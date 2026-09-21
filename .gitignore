@@ -1,0 +1,19 @@
+# JavaScript
+node_modules/
+.pnpm-store/
+.next/
+coverage/
+*.tsbuildinfo
+
+# Python
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.pyright/
+
+# Local configuration and data
+.env
+.env.local
+apps/web/.env.local
+*.local

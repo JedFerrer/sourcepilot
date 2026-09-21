@@ -1,0 +1,30 @@
+:root {
+  color-scheme: light;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+main {
+  max-width: 48rem;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+}
+
+.health-status {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: #e2e8f0;
+}
+
+.health-status--connected {
+  background: #dcfce7;
+}
+
+.health-status--unavailable {
+  background: #fee2e2;
+}
