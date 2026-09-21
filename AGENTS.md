@@ -79,6 +79,12 @@ Do not introduce or require the following unless the approved architecture is ex
 
 Read the Technical Architecture for the authoritative details and rationale.
 
+## Coding standards
+
+Follow `docs/development/CODING_STANDARDS.md` for stable repository-wide coding principles.
+
+Do not duplicate those standards here. Tool-specific commands and configuration belong in the repository only once those tools are approved and introduced.
+
 ## Implementation-unit boundary
 
 Work on one approved implementation unit at a time.

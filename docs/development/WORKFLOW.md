@@ -6,6 +6,106 @@ PLANNING → IMPLEMENTATION → REVIEW → BROWSER QA when applicable → DONE C
 
 One approved implementation unit is active at a time.
 
+## Standard Agent Commands
+
+These commands refer to one named implementation unit. They do not authorize work outside that unit.
+
+### Lifecycle status transitions
+
+```text
+Plan Mx-Uy
+→ PLANNING
+
+Human approves plan
+→ PLAN_APPROVED
+
+Implement Mx-Uy
+→ IMPLEMENTING
+
+Review Mx-Uy
+→ IN_REVIEW
+
+Browser QA Mx-Uy
+→ QA
+
+Done check Mx-Uy
+→ READY_TO_COMMIT
+
+Commit Mx-Uy
+→ COMMITTED
+```
+
+An agent must never set `PLAN_APPROVED` on its own. It may record that status only after explicit human approval.
+
+If Browser QA is not applicable, record `Browser QA: Not applicable` and a reason in the unit document without transitioning to `QA`. A failed Review, Browser QA, or Done Check must not advance the unit to the next lifecycle status. Set `COMMITTED` only after a successful commit.
+
+### Plan Mx-Uy
+
+- read `AGENTS.md`;
+- identify the unit in the Implementation Plan;
+- read relevant Product Specification and Technical Architecture sections;
+- inspect affected existing code;
+- create or update the active unit document;
+- set its status to `PLANNING`;
+- produce a detailed plan;
+- stop before implementation.
+
+### Implement Mx-Uy
+
+- read `AGENTS.md`;
+- read the approved active unit document;
+- set status to `IMPLEMENTING`;
+- implement only that plan;
+- add required tests and evals;
+- run relevant checks;
+- update unit results;
+- stop before review;
+- do not commit.
+
+### Review Mx-Uy
+
+- inspect the active unit document;
+- set status to `IN_REVIEW`;
+- inspect the actual diff;
+- inspect relevant tests;
+- compare the change against relevant source-of-truth material;
+- report findings by severity;
+- do not modify files except for the status update unless explicitly asked.
+
+### Fix Mx-Uy review findings
+
+- address only approved review findings;
+- rerun relevant checks;
+- update review results;
+- keep the unit in `IN_REVIEW` until review passes;
+- stop before Browser QA or Done Check.
+
+### Browser QA Mx-Uy
+
+- determine whether Browser QA applies;
+- when applicable, set status to `QA` and test the relevant browser-visible flow;
+- record pass or fail evidence in the active unit document;
+- when not applicable, record the reason without transitioning to `QA`;
+- stop before Done Check.
+
+### Done check Mx-Uy
+
+- execute the Done Check in this document;
+- confirm acceptance criteria, tests, review, QA, scope, documentation, diff, secrets, and artifacts;
+- set status to `READY_TO_COMMIT` only when every Done Check item passes;
+- update the active unit document;
+- do not commit unless explicitly authorized.
+
+### Commit Mx-Uy
+
+- run only after the Done Check passes;
+- stage only unit-related files;
+- create one coherent unit-scoped commit;
+- set status to `COMMITTED` only after the commit succeeds;
+- show Git status and the commit;
+- stop;
+- do not begin the next unit.
+
 ## 1. Planning
 
 Before code changes:
