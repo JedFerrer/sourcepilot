@@ -6,6 +6,80 @@ PLANNING → IMPLEMENTATION → REVIEW → BROWSER QA when applicable → DONE C
 
 One approved implementation unit is active at a time.
 
+## Change Paths
+
+SourcePilot supports two development paths.
+
+### Full Flow
+
+```text
+PLANNING
+→ IMPLEMENTATION
+→ REVIEW
+→ BROWSER QA when applicable
+→ DONE CHECK
+→ COMMIT
+```
+
+Full Flow is required for:
+
+- implementation-plan units;
+- new features or product behavior;
+- architecture changes;
+- database schema or migration changes;
+- authentication, session, authorization, or security-sensitive behavior;
+- AI prompts, structured contracts, agents, tools, or eval behavior;
+- new dependencies;
+- infrastructure;
+- changes spanning multiple application layers;
+- broad refactors;
+- changes whose scope, cause, or risk is not clearly understood.
+
+When uncertain, use Full Flow.
+
+### Fast Path
+
+```text
+IMPLEMENT / FIX
+→ TARGETED VERIFICATION
+→ DIFF REVIEW
+→ COMMIT
+```
+
+Fast Path may be used only for small, isolated, low-risk changes whose cause, solution, and blast radius are already clear.
+
+Examples may include:
+
+- typo or copy correction;
+- small documentation correction;
+- minor styling/layout fix;
+- narrow defensive bug fix;
+- obvious one-line or localized logic correction;
+- small test correction;
+- similarly contained maintenance work.
+
+Fast Path does not require:
+
+- a formal Planning phase;
+- a dedicated implementation-unit document;
+- an independent Review phase;
+- a formal Done Check phase.
+
+Fast Path still requires verification:
+
+```text
+[ ] Relevant tests/checks pass
+[ ] Regression coverage added when appropriate
+[ ] Browser verification performed when browser-visible
+[ ] Diff reviewed
+[ ] No unrelated changes
+[ ] No unapproved dependency/infrastructure added
+[ ] No temporary/debug artifacts
+[ ] No secrets added
+```
+
+A Fast Path change must not be used to bypass the Full Flow for work that is actually feature, architecture, security, AI, database, infrastructure, dependency, or otherwise meaningful-risk work.
+
 ## Standard Agent Commands
 
 These commands refer to one named implementation unit. They do not authorize work outside that unit.

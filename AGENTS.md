@@ -85,6 +85,14 @@ Follow `docs/development/CODING_STANDARDS.md` for stable repository-wide coding 
 
 Do not duplicate those standards here. Tool-specific commands and configuration belong in the repository only once those tools are approved and introduced.
 
+## Change path
+
+Follow the Full Flow by default for implementation units and material changes.
+
+The Fast Path defined in `docs/development/WORKFLOW.md` may be used only for clearly small, isolated, low-risk changes.
+
+When uncertain, use the Full Flow.
+
 ## Implementation-unit boundary
 
 Work on one approved implementation unit at a time.
