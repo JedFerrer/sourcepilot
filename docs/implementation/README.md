@@ -4,11 +4,11 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M0-U3 — Anonymous Session Isolation**
+**M0-U4 — Project Creation Vertical Slice**
 
 Status: `COMMITTED`.
 
-M0-U3 is the sole active implementation unit.
+M0-U4 is the sole active implementation unit.
 
 ## Unit lifecycle statuses
 

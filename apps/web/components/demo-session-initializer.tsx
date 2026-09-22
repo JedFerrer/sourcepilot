@@ -1,10 +1,11 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 type DemoSessionState = "initializing" | "ready" | "unavailable";
 
-export function DemoSessionInitializer() {
+export function DemoSessionInitializer({ children }: { children?: ReactNode }) {
   const [state, setState] = useState<DemoSessionState>("initializing");
 
   useEffect(() => {
@@ -23,7 +24,12 @@ export function DemoSessionInitializer() {
   }
 
   if (state === "ready") {
-    return <p className="session-status session-status--ready">Demo session ready</p>;
+    return (
+      <>
+        <p className="session-status session-status--ready">Demo session ready</p>
+        {children}
+      </>
+    );
   }
 
   return (

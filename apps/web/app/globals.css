@@ -15,6 +15,93 @@ main {
   padding: 0 1.5rem;
 }
 
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  width: fit-content;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: #0f172a;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.project-dashboard,
+.project-workspace {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.project-form,
+.rename-form {
+  display: grid;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.project-form label,
+.rename-form label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.project-form input,
+.project-form textarea,
+.rename-form input {
+  padding: 0.55rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.35rem;
+}
+
+.project-list,
+.stage-list {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0;
+  list-style: none;
+}
+
+.project-list a,
+.stage-list li {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+}
+
+.stage-list li[data-unavailable="true"] {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.workspace-stage {
+  margin: 0;
+  color: #475569;
+}
+
+.form-error {
+  color: #b91c1c;
+}
+
 .health-status,
 .session-status {
   padding: 1rem;
