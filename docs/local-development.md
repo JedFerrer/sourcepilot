@@ -24,6 +24,10 @@ After starting Compose, run `docker compose ps`. The `postgres` service must rep
 
 The API and Alembic migration commands use `DATABASE_URL`; migration commands fail clearly when it is missing. The existing health endpoint does not open a database connection. `TEST_DATABASE_URL` is required only for persistence/integration tests; it must name a different PostgreSQL database from `DATABASE_URL`.
 
+## Anonymous demo sessions
+
+`DEMO_SESSION_TTL_SECONDS` controls the fixed lifetime of anonymous demo sessions and defaults to 86400 seconds (24 hours). Activity updates only the session's `last_seen_at`; it does not extend the lifetime. `DEMO_SESSION_COOKIE_SECURE` defaults to `false` for local HTTP development. Set it to `true` for every HTTPS deployment so the HttpOnly, same-site session cookie is transmitted only over HTTPS.
+
 ## Migrations and persistence tests
 
 From `apps/api`, after PostgreSQL is healthy:

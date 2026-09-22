@@ -15,7 +15,8 @@ main {
   padding: 0 1.5rem;
 }
 
-.health-status {
+.health-status,
+.session-status {
   padding: 1rem;
   border-radius: 0.5rem;
   background: #e2e8f0;
@@ -26,5 +27,13 @@ main {
 }
 
 .health-status--unavailable {
+  background: #fee2e2;
+}
+
+.session-status--ready {
+  background: #dcfce7;
+}
+
+.session-status--unavailable {
   background: #fee2e2;
 }

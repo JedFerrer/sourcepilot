@@ -4,11 +4,11 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M0-U2 — Persistence and Migration Foundation**
+**M0-U3 — Anonymous Session Isolation**
 
 Status: `COMMITTED`.
 
-M0-U2 is the sole active implementation unit.
+M0-U3 is the sole active implementation unit.
 
 ## Unit lifecycle statuses
 
