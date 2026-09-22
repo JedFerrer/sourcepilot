@@ -4,9 +4,11 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**None.**
+**M0-U2 — Persistence and Migration Foundation**
 
-M0-U1 has not yet been activated. Do not create its unit document or begin implementation until this repository-context setup is approved and M0-U1 planning is explicitly started.
+Status: `COMMITTED`.
+
+M0-U2 is the sole active implementation unit.
 
 ## Unit lifecycle statuses
 
