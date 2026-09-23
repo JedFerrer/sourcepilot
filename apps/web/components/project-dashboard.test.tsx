@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectDashboard } from "./project-dashboard";
+import { jsonResponse } from "../test/api-responses";
 
 const push = vi.fn();
 
@@ -19,11 +20,8 @@ describe("ProjectDashboard", () => {
       "fetch",
       vi
         .fn()
-        .mockResolvedValueOnce({ ok: true, json: async () => [] })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => ({ id: "project-1", name: "Travel Bag", original_request: "Source bags" }),
-        }),
+        .mockResolvedValueOnce(jsonResponse([]))
+        .mockResolvedValueOnce(jsonResponse({ id: "project-1", name: "Travel Bag", original_request: "Source bags" })),
     );
     render(<ProjectDashboard />);
 
@@ -44,9 +42,8 @@ describe("ProjectDashboard", () => {
   it("shows current-session projects for reopening", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue({
-        ok: true,
-        json: async () => [
+      vi.fn().mockResolvedValue(jsonResponse(
+        [
           {
             id: "project-1",
             name: "Recycled Cosmetic Travel Bag",
@@ -55,7 +52,7 @@ describe("ProjectDashboard", () => {
             updated_at: "2026-09-22T00:00:00Z",
           },
         ],
-      }),
+      )),
     );
     render(<ProjectDashboard />);
 
@@ -65,7 +62,7 @@ describe("ProjectDashboard", () => {
   });
 
   it("validates required local input before creating a project", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => [] }));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([])));
     render(<ProjectDashboard />);
 
     await screen.findByText("No projects yet.");

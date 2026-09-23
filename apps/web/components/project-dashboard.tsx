@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { ApiClientError, apiRequest } from "../lib/api";
 
 type Project = {
   id: string;
@@ -19,23 +20,24 @@ export function ProjectDashboard() {
   const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loadState, setLoadState] = useState<LoadState>("loading");
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [creationError, setCreationError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
-    void fetch("/api/projects", { credentials: "same-origin" })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Project list request failed");
-        }
-        return (await response.json()) as Project[];
-      })
+    setLoadState("loading");
+    setLoadError(null);
+    void apiRequest<Project[]>("/api/projects")
       .then((loadedProjects) => {
         setProjects(loadedProjects);
         setLoadState("ready");
       })
-      .catch(() => setLoadState("unavailable"));
-  }, []);
+      .catch((error: unknown) => {
+        setLoadError(error instanceof ApiClientError ? error.message : "Projects are unavailable. Please try again.");
+        setLoadState("unavailable");
+      });
+  }, [loadAttempt]);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,19 +54,16 @@ export function ProjectDashboard() {
     setCreationError(null);
     setIsCreating(true);
     try {
-      const response = await fetch("/api/projects", {
+      const project = await apiRequest<Project>("/api/projects", {
         method: "POST",
-        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, original_request: originalRequest }),
       });
-      if (!response.ok) {
-        throw new Error("Project creation request failed");
-      }
-      const project = (await response.json()) as Project;
       router.push(`/projects/${project.id}`);
-    } catch {
-      setCreationError("We could not create this project. Please try again.");
+    } catch (error) {
+      setCreationError(
+        error instanceof ApiClientError ? error.message : "We could not create this project. Please try again.",
+      );
     } finally {
       setIsCreating(false);
     }
@@ -91,7 +90,12 @@ export function ProjectDashboard() {
       <h3>Recent projects</h3>
       {loadState === "loading" ? <p>Loading projects…</p> : null}
       {loadState === "unavailable" ? (
-        <p className="form-error">Projects are unavailable. Refresh to try again.</p>
+        <div className="form-error" role="alert">
+          <p>{loadError}</p>
+          <button type="button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>
+            Try again
+          </button>
+        </div>
       ) : null}
       {loadState === "ready" && projects.length === 0 ? <p>No projects yet.</p> : null}
       {loadState === "ready" && projects.length > 0 ? (

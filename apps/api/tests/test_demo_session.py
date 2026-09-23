@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.main import app
 from sourcepilot.persistence.database import get_database_session
-from sourcepilot.persistence.models import DemoSession, Project
+from sourcepilot.persistence.models import DemoSession
 from sourcepilot.session.service import (
     create_demo_session,
     project_for_current_demo_session,
@@ -25,6 +25,7 @@ from tests.database_test_support import (
     persistence_test_database_url_from_environment,
     reset_test_database,
 )
+from tests.factories import make_demo_session, make_project
 
 
 @pytest.fixture(scope="module")
@@ -72,18 +73,6 @@ def api_client(test_engine: Engine) -> Iterator[TestClient]:
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
-
-
-def make_demo_session(token: str, *, expires_at: datetime) -> DemoSession:
-    return DemoSession(opaque_token=token, last_seen_at=expires_at - timedelta(hours=1), expires_at=expires_at)
-
-
-def make_project(demo_session: DemoSession, name: str) -> Project:
-    return Project(
-        demo_session=demo_session,
-        name=name,
-        original_request=f"Source {name}.",
-    )
 
 
 def test_demo_session_settings_default_to_a_24_hour_local_cookie(

@@ -2,8 +2,14 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.orm import Session
 
+from sourcepilot.api_errors import (
+    http_exception_handler,
+    unhandled_exception_handler,
+    validation_exception_handler,
+)
 from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import DemoSession
 from sourcepilot.projects.schemas import CreateProjectRequest, ProjectResponse, RenameProjectRequest
@@ -20,6 +26,9 @@ from sourcepilot.session.settings import (
 )
 
 app = FastAPI(title="SourcePilot API")
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
 
 
 def active_demo_session(request: Request, database_session: Session) -> DemoSession:

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
+import { ApiClientError, apiRequest } from "../lib/api";
 
 type Project = {
   id: string;
@@ -17,25 +18,39 @@ const unavailableStages = ["Suppliers", "Quotes", "Comparison", "Decision"];
 export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<Project | null>(null);
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>("loading");
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
-    void fetch(`/api/projects/${projectId}`, { credentials: "same-origin" })
-      .then(async (response) => {
-        if (response.status === 404) {
-          setWorkspaceState("not-found");
+    let isCurrentRequest = true;
+    setWorkspaceState("loading");
+    setLoadError(null);
+    void apiRequest<Project>(`/api/projects/${projectId}`)
+      .then((loadedProject) => {
+        if (!isCurrentRequest) {
           return;
         }
-        if (!response.ok) {
-          throw new Error("Project request failed");
-        }
-        const loadedProject = (await response.json()) as Project;
         setProject(loadedProject);
         setWorkspaceState("ready");
       })
-      .catch(() => setWorkspaceState("unavailable"));
-  }, [projectId]);
+      .catch((error: unknown) => {
+        if (!isCurrentRequest) {
+          return;
+        }
+        if (error instanceof ApiClientError && error.status === 404) {
+          setWorkspaceState("not-found");
+          return;
+        }
+        setLoadError(error instanceof ApiClientError ? error.message : "Project unavailable. Please try again.");
+        setWorkspaceState("unavailable");
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [loadAttempt, projectId]);
 
   async function handleRename(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -48,18 +63,16 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
     setRenameError(null);
     setIsRenaming(true);
     try {
-      const response = await fetch(`/api/projects/${projectId}`, {
+      const renamedProject = await apiRequest<Project>(`/api/projects/${projectId}`, {
         method: "PATCH",
-        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
-      if (!response.ok) {
-        throw new Error("Project rename request failed");
-      }
-      setProject((await response.json()) as Project);
-    } catch {
-      setRenameError("We could not rename this project. Please try again.");
+      setProject(renamedProject);
+    } catch (error) {
+      setRenameError(
+        error instanceof ApiClientError ? error.message : "We could not rename this project. Please try again.",
+      );
     } finally {
       setIsRenaming(false);
     }
@@ -72,7 +85,14 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
     return <p>Project not found in this demo session.</p>;
   }
   if (workspaceState === "unavailable" || project === null) {
-    return <p className="form-error">Project unavailable. Refresh to try again.</p>;
+    return (
+      <div className="form-error" role="alert">
+        <p>{loadError}</p>
+        <button type="button" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>
+          Try again
+        </button>
+      </div>
+    );
   }
 
   return (

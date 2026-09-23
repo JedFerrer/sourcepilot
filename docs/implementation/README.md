@@ -8,6 +8,8 @@ This directory holds the approved working context for active SourcePilot impleme
 
 M0-U5 — AI Client, AIRun, and Prompt-Version Foundation is `COMMITTED`.
 
+M0-U6 — Shared API/Error/Testing Conventions is `COMMITTED`.
+
 No implementation unit is active.
 
 ## Unit lifecycle statuses

@@ -59,7 +59,7 @@ def api_client(test_engine: Engine) -> Iterator[TestClient]:
             session.close()
 
     app.dependency_overrides[get_database_session] = override_database_session
-    with TestClient(app) as client:
+    with TestClient(app, raise_server_exceptions=False) as client:
         yield client
     app.dependency_overrides.clear()
 
@@ -138,6 +138,61 @@ def test_project_api_rejects_blank_input_and_a_missing_session(api_client: TestC
     assert response.status_code == 422
 
 
+def test_api_errors_share_the_stable_contract(api_client: TestClient) -> None:
+    missing_session = api_client.post(
+        "/projects", json={"name": "Project", "original_request": "Source an item."}
+    )
+    assert missing_session.status_code == 401
+    assert missing_session.json() == {
+        "error": {"code": "UNAUTHORIZED", "message": "Demo session is unavailable."}
+    }
+
+    assert api_client.post("/demo-session").status_code == 204
+    missing_project = api_client.get("/projects/00000000-0000-0000-0000-000000000000")
+    assert missing_project.status_code == 404
+    assert missing_project.json() == {
+        "error": {"code": "NOT_FOUND", "message": "Project not found."}
+    }
+
+    invalid_payload = api_client.post("/projects", json={"name": " ", "original_request": "Source."})
+    assert invalid_payload.status_code == 422
+    assert invalid_payload.json() == {
+        "error": {
+            "code": "VALIDATION_ERROR",
+            "message": "Request validation failed.",
+            "fields": [{"field": "body.name", "message": "Value error, must not be blank"}],
+        }
+    }
+
+    invalid_path = api_client.get("/projects/not-a-uuid")
+    assert invalid_path.status_code == 422
+    assert invalid_path.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert invalid_path.json()["error"]["fields"][0]["field"] == "path.project_id"
+
+
+def test_unhandled_api_errors_are_safe_without_a_test_endpoint(
+    api_client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert api_client.post("/demo-session").status_code == 204
+
+    def fail_create_project(*_: object, **__: object) -> None:
+        raise RuntimeError("database password must stay private")
+
+    monkeypatch.setattr("sourcepilot.main.create_project", fail_create_project)
+    response = api_client.post(
+        "/projects", json={"name": "Project", "original_request": "Source an item."}
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {
+        "error": {
+            "code": "INTERNAL_SERVER_ERROR",
+            "message": "We could not complete that request. Please try again.",
+        }
+    }
+    assert "password" not in response.text
+
+
 @pytest.mark.parametrize("field", ["name", "original_request"])
 @pytest.mark.parametrize("malformed_value", [123, ["not text"], {"text": "not text"}, None])
 def test_project_api_rejects_non_string_create_input(
@@ -150,7 +205,8 @@ def test_project_api_rejects_non_string_create_input(
     response = api_client.post("/projects", json=payload)
 
     assert response.status_code == 422
-    assert response.json()["detail"][0]["loc"] == ["body", field]
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert response.json()["error"]["fields"][0]["field"] == f"body.{field}"
 
 
 @pytest.mark.parametrize("malformed_value", [123, ["not text"], {"text": "not text"}, None])
@@ -167,7 +223,8 @@ def test_project_api_rejects_non_string_rename_input(
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"][0]["loc"] == ["body", "name"]
+    assert response.json()["error"]["code"] == "VALIDATION_ERROR"
+    assert response.json()["error"]["fields"][0]["field"] == "body.name"
 
 
 @pytest.mark.parametrize(
