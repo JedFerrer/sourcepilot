@@ -161,7 +161,7 @@ def test_air_run_is_committed_as_running_before_the_first_provider_call(
     assert observed_statuses == ["RUNNING"]
 
 
-def test_invalid_first_response_uses_the_only_remaining_provider_call(database_session: Session) -> None:
+def test_invalid_first_response_uses_schema_repair(database_session: Session) -> None:
     client = FakeClient(
         [
             ModelInvocation("not json", input_tokens=1, output_tokens=1),
@@ -179,17 +179,54 @@ def test_invalid_first_response_uses_the_only_remaining_provider_call(database_s
     assert "Repair the JSON schema failure" in str(client.calls[1]["instructions"])
 
 
-def test_provider_retry_and_schema_failure_never_make_a_third_call(database_session: Session) -> None:
+def test_provider_retry_then_invalid_output_uses_schema_repair(database_session: Session) -> None:
     client = FakeClient(
         [
             ModelProviderError("temporary", retryable=True),
             ModelInvocation("not json", input_tokens=1, output_tokens=1),
+            ModelInvocation('{"answer":"repaired"}', input_tokens=2, output_tokens=2),
+        ]
+    )
+    result, air_run = run_for_test(database_session, client)
+
+    assert result == Answer(answer="repaired")
+    assert air_run.status == COMPLETED
+    assert air_run.validation_status == REPAIRED
+    assert air_run.error_type == ModelProviderError.__name__
+    assert air_run.attempts == 3
+    assert len(client.calls) == 3
+
+
+def test_repair_provider_failure_uses_provider_retry(database_session: Session) -> None:
+    client = FakeClient(
+        [
+            ModelInvocation("not json", input_tokens=1, output_tokens=1),
+            ModelProviderError("temporary", retryable=True),
+            ModelInvocation('{"answer":"repaired"}', input_tokens=2, output_tokens=2),
+        ]
+    )
+    result, air_run = run_for_test(database_session, client)
+
+    assert result == Answer(answer="repaired")
+    assert air_run.status == COMPLETED
+    assert air_run.validation_status == REPAIRED
+    assert air_run.attempts == 3
+    assert len(client.calls) == 3
+    assert "Repair the JSON schema failure" in str(client.calls[2]["instructions"])
+
+
+def test_second_invalid_output_exhausts_repair_budget(database_session: Session) -> None:
+    client = FakeClient(
+        [
+            ModelInvocation("not json", input_tokens=1, output_tokens=1),
+            ModelInvocation("still not json", input_tokens=2, output_tokens=2),
         ]
     )
     result, air_run = run_for_test(database_session, client)
 
     assert result is None
     assert air_run.status == VALIDATION_FAILED
+    assert air_run.validation_status == "INVALID"
     assert air_run.attempts == 2
     assert len(client.calls) == 2
 

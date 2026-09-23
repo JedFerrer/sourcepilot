@@ -16,7 +16,7 @@ from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
 from sourcepilot.ai.tracing import AIRunTracer, NoOpAIRunTracer
 from sourcepilot.persistence.models import AIRun, DemoSession
 
-MAX_PROVIDER_INVOCATIONS = 2
+MAX_PROVIDER_INVOCATIONS = 3
 RUNNING = "RUNNING"
 COMPLETED = "COMPLETED"
 VALIDATION_FAILED = "VALIDATION_FAILED"
@@ -57,7 +57,7 @@ def run_structured_operation(
     tracer: AIRunTracer | None = None,
     sleep: Callable[[float], None] = time.sleep,
 ) -> tuple[ResultModel | None, AIRun]:
-    """Run at most two total provider calls and retain one trace record throughout."""
+    """Use one provider retry and one schema repair, with one trace record."""
     air_run = AIRun(
         demo_session_id=demo_session.id,
         project_id=project_id,
@@ -75,6 +75,9 @@ def run_structured_operation(
     started = time.monotonic()
     current_instructions = instructions
     final_result: ResultModel | None = None
+    provider_retry_used = False
+    schema_repair_used = False
+    provider_failure_seen = False
 
     try:
         for invocation_number in range(1, MAX_PROVIDER_INVOCATIONS + 1):
@@ -88,8 +91,10 @@ def run_structured_operation(
                     schema=result_model.model_json_schema(),
                 )
             except ModelProviderError as error:
+                provider_failure_seen = True
                 air_run.error_type = type(error).__name__
-                if error.retryable and invocation_number < MAX_PROVIDER_INVOCATIONS:
+                if error.retryable and not provider_retry_used:
+                    provider_retry_used = True
                     sleep(provider_retry_delay_seconds(invocation_number))
                     continue
                 air_run.status = PROVIDER_FAILED
@@ -102,7 +107,8 @@ def run_structured_operation(
             except ValidationError as error:
                 air_run.validation_status = INVALID
                 air_run.error_type = type(error).__name__
-                if invocation_number < MAX_PROVIDER_INVOCATIONS:
+                if not schema_repair_used:
+                    schema_repair_used = True
                     current_instructions = f"{instructions}\nRepair the JSON schema failure: {error.errors()}"
                     continue
                 air_run.status = VALIDATION_FAILED
@@ -112,8 +118,7 @@ def run_structured_operation(
                 air_run.validation_status = (
                     REPAIRED if air_run.validation_status == INVALID else VALID
                 )
-                if air_run.error_type != ModelProviderError.__name__:
-                    air_run.error_type = None
+                air_run.error_type = ModelProviderError.__name__ if provider_failure_seen else None
                 break
     except Exception as error:
         air_run.status = FAILED
