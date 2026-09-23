@@ -4,11 +4,11 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M0-U4 — Project Creation Vertical Slice**
+**None.**
 
-Status: `COMMITTED`.
+M0-U4 — Project Creation Vertical Slice is `COMMITTED`.
 
-M0-U4 is the sole active implementation unit.
+No implementation unit is active.
 
 ## Unit lifecycle statuses
 
