@@ -4,11 +4,13 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M1-U1 — Brief and Requirement Domain Model** is `COMMITTED`.
-
-M0-U1 through M0-U6 are `COMMITTED`.
+**M1-U2 — Brief Readiness Service** is `COMMITTED`.
 
 No implementation unit is active.
+
+M1-U1 is `COMMITTED`.
+
+M0-U1 through M0-U6 are `COMMITTED`.
 
 ## Unit lifecycle statuses
 
