@@ -51,16 +51,16 @@ def make_demo_session(token: str = "token-a") -> DemoSession:
     )
 
 
-def test_migration_smoke_creates_only_initial_application_tables(test_engine: Engine) -> None:
+def test_migration_smoke_creates_only_current_application_tables(test_engine: Engine) -> None:
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0001_persistence_foundation"]
+    assert current_revisions == ["0002_ai_run_foundation"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
-    assert {"demo_sessions", "projects"}.issubset(table_names)
-    assert table_names - {"demo_sessions", "projects", "alembic_version"} == set()
+    assert {"demo_sessions", "projects", "ai_runs"}.issubset(table_names)
+    assert table_names - {"demo_sessions", "projects", "ai_runs", "alembic_version"} == set()
 
     demo_session_unique_constraints = [
         constraint

@@ -46,6 +46,18 @@ uv run --env-file ../../.env alembic revision --autogenerate -m "describe the sc
 
 The Compose service creates the local `sourcepilot_test` database for a fresh PostgreSQL volume. If the volume existed before M0-U2, create it once with `docker compose exec postgres createdb -U sourcepilot sourcepilot_test`. Persistence tests require `TEST_DATABASE_URL` and reset only that database through Alembic. Their safety checks reject a URL that targets the same PostgreSQL database as `DATABASE_URL`.
 
+## AI foundation smoke check
+
+AI configuration is lazy: `OPENAI_API_KEY` and `SOURCEPILOT_AI_MODEL` are required only when an AI operation runs, never during API startup or automated tests. CI and pytest use model-client fakes and must not call OpenAI.
+
+The following command is a manual, opt-in live check. It requires a valid API key, a configured model name, a migrated database, and an existing `DemoSession` UUID. It creates exactly one `AIRun` and prints its ID and terminal status:
+
+```text
+uv run --env-file ../../.env python -m sourcepilot.ai.smoke --demo-session-id <demo-session-uuid>
+```
+
+The smoke request uses `foundation-smoke-v1` and sends `store=false` to the Responses API. Do not run it in automated checks.
+
 ## Checks
 
 Run these from the repository root:

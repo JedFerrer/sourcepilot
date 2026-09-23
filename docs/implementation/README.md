@@ -6,7 +6,7 @@ This directory holds the approved working context for active SourcePilot impleme
 
 **None.**
 
-M0-U4 — Project Creation Vertical Slice is `COMMITTED`.
+M0-U5 — AI Client, AIRun, and Prompt-Version Foundation is `COMMITTED`.
 
 No implementation unit is active.
 
