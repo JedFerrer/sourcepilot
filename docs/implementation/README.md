@@ -4,11 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**None.**
+**M1-U1 — Brief and Requirement Domain Model** is `COMMITTED`.
 
-M0-U5 — AI Client, AIRun, and Prompt-Version Foundation is `COMMITTED`.
-
-M0-U6 — Shared API/Error/Testing Conventions is `COMMITTED`.
+M0-U1 through M0-U6 are `COMMITTED`.
 
 No implementation unit is active.
 

@@ -55,12 +55,19 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0002_ai_run_foundation"]
+    assert current_revisions == ["0003_brief_requirement_domain"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
-    assert {"demo_sessions", "projects", "ai_runs"}.issubset(table_names)
-    assert table_names - {"demo_sessions", "projects", "ai_runs", "alembic_version"} == set()
+    assert {"demo_sessions", "projects", "ai_runs", "briefs", "requirements"}.issubset(table_names)
+    assert table_names - {
+        "demo_sessions",
+        "projects",
+        "ai_runs",
+        "briefs",
+        "requirements",
+        "alembic_version",
+    } == set()
 
     demo_session_unique_constraints = [
         constraint
@@ -69,6 +76,31 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     ]
 
     assert len(demo_session_unique_constraints) == 1
+
+    project_columns = {column["name"]: column for column in inspect(test_engine).get_columns("projects")}
+    brief_columns = {column["name"]: column for column in inspect(test_engine).get_columns("briefs")}
+
+    assert not project_columns["brief_revision"]["nullable"]
+    assert project_columns["brief_revision"]["default"] == "0"
+    assert brief_columns["quantity"]["nullable"]
+    assert brief_columns["delivery_target"]["nullable"]
+    assert brief_columns["target_unit_price"]["nullable"]
+    assert "IN_PROGRESS" in str(brief_columns["status"]["default"])
+
+
+def test_project_brief_revision_defaults_to_zero(database_session: Session) -> None:
+    project = Project(
+        demo_session=make_demo_session(),
+        name="New project",
+        original_request="Source travel bags.",
+    )
+    database_session.add(project)
+    database_session.commit()
+    database_session.expire_all()
+
+    reloaded = database_session.get(Project, project.id)
+    assert reloaded is not None
+    assert reloaded.brief_revision == 0
 
 
 def test_project_persists_with_its_demo_session(database_session: Session) -> None:
