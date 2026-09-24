@@ -193,7 +193,7 @@ def test_analyze_rejects_oversized_extraction_before_persistence(
         assert run is not None and run.status == "VALIDATION_FAILED"
 
 
-def test_analyze_persists_extraction_null_importance_and_transient_ambiguity(
+def test_analyze_persists_extraction_null_importance_and_uncertainty_for_approval(
     client: TestClient, engine: Engine
 ) -> None:
     project_id = create_project(client)
@@ -205,13 +205,29 @@ def test_analyze_persists_extraction_null_importance_and_transient_ambiguity(
     assert data["can_analyze"] is False
     assert data["status"] == "READY_FOR_REVIEW"
     assert data["ambiguities"] == ["Branding method was not stated."]
+    assert data["uncertainties"] == ["Branding method was not stated."]
     material = next(item for item in data["requirements"] if item["kind"] == "MATERIAL")
-    attribute = next(item for item in data["requirements"] if item["kind"] == "INFORMATIONAL")
+    attribute = next(item for item in data["requirements"] if item["expected_value"].get("subject") == "COLOR")
     assert material["importance"] is None
     assert attribute["importance"] == "INFORMATIONAL"
     assert attribute["expected_value"] == {"subject": "COLOR", "text": "Blue"}
     reread = client.get(f"/projects/{project_id}/brief").json()
     assert "ambiguities" not in reread
+    assert reread["uncertainties"] == ["Branding method was not stated."]
+    saved = client.patch(f"/projects/{project_id}/brief", json={
+        **{key: reread[key] for key in (
+            "product_name", "category", "quantity", "destination", "delivery_target",
+            "target_unit_price", "requirements",
+        )},
+        "quantity": 2200,
+        "expected_brief_revision": reread["brief_revision"],
+    })
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["brief_revision"] == 2
+    assert saved.json()["uncertainties"] == ["Branding method was not stated."]
+    assert client.get(f"/projects/{project_id}/brief").json()["uncertainties"] == [
+        "Branding method was not stated."
+    ]
     assert reread["brief_revision"] == 1
     with Session(engine) as session:
         assert len(session.scalars(select(AIRun).where(AIRun.project_id == project_id)).all()) == 1
@@ -221,7 +237,7 @@ def test_empty_extraction_can_retry_without_revision(client: TestClient, engine:
     project_id = create_project(client)
     FakeClient.outputs = [ModelInvocation(json.dumps(extraction(
         product_name=None, category=None, quantity=None, destination=None,
-        delivery_target=None, attributes=[], requirements=[],
+        delivery_target=None, attributes=[], requirements=[], ambiguities=[],
     )), None, None)]
     first = client.post(f"/projects/{project_id}/brief/analyze")
     assert first.status_code == 200
@@ -295,6 +311,94 @@ def test_patch_add_update_remove_clear_and_noop_revision(client: TestClient) -> 
     assert cleared["requirements"] == []
     assert client.patch(path, json=empty_edit()).json()["brief_revision"] == 3
     assert client.post(f"{path}/analyze").status_code == 409
+
+
+def ready_edit() -> dict[str, object]:
+    return {
+        **empty_edit(),
+        "product_name": "Desk lamp",
+        "category": "Lighting",
+        "quantity": 100,
+        "destination": "Manila",
+        "delivery_target": {"kind": "DATE", "date": "2027-01-01"},
+    }
+
+
+def test_approval_and_post_approval_stage_transitions(client: TestClient, engine: Engine) -> None:
+    project_id = create_project(client)
+    path = f"/projects/{project_id}/brief"
+    approve_path = f"{path}/approve"
+    assert client.post(approve_path, json={"expected_brief_revision": 0}).status_code == 409
+    saved = client.patch(path, json=ready_edit()).json()
+    assert saved["status"] == "READY_FOR_REVIEW"
+    assert saved["approved_at"] is None
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "BRIEF"
+    assert client.post(approve_path, json={"expected_brief_revision": 0}).status_code == 409
+
+    approved = client.post(approve_path, json={"expected_brief_revision": 1})
+    assert approved.status_code == 200, approved.text
+    first = approved.json()
+    assert first["status"] == "APPROVED"
+    assert first["approved_at"] is not None
+    assert first["brief_revision"] == 1
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+
+    with Session(engine) as session:
+        project = session.get(Project, project_id)
+        brief = session.get(Brief, project_id)
+        assert project is not None and brief is not None
+        before_updated_at = project.updated_at
+        before_approved_at = brief.approved_at
+
+    repeated = client.post(approve_path, json={"expected_brief_revision": 1})
+    assert repeated.status_code == 200
+    assert repeated.json() == first
+    with Session(engine) as session:
+        project = session.get(Project, project_id)
+        brief = session.get(Brief, project_id)
+        assert project is not None and brief is not None
+        assert project.stage == "SUPPLIERS"
+        assert project.brief_revision == 1
+        assert project.updated_at == before_updated_at
+        assert brief.approved_at == before_approved_at
+
+    still_ready = client.patch(path, json={**ready_edit(), "quantity": 200, "expected_brief_revision": 1}).json()
+    assert still_ready["brief_revision"] == 2
+    assert still_ready["status"] == "APPROVED"
+    assert still_ready["approved_at"] == first["approved_at"]
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+    noop = client.patch(path, json={**ready_edit(), "quantity": 200, "expected_brief_revision": 2}).json()
+    assert noop == still_ready
+
+    incomplete = client.patch(path, json={**ready_edit(), "quantity": None, "expected_brief_revision": 2}).json()
+    assert incomplete["brief_revision"] == 3
+    assert incomplete["status"] == "IN_PROGRESS"
+    assert incomplete["approved_at"] is None
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "BRIEF"
+    assert client.post(approve_path, json={"expected_brief_revision": 3}).status_code == 409
+
+    restored = client.patch(path, json={**ready_edit(), "expected_brief_revision": 3}).json()
+    assert restored["brief_revision"] == 4
+    assert restored["status"] == "READY_FOR_REVIEW"
+    reapproved = client.post(approve_path, json={"expected_brief_revision": 4}).json()
+    assert reapproved["status"] == "APPROVED"
+    assert reapproved["approved_at"] is not None
+    assert reapproved["brief_revision"] == 4
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+
+
+def test_approval_is_session_scoped_and_failed_edits_keep_approval(client: TestClient) -> None:
+    project_id = create_project(client)
+    path = f"/projects/{project_id}/brief"
+    client.patch(path, json=ready_edit())
+    approved = client.post(f"{path}/approve", json={"expected_brief_revision": 1}).json()
+    foreign = TestClient(app, raise_server_exceptions=False)
+    assert foreign.post("/demo-session").status_code == 204
+    assert foreign.post(f"{path}/approve", json={"expected_brief_revision": 1}).status_code == 404
+    assert client.patch(path, json={**ready_edit(), "quantity": None, "expected_brief_revision": 0}).status_code == 409
+    assert client.patch(path, json={**ready_edit(), "quantity": -1, "expected_brief_revision": 1}).status_code == 422
+    assert client.get(path).json() == approved
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
 
 
 @pytest.mark.parametrize("invalid_case", ["value", "foreign_id"])

@@ -14,7 +14,7 @@ type Project = {
 
 type WorkspaceState = "loading" | "ready" | "unavailable" | "not-found";
 
-const unavailableStages = ["Suppliers", "Quotes", "Comparison", "Decision"];
+const laterStages = ["Quotes", "Comparison", "Decision"];
 
 export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<Project | null>(null);
@@ -23,6 +23,16 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [renameError, setRenameError] = useState<string | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
+
+  async function refreshProject() {
+    try {
+      const latest = await apiRequest<Project>(`/api/projects/${projectId}`);
+      setProject(latest);
+      setLoadError(null);
+    } catch {
+      setLoadError("The project stage could not be refreshed. Try again.");
+    }
+  }
 
   useEffect(() => {
     let isCurrentRequest = true;
@@ -99,7 +109,8 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   return (
     <section className="project-workspace" aria-labelledby="project-title">
       <Link href="/">Back to projects</Link>
-      <p className="workspace-stage">Current stage: Brief</p>
+      <p className="workspace-stage">Current stage: {project.stage === "SUPPLIERS" ? "Suppliers" : "Brief"}</p>
+      {loadError ? <div className="form-error" role="alert"><p>{loadError}</p><button type="button" onClick={() => void refreshProject()}>Refresh stage</button></div> : null}
       <h1 id="project-title">{project.name}</h1>
       <form className="rename-form" onSubmit={handleRename}>
         <label>
@@ -115,11 +126,12 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
         <h2 id="original-request-title">Original sourcing request</h2>
         <p>{project.original_request}</p>
       </section>
-      <BriefEditor projectId={projectId} />
+      <BriefEditor projectId={projectId} onProjectChange={refreshProject} />
       <nav aria-label="Sourcing workflow stages">
         <ul className="stage-list">
-          <li aria-current="step"><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
-          {unavailableStages.map((stage) => (
+          <li aria-current={project.stage === "BRIEF" ? "step" : undefined}><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
+          <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "SUPPLIERS" ? undefined : "true"}><strong>Suppliers</strong><span>{project.stage === "SUPPLIERS" ? "Current stage. Supplier discovery is planned for M2." : "Available after Brief approval. Supplier discovery is planned for M2."}</span></li>
+          {laterStages.map((stage) => (
             <li key={stage} data-unavailable="true"><strong>{stage}</strong><span>Available in a later step.</span></li>
           ))}
         </ul>

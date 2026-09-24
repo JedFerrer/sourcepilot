@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from datetime import UTC, datetime
 from decimal import Decimal
 from uuid import UUID
 
@@ -19,6 +20,7 @@ from sourcepilot.briefs.readiness import (
 )
 from sourcepilot.briefs.schemas import (
     AnalyzeBriefResponse,
+    ApproveBriefRequest,
     BriefResponse,
     ClarificationResponse,
     EditBriefRequest,
@@ -43,6 +45,9 @@ class BriefAnalysisUnavailableError(RuntimeError):
 
 class ClarificationUnavailableError(RuntimeError):
     pass
+
+
+UNCERTAINTY_NOTE = "Uncertainty identified during Brief analysis"
 
 
 def project_requirements(database_session: Session, project_id: UUID) -> list[Requirement]:
@@ -127,9 +132,16 @@ def brief_snapshot(
             for item in requirements
         ],
         status=brief.status if brief and brief.status == BriefStatus.APPROVED else readiness.status.value,
+        approved_at=brief.approved_at if brief else None,
         missing_fields=[
             MissingFieldResponse(field_key=item.field_key, reason=item.reason)
             for item in readiness.missing_fields
+        ],
+        uncertainties=[
+            str(item.expected_value["text"])
+            for item in requirements
+            if item.kind == RequirementKind.INFORMATIONAL
+            and item.notes == UNCERTAINTY_NOTE
         ],
         brief_revision=project.brief_revision,
         can_analyze=can_analyze(project, brief, requirements),
@@ -168,8 +180,6 @@ def edit_brief(
     ):
         raise BriefConflictError("This Brief changed. Reload it before saving.")
     brief = database_session.get(Brief, project.id)
-    if brief is not None and brief.status == BriefStatus.APPROVED:
-        raise BriefConflictError("Approved Brief editing belongs to a later workflow step.")
     existing = project_requirements(database_session, project.id)
     existing_by_id = {item.id: item for item in existing}
     seen_ids: set[UUID] = set()
@@ -257,9 +267,50 @@ def edit_brief(
             old.notes = item.notes
     database_session.flush()
     current = project_requirements(database_session, project.id)
-    recalculate_brief_readiness(database_session, brief, current)
+    readiness = recalculate_brief_readiness(database_session, brief, current)
+    if brief.status == BriefStatus.APPROVED and readiness.status != BriefStatus.READY_FOR_REVIEW:
+        brief.status = BriefStatus.IN_PROGRESS.value
+        brief.approved_at = None
+        project.stage = "BRIEF"
     increment_brief_revision(database_session, project)
     return brief_snapshot(project, brief, current)
+
+
+def approve_brief(
+    database_session: Session, project: Project, payload: ApproveBriefRequest
+) -> BriefResponse:
+    project = database_session.scalars(
+        select(Project)
+        .where(Project.id == project.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).one()
+    if project.brief_revision != payload.expected_brief_revision:
+        raise BriefConflictError("This Brief changed. Reload it before approving.")
+    brief = database_session.get(Brief, project.id)
+    requirements = project_requirements(database_session, project.id)
+    if brief is None:
+        raise BriefConflictError("Complete the Brief before approving it.")
+    readiness = evaluate_brief_readiness(
+        product_name=brief.product_name,
+        category=brief.category,
+        quantity=brief.quantity,
+        destination=brief.destination,
+        delivery_target=brief.delivery_target,
+        requirements=tuple(
+            ReadinessRequirement(kind=item.kind, expected_value=item.expected_value)
+            for item in requirements
+        ),
+    )
+    if readiness.status != BriefStatus.READY_FOR_REVIEW:
+        raise BriefConflictError("Complete the missing Brief information before approving it.")
+    if brief.status == BriefStatus.APPROVED and project.stage == "SUPPLIERS":
+        return brief_snapshot(project, brief, requirements)
+    brief.status = BriefStatus.APPROVED.value
+    brief.approved_at = datetime.now(UTC)
+    project.stage = "SUPPLIERS"
+    database_session.flush()
+    return brief_snapshot(project, brief, requirements)
 
 
 def persist_extraction(
@@ -285,6 +336,15 @@ def persist_extraction(
             expected_value=item.expected_value.model_dump(exclude_none=True),
         )
         for item in extracted.requirements
+    ] + [
+        Requirement(
+            project_id=project.id,
+            kind=RequirementKind.INFORMATIONAL.value,
+            importance=RequirementImportance.INFORMATIONAL.value,
+            expected_value={"subject": "OTHER_CONTEXT", "text": ambiguity},
+            notes=UNCERTAINTY_NOTE,
+        )
+        for ambiguity in extracted.ambiguities
     ]
     if not meaningful_brief_content(
         product_name=extracted.product_name,

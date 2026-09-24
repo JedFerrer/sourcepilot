@@ -8,6 +8,14 @@ const emptyBrief = {
   delivery_target: null, target_unit_price: null, requirements: [],
   status: "IN_PROGRESS", brief_revision: 0, can_analyze: true,
   missing_fields: [{ field_key: "product_name", reason: "Name the product to source." }],
+  uncertainties: [],
+};
+
+const readyBrief = {
+  ...emptyBrief, product_name: "Desk lamp", category: "Lighting", quantity: 100,
+  destination: "Manila", delivery_target: { kind: "DATE", date: "2027-01-01" },
+  status: "READY_FOR_REVIEW", missing_fields: [], brief_revision: 1, can_analyze: false,
+  approved_at: null,
 };
 
 describe("BriefEditor", () => {
@@ -15,6 +23,82 @@ describe("BriefEditor", () => {
     cleanup();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+  });
+
+  it("requires saved edits before approval and refreshes the project after success", async () => {
+    const onProjectChange = vi.fn().mockResolvedValue(undefined);
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => Promise.resolve(
+      path.endsWith("/approve") && init?.method === "POST"
+        ? jsonResponse({ ...readyBrief, status: "APPROVED", approved_at: "2026-09-24T00:00:00Z" })
+        : jsonResponse(readyBrief),
+    ));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<BriefEditor projectId="project-1" onProjectChange={onProjectChange} />);
+    const approve = await screen.findByRole("button", { name: "Approve Brief" });
+    fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "200" } });
+    expect(approve).toBeDisabled();
+    expect(screen.getByText("Save your Brief edits before approving.")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "100" } });
+    fireEvent.click(approve);
+    await waitFor(() => expect(screen.getByText("Readiness: Approved")).toBeInTheDocument());
+    expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/brief/approve", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expected_brief_revision: 1 }),
+      credentials: "same-origin",
+    });
+    expect(onProjectChange).toHaveBeenCalledOnce();
+  });
+
+  it("retains the draft when approval fails", async () => {
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(
+      path.endsWith("/approve")
+        ? jsonResponse({ error: { code: "BRIEF_CONFLICT", message: "This Brief changed." } }, 409)
+        : jsonResponse(readyBrief),
+    )));
+    render(<BriefEditor projectId="project-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Approve Brief" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("This Brief changed.");
+    expect(screen.getByLabelText("Product name")).toHaveValue("Desk lamp");
+    expect(screen.getByRole("button", { name: "Reload Brief" })).toBeInTheDocument();
+  });
+
+  it("clears a stale approval error after reloading the latest ready Brief and allows approval", async () => {
+    const latest = { ...readyBrief, quantity: 220, brief_revision: 2 };
+    const approved = { ...latest, status: "APPROVED", approved_at: "2026-09-24T00:00:00Z" };
+    let reads = 0;
+    let approvals = 0;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/approve") && init?.method === "POST") {
+        approvals += 1;
+        return Promise.resolve(approvals === 1
+          ? jsonResponse({ error: { code: "BRIEF_CONFLICT", message: "This Brief changed. Reload it before approving." } }, 409)
+          : jsonResponse(approved));
+      }
+      reads += 1;
+      return Promise.resolve(jsonResponse(reads === 1 ? readyBrief : latest));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<BriefEditor projectId="project-1" />);
+
+    const approve = await screen.findByRole("button", { name: "Approve Brief" });
+    fireEvent.click(approve);
+    expect(await screen.findByRole("alert")).toHaveTextContent("This Brief changed. Reload it before approving.");
+    expect(approve).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reload Brief" }));
+    await waitFor(() => expect(screen.getByLabelText("Requested quantity")).toHaveValue(220));
+    expect(screen.getByRole("region", { name: "Brief approval review" })).toHaveTextContent("220");
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Reload Brief" })).not.toBeInTheDocument();
+    expect(approve).toBeEnabled();
+    expect(reads).toBe(2);
+
+    fireEvent.click(approve);
+    await waitFor(() => expect(screen.getByText("Readiness: Approved")).toBeInTheDocument());
+    expect(approvals).toBe(2);
+    const approvalCalls = fetchMock.mock.calls.filter(([path, init]) => path.endsWith("/approve") && init?.method === "POST");
+    expect(JSON.parse(String(approvalCalls[0][1]?.body))).toEqual({ expected_brief_revision: 1 });
+    expect(JSON.parse(String(approvalCalls[1][1]?.body))).toEqual({ expected_brief_revision: 2 });
   });
 
   it("loads an empty editable Brief and saves manual content after analysis fails", async () => {
@@ -38,28 +122,33 @@ describe("BriefEditor", () => {
     await waitFor(() => expect(screen.queryByRole("button", { name: "Analyze request" })).not.toBeInTheDocument());
   });
 
-  it("shows extracted unknown importance and transient ambiguities, then saves an edit", async () => {
+  it("keeps an extracted uncertainty visible for approval after save and reload", async () => {
     const extracted = {
-      ...emptyBrief, product_name: "Cosmetic bag", brief_revision: 1, can_analyze: false,
+      ...readyBrief, product_name: "Cosmetic bag", brief_revision: 1, can_analyze: false,
       requirements: [{ id: "req-1", kind: "MATERIAL", importance: null, expected_value: { value: "recycled polyester" }, notes: null }],
       ambiguities: ["Branding method was not stated."],
+      uncertainties: ["Branding method was not stated."],
     };
+    let saved: object = emptyBrief;
     const fetchMock = vi.fn((_: string, init?: RequestInit) => Promise.resolve(
       init?.method === "POST" ? jsonResponse(extracted) :
-      init?.method === "PATCH" ? jsonResponse({ ...extracted, requirements: [{ ...extracted.requirements[0], importance: "REQUIRED" }] }) :
-      jsonResponse(emptyBrief),
+      init?.method === "PATCH" ? (saved = { ...extracted, requirements: [{ ...extracted.requirements[0], importance: "REQUIRED" }] }, jsonResponse(saved)) :
+      jsonResponse(saved),
     ));
     vi.stubGlobal("fetch", fetchMock);
-    render(<BriefEditor projectId="project-1" />);
+    const first = render(<BriefEditor projectId="project-1" />);
     fireEvent.click(await screen.findByRole("button", { name: "Analyze request" }));
-    expect(await screen.findByText("Branding method was not stated.")).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Uncertainties to review" })).toHaveTextContent("Branding method was not stated.");
     expect(screen.getByLabelText("Importance")).toHaveValue("");
     fireEvent.change(screen.getByLabelText("Importance"), { target: { value: "REQUIRED" } });
     fireEvent.click(screen.getByRole("button", { name: "Save Brief" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/brief", expect.objectContaining({ method: "PATCH" })));
     const saveCall = fetchMock.mock.calls.find(([, init]) => init?.method === "PATCH");
     expect(JSON.parse(String(saveCall?.[1]?.body)).requirements[0].importance).toBe("REQUIRED");
-    await waitFor(() => expect(screen.queryByText("Branding method was not stated.")).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("region", { name: "Uncertainties to review" })).toHaveTextContent("Branding method was not stated."));
+    first.unmount();
+    render(<BriefEditor projectId="project-1" />);
+    expect(await screen.findByRole("region", { name: "Uncertainties to review" })).toHaveTextContent("Branding method was not stated.");
   });
 
   it("reloads saved requirements and informational attributes in separate sections", async () => {

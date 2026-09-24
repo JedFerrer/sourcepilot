@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 from uuid import UUID
 
@@ -102,9 +103,17 @@ class BriefResponse(BaseModel):
     target_unit_price: str | None
     requirements: list[RequirementResponse]
     status: str
+    approved_at: datetime | None
     missing_fields: list[MissingFieldResponse]
+    uncertainties: list[str]
     brief_revision: int
     can_analyze: bool
+
+
+class ApproveBriefRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    expected_brief_revision: StrictInt = Field(ge=0)
 
 
 class AnalyzeBriefResponse(BriefResponse):

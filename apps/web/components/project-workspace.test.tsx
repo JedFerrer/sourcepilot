@@ -6,7 +6,14 @@ import { jsonResponse } from "../test/api-responses";
 const emptyBrief = {
   product_name: null, category: null, quantity: null, destination: null,
   delivery_target: null, target_unit_price: null, requirements: [],
-  status: "IN_PROGRESS", missing_fields: [], brief_revision: 0, can_analyze: true,
+  status: "IN_PROGRESS", missing_fields: [], uncertainties: [], brief_revision: 0, can_analyze: true,
+};
+
+const readyBrief = {
+  ...emptyBrief, product_name: "Desk lamp", category: "Lighting", quantity: 100,
+  destination: "Manila", delivery_target: { kind: "DATE", date: "2027-01-01" },
+  status: "READY_FOR_REVIEW", brief_revision: 1, can_analyze: false,
+  approved_at: null,
 };
 
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
@@ -35,6 +42,41 @@ describe("ProjectWorkspace", () => {
     for (const stage of ["Suppliers", "Quotes", "Comparison", "Decision"]) {
       expect(screen.getByText(stage).closest("li")).toHaveAttribute("data-unavailable", "true");
     }
+  });
+
+  it("synchronizes project stage after approval and an approval-revoking edit", async () => {
+    let stage = "BRIEF";
+    let brief = {
+      ...readyBrief, quantity: readyBrief.quantity as number | null,
+      approved_at: null as string | null,
+      missing_fields: [] as { field_key: string; reason: string }[],
+    };
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/brief/approve")) {
+        stage = "SUPPLIERS";
+        brief = { ...brief, status: "APPROVED", approved_at: "2026-09-24T00:00:00Z" };
+        return Promise.resolve(jsonResponse(brief));
+      }
+      if (path.endsWith("/brief") && init?.method === "PATCH") {
+        stage = "BRIEF";
+        brief = { ...brief, quantity: null, status: "IN_PROGRESS", approved_at: null, brief_revision: 2,
+          missing_fields: [{ field_key: "quantity", reason: "Enter a positive requested quantity." }] };
+        return Promise.resolve(jsonResponse(brief));
+      }
+      if (path.endsWith("/brief")) return Promise.resolve(jsonResponse(brief));
+      return Promise.resolve(jsonResponse({ id: "project-1", name: "Lamp", original_request: "Source lamps.", stage }));
+    }));
+    render(<ProjectWorkspace projectId="project-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Approve Brief" }));
+    expect(await screen.findByText("Current stage: Suppliers")).toBeInTheDocument();
+    const suppliers = screen.getByText("Suppliers").closest("li");
+    expect(suppliers).toHaveAttribute("aria-current", "step");
+    expect(suppliers).not.toHaveAttribute("data-unavailable");
+    expect(suppliers).toHaveTextContent("Supplier discovery is planned for M2.");
+    expect(suppliers).not.toHaveTextContent("Available in a later step.");
+    fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save Brief" }));
+    expect(await screen.findByText("Current stage: Brief")).toBeInTheDocument();
   });
 
   it("persists a project rename", async () => {

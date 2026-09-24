@@ -4,7 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M1-U5 — Clarification Generator** is `COMMITTED`.
+**M1-U6 — Brief Approval and Revision Foundation** is `COMMITTED`.
+
+M1-U5 is `COMMITTED`.
 
 M1-U4 is `COMMITTED`.
 

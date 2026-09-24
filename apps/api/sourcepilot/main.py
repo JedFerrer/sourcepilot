@@ -15,6 +15,7 @@ from sourcepilot.api_errors import (
 )
 from sourcepilot.briefs.schemas import (
     AnalyzeBriefResponse,
+    ApproveBriefRequest,
     BriefResponse,
     ClarificationResponse,
     EditBriefRequest,
@@ -25,6 +26,7 @@ from sourcepilot.briefs.workflow import (
     BriefEditError,
     ClarificationUnavailableError,
     analyze_project_brief,
+    approve_brief,
     brief_snapshot,
     clarify_project_brief,
     edit_brief,
@@ -210,6 +212,23 @@ def edit_brief_endpoint(
     except BriefEditError as error:
         database_session.rollback()
         return error_response(422, code="VALIDATION_ERROR", message=str(error))
+    return result
+
+
+@app.post("/projects/{project_id}/brief/approve", response_model=BriefResponse)
+def approve_brief_endpoint(
+    project_id: UUID,
+    payload: ApproveBriefRequest,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> BriefResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = approve_brief(database_session, project, payload)
+        commit_or_rollback(database_session)
+    except BriefConflictError as error:
+        database_session.rollback()
+        return error_response(409, code="BRIEF_CONFLICT", message=str(error))
     return result
 
 

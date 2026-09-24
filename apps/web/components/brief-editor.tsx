@@ -23,7 +23,9 @@ type Brief = {
   target_unit_price: string | null;
   requirements: Requirement[];
   status: "IN_PROGRESS" | "READY_FOR_REVIEW" | "APPROVED";
+  approved_at: string | null;
   missing_fields: { field_key: string; reason: string }[];
+  uncertainties: string[];
   brief_revision: number;
   can_analyze: boolean;
 };
@@ -55,6 +57,13 @@ function initialValue(kind: RequirementKind): Record<string, unknown> {
 
 function text(value: unknown): string {
   return value === null || value === undefined ? "" : String(value);
+}
+
+function reviewValue(value: Record<string, unknown>): string {
+  return Object.entries(value)
+    .filter(([, entry]) => entry !== null && entry !== "")
+    .map(([key, entry]) => `${key.replaceAll("_", " ")}: ${entry === true ? "yes" : entry === false ? "no" : text(entry)}`)
+    .join(", ");
 }
 
 const briefFieldLabels: Record<string, string> = {
@@ -130,14 +139,13 @@ function applyAnswers(brief: Brief, questions: ClarificationQuestion[], answers:
   return next;
 }
 
-export function BriefEditor({ projectId }: { projectId: string }) {
+export function BriefEditor({ projectId, onProjectChange }: { projectId: string; onProjectChange?: () => Promise<void> }) {
   const [brief, setBrief] = useState<Brief | null>(null);
   const [draft, setDraft] = useState<Brief | null>(null);
-  const [ambiguities, setAmbiguities] = useState<string[]>([]);
   const [clarifications, setClarifications] = useState<ClarificationResult | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [deliveryKind, setDeliveryKind] = useState<"DATE" | "PERIOD">("DATE");
-  const [busy, setBusy] = useState<"analyze" | "save" | "clarify" | "answers" | "refresh" | null>(null);
+  const [busy, setBusy] = useState<"analyze" | "save" | "clarify" | "answers" | "refresh" | "approve" | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<ApiFieldError[]>([]);
   const [loading, setLoading] = useState(true);
@@ -171,7 +179,6 @@ export function BriefEditor({ projectId }: { projectId: string }) {
       const result = await apiRequest<AnalyzeResult>(`/api/projects/${projectId}/brief/analyze`, { method: "POST" });
       setBrief(result);
       setDraft(result);
-      setAmbiguities(result.ambiguities);
       setClarifications(null);
     } catch (caught) {
       setError(caught instanceof ApiClientError ? caught.message : "Analysis failed. Try again or enter the Brief manually.");
@@ -180,7 +187,7 @@ export function BriefEditor({ projectId }: { projectId: string }) {
     }
   }
 
-  async function refreshAfterConflict() {
+  async function refreshAfterConflict(clearErrorOnSuccess = false) {
     setNeedsConflictRefresh(true);
     try {
       const latest = await apiRequest<Brief>(`/api/projects/${projectId}/brief`);
@@ -193,6 +200,7 @@ export function BriefEditor({ projectId }: { projectId: string }) {
       });
       setAnswers((current) => Object.fromEntries(Object.entries(current).filter(([fieldKey]) => unresolved.has(fieldKey))));
       setNeedsConflictRefresh(false);
+      if (clearErrorOnSuccess) setError(null);
     } catch {
       setError("This Brief changed, but we could not reload it. Try reloading before saving.");
     }
@@ -208,9 +216,9 @@ export function BriefEditor({ projectId }: { projectId: string }) {
       });
       setBrief(result);
       setDraft(result);
-      setAmbiguities([]);
       setClarifications(null);
       setAnswers({});
+      await onProjectChange?.();
     } catch (caught) {
       if (caught instanceof ApiClientError && caught.fields?.length) {
         setFieldErrors(caught.fields);
@@ -228,6 +236,27 @@ export function BriefEditor({ projectId }: { projectId: string }) {
   async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (draft && brief && !needsConflictRefresh) await saveSnapshot(draft, brief.brief_revision);
+  }
+
+  async function approve() {
+    if (!brief || !draft || brief.status !== "READY_FOR_REVIEW" || JSON.stringify(draft) !== JSON.stringify(brief)) return;
+    setBusy("approve");
+    setError(null);
+    setFieldErrors([]);
+    try {
+      const result = await apiRequest<Brief>(`/api/projects/${projectId}/brief/approve`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expected_brief_revision: brief.brief_revision }),
+      });
+      setBrief(result);
+      setDraft(result);
+      await onProjectChange?.();
+    } catch (caught) {
+      setError(caught instanceof ApiClientError ? caught.message : "We could not approve the Brief. Please try again.");
+      if (caught instanceof ApiClientError && caught.code === "BRIEF_CONFLICT") setNeedsConflictRefresh(true);
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function generateQuestions() {
@@ -325,7 +354,28 @@ export function BriefEditor({ projectId }: { projectId: string }) {
   return <section className="brief-editor" aria-labelledby="brief-title">
     <h2 id="brief-title">Sourcing Brief</h2>
     <p>Readiness: {brief.status === "READY_FOR_REVIEW" ? "Ready for review" : brief.status === "APPROVED" ? "Approved" : "In progress"}</p>
+    {brief.approved_at ? <p>Approved on {new Date(brief.approved_at).toLocaleDateString()}</p> : null}
     {brief.missing_fields.length > 0 ? <section aria-label="Missing information"><h3>Missing information</h3><ul>{brief.missing_fields.map((field) => <li key={field.field_key}>{field.reason}</li>)}</ul></section> : <p>No required information is missing.</p>}
+    {brief.status === "READY_FOR_REVIEW" ? <section aria-label="Brief approval review">
+      <h3>Review before approval</h3>
+      <p>Compare these saved details with the original request above. You can continue editing below.</p>
+      <dl>
+        <dt>Product</dt><dd>{brief.product_name}</dd>
+        <dt>Category</dt><dd>{brief.category}</dd>
+        <dt>Quantity</dt><dd>{brief.quantity}</dd>
+        <dt>Destination</dt><dd>{brief.destination}</dd>
+        <dt>Delivery target</dt><dd>{brief.delivery_target ? reviewValue(brief.delivery_target) : "Not set"}</dd>
+        <dt>Target unit price</dt><dd>{brief.target_unit_price ?? "Not set (optional)"}</dd>
+      </dl>
+      <h4>Requirements and context</h4>
+      {brief.requirements.length ? <ul>{brief.requirements.map((item, index) =>
+        <li key={item.id ?? index}>{item.importance?.toLowerCase() ?? "Importance not set"}: {item.kind.replaceAll("_", " ").toLowerCase()} — {reviewValue(item.expected_value)}</li>,
+      )}</ul> : <p>No additional requirements or context saved.</p>}
+      {brief.requirements.some((item) => item.importance === null) ? <p>Some requirement importance values are not set. Review them before approving.</p> : null}
+      {brief.uncertainties.length > 0 ? <section aria-label="Uncertainties to review"><h4>Uncertainties to review</h4><ul>{brief.uncertainties.map((item, index) => <li key={index}>{item}</li>)}</ul></section> : null}
+      <button type="button" onClick={() => void approve()} disabled={busy !== null || hasUnsavedEdits || needsConflictRefresh}>{busy === "approve" ? "Approving…" : "Approve Brief"}</button>
+      {hasUnsavedEdits ? <p>Save your Brief edits before approving.</p> : null}
+    </section> : null}
     {brief.can_analyze ? <button type="button" onClick={() => void analyze()} disabled={busy !== null}>{busy === "analyze" ? "Analyzing…" : "Analyze request"}</button> : null}
     {hasSavedContent(brief) && brief.missing_fields.length > 0 ? <>
       <button type="button" onClick={() => void generateQuestions()} disabled={busy !== null || hasUnsavedEdits}>{busy === "clarify" ? "Generating questions…" : "Get clarification questions"}</button>
@@ -346,12 +396,12 @@ export function BriefEditor({ projectId }: { projectId: string }) {
       </div>)}
       <button type="submit" disabled={busy !== null || hasUnsavedEdits || needsConflictRefresh}>{busy === "answers" ? "Saving answers…" : "Save answers"}</button>
     </form> : null}
-    {ambiguities.length > 0 ? <section aria-label="Unclear information"><h3>Unclear information</h3><ul>{ambiguities.map((item, index) => <li key={index}>{item}</li>)}</ul></section> : null}
+    {brief.status !== "READY_FOR_REVIEW" && brief.uncertainties.length > 0 ? <section aria-label="Unclear information"><h3>Unclear information</h3><ul>{brief.uncertainties.map((item, index) => <li key={index}>{item}</li>)}</ul></section> : null}
     {error || fieldErrors.length > 0 ? <div className="form-error" role="alert">
       {error ? <p>{error}</p> : null}
       {fieldErrors.length > 0 ? <ul>{fieldErrors.map((field, index) => <li key={`${field.field}-${index}`}>{fieldMessage(field)}</li>)}</ul> : null}
     </div> : null}
-    {needsConflictRefresh ? <button type="button" onClick={() => { setBusy("refresh"); void refreshAfterConflict().finally(() => setBusy(null)); }} disabled={busy !== null}>Reload Brief</button> : null}
+    {needsConflictRefresh ? <button type="button" onClick={() => { setBusy("refresh"); void refreshAfterConflict(true).finally(() => setBusy(null)); }} disabled={busy !== null}>Reload Brief</button> : null}
     <form className="brief-form" onSubmit={(event) => void save(event)}>
       <h3>Product and delivery</h3>
       <label>Product name<input value={draft.product_name ?? ""} onChange={(event) => updateField("product_name", event.target.value)} /></label>
