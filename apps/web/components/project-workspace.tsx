@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
+import { BriefEditor } from "./brief-editor";
 
 type Project = {
   id: string;
@@ -114,9 +115,10 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
         <h2 id="original-request-title">Original sourcing request</h2>
         <p>{project.original_request}</p>
       </section>
+      <BriefEditor projectId={projectId} />
       <nav aria-label="Sourcing workflow stages">
         <ul className="stage-list">
-          <li aria-current="step"><strong>Brief</strong><span>Brief setup is not part of this slice.</span></li>
+          <li aria-current="step"><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
           {unavailableStages.map((stage) => (
             <li key={stage} data-unavailable="true"><strong>{stage}</strong><span>Available in a later step.</span></li>
           ))}

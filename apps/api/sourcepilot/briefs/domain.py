@@ -52,6 +52,8 @@ class InformationalSubject(StrEnum):
 _ISO_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ISO_CURRENCY_PATTERN = re.compile(r"^[A-Z]{3}$")
 _BOOLEAN_CAPABILITY_KEYS = {CapabilityKey.CUSTOM_BRANDING}
+MAX_BRIEF_TEXT_LENGTH = 255
+MAX_BRIEF_INTEGER = 2_147_483_647
 
 
 def validate_delivery_target(value: object) -> dict[str, object]:
@@ -150,6 +152,10 @@ def validate_target_unit_price(value: object) -> Decimal:
     return value
 
 
+def validate_brief_quantity(value: object) -> int:
+    return _require_positive_integer(value, "quantity")
+
+
 def _require_mapping(value: object, label: str) -> dict[str, object]:
     if not isinstance(value, dict):
         raise ValueError(f"{label} must be an object")  # noqa: TRY004 - stable boundary error.
@@ -177,6 +183,8 @@ def _normalize_comparison_text(value: object, label: str) -> str:
 def _require_positive_integer(value: object, label: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
         raise ValueError(f"{label} must be a positive integer")
+    if value > MAX_BRIEF_INTEGER:
+        raise ValueError(f"{label} must be at most {MAX_BRIEF_INTEGER}")
     return value
 
 

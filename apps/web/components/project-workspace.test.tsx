@@ -3,6 +3,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
 import { jsonResponse } from "../test/api-responses";
 
+const emptyBrief = {
+  product_name: null, category: null, quantity: null, destination: null,
+  delivery_target: null, target_unit_price: null, requirements: [],
+  status: "IN_PROGRESS", missing_fields: [], brief_revision: 0, can_analyze: true,
+};
+
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 
 describe("ProjectWorkspace", () => {
@@ -14,12 +20,12 @@ describe("ProjectWorkspace", () => {
   it("shows the saved request and a presentation-only five-stage shell", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(jsonResponse({
+      vi.fn((path: string) => Promise.resolve(path.endsWith("/brief") ? jsonResponse(emptyBrief) : jsonResponse({
           id: "project-1",
           name: "Travel Bag",
           original_request: "Source recycled travel bags.",
           stage: "BRIEF",
-        })),
+        }))),
     );
     render(<ProjectWorkspace projectId="project-1" />);
 
@@ -34,10 +40,11 @@ describe("ProjectWorkspace", () => {
   it("persists a project rename", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValueOnce(jsonResponse({ id: "project-1", name: "Travel Bag", original_request: "Source bags" }))
-        .mockResolvedValueOnce(jsonResponse({ id: "project-1", name: "Renamed Bag", original_request: "Source bags" })),
+      vi.fn((path: string, init?: RequestInit) => Promise.resolve(
+        path.endsWith("/brief") ? jsonResponse(emptyBrief) :
+        init?.method === "PATCH" ? jsonResponse({ id: "project-1", name: "Renamed Bag", original_request: "Source bags" }) :
+        jsonResponse({ id: "project-1", name: "Travel Bag", original_request: "Source bags" }),
+      )),
     );
     render(<ProjectWorkspace projectId="project-1" />);
 
@@ -46,7 +53,7 @@ describe("ProjectWorkspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
 
     expect(await screen.findByText("Renamed Bag")).toBeInTheDocument();
-    expect(fetch).toHaveBeenLastCalledWith("/api/projects/project-1", {
+    expect(fetch).toHaveBeenCalledWith("/api/projects/project-1", {
       method: "PATCH",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
@@ -75,7 +82,7 @@ describe("ProjectWorkspace", () => {
     });
     vi.stubGlobal(
       "fetch",
-      vi.fn((path: string) => (path.endsWith("project-a") ? projectAResponse : projectBResponse)),
+      vi.fn((path: string) => path.endsWith("/brief") ? Promise.resolve(jsonResponse(emptyBrief)) : (path.endsWith("project-a") ? projectAResponse : projectBResponse)),
     );
 
     const { rerender } = render(<ProjectWorkspace projectId="project-a" />);

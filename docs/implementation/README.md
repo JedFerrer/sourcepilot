@@ -4,9 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M1-U3 — Brief Interpreter Structured AI Capability** is `COMMITTED`.
+**M1-U4 — Analyze Request API and Brief Editing UI** is `COMMITTED`.
 
-No implementation unit is active.
+M1-U3 is `COMMITTED`.
 
 M1-U2 is `COMMITTED`.
 

@@ -7,7 +7,7 @@ from ipaddress import IPv6Address, ip_address
 from pathlib import Path
 
 from alembic.config import Config
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, inspect, text
 from sqlalchemy.engine import URL, make_url
 
 from alembic import command
@@ -95,6 +95,14 @@ def alembic_config(database_url: str) -> Config:
 
 def reset_test_database(database_url: str) -> None:
     config = alembic_config(database_url)
+    # Reset discards test data; remove nullable-importance rows before a guarded downgrade.
+    engine = create_test_engine(database_url)
+    try:
+        if "requirements" in inspect(engine).get_table_names():
+            with engine.begin() as connection:
+                connection.execute(text("DELETE FROM requirements"))
+    finally:
+        engine.dispose()
     command.downgrade(config, "base")
     command.upgrade(config, "head")
 

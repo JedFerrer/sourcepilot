@@ -24,6 +24,7 @@ from sourcepilot.briefs.domain import (
     BriefStatus,
     RequirementImportance,
     RequirementKind,
+    validate_brief_quantity,
     validate_delivery_target,
     validate_requirement_expected_value,
     validate_target_unit_price,
@@ -140,7 +141,7 @@ class Requirement(Base):
         index=True,
     )
     kind: Mapped[str] = mapped_column(String(32), nullable=False)
-    importance: Mapped[str] = mapped_column(String(32), nullable=False)
+    importance: Mapped[str | None] = mapped_column(String(32), nullable=True)
     expected_value: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -148,10 +149,8 @@ class Requirement(Base):
 
 
 def _validate_brief_before_persist(_: object, __: object, brief: Brief) -> None:
-    if brief.quantity is not None and (
-        isinstance(brief.quantity, bool) or not isinstance(brief.quantity, int) or brief.quantity <= 0
-    ):
-        raise ValueError("brief quantity must be a positive integer")
+    if brief.quantity is not None:
+        brief.quantity = validate_brief_quantity(brief.quantity)
     if brief.delivery_target is not None:
         brief.delivery_target = validate_delivery_target(brief.delivery_target)
     if brief.target_unit_price is not None:
@@ -164,7 +163,8 @@ def _validate_brief_before_persist(_: object, __: object, brief: Brief) -> None:
 
 def _validate_requirement_before_persist(_: object, __: object, requirement: Requirement) -> None:
     requirement.kind = RequirementKind(requirement.kind).value
-    requirement.importance = RequirementImportance(requirement.importance).value
+    if requirement.importance is not None:
+        requirement.importance = RequirementImportance(requirement.importance).value
     requirement.expected_value = validate_requirement_expected_value(
         requirement.kind, requirement.expected_value
     )

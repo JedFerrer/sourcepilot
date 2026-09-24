@@ -20,10 +20,12 @@ from sqlalchemy.orm import Session
 from sourcepilot.ai.client import StructuredModelClient
 from sourcepilot.ai.structured import run_structured_operation
 from sourcepilot.briefs.domain import (
+    MAX_BRIEF_TEXT_LENGTH,
     CapabilityKey,
     InformationalSubject,
     RequirementImportance,
     RequirementKind,
+    validate_brief_quantity,
     validate_delivery_target,
     validate_requirement_expected_value,
     validate_target_unit_price,
@@ -143,14 +145,14 @@ class ExtractedBrief(StrictModel):
     def validate_optional_text(cls, value: str | None) -> str | None:
         if value is not None and not value.strip():
             raise ValueError("known text must not be blank")
+        if value is not None and len(value) > MAX_BRIEF_TEXT_LENGTH:
+            raise ValueError(f"known text must be at most {MAX_BRIEF_TEXT_LENGTH} characters")
         return value
 
     @field_validator("quantity")
     @classmethod
     def validate_quantity(cls, value: int | None) -> int | None:
-        if value is not None and value <= 0:
-            raise ValueError("quantity must be positive")
-        return value
+        return None if value is None else validate_brief_quantity(value)
 
     @field_validator("target_unit_price")
     @classmethod

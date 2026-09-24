@@ -3,15 +3,28 @@ from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
+from sourcepilot.ai.client import OpenAIResponsesClient
 from sourcepilot.api_errors import (
+    error_response,
     http_exception_handler,
     unhandled_exception_handler,
     validation_exception_handler,
 )
+from sourcepilot.briefs.schemas import AnalyzeBriefResponse, BriefResponse, EditBriefRequest
+from sourcepilot.briefs.workflow import (
+    BriefAnalysisUnavailableError,
+    BriefConflictError,
+    BriefEditError,
+    analyze_project_brief,
+    brief_snapshot,
+    edit_brief,
+    project_requirements,
+)
 from sourcepilot.persistence.database import get_database_session
-from sourcepilot.persistence.models import DemoSession
+from sourcepilot.persistence.models import Brief, DemoSession, Project
 from sourcepilot.projects.schemas import CreateProjectRequest, ProjectResponse, RenameProjectRequest
 from sourcepilot.projects.service import (
     create_project,
@@ -147,3 +160,75 @@ def rename_project_endpoint(
     commit_or_rollback(database_session)
     database_session.refresh(project)
     return ProjectResponse.model_validate(project)
+
+
+def owned_project_or_404(
+    database_session: Session, request: Request, project_id: UUID
+) -> tuple[DemoSession, Project]:
+    demo_session = active_demo_session(request, database_session)
+    project = project_for_demo_session(database_session, demo_session, project_id)
+    if project is None:
+        database_session.rollback()
+        raise HTTPException(status_code=404, detail="Project not found.")
+    return demo_session, project
+
+
+@app.get("/projects/{project_id}/brief", response_model=BriefResponse)
+def read_brief_endpoint(
+    project_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> BriefResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    brief = database_session.get(Brief, project.id)
+    result = brief_snapshot(project, brief, project_requirements(database_session, project.id))
+    commit_or_rollback(database_session)
+    return result
+
+
+@app.patch("/projects/{project_id}/brief", response_model=BriefResponse)
+def edit_brief_endpoint(
+    project_id: UUID,
+    payload: EditBriefRequest,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> BriefResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = edit_brief(database_session, project, payload)
+        commit_or_rollback(database_session)
+    except BriefConflictError as error:
+        database_session.rollback()
+        return error_response(409, code="BRIEF_CONFLICT", message=str(error))
+    except BriefEditError as error:
+        database_session.rollback()
+        return error_response(422, code="VALIDATION_ERROR", message=str(error))
+    return result
+
+
+@app.post("/projects/{project_id}/brief/analyze", response_model=AnalyzeBriefResponse)
+def analyze_brief_endpoint(
+    project_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> AnalyzeBriefResponse | JSONResponse:
+    demo_session, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = analyze_project_brief(
+            database_session,
+            demo_session=demo_session,
+            project=project,
+            client_factory=OpenAIResponsesClient.from_environment,
+        )
+        commit_or_rollback(database_session)
+    except BriefConflictError as error:
+        database_session.rollback()
+        return error_response(409, code="BRIEF_CONFLICT", message=str(error))
+    except BriefAnalysisUnavailableError:
+        database_session.rollback()
+        return error_response(
+            503,
+            code="BRIEF_ANALYSIS_UNAVAILABLE",
+            message="We could not analyze this request. Try again or enter the Brief manually.",
+        )
+    return result

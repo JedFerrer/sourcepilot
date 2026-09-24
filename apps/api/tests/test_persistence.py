@@ -3,11 +3,11 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import Engine, delete, inspect, text
+from sqlalchemy import Engine, delete, inspect, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from sourcepilot.persistence.models import DemoSession, Project
+from sourcepilot.persistence.models import DemoSession, Project, Requirement
 from tests.conftest import database_session_for_engine
 from tests.database_test_support import (
     create_test_engine,
@@ -55,7 +55,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0003_brief_requirement_domain"]
+    assert current_revisions == ["0004_nullable_importance"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
@@ -79,6 +79,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
 
     project_columns = {column["name"]: column for column in inspect(test_engine).get_columns("projects")}
     brief_columns = {column["name"]: column for column in inspect(test_engine).get_columns("briefs")}
+    requirement_columns = {column["name"]: column for column in inspect(test_engine).get_columns("requirements")}
 
     assert not project_columns["brief_revision"]["nullable"]
     assert project_columns["brief_revision"]["default"] == "0"
@@ -86,6 +87,60 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     assert brief_columns["delivery_target"]["nullable"]
     assert brief_columns["target_unit_price"]["nullable"]
     assert "IN_PROGRESS" in str(brief_columns["status"]["default"])
+    assert requirement_columns["importance"]["nullable"]
+
+
+def test_nullable_importance_preserves_existing_rows_through_upgrade(
+    test_engine: Engine, test_database_url: str
+) -> None:
+    from alembic import command
+    from tests.database_test_support import alembic_config
+
+    config = alembic_config(test_database_url)
+    command.downgrade(config, "0003_brief_requirement_domain")
+    with Session(test_engine) as session:
+        project = Project(
+            demo_session=make_demo_session(),
+            name="Existing",
+            original_request="Source bags.",
+        )
+        session.add(project)
+        session.flush()
+        project_id = project.id
+        requirement = Requirement(
+            project_id=project_id,
+            kind="MATERIAL",
+            importance="REQUIRED",
+            expected_value={"value": "Cotton"},
+        )
+        session.add(requirement)
+        session.commit()
+        requirement_id = requirement.id
+
+    command.upgrade(config, "head")
+    with Session(test_engine) as session:
+        preserved = session.get(Requirement, requirement_id)
+        assert preserved is not None
+        assert preserved.project_id == project_id
+        assert preserved.importance == "REQUIRED"
+        assert preserved.expected_value == {"value": "cotton"}
+        session.add(
+            Requirement(
+                project_id=project_id,
+                kind="MATERIAL",
+                importance=None,
+                expected_value={"value": "Polyester"},
+            )
+        )
+        session.commit()
+        values = set(
+            session.scalars(
+                select(Requirement.importance).where(Requirement.project_id == project_id)
+            ).all()
+        )
+        assert values == {"REQUIRED", None}
+    with pytest.raises(RuntimeError, match="Resolve unknown requirement importance"):
+        command.downgrade(config, "0003_brief_requirement_domain")
 
 
 def test_project_brief_revision_defaults_to_zero(database_session: Session) -> None:
