@@ -55,6 +55,7 @@ def run_structured_operation(
     result_model: type[ResultModel],
     client: StructuredModelClient,
     tracer: AIRunTracer | None = None,
+    post_validate: Callable[[ResultModel], None] | None = None,
     sleep: Callable[[float], None] = time.sleep,
 ) -> tuple[ResultModel | None, AIRun]:
     """Use one provider retry and one schema repair, with one trace record."""
@@ -104,12 +105,18 @@ def run_structured_operation(
             air_run.output_tokens = response.output_tokens
             try:
                 final_result = result_model.model_validate_json(response.output_text)
-            except ValidationError as error:
+                if post_validate is not None:
+                    post_validate(final_result)
+            except (ValidationError, ValueError) as error:
+                final_result = None
                 air_run.validation_status = INVALID
                 air_run.error_type = type(error).__name__
                 if not schema_repair_used:
                     schema_repair_used = True
-                    current_instructions = f"{instructions}\nRepair the JSON schema failure: {error.errors()}"
+                    if isinstance(error, ValidationError):
+                        current_instructions = f"{instructions}\nRepair the JSON schema failure: {error.errors()}"
+                    else:
+                        current_instructions = f"{instructions}\nRepair the structured output failure: {error}"
                     continue
                 air_run.status = VALIDATION_FAILED
                 break

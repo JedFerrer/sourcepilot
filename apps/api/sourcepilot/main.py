@@ -13,13 +13,20 @@ from sourcepilot.api_errors import (
     unhandled_exception_handler,
     validation_exception_handler,
 )
-from sourcepilot.briefs.schemas import AnalyzeBriefResponse, BriefResponse, EditBriefRequest
+from sourcepilot.briefs.schemas import (
+    AnalyzeBriefResponse,
+    BriefResponse,
+    ClarificationResponse,
+    EditBriefRequest,
+)
 from sourcepilot.briefs.workflow import (
     BriefAnalysisUnavailableError,
     BriefConflictError,
     BriefEditError,
+    ClarificationUnavailableError,
     analyze_project_brief,
     brief_snapshot,
+    clarify_project_brief,
     edit_brief,
     project_requirements,
 )
@@ -230,5 +237,33 @@ def analyze_brief_endpoint(
             503,
             code="BRIEF_ANALYSIS_UNAVAILABLE",
             message="We could not analyze this request. Try again or enter the Brief manually.",
+        )
+    return result
+
+
+@app.post("/projects/{project_id}/brief/clarifications", response_model=ClarificationResponse)
+def generate_brief_clarifications_endpoint(
+    project_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> ClarificationResponse | JSONResponse:
+    demo_session, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = clarify_project_brief(
+            database_session,
+            demo_session=demo_session,
+            project=project,
+            client_factory=OpenAIResponsesClient.from_environment,
+        )
+        commit_or_rollback(database_session)
+    except BriefConflictError as error:
+        database_session.rollback()
+        return error_response(409, code="BRIEF_CONFLICT", message=str(error))
+    except ClarificationUnavailableError:
+        database_session.rollback()
+        return error_response(
+            503,
+            code="CLARIFICATION_UNAVAILABLE",
+            message="We could not generate questions. Try again or edit the Brief manually.",
         )
     return result

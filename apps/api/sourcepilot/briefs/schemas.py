@@ -7,6 +7,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator, model_validator
 
+from sourcepilot.ai.clarification import ClarificationQuestion
 from sourcepilot.briefs.domain import (
     MAX_BRIEF_TEXT_LENGTH,
     RequirementImportance,
@@ -43,6 +44,7 @@ class EditBriefRequest(BaseModel):
     delivery_target: dict[str, object] | None
     target_unit_price: str | None
     requirements: list[EditRequirement]
+    expected_brief_revision: StrictInt | None = Field(default=None, ge=0)
 
     @field_validator("product_name", "category", "destination")
     @classmethod
@@ -107,3 +109,8 @@ class BriefResponse(BaseModel):
 
 class AnalyzeBriefResponse(BriefResponse):
     ambiguities: list[str] = Field(default_factory=list)
+
+
+class ClarificationResponse(BaseModel):
+    brief_revision: int
+    questions: list[ClarificationQuestion]

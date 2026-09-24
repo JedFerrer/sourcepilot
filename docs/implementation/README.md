@@ -4,7 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M1-U4 — Analyze Request API and Brief Editing UI** is `COMMITTED`.
+**M1-U5 — Clarification Generator** is `COMMITTED`.
+
+M1-U4 is `COMMITTED`.
 
 M1-U3 is `COMMITTED`.
 

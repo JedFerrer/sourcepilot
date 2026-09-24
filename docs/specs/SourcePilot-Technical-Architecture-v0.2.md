@@ -469,11 +469,15 @@ Target price is optional.
 
 ## Clarification
 
-The application determines which readiness information is missing.
+Deterministic readiness selects the unresolved fields that need clarification.
 
-The LLM only turns those missing items into concise questions.
+The LLM only phrases a bounded set of concise questions for those fields.
 
 It does not decide what information is mandatory.
+
+Clarification generation does not mutate Brief state and returns the source
+`brief_revision` so stale questions can be rejected. Clarification answers remain
+application-owned Brief edits through `PATCH /projects/{id}/brief`.
 
 ## Approval
 
@@ -2919,6 +2923,7 @@ Every operation is session-scoped.
 POST   /projects/{id}/brief/analyze
 GET    /projects/{id}/brief
 PATCH  /projects/{id}/brief
+POST   /projects/{id}/brief/clarifications
 POST   /projects/{id}/brief/approve
 ```
 

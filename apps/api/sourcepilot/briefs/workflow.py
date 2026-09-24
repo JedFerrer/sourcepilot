@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.brief_interpreter import ExtractedBrief, interpret_project_request
+from sourcepilot.ai.clarification import generate_clarifications
 from sourcepilot.ai.client import StructuredModelClient
 from sourcepilot.briefs.domain import BriefStatus, RequirementImportance, RequirementKind
 from sourcepilot.briefs.readiness import (
@@ -19,6 +20,7 @@ from sourcepilot.briefs.readiness import (
 from sourcepilot.briefs.schemas import (
     AnalyzeBriefResponse,
     BriefResponse,
+    ClarificationResponse,
     EditBriefRequest,
     MissingFieldResponse,
     RequirementResponse,
@@ -36,6 +38,10 @@ class BriefEditError(ValueError):
 
 
 class BriefAnalysisUnavailableError(RuntimeError):
+    pass
+
+
+class ClarificationUnavailableError(RuntimeError):
     pass
 
 
@@ -156,6 +162,11 @@ def edit_brief(
         .with_for_update()
         .execution_options(populate_existing=True)
     ).one()
+    if (
+        payload.expected_brief_revision is not None
+        and project.brief_revision != payload.expected_brief_revision
+    ):
+        raise BriefConflictError("This Brief changed. Reload it before saving.")
     brief = database_session.get(Brief, project.id)
     if brief is not None and brief.status == BriefStatus.APPROVED:
         raise BriefConflictError("Approved Brief editing belongs to a later workflow step.")
@@ -342,3 +353,64 @@ def analyze_project_brief(
         raise BriefConflictError("Project is no longer available.")
     result = persist_extraction(database_session, refreshed, extracted)
     return AnalyzeBriefResponse(**result.model_dump(), ambiguities=extracted.ambiguities)
+
+
+def clarify_project_brief(
+    database_session: Session,
+    *,
+    demo_session: DemoSession,
+    project: Project,
+    client_factory: Callable[[], StructuredModelClient],
+) -> ClarificationResponse:
+    """Phrase current readiness gaps without mutating Brief domain state."""
+    brief = database_session.get(Brief, project.id)
+    requirements = project_requirements(database_session, project.id)
+    if brief is None or not meaningful_brief_content(
+        product_name=brief.product_name,
+        category=brief.category,
+        quantity=brief.quantity,
+        destination=brief.destination,
+        delivery_target=brief.delivery_target,
+        target_unit_price=brief.target_unit_price,
+        requirements=requirements,
+    ):
+        raise BriefConflictError("Save Brief information before generating clarifications.")
+    snapshot = brief_snapshot(project, brief, requirements)
+    if not snapshot.missing_fields:
+        raise BriefConflictError("This Brief has no missing readiness information.")
+    revision = project.brief_revision
+    readiness = evaluate_brief_readiness(
+        product_name=brief.product_name,
+        category=brief.category,
+        quantity=brief.quantity,
+        destination=brief.destination,
+        delivery_target=brief.delivery_target,
+        requirements=tuple(
+            ReadinessRequirement(kind=item.kind, expected_value=item.expected_value)
+            for item in requirements
+        ),
+    )
+    try:
+        client = client_factory()
+        result, _ = generate_clarifications(
+            database_session,
+            demo_session=demo_session,
+            project_id=project.id,
+            brief=snapshot,
+            missing_fields=readiness.missing_fields,
+            client=client,
+        )
+    except RuntimeError as error:
+        raise ClarificationUnavailableError("Clarification generation is unavailable.") from error
+    if result is None:
+        raise ClarificationUnavailableError("Clarification generation is unavailable.")
+    database_session.expire_all()
+    refreshed = database_session.scalars(
+        select(Project)
+        .where(Project.id == project.id, Project.demo_session_id == demo_session.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).one_or_none()
+    if refreshed is None or refreshed.brief_revision != revision:
+        raise BriefConflictError("This Brief changed. Generate new clarifications.")
+    return ClarificationResponse(brief_revision=revision, questions=result.questions)
