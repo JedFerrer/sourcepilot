@@ -23,6 +23,16 @@ class ModelInvocation:
     output_tokens: int | None
 
 
+@dataclass(frozen=True)
+class AnalystModelInvocation:
+    """One Responses turn, including opaque output items for the next turn."""
+
+    output_text: str
+    output_items: tuple[dict[str, Any], ...]
+    input_tokens: int | None
+    output_tokens: int | None
+
+
 class ModelProviderError(RuntimeError):
     """A normalized model-provider failure with retryability information."""
 
@@ -42,6 +52,16 @@ class StructuredModelClient(Protocol):
         schema_name: str,
         schema: dict[str, Any],
     ) -> ModelInvocation: ...
+
+    def invoke_with_tools(
+        self,
+        *,
+        instructions: str,
+        input_items: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        schema_name: str,
+        schema: dict[str, Any],
+    ) -> AnalystModelInvocation: ...
 
 
 def ai_settings_from_environment() -> AISettings:
@@ -99,6 +119,42 @@ class OpenAIResponsesClient:
         usage = getattr(response, "usage", None)
         return ModelInvocation(
             output_text=response.output_text,
+            input_tokens=getattr(usage, "input_tokens", None),
+            output_tokens=getattr(usage, "output_tokens", None),
+        )
+
+    def invoke_with_tools(
+        self,
+        *,
+        instructions: str,
+        input_items: list[dict[str, Any]],
+        tools: list[dict[str, Any]],
+        schema_name: str,
+        schema: dict[str, Any],
+    ) -> AnalystModelInvocation:
+        try:
+            response = cast(Any, cast(Any, self._client.responses).create(
+                model=self.model,
+                instructions=instructions,
+                input=input_items,
+                tools=tools,
+                store=False,
+                text={"format": {
+                    "type": "json_schema", "name": schema_name,
+                    "strict": True, "schema": schema,
+                }},
+            ))
+        except Exception as error:
+            status_code = getattr(error, "status_code", None)
+            retryable = status_code is None or status_code in {408, 409, 429}
+            if isinstance(status_code, int) and status_code >= 500:
+                retryable = True
+            raise ModelProviderError(str(error), retryable=retryable) from error
+
+        usage = getattr(response, "usage", None)
+        return AnalystModelInvocation(
+            output_text=response.output_text or "",
+            output_items=tuple(item.model_dump(exclude_none=True) for item in response.output),
             input_tokens=getattr(usage, "input_tokens", None),
             output_tokens=getattr(usage, "output_tokens", None),
         )

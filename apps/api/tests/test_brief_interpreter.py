@@ -10,7 +10,7 @@ from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.ai.brief_interpreter import ExtractedBrief, interpret_project_request
-from sourcepilot.ai.client import ModelInvocation, ModelProviderError
+from sourcepilot.ai.client import AnalystModelInvocation, ModelInvocation, ModelProviderError
 from sourcepilot.main import app
 from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import AIRun, Brief, Project
@@ -34,6 +34,9 @@ class FakeClient:
         if isinstance(output, Exception):
             raise output
         return output
+
+    def invoke_with_tools(self, **kwargs: object) -> AnalystModelInvocation:
+        raise AssertionError("Tool calls are outside these Brief tests.")
 
 
 def payload() -> dict[str, object]:

@@ -7,6 +7,13 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.client import OpenAIResponsesClient
+from sourcepilot.ai.supplier_explanation import (
+    ExplanationNotReadyError,
+    ExplanationUnavailableError,
+    SupplierExplanationResponse,
+    analyst_limits_from_environment,
+    explain_supplier,
+)
 from sourcepilot.api_errors import (
     error_response,
     http_exception_handler,
@@ -343,4 +350,37 @@ def update_supplier_endpoint(
     except SupplierNotInProjectError as error:
         database_session.rollback()
         return error_response(404, code="SUPPLIER_NOT_FOUND", message=str(error))
+    return result
+
+
+@app.post(
+    "/projects/{project_id}/suppliers/{supplier_id}/explanation",
+    response_model=SupplierExplanationResponse,
+)
+def explain_supplier_endpoint(
+    project_id: UUID,
+    supplier_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> SupplierExplanationResponse | JSONResponse:
+    demo_session, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        max_model_turns, max_tool_calls = analyst_limits_from_environment()
+        result = explain_supplier(
+            database_session, demo_session_id=demo_session.id,
+            project_id=project.id, supplier_id=supplier_id,
+            client_factory=OpenAIResponsesClient.from_environment,
+            max_model_turns=max_model_turns, max_tool_calls=max_tool_calls,
+        )
+        commit_or_rollback(database_session)
+    except ExplanationNotReadyError as error:
+        database_session.rollback()
+        status_code = 404 if error.code == "SUPPLIER_NOT_FOUND" else 409
+        return error_response(status_code, code=error.code, message=str(error))
+    except ExplanationUnavailableError:
+        database_session.rollback()
+        return error_response(
+            503, code="SUPPLIER_EXPLANATION_UNAVAILABLE",
+            message="We could not explain this supplier. Please try again.",
+        )
     return result

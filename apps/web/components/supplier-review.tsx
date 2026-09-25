@@ -17,24 +17,72 @@ type Supplier = {
   general_moq: number | null; general_lead_time_days: number | null;
   indicative_price_amount: string | null; indicative_price_currency: string | null;
   shortlisted: boolean; dismissed: boolean; notes: string | null;
-  stale: boolean; evaluations: Finding[];
+  stale: boolean; evaluated_against_brief_revision: number; evaluations: Finding[];
   derived_context: { kind: string; status: string; evidence_ids: string[] }[];
   informational_requirements: { requirement_id: string; kind: string; importance: string | null; expected_value: Record<string, unknown> }[];
   evidence: Evidence[];
 };
 type SupplierList = { brief_revision: number; brief_approved: boolean; suppliers: Supplier[] };
+type ExplanationPoint = { text: string; requirement_id: string | null; evidence_ids: string[] };
+type SupplierExplanation = {
+  supplier_id: string;
+  strengths: ExplanationPoint[]; required_failures: ExplanationPoint[];
+  preferred_findings: ExplanationPoint[]; unknowns: ExplanationPoint[];
+  conflicts: ExplanationPoint[]; concerns: ExplanationPoint[]; evidence_ids: string[];
+};
+type ExplanationResponse = { run_id: string; explanation: SupplierExplanation };
 
 function expectedLabel(value: Record<string, unknown>): string {
   return Object.values(value).map((item) => String(item)).join(" · ");
 }
 
-function SupplierCard({ supplier, onUpdate, busy }: {
+function SupplierCard({ projectId, supplier, dataVersion, onUpdate, onRefresh, busy }: {
+  projectId: string;
   supplier: Supplier;
+  dataVersion: number;
   onUpdate: (id: string, payload: Record<string, unknown>) => Promise<void>;
+  onRefresh: () => Promise<void>;
   busy: boolean;
 }) {
   const [notes, setNotes] = useState(supplier.notes ?? "");
+  const [explanation, setExplanation] = useState<ExplanationResponse | null>(null);
+  const [explanationError, setExplanationError] = useState<string | null>(null);
+  const [explaining, setExplaining] = useState(false);
+  const latestVersion = useRef(dataVersion);
+  latestVersion.current = dataVersion;
   useEffect(() => setNotes(supplier.notes ?? ""), [supplier.notes]);
+  useEffect(() => { setExplanation(null); setExplanationError(null); }, [dataVersion]);
+
+  async function explain() {
+    const requestedVersion = dataVersion;
+    setExplaining(true);
+    setExplanationError(null);
+    try {
+      const result = await apiRequest<ExplanationResponse>(
+        `/api/projects/${projectId}/suppliers/${supplier.id}/explanation`, { method: "POST" },
+      );
+      if (requestedVersion === latestVersion.current) setExplanation(result);
+    } catch (failure) {
+      if (requestedVersion === latestVersion.current) {
+        setExplanation(null);
+        setExplanationError(failure instanceof ApiClientError ? failure.message : "The explanation could not be loaded. Try again.");
+        if (failure instanceof ApiClientError && ["SUPPLIER_EVALUATION_STALE", "SUPPLIER_NOT_FOUND"].includes(failure.code)) {
+          await onRefresh();
+        }
+      }
+    } finally {
+      setExplaining(false);
+    }
+  }
+
+  const sections: [string, ExplanationPoint[]][] = explanation ? [
+    ["Strengths", explanation.explanation.strengths],
+    ["Required failures", explanation.explanation.required_failures],
+    ["Preferred findings", explanation.explanation.preferred_findings],
+    ["Unknowns", explanation.explanation.unknowns],
+    ["Conflicts", explanation.explanation.conflicts],
+    ["Concerns", explanation.explanation.concerns],
+  ] : [];
 
   function saveNotes(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -75,6 +123,24 @@ function SupplierCard({ supplier, onUpdate, busy }: {
           </li>
         ))}</ul> : <p>No supporting evidence is available.</p>}
       </details>
+      {!supplier.stale ? <div className="supplier-explanation">
+        <button type="button" disabled={busy || explaining} onClick={() => void explain()}>
+          {explaining ? "Explaining…" : explanation ? "Generate explanation again" : "Explain this supplier"}
+        </button>
+        {explaining ? <p role="status">Preparing an evidence-backed explanation…</p> : null}
+        {explanationError ? <div role="alert"><p>{explanationError}</p><button type="button" onClick={() => void explain()}>Retry explanation</button></div> : null}
+        {explanation ? <div>
+          <h4>Supplier explanation</h4>
+          {sections.every(([, points]) => points.length === 0) ? <p>No grounded findings are available for this supplier.</p> : null}
+          {sections.filter(([, points]) => points.length > 0).map(([title, points]) => <div key={title}>
+            <h5>{title}</h5>
+            <ul>{points.map((point, index) => <li key={`${title}-${index}`}>
+              {point.text}
+              {point.evidence_ids.length ? <span> · Evidence: {point.evidence_ids.map((id) => supplier.evidence.find((item) => item.id === id)?.source_label ?? id).join(", ")}</span> : null}
+            </li>)}</ul>
+          </div>)}
+        </div> : null}
+      </div> : null}
       <div className="supplier-actions">
         <button type="button" disabled={busy} onClick={() => void onUpdate(supplier.id, { shortlisted: !supplier.shortlisted })}>
           {supplier.shortlisted ? "Remove from shortlist" : "Add to shortlist"}
@@ -94,7 +160,7 @@ function SupplierCard({ supplier, onUpdate, busy }: {
 }
 
 export function SupplierReview({ projectId, refreshKey }: { projectId: string; refreshKey: number }) {
-  const [loaded, setLoaded] = useState<{ projectId: string; refreshKey: number; data: SupplierList } | null>(null);
+  const [loaded, setLoaded] = useState<{ projectId: string; refreshKey: number; version: number; data: SupplierList } | null>(null);
   const data = loaded?.projectId === projectId && loaded.refreshKey === refreshKey ? loaded.data : null;
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -108,7 +174,7 @@ export function SupplierReview({ projectId, refreshKey }: { projectId: string; r
     try {
       const result = await apiRequest<SupplierList>(`/api/projects/${projectId}/suppliers`);
       if (request === requestSequence.current) {
-        setLoaded({ projectId, refreshKey, data: result });
+        setLoaded({ projectId, refreshKey, version: request, data: result });
         setError(null);
       }
     } catch (failure) {
@@ -146,7 +212,7 @@ export function SupplierReview({ projectId, refreshKey }: { projectId: string; r
       const updated = await apiRequest<SupplierList>(`/api/projects/${projectId}/suppliers/${id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
       });
-      if (request === requestSequence.current) setLoaded({ projectId, refreshKey, data: updated });
+      if (request === requestSequence.current) setLoaded({ projectId, refreshKey, version: request, data: updated });
     } catch (failure) {
       setError(failure instanceof ApiClientError ? failure.message : "Supplier review could not be saved. Try again.");
     } finally {
@@ -162,7 +228,7 @@ export function SupplierReview({ projectId, refreshKey }: { projectId: string; r
       {data?.suppliers.some((item) => item.stale) ? <p role="status" className="form-error">Your sourcing requirements changed. Existing supplier evaluations may no longer reflect the current Brief.</p> : null}
       {data?.brief_approved ? <button type="button" disabled={busy} onClick={() => void discover()}>{data.suppliers.length ? "Re-discover and re-evaluate" : "Discover Suppliers"}</button> : data ? <p>Approve the Brief to discover or re-evaluate suppliers.</p> : null}
       {data && data.suppliers.length === 0 && !loading ? <p>No suppliers discovered yet.</p> : null}
-      {data?.suppliers.map((supplier) => <SupplierCard key={supplier.id} supplier={supplier} onUpdate={update} busy={busy} />)}
+      {data?.suppliers.map((supplier) => <SupplierCard key={supplier.id} projectId={projectId} supplier={supplier} dataVersion={loaded?.version ?? 0} onUpdate={update} onRefresh={reload} busy={busy} />)}
     </section>
   );
 }

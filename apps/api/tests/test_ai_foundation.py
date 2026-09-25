@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.ai.client import (
     AISettings,
+    AnalystModelInvocation,
     ModelInvocation,
     ModelProviderError,
     OpenAIResponsesClient,
@@ -57,6 +58,9 @@ class FakeClient:
         if isinstance(outcome, Exception):
             raise outcome
         return outcome
+
+    def invoke_with_tools(self, **kwargs: object) -> AnalystModelInvocation:
+        raise AssertionError("Tool calls are outside these structured-operation tests.")
 
 
 @pytest.fixture(scope="module")

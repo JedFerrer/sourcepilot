@@ -347,3 +347,23 @@ class AIRun(Base):
 
     demo_session: Mapped[DemoSession] = relationship(back_populates="ai_runs")
     project: Mapped[Project | None] = relationship(back_populates="ai_runs")
+    supplier_explanation_steps: Mapped[list[SupplierExplanationRunStep]] = relationship(
+        back_populates="air_run", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class SupplierExplanationRunStep(Base):
+    """Minimal ordered observability for M2-U6 analyst runs."""
+
+    __tablename__ = "supplier_explanation_run_steps"
+
+    air_run_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("ai_runs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    sequence: Mapped[int] = mapped_column(Integer, primary_key=True)
+    kind: Mapped[str] = mapped_column(String(32), nullable=False)
+    outcome: Mapped[str] = mapped_column(String(32), nullable=False)
+    name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    air_run: Mapped[AIRun] = relationship(back_populates="supplier_explanation_steps")

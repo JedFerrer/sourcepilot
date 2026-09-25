@@ -55,14 +55,14 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0006_project_supplier_review"]
+    assert current_revisions == ["0007_supplier_explanation_steps"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
     assert {
         "demo_sessions", "projects", "ai_runs", "briefs", "requirements",
         "suppliers", "supplier_capabilities", "supplier_evidence",
-        "project_suppliers", "requirement_evaluations",
+        "project_suppliers", "requirement_evaluations", "supplier_explanation_run_steps",
     }.issubset(table_names)
     assert table_names - {
         "demo_sessions",
@@ -75,6 +75,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
         "supplier_evidence",
         "project_suppliers",
         "requirement_evaluations",
+        "supplier_explanation_run_steps",
         "alembic_version",
     } == set()
 
