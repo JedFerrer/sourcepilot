@@ -46,6 +46,8 @@ from sourcepilot.session.settings import (
     DEMO_SESSION_COOKIE_NAME,
     demo_session_settings_from_environment,
 )
+from sourcepilot.suppliers.schemas import DiscoverSuppliersResponse
+from sourcepilot.suppliers.service import DiscoveryNotReadyError, discover_suppliers
 
 app = FastAPI(title="SourcePilot API")
 app.add_exception_handler(HTTPException, http_exception_handler)
@@ -285,4 +287,20 @@ def generate_brief_clarifications_endpoint(
             code="CLARIFICATION_UNAVAILABLE",
             message="We could not generate questions. Try again or edit the Brief manually.",
         )
+    return result
+
+
+@app.post("/projects/{project_id}/suppliers/discover", response_model=DiscoverSuppliersResponse)
+def discover_suppliers_endpoint(
+    project_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> DiscoverSuppliersResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = discover_suppliers(database_session, project_id=project.id)
+        commit_or_rollback(database_session)
+    except DiscoveryNotReadyError as error:
+        database_session.rollback()
+        return error_response(409, code="BRIEF_NOT_APPROVED", message=str(error))
     return result
