@@ -46,8 +46,18 @@ from sourcepilot.session.settings import (
     DEMO_SESSION_COOKIE_NAME,
     demo_session_settings_from_environment,
 )
-from sourcepilot.suppliers.schemas import DiscoverSuppliersResponse
-from sourcepilot.suppliers.service import DiscoveryNotReadyError, discover_suppliers
+from sourcepilot.suppliers.schemas import (
+    DiscoverSuppliersResponse,
+    SupplierListResponse,
+    UpdateSupplierReviewRequest,
+)
+from sourcepilot.suppliers.service import (
+    DiscoveryNotReadyError,
+    SupplierNotInProjectError,
+    discover_suppliers,
+    list_project_suppliers,
+    update_supplier_review,
+)
 
 app = FastAPI(title="SourcePilot API")
 app.add_exception_handler(HTTPException, http_exception_handler)
@@ -303,4 +313,34 @@ def discover_suppliers_endpoint(
     except DiscoveryNotReadyError as error:
         database_session.rollback()
         return error_response(409, code="BRIEF_NOT_APPROVED", message=str(error))
+    return result
+
+
+@app.get("/projects/{project_id}/suppliers", response_model=SupplierListResponse)
+def list_suppliers_endpoint(
+    project_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> SupplierListResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    result = list_project_suppliers(database_session, project)
+    commit_or_rollback(database_session)
+    return result
+
+
+@app.patch("/projects/{project_id}/suppliers/{supplier_id}", response_model=SupplierListResponse)
+def update_supplier_endpoint(
+    project_id: UUID,
+    supplier_id: UUID,
+    payload: UpdateSupplierReviewRequest,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> SupplierListResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = update_supplier_review(database_session, project, supplier_id, payload)
+        commit_or_rollback(database_session)
+    except SupplierNotInProjectError as error:
+        database_session.rollback()
+        return error_response(404, code="SUPPLIER_NOT_FOUND", message=str(error))
     return result

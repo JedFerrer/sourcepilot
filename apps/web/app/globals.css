@@ -143,3 +143,41 @@ button:disabled {
 .session-status--unavailable {
   background: #fee2e2;
 }
+
+.supplier-review {
+  display: grid;
+  gap: 1rem;
+}
+
+.supplier-card {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.supplier-card h3,
+.supplier-card h4,
+.supplier-card p {
+  margin: 0;
+}
+
+.supplier-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.supplier-card form label {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.supplier-card textarea {
+  min-height: 5rem;
+  padding: 0.55rem;
+  border: 1px solid #94a3b8;
+  border-radius: 0.35rem;
+}

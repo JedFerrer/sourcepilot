@@ -8,6 +8,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     Numeric,
     String,
@@ -84,6 +85,9 @@ class Project(Base):
         back_populates="project", cascade="all, delete-orphan", passive_deletes=True
     )
     ai_runs: Mapped[list[AIRun]] = relationship(back_populates="project", passive_deletes=True)
+    project_suppliers: Mapped[list[ProjectSupplier]] = relationship(
+        back_populates="project", cascade="all, delete-orphan", passive_deletes=True
+    )
 
 
 class Brief(Base):
@@ -175,6 +179,9 @@ class Supplier(Base):
     evidence: Mapped[list[SupplierEvidence]] = relationship(
         back_populates="supplier", cascade="all, delete-orphan", passive_deletes=True
     )
+    project_suppliers: Mapped[list[ProjectSupplier]] = relationship(
+        back_populates="supplier", passive_deletes=True
+    )
 
 
 class SupplierCapability(Base):
@@ -221,6 +228,56 @@ class SupplierEvidence(Base):
     evidence_state: Mapped[str] = mapped_column(String(20), nullable=False)
 
     supplier: Mapped[Supplier] = relationship(back_populates="evidence")
+
+
+class ProjectSupplier(Base):
+    __tablename__ = "project_suppliers"
+    __table_args__ = (
+        CheckConstraint("evaluated_against_brief_revision >= 0", name="ck_project_suppliers_revision"),
+    )
+
+    project_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), primary_key=True
+    )
+    supplier_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("suppliers.id", ondelete="CASCADE"), primary_key=True
+    )
+    shortlisted: Mapped[bool] = mapped_column(nullable=False, default=False)
+    dismissed: Mapped[bool] = mapped_column(nullable=False, default=False)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    evaluated_against_brief_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    project: Mapped[Project] = relationship(back_populates="project_suppliers")
+    supplier: Mapped[Supplier] = relationship(back_populates="project_suppliers")
+    evaluations: Mapped[list[RequirementEvaluationRecord]] = relationship(
+        back_populates="project_supplier", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class RequirementEvaluationRecord(Base):
+    __tablename__ = "requirement_evaluations"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["project_id", "supplier_id"],
+            ["project_suppliers.project_id", "project_suppliers.supplier_id"],
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(["requirement_id"], ["requirements.id"], ondelete="CASCADE"),
+        CheckConstraint(
+            "status IN ('MEETS', 'DOES_NOT_MEET', 'UNKNOWN', 'CONFLICT')",
+            name="ck_requirement_evaluations_status",
+        ),
+    )
+
+    project_id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    supplier_id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    requirement_id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
+    resolved_source_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    resolved_fact_reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    evidence_ids: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
+
+    project_supplier: Mapped[ProjectSupplier] = relationship(back_populates="evaluations")
 
 
 def _validate_brief_before_persist(_: object, __: object, brief: Brief) -> None:

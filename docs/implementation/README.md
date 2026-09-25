@@ -4,7 +4,11 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M2-U2 — Candidate Retrieval** is `COMMITTED`.
+**M2-U4 — ProjectSupplier, Supplier Review, and Staleness** is `COMMITTED`.
+
+M2-U3 — Supplier Requirement Evaluators is `COMMITTED`.
+
+M2-U2 — Candidate Retrieval is `COMMITTED`.
 
 M2-U1 — Synthetic Supplier Domain + Initial Fixtures is `COMMITTED`.
 

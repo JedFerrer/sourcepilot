@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
 import { BriefEditor } from "./brief-editor";
+import { SupplierReview } from "./supplier-review";
 
 type Project = {
   id: string;
@@ -23,12 +24,14 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [renameError, setRenameError] = useState<string | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [supplierRefreshKey, setSupplierRefreshKey] = useState(0);
 
   async function refreshProject() {
     try {
       const latest = await apiRequest<Project>(`/api/projects/${projectId}`);
       setProject(latest);
       setLoadError(null);
+      setSupplierRefreshKey((value) => value + 1);
     } catch {
       setLoadError("The project stage could not be refreshed. Try again.");
     }
@@ -127,10 +130,11 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
         <p>{project.original_request}</p>
       </section>
       <BriefEditor projectId={projectId} onProjectChange={refreshProject} />
+      <SupplierReview projectId={projectId} refreshKey={supplierRefreshKey} />
       <nav aria-label="Sourcing workflow stages">
         <ul className="stage-list">
           <li aria-current={project.stage === "BRIEF" ? "step" : undefined}><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
-          <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "SUPPLIERS" ? undefined : "true"}><strong>Suppliers</strong><span>{project.stage === "SUPPLIERS" ? "Current stage. Supplier discovery is planned for M2." : "Available after Brief approval. Supplier discovery is planned for M2."}</span></li>
+          <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "SUPPLIERS" ? undefined : "true"}><strong>Suppliers</strong><span>{project.stage === "SUPPLIERS" ? "Review discovered suppliers above." : "Available after Brief approval."}</span></li>
           {laterStages.map((stage) => (
             <li key={stage} data-unavailable="true"><strong>{stage}</strong><span>Available in a later step.</span></li>
           ))}

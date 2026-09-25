@@ -17,6 +17,7 @@ const readyBrief = {
 };
 
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
+vi.mock("./supplier-review", () => ({ SupplierReview: () => null }));
 
 describe("ProjectWorkspace", () => {
   afterEach(() => {
@@ -72,7 +73,7 @@ describe("ProjectWorkspace", () => {
     const suppliers = screen.getByText("Suppliers").closest("li");
     expect(suppliers).toHaveAttribute("aria-current", "step");
     expect(suppliers).not.toHaveAttribute("data-unavailable");
-    expect(suppliers).toHaveTextContent("Supplier discovery is planned for M2.");
+    expect(suppliers).toHaveTextContent("Review discovered suppliers above.");
     expect(suppliers).not.toHaveTextContent("Available in a later step.");
     fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Save Brief" }));
