@@ -46,6 +46,24 @@ uv run --env-file ../../.env alembic revision --autogenerate -m "describe the sc
 
 The Compose service creates the local `sourcepilot_test` database for a fresh PostgreSQL volume. If the volume existed before M0-U2, create it once with `docker compose exec postgres createdb -U sourcepilot sourcepilot_test`. Persistence tests require `TEST_DATABASE_URL` and reset only that database through Alembic. Their safety checks reject a URL that targets the same PostgreSQL database as `DATABASE_URL`.
 
+## Synthetic supplier catalog
+
+The eight initial supplier records, their capabilities, prices, and evidence are
+fictional. The seed command is explicit and safe to repeat; it updates only
+fixture-owned records and does not run during API startup. After migration,
+run this from `apps/api`:
+
+```text
+uv run --env-file ../../.env python -m sourcepilot.suppliers.seed
+```
+
+Inspect the seeded names and evidence with PostgreSQL:
+
+```text
+docker compose exec postgres psql -U sourcepilot -d sourcepilot -c "SELECT name, country, general_moq FROM suppliers ORDER BY name;"
+docker compose exec postgres psql -U sourcepilot -d sourcepilot -c "SELECT s.name, e.claim_key, e.source_label, e.evidence_state, e.evidence_text FROM supplier_evidence e JOIN suppliers s ON s.id = e.supplier_id ORDER BY s.name, e.claim_key, e.source_label;"
+```
+
 ## AI foundation smoke check
 
 AI configuration is lazy: `OPENAI_API_KEY` and `SOURCEPILOT_AI_MODEL` are required only when an AI operation runs, never during API startup or automated tests. CI and pytest use model-client fakes and must not call OpenAI.

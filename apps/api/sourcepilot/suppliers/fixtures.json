@@ -1,0 +1,89 @@
+{
+  "synthetic_notice": "Every supplier, capability, price, and evidence record is fictional demo data. No real manufacturer is described.",
+  "suppliers": [
+    {
+      "key": "harbor-pouch-works", "name": "Harbor Pouch Works", "country": "Vietnam",
+      "description": "Fictional maker of custom cosmetic travel bags and small textile accessories.",
+      "general_moq": 1000, "general_lead_time_days": 32, "indicative_price_amount": "4.60", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "true"], ["BRANDING_METHOD", "screen print"], ["CERTIFICATION", "grs"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists custom cosmetic travel bags.", "SUPPORTS", "category"],
+        ["material:recycled polyester", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists recycled polyester bag production.", "SUPPORTS", "material"],
+        ["capability:custom branding", "CAPABILITY_RECORD", "Synthetic branding sheet", "Branding sheet offers custom screen printed logos.", "SUPPORTS", "branding"],
+        ["moq:general", "CATALOG", "Synthetic catalog terms", "General minimum order is 1,000 units.", "SUPPORTS", "moq"],
+        ["certification:grs:current", "CERTIFICATION_RECORD", "Synthetic current GRS record", "Record states current GRS certification for this fictional supplier.", "SUPPORTS", "grs-current"]
+      ]
+    },
+    {
+      "key": "willow-stitch-studio", "name": "Willow Stitch Studio", "country": "Indonesia",
+      "description": "Fictional textile studio with cosmetic pouch and branding capabilities.",
+      "general_moq": 1800, "general_lead_time_days": 40, "indicative_price_amount": "4.20", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "true"], ["BRANDING_METHOD", "embroidery"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cosmetic travel pouches.", "SUPPORTS", "category"],
+        ["material:recycled polyester", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists recycled polyester sewing.", "SUPPORTS", "material"],
+        ["capability:custom branding", "CAPABILITY_RECORD", "Synthetic branding sheet", "Branding sheet offers embroidered logos.", "SUPPORTS", "branding"]
+      ]
+    },
+    {
+      "key": "cedar-pack-co", "name": "Cedar Pack Co", "country": "Thailand",
+      "description": "Fictional bag maker with a high general minimum order.",
+      "general_moq": 5000, "general_lead_time_days": 28, "indicative_price_amount": "3.70", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cosmetic travel bags.", "SUPPORTS", "category"],
+        ["moq:general", "CATALOG", "Synthetic order terms", "General minimum order is 5,000 units.", "SUPPORTS", "moq"]
+      ]
+    },
+    {
+      "key": "moss-thread-bags", "name": "Moss Thread Bags", "country": "Philippines",
+      "description": "Fictional small-run pouch producer with unverified certification status.",
+      "general_moq": 800, "general_lead_time_days": 37, "indicative_price_amount": null, "indicative_price_currency": null,
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cosmetic travel pouches.", "SUPPORTS", "category"],
+        ["material:recycled polyester", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists recycled polyester.", "SUPPORTS", "material"]
+      ]
+    },
+    {
+      "key": "sunrise-textile-lab", "name": "Sunrise Textile Lab", "country": "India",
+      "description": "Fictional bag producer with conflicting current certification records.",
+      "general_moq": 1500, "general_lead_time_days": 45, "indicative_price_amount": "4.10", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "true"], ["CERTIFICATION", "grs"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cosmetic travel bags.", "SUPPORTS", "category"],
+        ["certification:grs:current", "CERTIFICATION_RECORD", "Synthetic certification register A", "Current register A marks GRS certification active.", "SUPPORTS", "grs-register-a"],
+        ["certification:grs:current", "CERTIFICATION_RECORD", "Synthetic certification register B", "Current register B marks the same GRS certification inactive.", "CONTRADICTS", "grs-register-b"]
+      ]
+    },
+    {
+      "key": "linen-lane-studio", "name": "Linen Lane Studio", "country": "Vietnam",
+      "description": "Fictional cosmetic bag studio focused on cotton rather than recycled polyester.",
+      "general_moq": 1200, "general_lead_time_days": 34, "indicative_price_amount": "3.90", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "cotton"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cosmetic travel bags.", "SUPPORTS", "category"],
+        ["material:cotton", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists cotton bag production.", "SUPPORTS", "material"]
+      ]
+    },
+    {
+      "key": "ridge-accessory-works", "name": "Ridge Accessory Works", "country": "Malaysia",
+      "description": "Fictional accessory maker specializing in structured organizers.",
+      "general_moq": 2000, "general_lead_time_days": 50, "indicative_price_amount": "5.30", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["MANUFACTURING_CAPABILITY", "structured organizer"], ["CUSTOM_BRANDING", "false"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists structured cosmetic organizers.", "SUPPORTS", "category"],
+        ["capability:custom branding", "CAPABILITY_RECORD", "Synthetic capability sheet", "Capability sheet states custom logo work is unavailable.", "CONTRADICTS", "branding"]
+      ]
+    },
+    {
+      "key": "coastal-home-textiles", "name": "Coastal Home Textiles", "country": "Bangladesh",
+      "description": "Fictional home textile maker outside the cosmetic travel bag category.",
+      "general_moq": 2500, "general_lead_time_days": 38, "indicative_price_amount": "3.20", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "home textile pouch"], ["MATERIAL", "cotton"]],
+      "evidence": [
+        ["category:home textile pouch", "CATALOG", "Synthetic product catalog", "Catalog lists home textile storage pouches.", "SUPPORTS", "category"]
+      ]
+    }
+  ]
+}

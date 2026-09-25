@@ -1,0 +1,1 @@
+"""Curated synthetic supplier catalog."""

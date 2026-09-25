@@ -148,6 +148,81 @@ class Requirement(Base):
     project: Mapped[Project] = relationship(back_populates="requirements")
 
 
+class Supplier(Base):
+    __tablename__ = "suppliers"
+    __table_args__ = (
+        CheckConstraint("general_moq > 0", name="ck_suppliers_general_moq_positive"),
+        CheckConstraint("general_lead_time_days > 0", name="ck_suppliers_lead_time_positive"),
+        CheckConstraint("indicative_price_amount > 0", name="ck_suppliers_price_positive"),
+        CheckConstraint(
+            "(indicative_price_amount IS NULL) = (indicative_price_currency IS NULL)",
+            name="ck_suppliers_price_currency_pair",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    country: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str] = mapped_column(Text, nullable=False)
+    general_moq: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    general_lead_time_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    indicative_price_amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 4), nullable=True)
+    indicative_price_currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
+
+    capabilities: Mapped[list[SupplierCapability]] = relationship(
+        back_populates="supplier", cascade="all, delete-orphan", passive_deletes=True
+    )
+    evidence: Mapped[list[SupplierEvidence]] = relationship(
+        back_populates="supplier", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class SupplierCapability(Base):
+    __tablename__ = "supplier_capabilities"
+    __table_args__ = (
+        CheckConstraint(
+            "capability_kind IN ('PRODUCT_CATEGORY', 'MATERIAL', 'CERTIFICATION', "
+            "'CUSTOM_BRANDING', 'BRANDING_METHOD', 'PRODUCT_FEATURE', "
+            "'MANUFACTURING_CAPABILITY')",
+            name="ck_supplier_capabilities_kind",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    supplier_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("suppliers.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    capability_kind: Mapped[str] = mapped_column(String(40), nullable=False)
+    value: Mapped[str] = mapped_column(String(255), nullable=False)
+
+    supplier: Mapped[Supplier] = relationship(back_populates="capabilities")
+
+
+class SupplierEvidence(Base):
+    __tablename__ = "supplier_evidence"
+    __table_args__ = (
+        CheckConstraint(
+            "evidence_state IN ('SUPPORTS', 'CONTRADICTS', 'PARTIAL', 'UNKNOWN')",
+            name="ck_supplier_evidence_state",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    supplier_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("suppliers.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    claim_key: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    source_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    source_label: Mapped[str] = mapped_column(String(255), nullable=False)
+    source_reference: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    evidence_text: Mapped[str] = mapped_column(Text, nullable=False)
+    evidence_state: Mapped[str] = mapped_column(String(20), nullable=False)
+
+    supplier: Mapped[Supplier] = relationship(back_populates="evidence")
+
+
 def _validate_brief_before_persist(_: object, __: object, brief: Brief) -> None:
     if brief.quantity is not None:
         brief.quantity = validate_brief_quantity(brief.quantity)

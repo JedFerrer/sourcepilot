@@ -4,7 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M1-U6 — Brief Approval and Revision Foundation** is `COMMITTED`.
+**M2-U1 — Synthetic Supplier Domain + Initial Fixtures** is `COMMITTED`.
+
+M1-U6 — Brief Approval and Revision Foundation is `COMMITTED`.
 
 M1-U5 is `COMMITTED`.
 
