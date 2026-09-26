@@ -195,4 +195,119 @@ describe("SupplierReview", () => {
     expect(screen.queryByRole("button", { name: "Explain this supplier" })).not.toBeInTheDocument();
     expect(screen.queryByText("Supplier explanation")).not.toBeInTheDocument();
   });
+
+  it("reviews current findings and requires explicit approval after dismiss and restore", async () => {
+    let shortlisted = false;
+    let dismissed = false;
+    let approved = false;
+    const onStageChange = vi.fn().mockResolvedValue(undefined);
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/shortlist/approve") && init?.method === "POST") approved = true;
+      if (path.endsWith("/supplier-1") && init?.method === "PATCH") {
+        const change = JSON.parse(String(init.body));
+        if ("shortlisted" in change) shortlisted = change.shortlisted;
+        if ("dismissed" in change) {
+          dismissed = change.dismissed;
+          if (dismissed) shortlisted = false;
+        }
+        if (!shortlisted) approved = false;
+      }
+      return Promise.resolve(jsonResponse({
+        brief_revision: 1, brief_approved: true, shortlist_approved: approved,
+        suppliers: [{ ...supplier, shortlisted, dismissed }],
+      }));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<SupplierReview projectId="project-1" refreshKey={0} onStageChange={onStageChange} />);
+    await screen.findByText("Harbor Pouch Works");
+    fireEvent.click(screen.getByRole("button", { name: "Add to shortlist" }));
+    expect(await screen.findByText(/1 selected/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
+    expect(screen.getByLabelText("Harbor Pouch Works approval details")).toHaveTextContent("REQUIRED: MATERIAL recycled polyester — MEETS");
+    fireEvent.click(screen.getByRole("button", { name: "Continue Reviewing" }));
+    expect(screen.queryByText("Review before approval")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Approve Shortlist" }));
+    expect(await screen.findByText(/Shortlist approved/)).toBeInTheDocument();
+    expect(onStageChange).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+    expect(await screen.findByRole("button", { name: "Restore" })).toBeInTheDocument();
+    expect(screen.queryByText(/Shortlist approved/)).not.toBeInTheDocument();
+    expect(onStageChange).toHaveBeenCalledTimes(2);
+    fireEvent.click(screen.getByRole("button", { name: "Restore" }));
+    expect(await screen.findByRole("button", { name: "Add to shortlist" })).toBeInTheDocument();
+    expect(screen.queryByText(/Shortlist approved/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Add to shortlist" }));
+    expect(await screen.findByRole("button", { name: "Remove from shortlist" })).toBeInTheDocument();
+    expect(screen.queryByText(/Shortlist approved/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Approve Shortlist" }));
+    expect(await screen.findByText(/Shortlist approved/)).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/shortlist/approve"))).toHaveLength(2);
+  });
+
+  it("labels only an in-flight approval as Approving while re-discovery keeps approval disabled", async () => {
+    let resolveDiscovery!: (value: Response) => void;
+    let resolveApproval!: (value: Response) => void;
+    const discovery = new Promise<Response>((resolve) => { resolveDiscovery = resolve; });
+    const approval = new Promise<Response>((resolve) => { resolveApproval = resolve; });
+    const list = { brief_revision: 1, brief_approved: true, shortlist_approved: false,
+      suppliers: [{ ...supplier, shortlisted: true }] };
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/discover") && init?.method === "POST") return discovery;
+      if (path.endsWith("/shortlist/approve") && init?.method === "POST") return approval;
+      return Promise.resolve(jsonResponse(list));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Review selected suppliers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Re-discover and re-evaluate" }));
+    expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeDisabled();
+    expect(screen.queryByRole("button", { name: "Approving…" })).not.toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/shortlist/approve"))).toHaveLength(0);
+
+    await act(async () => { resolveDiscovery(jsonResponse({})); });
+    expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Approve Shortlist" }));
+    expect(screen.getByRole("button", { name: "Approving…" })).toBeDisabled();
+    await act(async () => { resolveApproval(jsonResponse({ ...list, shortlist_approved: true })); });
+    expect(screen.getByText(/Shortlist approved/)).toBeInTheDocument();
+  });
+
+  it("blocks approval when four suppliers are selected", async () => {
+    const selectedSuppliers = Array.from({ length: 4 }, (_, index) => ({
+      ...supplier, id: `supplier-${index}`, name: `Supplier ${index}`, shortlisted: true,
+    }));
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse({
+      brief_revision: 1, brief_approved: true, shortlist_approved: false, suppliers: selectedSuppliers,
+    }))));
+    render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    expect(await screen.findByText(/4 selected/)).toBeInTheDocument();
+    expect(screen.getByText(/Remove suppliers until no more than three remain/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
+    expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeDisabled();
+  });
+
+  it("refreshes stale findings and explains a rejected approval", async () => {
+    let stale = false;
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/shortlist/approve") && init?.method === "POST") {
+        stale = true;
+        return Promise.resolve(jsonResponse({ error: {
+          code: "SHORTLIST_NOT_READY", message: "Re-discover and re-evaluate suppliers before approval.",
+        } }, 409));
+      }
+      return Promise.resolve(jsonResponse({
+        brief_revision: stale ? 2 : 1, brief_approved: true, shortlist_approved: false,
+        suppliers: [{ ...supplier, shortlisted: true, stale, evaluations: stale ? [] : supplier.evaluations }],
+      }));
+    }));
+    render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Review selected suppliers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Approve Shortlist" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Re-discover and re-evaluate suppliers before approval.");
+    expect(screen.getByText(/Your sourcing requirements changed/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeDisabled();
+    expect(screen.queryByText(/Shortlist approved/)).not.toBeInTheDocument();
+  });
 });

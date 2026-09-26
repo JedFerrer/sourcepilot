@@ -4,7 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M2-U6 — Supplier Explanation via Sourcing Analyst** is `COMMITTED`.
+**M2-U7 — Complete Supplier Fixtures + Shortlist Approval** is `COMMITTED`.
+
+M2-U6 — Supplier Explanation via Sourcing Analyst is `COMMITTED`.
 
 M2-U5 — Sourcing Analyst Read-Only Tool Foundation is `COMMITTED`.
 

@@ -15,7 +15,7 @@ type Project = {
 
 type WorkspaceState = "loading" | "ready" | "unavailable" | "not-found";
 
-const laterStages = ["Quotes", "Comparison", "Decision"];
+const laterStages = ["Comparison", "Decision"];
 
 export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<Project | null>(null);
@@ -112,7 +112,7 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   return (
     <section className="project-workspace" aria-labelledby="project-title">
       <Link href="/">Back to projects</Link>
-      <p className="workspace-stage">Current stage: {project.stage === "SUPPLIERS" ? "Suppliers" : "Brief"}</p>
+      <p className="workspace-stage">Current stage: {project.stage === "QUOTES" ? "Quotes" : project.stage === "SUPPLIERS" ? "Suppliers" : "Brief"}</p>
       {loadError ? <div className="form-error" role="alert"><p>{loadError}</p><button type="button" onClick={() => void refreshProject()}>Refresh stage</button></div> : null}
       <h1 id="project-title">{project.name}</h1>
       <form className="rename-form" onSubmit={handleRename}>
@@ -130,11 +130,12 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
         <p>{project.original_request}</p>
       </section>
       <BriefEditor projectId={projectId} onProjectChange={refreshProject} />
-      <SupplierReview projectId={projectId} refreshKey={supplierRefreshKey} />
+      <SupplierReview projectId={projectId} refreshKey={supplierRefreshKey} onStageChange={refreshProject} />
       <nav aria-label="Sourcing workflow stages">
         <ul className="stage-list">
           <li aria-current={project.stage === "BRIEF" ? "step" : undefined}><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
-          <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "SUPPLIERS" ? undefined : "true"}><strong>Suppliers</strong><span>{project.stage === "SUPPLIERS" ? "Review discovered suppliers above." : "Available after Brief approval."}</span></li>
+          <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "BRIEF" ? "true" : undefined}><strong>Suppliers</strong><span>{project.stage === "BRIEF" ? "Available after Brief approval." : "Review discovered suppliers above."}</span></li>
+          <li aria-current={project.stage === "QUOTES" ? "step" : undefined} data-unavailable={project.stage === "QUOTES" ? undefined : "true"}><strong>Quotes</strong><span>{project.stage === "QUOTES" ? "Shortlist approved. Quote entry is coming in the next step." : "Available after shortlist approval."}</span></li>
           {laterStages.map((stage) => (
             <li key={stage} data-unavailable="true"><strong>{stage}</strong><span>Available in a later step.</span></li>
           ))}

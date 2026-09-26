@@ -272,6 +272,8 @@ def edit_brief(
         brief.status = BriefStatus.IN_PROGRESS.value
         brief.approved_at = None
         project.stage = "BRIEF"
+    elif project.stage == "QUOTES":
+        project.stage = "SUPPLIERS"
     increment_brief_revision(database_session, project)
     return brief_snapshot(project, brief, current)
 
@@ -304,7 +306,7 @@ def approve_brief(
     )
     if readiness.status != BriefStatus.READY_FOR_REVIEW:
         raise BriefConflictError("Complete the missing Brief information before approving it.")
-    if brief.status == BriefStatus.APPROVED and project.stage == "SUPPLIERS":
+    if brief.status == BriefStatus.APPROVED and project.stage in {"SUPPLIERS", "QUOTES"}:
         return brief_snapshot(project, brief, requirements)
     brief.status = BriefStatus.APPROVED.value
     brief.approved_at = datetime.now(UTC)

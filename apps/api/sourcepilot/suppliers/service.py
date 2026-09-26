@@ -49,6 +49,10 @@ class SupplierNotInProjectError(ValueError):
     pass
 
 
+class ShortlistApprovalError(ValueError):
+    pass
+
+
 def _candidate_response(supplier: Supplier) -> SupplierCandidateResponse:
     return SupplierCandidateResponse(
         id=supplier.id,
@@ -125,6 +129,12 @@ def discover_suppliers(
             select(ProjectSupplier).where(ProjectSupplier.project_id == project.id)
         )
     }
+    removed_selected = any(
+        item.shortlisted and supplier_id not in ordered_ids
+        for supplier_id, item in existing.items()
+    )
+    if removed_selected and project.stage == "QUOTES":
+        project.stage = "SUPPLIERS"
     for supplier_id, item in existing.items():
         if supplier_id not in ordered_ids:
             database_session.delete(item)
@@ -251,6 +261,7 @@ def list_project_suppliers(database_session: Session, project: Project) -> Suppl
     return SupplierListResponse(
         brief_revision=project.brief_revision,
         brief_approved=brief is not None and brief.status == BriefStatus.APPROVED,
+        shortlist_approved=project.stage == "QUOTES",
         suppliers=reviewed,
     )
 
@@ -259,7 +270,7 @@ def update_supplier_review(
     database_session: Session, project: Project, supplier_id: UUID,
     payload: UpdateSupplierReviewRequest,
 ) -> SupplierListResponse:
-    database_session.scalars(
+    locked_project = database_session.scalars(
         select(Project)
         .where(Project.id == project.id)
         .with_for_update()
@@ -268,6 +279,7 @@ def update_supplier_review(
     item = database_session.get(ProjectSupplier, (project.id, supplier_id))
     if item is None:
         raise SupplierNotInProjectError("Supplier is not in this project candidate set.")
+    was_shortlisted = item.shortlisted
     if "shortlisted" in payload.model_fields_set and payload.shortlisted is not None:
         item.shortlisted = payload.shortlisted
         if item.shortlisted:
@@ -278,5 +290,35 @@ def update_supplier_review(
             item.shortlisted = False
     if "notes" in payload.model_fields_set:
         item.notes = payload.notes
+    if was_shortlisted != item.shortlisted and locked_project.stage == "QUOTES":
+        locked_project.stage = "SUPPLIERS"
     database_session.flush()
     return list_project_suppliers(database_session, project)
+
+
+def approve_shortlist(database_session: Session, project: Project) -> SupplierListResponse:
+    """Advance only a reviewed, current project shortlist through explicit approval."""
+    locked_project = database_session.scalars(
+        select(Project)
+        .where(Project.id == project.id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).one()
+    brief = database_session.get(Brief, project.id)
+    if brief is None or brief.status != BriefStatus.APPROVED:
+        raise ShortlistApprovalError("Approve the Brief before approving a shortlist.")
+    selected = list(database_session.scalars(
+        select(ProjectSupplier).where(
+            ProjectSupplier.project_id == project.id,
+            ProjectSupplier.shortlisted.is_(True),
+        )
+    ))
+    if not 1 <= len(selected) <= 3:
+        raise ShortlistApprovalError("Select one to three suppliers before approval.")
+    if any(item.dismissed for item in selected):
+        raise ShortlistApprovalError("Restore dismissed suppliers before approval.")
+    if any(item.evaluated_against_brief_revision != locked_project.brief_revision for item in selected):
+        raise ShortlistApprovalError("Re-discover and re-evaluate suppliers before approval.")
+    locked_project.stage = "QUOTES"
+    database_session.flush()
+    return list_project_suppliers(database_session, locked_project)

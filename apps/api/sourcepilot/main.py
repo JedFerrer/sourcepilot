@@ -60,7 +60,9 @@ from sourcepilot.suppliers.schemas import (
 )
 from sourcepilot.suppliers.service import (
     DiscoveryNotReadyError,
+    ShortlistApprovalError,
     SupplierNotInProjectError,
+    approve_shortlist,
     discover_suppliers,
     list_project_suppliers,
     update_supplier_review,
@@ -332,6 +334,22 @@ def list_suppliers_endpoint(
     _, project = owned_project_or_404(database_session, request, project_id)
     result = list_project_suppliers(database_session, project)
     commit_or_rollback(database_session)
+    return result
+
+
+@app.post("/projects/{project_id}/shortlist/approve", response_model=SupplierListResponse)
+def approve_shortlist_endpoint(
+    project_id: UUID,
+    request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> SupplierListResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = approve_shortlist(database_session, project)
+        commit_or_rollback(database_session)
+    except ShortlistApprovalError as error:
+        database_session.rollback()
+        return error_response(409, code="SHORTLIST_NOT_READY", message=str(error))
     return result
 
 

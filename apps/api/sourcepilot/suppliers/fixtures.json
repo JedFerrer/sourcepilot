@@ -84,6 +84,75 @@
       "evidence": [
         ["category:home textile pouch", "CATALOG", "Synthetic product catalog", "Catalog lists home textile storage pouches.", "SUPPORTS", "category"]
       ]
+    },
+    {
+      "key": "fern-travel-sewing", "name": "Fern Travel Sewing", "country": "Cambodia",
+      "description": "Fictional cosmetic bag workshop using recycled polyester but without custom logo production.",
+      "general_moq": 600, "general_lead_time_days": 56, "indicative_price_amount": "3.45", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "false"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cosmetic travel bags.", "SUPPORTS", "category"],
+        ["material:recycled polyester", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists recycled polyester sewing.", "SUPPORTS", "material"],
+        ["capability:custom branding", "CAPABILITY_RECORD", "Synthetic production sheet", "Production sheet states custom logo application is unavailable.", "CONTRADICTS", "branding"]
+      ]
+    },
+    {
+      "key": "amber-cotton-pouches", "name": "Amber Cotton Pouches", "country": "Sri Lanka",
+      "description": "Fictional cotton cosmetic pouch maker with custom logos and no recycled polyester line.",
+      "general_moq": 900, "general_lead_time_days": 29, "indicative_price_amount": "3.80", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "cosmetic travel bag"], ["MATERIAL", "cotton"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:cosmetic travel bag", "CATALOG", "Synthetic product catalog", "Catalog lists cotton cosmetic pouches.", "SUPPORTS", "category"],
+        ["material:cotton", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists cotton pouch production.", "SUPPORTS", "material"],
+        ["material:recycled polyester", "CAPABILITY_RECORD", "Synthetic material exclusion", "Current material sheet explicitly excludes recycled polyester pouch production.", "CONTRADICTS", "recycled-polyester-exclusion"]
+      ]
+    },
+    {
+      "key": "maple-tote-studio", "name": "Maple Tote Studio", "country": "India",
+      "description": "Fictional maker of branded recycled-polyester tote bags.",
+      "general_moq": 700, "general_lead_time_days": 36, "indicative_price_amount": "4.05", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "tote bag"], ["MATERIAL", "recycled polyester"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:tote bag", "CATALOG", "Synthetic product catalog", "Catalog lists recycled-polyester tote bags.", "SUPPORTS", "category"],
+        ["capability:custom branding", "CAPABILITY_RECORD", "Synthetic branding sheet", "Branding sheet lists printed logos for tote bags.", "SUPPORTS", "branding"]
+      ]
+    },
+    {
+      "key": "opal-case-makers", "name": "Opal Case Makers", "country": "Thailand",
+      "description": "Fictional producer of small jewelry cases with limited material documentation.",
+      "general_moq": 1400, "general_lead_time_days": 47, "indicative_price_amount": null, "indicative_price_currency": null,
+      "capabilities": [["PRODUCT_CATEGORY", "jewelry case"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:jewelry case", "CATALOG", "Synthetic product catalog", "Catalog lists small jewelry cases.", "SUPPORTS", "category"]
+      ]
+    },
+    {
+      "key": "delta-tech-organizers", "name": "Delta Tech Organizers", "country": "Vietnam",
+      "description": "Fictional manufacturer of padded electronics organizers.",
+      "general_moq": 3000, "general_lead_time_days": 42, "indicative_price_amount": "6.40", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "electronics organizer"], ["MATERIAL", "recycled polyester"], ["MANUFACTURING_CAPABILITY", "padding"]],
+      "evidence": [
+        ["category:electronics organizer", "CATALOG", "Synthetic product catalog", "Catalog lists padded electronics organizers.", "SUPPORTS", "category"]
+      ]
+    },
+    {
+      "key": "bloom-garment-pouches", "name": "Bloom Garment Pouches", "country": "Philippines",
+      "description": "Fictional garment pouch workshop with short runs and longer lead times.",
+      "general_moq": 400, "general_lead_time_days": 61, "indicative_price_amount": "2.85", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "garment pouch"], ["MATERIAL", "cotton"]],
+      "evidence": [
+        ["category:garment pouch", "CATALOG", "Synthetic product catalog", "Catalog lists cotton garment pouches.", "SUPPORTS", "category"]
+      ]
+    },
+    {
+      "key": "quartz-packaging-sleeves", "name": "Quartz Packaging Sleeves", "country": "Malaysia",
+      "description": "Fictional producer of recycled-card packaging sleeves for accessories.",
+      "general_moq": 4500, "general_lead_time_days": 21, "indicative_price_amount": "0.72", "indicative_price_currency": "USD",
+      "capabilities": [["PRODUCT_CATEGORY", "packaging sleeve"], ["MATERIAL", "recycled card"], ["CUSTOM_BRANDING", "true"]],
+      "evidence": [
+        ["category:packaging sleeve", "CATALOG", "Synthetic product catalog", "Catalog lists printed recycled-card sleeves.", "SUPPORTS", "category"],
+        ["material:recycled card", "CAPABILITY_RECORD", "Synthetic material sheet", "Material sheet lists recycled card stock.", "SUPPORTS", "material"]
+      ]
     }
   ]
 }

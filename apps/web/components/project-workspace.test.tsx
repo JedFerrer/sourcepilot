@@ -104,6 +104,19 @@ describe("ProjectWorkspace", () => {
     });
   });
 
+  it("shows Quotes as the current stage after shortlist approval", async () => {
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(
+      path.endsWith("/brief") ? jsonResponse(emptyBrief) : jsonResponse({
+        id: "project-1", name: "Travel Bag", original_request: "Source bags.", stage: "QUOTES",
+      }),
+    )));
+    render(<ProjectWorkspace projectId="project-1" />);
+    expect(await screen.findByText("Current stage: Quotes")).toBeInTheDocument();
+    expect(screen.getByText("Quotes").closest("li")).toHaveAttribute("aria-current", "step");
+    expect(screen.getByText("Quotes").closest("li")).not.toHaveAttribute("data-unavailable");
+    expect(screen.getByText("Quotes").closest("li")).toHaveTextContent("Quote entry is coming in the next step.");
+  });
+
   it("does not expose a project outside the current session", async () => {
     vi.stubGlobal(
       "fetch",

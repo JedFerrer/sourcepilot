@@ -1,19 +1,31 @@
 """Persisted supplier review and brief-revision integration tests."""
 
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event, current_thread
 from uuid import UUID, uuid4
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, select
+from sqlalchemy import Engine, event, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.main import app
 from sourcepilot.persistence.database import get_database_session
-from sourcepilot.persistence.models import Project, ProjectSupplier, RequirementEvaluationRecord
+from sourcepilot.persistence.models import (
+    Project,
+    ProjectSupplier,
+    RequirementEvaluationRecord,
+    SupplierCapability,
+)
 from sourcepilot.suppliers.schemas import UpdateSupplierReviewRequest
 from sourcepilot.suppliers.seed import seed_suppliers
-from sourcepilot.suppliers.service import list_project_suppliers, update_supplier_review
+from sourcepilot.suppliers.service import (
+    ShortlistApprovalError,
+    approve_shortlist,
+    list_project_suppliers,
+    update_supplier_review,
+)
 from tests.database_test_support import (
     create_test_engine,
     persistence_test_database_url_from_environment,
@@ -239,3 +251,212 @@ def test_review_update_uses_locked_revision_after_a_brief_edit(
         reviewed = next(item for item in listed.suppliers if item.id == UUID(supplier_id))
         assert reviewed.notes == "Still relevant"
         session.commit()
+
+
+def test_shortlist_approval_count_and_explicit_stage_transition(client: TestClient) -> None:
+    project_id = create_project(client)
+    endpoint = f"/projects/{project_id}/shortlist/approve"
+    assert client.post(endpoint).status_code == 409
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    approve(client, project_id, edited["brief_revision"])
+    assert client.post(f"/projects/{project_id}/suppliers/discover").status_code == 200
+    suppliers = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"]
+    assert client.post(endpoint).status_code == 409
+    for item in suppliers[:4]:
+        selected = client.patch(
+            f"/projects/{project_id}/suppliers/{item['id']}", json={"shortlisted": True}
+        )
+        assert selected.status_code == 200
+    too_many = client.post(endpoint)
+    assert too_many.status_code == 409
+    assert too_many.json()["error"]["code"] == "SHORTLIST_NOT_READY"
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+
+    client.patch(f"/projects/{project_id}/suppliers/{suppliers[3]['id']}", json={"shortlisted": False})
+    approved = client.post(endpoint)
+    assert approved.status_code == 200
+    assert approved.json()["shortlist_approved"]
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "QUOTES"
+    assert client.post(endpoint).status_code == 200
+
+    # A review note does not change approval; removing one selected supplier does.
+    client.patch(f"/projects/{project_id}/suppliers/{suppliers[0]['id']}", json={"notes": "Reviewed"})
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "QUOTES"
+    removed = client.patch(
+        f"/projects/{project_id}/suppliers/{suppliers[0]['id']}", json={"shortlisted": False}
+    )
+    assert not removed.json()["shortlist_approved"]
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+    assert client.post(endpoint).status_code == 200  # Two suppliers are valid.
+    client.patch(f"/projects/{project_id}/suppliers/{suppliers[1]['id']}", json={"shortlisted": False})
+    assert client.post(endpoint).status_code == 200  # One supplier is valid.
+
+
+def test_unchanged_brief_approval_retry_preserves_approved_shortlist(client: TestClient) -> None:
+    project_id = create_project(client)
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    revision = edited["brief_revision"]
+    approve(client, project_id, revision)
+    assert client.post(f"/projects/{project_id}/suppliers/discover").status_code == 200
+    supplier_id = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"][0]["id"]
+    client.patch(f"/projects/{project_id}/suppliers/{supplier_id}", json={"shortlisted": True})
+    assert client.post(f"/projects/{project_id}/shortlist/approve").status_code == 200
+    before = client.get(f"/projects/{project_id}/brief").json()
+
+    retry = client.post(
+        f"/projects/{project_id}/brief/approve", json={"expected_brief_revision": revision}
+    )
+    assert retry.status_code == 200
+    assert retry.json() == before
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "QUOTES"
+    listed = client.get(f"/projects/{project_id}/suppliers").json()
+    assert listed["shortlist_approved"]
+    assert [item["id"] for item in listed["suppliers"] if item["shortlisted"]] == [supplier_id]
+
+
+def test_dismiss_restore_requires_explicit_reapproval(client: TestClient) -> None:
+    project_id = create_project(client)
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    approve(client, project_id, edited["brief_revision"])
+    client.post(f"/projects/{project_id}/suppliers/discover")
+    supplier_id = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"][0]["id"]
+    supplier_url = f"/projects/{project_id}/suppliers/{supplier_id}"
+    client.patch(supplier_url, json={"shortlisted": True})
+    endpoint = f"/projects/{project_id}/shortlist/approve"
+    assert client.post(endpoint).json()["shortlist_approved"]
+
+    dismissed = client.patch(supplier_url, json={"dismissed": True}).json()
+    assert dismissed["suppliers"][0]["dismissed"]
+    assert not dismissed["suppliers"][0]["shortlisted"]
+    assert not dismissed["shortlist_approved"]
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+    restored = client.patch(supplier_url, json={"dismissed": False}).json()
+    assert not restored["shortlist_approved"]
+    assert not restored["suppliers"][0]["shortlisted"]
+    assert client.post(endpoint).status_code == 409
+    client.patch(supplier_url, json={"shortlisted": True})
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+    assert client.post(endpoint).json()["shortlist_approved"]
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "QUOTES"
+
+
+def test_brief_edit_requires_refresh_before_shortlist_reapproval(client: TestClient) -> None:
+    project_id = create_project(client)
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    approve(client, project_id, edited["brief_revision"])
+    client.post(f"/projects/{project_id}/suppliers/discover")
+    supplier_id = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"][0]["id"]
+    client.patch(f"/projects/{project_id}/suppliers/{supplier_id}", json={"shortlisted": True})
+    endpoint = f"/projects/{project_id}/shortlist/approve"
+    assert client.post(endpoint).status_code == 200
+    changed = client.patch(f"/projects/{project_id}/brief", json=brief_payload(quantity=2500)).json()
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+    assert client.post(endpoint).status_code == 409
+    if changed["status"] != "APPROVED":
+        approve(client, project_id, changed["brief_revision"])
+    client.post(f"/projects/{project_id}/suppliers/discover")
+    assert client.post(endpoint).status_code == 200
+
+
+def test_shortlist_approval_is_session_scoped(client: TestClient) -> None:
+    project_id = create_project(client)
+    with TestClient(app, raise_server_exceptions=False) as other:
+        assert other.post("/demo-session").status_code == 204
+        assert other.post(f"/projects/{project_id}/shortlist/approve").status_code == 404
+
+
+def test_rediscovery_revokes_approval_if_selected_candidate_disappears(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id = create_project(client)
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    approve(client, project_id, edited["brief_revision"])
+    client.post(f"/projects/{project_id}/suppliers/discover")
+    supplier_id = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"][0]["id"]
+    client.patch(f"/projects/{project_id}/suppliers/{supplier_id}", json={"shortlisted": True})
+    assert client.post(f"/projects/{project_id}/shortlist/approve").status_code == 200
+
+    with Session(engine) as session:
+        category = session.scalar(select(SupplierCapability).where(
+            SupplierCapability.supplier_id == UUID(supplier_id),
+            SupplierCapability.capability_kind == "PRODUCT_CATEGORY",
+        ))
+        assert category is not None
+        category.value = "different category"
+        session.commit()
+    assert client.post(f"/projects/{project_id}/suppliers/discover").status_code == 200
+    listed = client.get(f"/projects/{project_id}/suppliers").json()
+    assert not listed["shortlist_approved"]
+    assert supplier_id not in {item["id"] for item in listed["suppliers"]}
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+
+
+@pytest.mark.parametrize("first_action", ["change", "approve"])
+def test_overlapping_shortlist_change_and_approval_preserve_valid_stage(
+    client: TestClient, engine: Engine,
+    first_action: str,
+) -> None:
+    project_id = create_project(client)
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    approve(client, project_id, edited["brief_revision"])
+    client.post(f"/projects/{project_id}/suppliers/discover")
+    supplier_id = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"][0]["id"]
+    client.patch(f"/projects/{project_id}/suppliers/{supplier_id}", json={"shortlisted": True})
+    first_locked = Event()
+    second_entered_lock = Event()
+    release_first = Event()
+
+    def before_lock(conn: object, cursor: object, statement: str, parameters: object,
+                    context: object, executemany: bool) -> None:
+        if ("FROM projects" in statement and "FOR UPDATE" in statement
+                and current_thread().name.endswith("_1")):
+            second_entered_lock.set()
+
+    def after_lock(conn: object, cursor: object, statement: str, parameters: object,
+                   context: object, executemany: bool) -> None:
+        if ("FROM projects" in statement and "FOR UPDATE" in statement
+                and current_thread().name.endswith("_0") and not first_locked.is_set()):
+            first_locked.set()
+            assert release_first.wait(10), "First operation was not released"
+
+    def run_action(action: str) -> str:
+        with Session(engine) as session:
+            project = session.get(Project, UUID(project_id))
+            assert project is not None
+            if action == "change":
+                update_supplier_review(
+                    session, project, UUID(supplier_id),
+                    UpdateSupplierReviewRequest(shortlisted=False),
+                )
+            else:
+                try:
+                    approve_shortlist(session, project)
+                except ShortlistApprovalError:
+                    return "rejected"
+            session.commit()
+            return "committed"
+
+    event.listen(engine, "before_cursor_execute", before_lock)
+    event.listen(engine, "after_cursor_execute", after_lock)
+    try:
+        with ThreadPoolExecutor(max_workers=2, thread_name_prefix="shortlist-race") as pool:
+            first = pool.submit(run_action, first_action)
+            assert first_locked.wait(10), "First operation did not acquire the project lock"
+            second = pool.submit(run_action, "approve" if first_action == "change" else "change")
+            try:
+                assert second_entered_lock.wait(10), "Second operation did not overlap the lock"
+            finally:
+                release_first.set()
+            assert first.result(timeout=10) == "committed"
+            assert second.result(timeout=10) == (
+                "rejected" if first_action == "change" else "committed"
+            )
+    finally:
+        release_first.set()
+        event.remove(engine, "before_cursor_execute", before_lock)
+        event.remove(engine, "after_cursor_execute", after_lock)
+
+    listed = client.get(f"/projects/{project_id}/suppliers").json()
+    assert not listed["shortlist_approved"]
+    assert not any(item["shortlisted"] for item in listed["suppliers"])
+    assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"

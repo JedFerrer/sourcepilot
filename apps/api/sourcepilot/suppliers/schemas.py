@@ -74,6 +74,7 @@ class ReviewedSupplierResponse(SupplierCandidateResponse):
 class SupplierListResponse(BaseModel):
     brief_revision: int
     brief_approved: bool
+    shortlist_approved: bool
     suppliers: list[ReviewedSupplierResponse]
 
 

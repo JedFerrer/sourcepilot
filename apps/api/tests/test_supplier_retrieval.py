@@ -132,7 +132,7 @@ def test_repository_excludes_unrelated_category(engine: Engine, reset_database: 
     with Session(engine) as session:
         seed_suppliers(session)
         matches = suppliers_in_category(session, "cosmetic travel bag")
-        assert len(matches) == 7
+        assert len(matches) == 9
         assert "Coastal Home Textiles" not in {item.name for item in matches}
         assert [item.name for item in matches] == sorted(item.name for item in matches)
         assert len(suppliers_in_category(session, "missing category")) == 0

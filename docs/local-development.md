@@ -48,7 +48,7 @@ The Compose service creates the local `sourcepilot_test` database for a fresh Po
 
 ## Synthetic supplier catalog
 
-The eight initial supplier records, their capabilities, prices, and evidence are
+The 15 supplier records, their capabilities, prices, and evidence are
 fictional. The seed command is explicit and safe to repeat; it updates only
 fixture-owned records and does not run during API startup. After migration,
 run this from `apps/api`:

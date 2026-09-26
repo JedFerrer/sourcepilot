@@ -9,6 +9,7 @@ import pytest
 from sqlalchemy import Engine, func, inspect, select
 from sqlalchemy.orm import Session
 
+from sourcepilot.briefs.domain import RequirementKind
 from sourcepilot.persistence.models import (
     DemoSession,
     Project,
@@ -17,6 +18,13 @@ from sourcepilot.persistence.models import (
     SupplierEvidence,
 )
 from sourcepilot.suppliers import seed as supplier_seed
+from sourcepilot.suppliers.evaluation import (
+    EvaluationEvidence,
+    EvaluationRequirement,
+    EvaluationStatus,
+    SupplierEvaluationFacts,
+    evaluate_supplier,
+)
 from sourcepilot.suppliers.repository import get_supplier, list_suppliers
 from sourcepilot.suppliers.seed import fixture_id, load_fixture_data, seed_suppliers
 from tests.conftest import database_session_for_engine
@@ -56,10 +64,10 @@ def database_session(test_engine: Engine) -> Iterator[Session]:
 def test_fixture_scenarios_and_fictional_notice() -> None:
     data = load_fixture_data()
     fixtures = data["suppliers"]
-    assert len(fixtures) == 8
+    assert len(fixtures) == 15
     assert "no real manufacturer" in data["synthetic_notice"].lower()
-    assert len({row["key"] for row in fixtures}) == 8
-    assert len({fixture_id("supplier", row["key"]) for row in fixtures}) == 8
+    assert len({row["key"] for row in fixtures}) == 15
+    assert len({fixture_id("supplier", row["key"]) for row in fixtures}) == 15
     assert all("Fictional" in row["description"] for row in fixtures)
 
     by_key = {row["key"]: row for row in fixtures}
@@ -79,6 +87,24 @@ def test_fixture_scenarios_and_fictional_notice() -> None:
         "PRODUCT_CATEGORY",
         "home textile pouch",
     ]
+    assert by_key["fern-travel-sewing"]["general_lead_time_days"] > 50
+    assert by_key["amber-cotton-pouches"]["general_lead_time_days"] < 30
+    amber = by_key["amber-cotton-pouches"]
+    material_evidence = [item for item in amber["evidence"] if item[0] == "material:recycled polyester"]
+    assert len(material_evidence) == 1
+    assert material_evidence[0][4] == "CONTRADICTS"
+    result = evaluate_supplier(
+        [EvaluationRequirement(uuid4(), RequirementKind.MATERIAL, {"value": "recycled polyester"})],
+        requested_quantity=2000,
+        supplier=SupplierEvaluationFacts(
+            capabilities=frozenset(tuple(item) for item in amber["capabilities"]),
+            general_moq=amber["general_moq"],
+            evidence=(EvaluationEvidence(uuid4(), material_evidence[0][0], material_evidence[0][4]),),
+        ),
+    )
+    assert result.results[0].status is EvaluationStatus.DOES_NOT_MEET
+    assert result.results[0].evidence_ids
+    assert by_key["quartz-packaging-sleeves"]["indicative_price_amount"] == "0.72"
 
 
 def test_migration_creates_supplier_tables_and_constraints(test_engine: Engine) -> None:
@@ -108,7 +134,7 @@ def test_seed_is_repeatable_and_preserves_unrelated_records(database_session: Se
     )
     database_session.add(unrelated)
     database_session.commit()
-    assert seed_suppliers(database_session) == 8
+    assert seed_suppliers(database_session) == 15
     initial_ids = {
         model: set(database_session.scalars(select(model.id)).all())
         for model in (Supplier, SupplierCapability, SupplierEvidence)
@@ -118,7 +144,7 @@ def test_seed_is_repeatable_and_preserves_unrelated_records(database_session: Se
         for row in database_session.scalars(select(SupplierEvidence)).all()
     }
     database_session.commit()
-    assert seed_suppliers(database_session) == 8
+    assert seed_suppliers(database_session) == 15
     assert initial_ids == {
         model: set(database_session.scalars(select(model.id)).all())
         for model in (Supplier, SupplierCapability, SupplierEvidence)
@@ -127,7 +153,7 @@ def test_seed_is_repeatable_and_preserves_unrelated_records(database_session: Se
         row.id: (row.claim_key, row.source_label, row.evidence_text, row.evidence_state)
         for row in database_session.scalars(select(SupplierEvidence)).all()
     }
-    assert database_session.scalar(select(func.count(Supplier.id))) == 9
+    assert database_session.scalar(select(func.count(Supplier.id))) == 16
     assert database_session.get(Supplier, unrelated.id) is not None
 
 
@@ -180,7 +206,7 @@ def test_reseed_removes_fixture_children_removed_from_definition(
         model: set(database_session.scalars(select(model.id)).all())
         for model in (SupplierCapability, SupplierEvidence)
     }
-    assert database_session.scalar(select(func.count(Supplier.id))) == 8
+    assert database_session.scalar(select(func.count(Supplier.id))) == 15
 
 
 def test_reordering_evidence_preserves_identity_and_updates_its_own_claim(
@@ -230,7 +256,7 @@ def test_repository_returns_ordered_catalog_and_both_conflict_records(
 ) -> None:
     seed_suppliers(database_session)
     suppliers = list_suppliers(database_session)
-    assert len(suppliers) == 8
+    assert len(suppliers) == 15
     assert [row.name for row in suppliers] == sorted(row.name for row in suppliers)
     conflict = get_supplier(database_session, fixture_id("supplier", "sunrise-textile-lab"))
     assert conflict is not None

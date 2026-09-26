@@ -22,7 +22,7 @@ type Supplier = {
   informational_requirements: { requirement_id: string; kind: string; importance: string | null; expected_value: Record<string, unknown> }[];
   evidence: Evidence[];
 };
-type SupplierList = { brief_revision: number; brief_approved: boolean; suppliers: Supplier[] };
+type SupplierList = { brief_revision: number; brief_approved: boolean; shortlist_approved: boolean; suppliers: Supplier[] };
 type ExplanationPoint = { text: string; requirement_id: string | null; evidence_ids: string[] };
 type SupplierExplanation = {
   supplier_id: string;
@@ -159,12 +159,16 @@ function SupplierCard({ projectId, supplier, dataVersion, onUpdate, onRefresh, b
   );
 }
 
-export function SupplierReview({ projectId, refreshKey }: { projectId: string; refreshKey: number }) {
+export function SupplierReview({ projectId, refreshKey, onStageChange }: {
+  projectId: string; refreshKey: number; onStageChange?: () => Promise<void>;
+}) {
   const [loaded, setLoaded] = useState<{ projectId: string; refreshKey: number; version: number; data: SupplierList } | null>(null);
   const data = loaded?.projectId === projectId && loaded.refreshKey === refreshKey ? loaded.data : null;
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [approving, setApproving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [reviewOpen, setReviewOpen] = useState(false);
   const requestSequence = useRef(0);
 
   const reload = useCallback(async () => {
@@ -197,6 +201,7 @@ export function SupplierReview({ projectId, refreshKey }: { projectId: string; r
     try {
       await apiRequest(`/api/projects/${projectId}/suppliers/discover`, { method: "POST" });
       await reload();
+      if (data?.shortlist_approved) await onStageChange?.();
     } catch (failure) {
       setError(failure instanceof ApiClientError ? failure.message : "Supplier discovery failed. Try again.");
     } finally {
@@ -212,13 +217,39 @@ export function SupplierReview({ projectId, refreshKey }: { projectId: string; r
       const updated = await apiRequest<SupplierList>(`/api/projects/${projectId}/suppliers/${id}`, {
         method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
       });
-      if (request === requestSequence.current) setLoaded({ projectId, refreshKey, version: request, data: updated });
+      if (request === requestSequence.current) {
+        setLoaded({ projectId, refreshKey, version: request, data: updated });
+        if (data?.shortlist_approved && !updated.shortlist_approved) await onStageChange?.();
+      }
     } catch (failure) {
       setError(failure instanceof ApiClientError ? failure.message : "Supplier review could not be saved. Try again.");
     } finally {
       setBusy(false);
     }
   }
+
+  async function approve() {
+    setBusy(true);
+    setApproving(true);
+    setError(null);
+    try {
+      const approved = await apiRequest<SupplierList>(`/api/projects/${projectId}/shortlist/approve`, { method: "POST" });
+      const request = ++requestSequence.current;
+      setLoaded({ projectId, refreshKey, version: request, data: approved });
+      setReviewOpen(false);
+      await onStageChange?.();
+    } catch (failure) {
+      if (failure instanceof ApiClientError && failure.status === 409) await reload();
+      setError(failure instanceof ApiClientError ? failure.message : "The shortlist could not be approved. Try again.");
+    } finally {
+      setApproving(false);
+      setBusy(false);
+    }
+  }
+
+  const selected = data?.suppliers.filter((item) => item.shortlisted) ?? [];
+  const selectionReady = data?.brief_approved && selected.length >= 1 && selected.length <= 3
+    && selected.every((item) => !item.dismissed && !item.stale);
 
   return (
     <section aria-labelledby="suppliers-title" className="supplier-review">
@@ -227,6 +258,34 @@ export function SupplierReview({ projectId, refreshKey }: { projectId: string; r
       {error ? <div className="form-error" role="alert"><p>{error}</p><button type="button" onClick={() => void reload()}>Retry</button></div> : null}
       {data?.suppliers.some((item) => item.stale) ? <p role="status" className="form-error">Your sourcing requirements changed. Existing supplier evaluations may no longer reflect the current Brief.</p> : null}
       {data?.brief_approved ? <button type="button" disabled={busy} onClick={() => void discover()}>{data.suppliers.length ? "Re-discover and re-evaluate" : "Discover Suppliers"}</button> : data ? <p>Approve the Brief to discover or re-evaluate suppliers.</p> : null}
+      {data ? <section aria-labelledby="shortlist-title">
+        <h3 id="shortlist-title">Shortlist</h3>
+        <p>{selected.length} selected · maximum 3 for approval</p>
+        {selected.length > 3 ? <p role="status" className="form-error">Remove suppliers until no more than three remain.</p> : null}
+        {data.shortlist_approved ? <p role="status">Shortlist approved. The project is ready for Quotes.</p> : null}
+        {selected.length === 1 ? <p>One supplier can proceed; side-by-side comparison later requires at least two.</p> : null}
+        {selected.length > 0 ? <button type="button" disabled={busy} onClick={() => setReviewOpen(true)}>Review selected suppliers</button> : null}
+        {reviewOpen ? <div aria-label="Shortlist approval summary">
+          <h4>Review before approval</h4>
+          {selected.map((item) => <section key={item.id} aria-label={`${item.name} approval details`}>
+            <h5>{item.name}</h5>
+            <p>General MOQ: {item.general_moq ?? "Unknown"} · Typical lead time: {item.general_lead_time_days === null ? "Unknown" : `${item.general_lead_time_days} days`} · Indicative price: {item.indicative_price_amount === null ? "Unknown" : `${item.indicative_price_amount} ${item.indicative_price_currency ?? ""}`}</p>
+            {item.stale ? <p>Evaluations are stale. Re-discover and re-evaluate before approval.</p> : <>
+              <ul>{item.evaluations.filter((finding) => finding.importance === "REQUIRED" || finding.importance === "PREFERRED").map((finding) => <li key={finding.requirement_id}>
+                {finding.importance}: {finding.kind} {expectedLabel(finding.expected_value)} — {finding.status.replaceAll("_", " ")}
+              </li>)}</ul>
+              {item.evaluations.some((finding) => finding.status === "UNKNOWN") ? <p>Some requirement information is Unknown.</p> : null}
+              {item.evaluations.some((finding) => finding.status === "CONFLICT") ? <p>Some requirement evidence is in Conflict.</p> : null}
+              {item.evaluations.some((finding) => finding.importance === "REQUIRED" && finding.status === "DOES_NOT_MEET") ? <p>Concern: a required requirement does not meet the Brief.</p> : null}
+              {item.derived_context.some((finding) => finding.status !== "MEETS") ? <p>Concern: general MOQ compatibility is {item.derived_context.map((finding) => finding.status.replaceAll("_", " ")).join(", ")}.</p> : null}
+            </>}
+          </section>)}
+          <button type="button" disabled={busy || !selectionReady || data.shortlist_approved} onClick={() => void approve()}>
+            {approving ? "Approving…" : "Approve Shortlist"}
+          </button>
+          <button type="button" disabled={busy} onClick={() => setReviewOpen(false)}>Continue Reviewing</button>
+        </div> : null}
+      </section> : null}
       {data && data.suppliers.length === 0 && !loading ? <p>No suppliers discovered yet.</p> : null}
       {data?.suppliers.map((supplier) => <SupplierCard key={supplier.id} projectId={projectId} supplier={supplier} dataVersion={loaded?.version ?? 0} onUpdate={update} onRefresh={reload} busy={busy} />)}
     </section>
