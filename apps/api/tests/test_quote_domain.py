@@ -6,6 +6,7 @@ from sourcepilot.quotes.domain import (
     QuoteStatus,
     QuoteValueOrigin,
     authoritative_current_values,
+    validate_manual_values,
     validate_quote_value_provenance,
 )
 
@@ -61,3 +62,19 @@ def test_only_confirmed_current_values_are_authoritative() -> None:
     assert authoritative_current_values(QuoteStatus.CONFIRMED, values) == {
         "unit_price": "4.50", "shipping_cost": None,
     }
+
+
+def test_manual_value_validation_preserves_unknown_and_normalizes_typed_values() -> None:
+    assert validate_manual_values({
+        "quoted_quantity": 2000, "unit_price": "4.2500", "currency": " usd ",
+        "shipping_cost": None, "production_lead_time": "30–35 days",
+    }) == {
+        "quoted_quantity": 2000, "unit_price": "4.2500", "currency": "USD",
+        "shipping_cost": None, "production_lead_time": "30–35 days",
+    }
+    for invalid in (
+        {"quoted_quantity": True}, {"moq": 0}, {"unit_price": "-1"},
+        {"currency": "US"}, {"payment_terms": " "}, {"invented": "x"},
+    ):
+        with pytest.raises(ValueError):
+            validate_manual_values(invalid)

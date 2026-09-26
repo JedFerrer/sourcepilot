@@ -4,6 +4,8 @@ from uuid import UUID
 from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.client import OpenAIResponsesClient
@@ -40,13 +42,27 @@ from sourcepilot.briefs.workflow import (
     project_requirements,
 )
 from sourcepilot.persistence.database import get_database_session
-from sourcepilot.persistence.models import Brief, DemoSession, Project
+from sourcepilot.persistence.models import Brief, DemoSession, Project, Quote
 from sourcepilot.projects.schemas import CreateProjectRequest, ProjectResponse, RenameProjectRequest
 from sourcepilot.projects.service import (
     create_project,
     project_for_demo_session,
     projects_for_demo_session,
     rename_project,
+)
+from sourcepilot.quotes.schemas import (
+    ManualQuoteCreateRequest,
+    ManualQuoteEditRequest,
+    QuoteResponse,
+)
+from sourcepilot.quotes.service import (
+    QuoteCandidateNotShortlistedError,
+    QuoteWorkflowError,
+    confirm_manual_quote,
+    create_manual_quote,
+    edit_manual_quote,
+    list_quotes,
+    quote_snapshot,
 )
 from sourcepilot.session.service import get_or_create_demo_session, resolve_demo_session
 from sourcepilot.session.settings import (
@@ -201,6 +217,100 @@ def owned_project_or_404(
         database_session.rollback()
         raise HTTPException(status_code=404, detail="Project not found.")
     return demo_session, project
+
+
+def owned_quote_or_404(
+    database_session: Session, request: Request, quote_id: UUID, *, lock: bool = False,
+) -> Quote:
+    demo_session = active_demo_session(request, database_session)
+    query = select(Quote).join(Project).where(
+        Quote.id == quote_id, Project.demo_session_id == demo_session.id,
+    )
+    quote = database_session.scalars(query.with_for_update(of=Quote) if lock else query).one_or_none()
+    if quote is None:
+        database_session.rollback()
+        raise HTTPException(status_code=404, detail="Quote not found.")
+    return quote
+
+
+@app.get("/projects/{project_id}/quotes", response_model=list[QuoteResponse])
+def list_quotes_endpoint(
+    project_id: UUID, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> list[QuoteResponse]:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    result = list_quotes(database_session, project.id)
+    commit_or_rollback(database_session)
+    return result
+
+
+@app.post(
+    "/projects/{project_id}/quotes/manual", response_model=QuoteResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_manual_quote_endpoint(
+    project_id: UUID, payload: ManualQuoteCreateRequest, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> QuoteResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        result = create_manual_quote(
+            database_session, project, payload.supplier_id, payload.values, payload.notes,
+        )
+        commit_or_rollback(database_session)
+    except (QuoteWorkflowError, QuoteCandidateNotShortlistedError) as error:
+        database_session.rollback()
+        return error_response(409, code="QUOTE_NOT_AVAILABLE", message=str(error))
+    except IntegrityError:
+        database_session.rollback()
+        return error_response(
+            409, code="QUOTE_NOT_AVAILABLE", message="A quote already exists for this supplier.",
+        )
+    return result
+
+
+@app.get("/quotes/{quote_id}", response_model=QuoteResponse)
+def read_quote_endpoint(
+    quote_id: UUID, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> QuoteResponse:
+    quote = owned_quote_or_404(database_session, request, quote_id)
+    result = quote_snapshot(quote)
+    commit_or_rollback(database_session)
+    return result
+
+
+@app.patch("/quotes/{quote_id}", response_model=QuoteResponse)
+def edit_quote_endpoint(
+    quote_id: UUID, payload: ManualQuoteEditRequest, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> QuoteResponse | JSONResponse:
+    quote = owned_quote_or_404(database_session, request, quote_id, lock=True)
+    try:
+        result = edit_manual_quote(
+            database_session, quote, payload.values,
+            notes_provided="notes" in payload.model_fields_set, notes=payload.notes,
+        )
+        commit_or_rollback(database_session)
+    except QuoteWorkflowError as error:
+        database_session.rollback()
+        return error_response(409, code="QUOTE_NOT_EDITABLE", message=str(error))
+    return result
+
+
+@app.post("/quotes/{quote_id}/confirm", response_model=QuoteResponse)
+def confirm_quote_endpoint(
+    quote_id: UUID, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> QuoteResponse | JSONResponse:
+    quote = owned_quote_or_404(database_session, request, quote_id, lock=True)
+    try:
+        result = confirm_manual_quote(database_session, quote)
+        commit_or_rollback(database_session)
+    except QuoteWorkflowError as error:
+        database_session.rollback()
+        return error_response(409, code="QUOTE_NOT_CONFIRMABLE", message=str(error))
+    return result
 
 
 @app.get("/projects/{project_id}/brief", response_model=BriefResponse)

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
 import { BriefEditor } from "./brief-editor";
+import { QuoteReview } from "./quote-review";
 import { SupplierReview } from "./supplier-review";
 
 type Project = {
@@ -131,11 +132,12 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
       </section>
       <BriefEditor projectId={projectId} onProjectChange={refreshProject} />
       <SupplierReview projectId={projectId} refreshKey={supplierRefreshKey} onStageChange={refreshProject} />
+      <QuoteReview projectId={projectId} active={project.stage === "QUOTES"} refreshKey={supplierRefreshKey} />
       <nav aria-label="Sourcing workflow stages">
         <ul className="stage-list">
           <li aria-current={project.stage === "BRIEF" ? "step" : undefined}><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
           <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "BRIEF" ? "true" : undefined}><strong>Suppliers</strong><span>{project.stage === "BRIEF" ? "Available after Brief approval." : "Review discovered suppliers above."}</span></li>
-          <li aria-current={project.stage === "QUOTES" ? "step" : undefined} data-unavailable={project.stage === "QUOTES" ? undefined : "true"}><strong>Quotes</strong><span>{project.stage === "QUOTES" ? "Shortlist approved. Quote entry is coming in the next step." : "Available after shortlist approval."}</span></li>
+          <li aria-current={project.stage === "QUOTES" ? "step" : undefined} data-unavailable={project.stage === "QUOTES" ? undefined : "true"}><strong>Quotes</strong><span>{project.stage === "QUOTES" ? "Add and confirm manual quotes above." : "Available after shortlist approval."}</span></li>
           {laterStages.map((stage) => (
             <li key={stage} data-unavailable="true"><strong>{stage}</strong><span>Available in a later step.</span></li>
           ))}

@@ -18,6 +18,7 @@ const readyBrief = {
 
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock("./supplier-review", () => ({ SupplierReview: () => null }));
+vi.mock("./quote-review", () => ({ QuoteReview: () => null }));
 
 describe("ProjectWorkspace", () => {
   afterEach(() => {
@@ -114,7 +115,7 @@ describe("ProjectWorkspace", () => {
     expect(await screen.findByText("Current stage: Quotes")).toBeInTheDocument();
     expect(screen.getByText("Quotes").closest("li")).toHaveAttribute("aria-current", "step");
     expect(screen.getByText("Quotes").closest("li")).not.toHaveAttribute("data-unavailable");
-    expect(screen.getByText("Quotes").closest("li")).toHaveTextContent("Quote entry is coming in the next step.");
+    expect(screen.getByText("Quotes").closest("li")).toHaveTextContent("Add and confirm manual quotes above.");
   });
 
   it("does not expose a project outside the current session", async () => {
