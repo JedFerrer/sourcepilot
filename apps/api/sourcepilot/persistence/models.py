@@ -13,6 +13,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    UniqueConstraint,
     event,
     func,
     text,
@@ -31,6 +32,12 @@ from sourcepilot.briefs.domain import (
     validate_target_unit_price,
 )
 from sourcepilot.persistence.base import Base
+from sourcepilot.quotes.domain import (
+    QuoteEntryType,
+    QuoteStatus,
+    QuoteValueOrigin,
+    validate_quote_value_provenance,
+)
 
 
 class DemoSession(Base):
@@ -254,6 +261,67 @@ class ProjectSupplier(Base):
     )
 
 
+class Quote(Base):
+    __tablename__ = "quotes"
+    __table_args__ = (
+        UniqueConstraint("project_id", "supplier_id", name="uq_quotes_project_supplier"),
+        CheckConstraint("entry_type IN ('MANUAL', 'PDF')", name="ck_quotes_entry_type"),
+        CheckConstraint(
+            "status IN ('PROCESSING', 'NEEDS_REVIEW', 'CONFIRMED', 'FAILED')",
+            name="ck_quotes_status",
+        ),
+        CheckConstraint("revision >= 0", name="ck_quotes_revision"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
+    )
+    supplier_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("suppliers.id"), nullable=False
+    )
+    entry_type: Mapped[str] = mapped_column(String(16), nullable=False)
+    status: Mapped[str] = mapped_column(String(20), nullable=False)
+    revision: Mapped[int] = mapped_column(
+        Integer, nullable=False, server_default=text("0"), default=0
+    )
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+
+    values: Mapped[list[QuoteValue]] = relationship(
+        back_populates="quote", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class QuoteValue(Base):
+    __tablename__ = "quote_values"
+    __table_args__ = (
+        UniqueConstraint("quote_id", "field_key", name="uq_quote_values_quote_field"),
+        CheckConstraint(
+            "current_origin IN ('AI_EXTRACTED', 'USER_CORRECTED', 'USER_ENTERED')",
+            name="ck_quote_values_current_origin",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    quote_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("quotes.id", ondelete="CASCADE"), nullable=False
+    )
+    field_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    current_value: Mapped[object | None] = mapped_column(JSONB, nullable=True)
+    current_origin: Mapped[str] = mapped_column(String(20), nullable=False)
+    ai_extracted_value: Mapped[object | None] = mapped_column(JSONB, nullable=True)
+    uncertainty: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    quote: Mapped[Quote] = relationship(back_populates="values")
+
+
 class RequirementEvaluationRecord(Base):
     __tablename__ = "requirement_evaluations"
     __table_args__ = (
@@ -306,6 +374,28 @@ event.listen(Brief, "before_insert", _validate_brief_before_persist)
 event.listen(Brief, "before_update", _validate_brief_before_persist)
 event.listen(Requirement, "before_insert", _validate_requirement_before_persist)
 event.listen(Requirement, "before_update", _validate_requirement_before_persist)
+
+
+def _validate_quote_before_persist(_: object, __: object, quote: Quote) -> None:
+    quote.entry_type = QuoteEntryType(quote.entry_type).value
+    quote.status = QuoteStatus(quote.status).value
+    if quote.revision is not None and quote.revision < 0:
+        raise ValueError("Quote revision must be nonnegative.")
+
+
+def _validate_quote_value_before_persist(_: object, __: object, value: QuoteValue) -> None:
+    value.current_origin = validate_quote_value_provenance(
+        field_key=value.field_key,
+        current_value=value.current_value,
+        current_origin=QuoteValueOrigin(value.current_origin),
+        ai_extracted_value=value.ai_extracted_value,
+    ).value
+
+
+event.listen(Quote, "before_insert", _validate_quote_before_persist)
+event.listen(Quote, "before_update", _validate_quote_before_persist)
+event.listen(QuoteValue, "before_insert", _validate_quote_value_before_persist)
+event.listen(QuoteValue, "before_update", _validate_quote_value_before_persist)
 
 
 class AIRun(Base):

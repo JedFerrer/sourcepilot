@@ -15,9 +15,13 @@ from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import (
     Project,
     ProjectSupplier,
+    Quote,
+    QuoteValue,
     RequirementEvaluationRecord,
     SupplierCapability,
 )
+from sourcepilot.quotes.domain import QuoteEntryType
+from sourcepilot.quotes.service import create_quote
 from sourcepilot.suppliers.schemas import UpdateSupplierReviewRequest
 from sourcepilot.suppliers.seed import seed_suppliers
 from sourcepilot.suppliers.service import (
@@ -389,6 +393,50 @@ def test_rediscovery_revokes_approval_if_selected_candidate_disappears(
     assert not listed["shortlist_approved"]
     assert supplier_id not in {item["id"] for item in listed["suppliers"]}
     assert client.get(f"/projects/{project_id}").json()["stage"] == "SUPPLIERS"
+
+
+def test_rediscovery_removes_candidate_without_losing_existing_quote(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id = create_project(client)
+    edited = client.patch(f"/projects/{project_id}/brief", json=brief_payload()).json()
+    approve(client, project_id, edited["brief_revision"])
+    assert client.post(f"/projects/{project_id}/suppliers/discover").status_code == 200
+    supplier_id = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"][0]["id"]
+    assert client.patch(
+        f"/projects/{project_id}/suppliers/{supplier_id}", json={"shortlisted": True}
+    ).status_code == 200
+
+    with Session(engine) as session:
+        quote = create_quote(
+            session, project_id=UUID(project_id), supplier_id=UUID(supplier_id),
+            entry_type=QuoteEntryType.MANUAL,
+        )
+        quote.values.append(QuoteValue(
+            field_key="quoted_quantity", current_value=2000,
+            current_origin="USER_ENTERED", ai_extracted_value=None,
+        ))
+        session.commit()
+        quote_id = quote.id
+        category = session.scalar(select(SupplierCapability).where(
+            SupplierCapability.supplier_id == UUID(supplier_id),
+            SupplierCapability.capability_kind == "PRODUCT_CATEGORY",
+        ))
+        assert category is not None
+        category.value = "different category"
+        session.commit()
+
+    response = client.post(f"/projects/{project_id}/suppliers/discover")
+    assert response.status_code == 200, response.text
+    with Session(engine) as session:
+        assert session.get(ProjectSupplier, (UUID(project_id), UUID(supplier_id))) is None
+        saved = session.get(Quote, quote_id)
+        assert saved is not None
+        assert saved.project_id == UUID(project_id)
+        assert saved.supplier_id == UUID(supplier_id)
+        assert [(value.field_key, value.current_value) for value in saved.values] == [
+            ("quoted_quantity", 2000)
+        ]
 
 
 @pytest.mark.parametrize("first_action", ["change", "approve"])

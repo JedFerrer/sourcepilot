@@ -4,6 +4,8 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
+**M3-U1 — Quote Persistence and Provenance Domain** is `COMMITTED`.
+
 **M2-U7 — Complete Supplier Fixtures + Shortlist Approval** is `COMMITTED`.
 
 M2-U6 — Supplier Explanation via Sourcing Analyst is `COMMITTED`.
