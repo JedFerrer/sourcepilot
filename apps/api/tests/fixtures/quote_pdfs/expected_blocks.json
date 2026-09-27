@@ -1,0 +1,383 @@
+{
+  "conflicting_lead_time.pdf": {
+    "page_count": 2,
+    "blocks": [
+      [
+        "p1-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p1-b2",
+        "Moss Thread Bags | Quote MTB-2000 | 27 September 2026"
+      ],
+      [
+        "p1-b3",
+        "Product: recycled-polyester cosmetic travel bags with custom logo"
+      ],
+      [
+        "p1-b4",
+        "Quoted quantity: 2,000 units"
+      ],
+      [
+        "p1-b5",
+        "Unit price: USD 4.45"
+      ],
+      [
+        "p1-b6",
+        "Minimum order quantity: 800 units"
+      ],
+      [
+        "p1-b7",
+        "Tooling/setup cost: USD 600"
+      ],
+      [
+        "p1-b8",
+        "Sample cost: USD 45"
+      ],
+      [
+        "p1-b9",
+        "Sample lead time: not stated in this quote"
+      ],
+      [
+        "p1-b10",
+        "Production lead time: 25 days after sample approval"
+      ],
+      [
+        "p1-b11",
+        "Shipping cost: USD 360 to Manila"
+      ],
+      [
+        "p1-b12",
+        "Shipping time: 10 days after production"
+      ],
+      [
+        "p1-b13",
+        "Material: recycled polyester; logo: custom print"
+      ],
+      [
+        "p1-b14",
+        "Payment terms: 40% deposit, 60% before dispatch"
+      ],
+      [
+        "p1-b15",
+        "Quote validity: 21 days"
+      ],
+      [
+        "p2-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p2-b2",
+        "Moss Thread Bags | Revised schedule note for quote MTB-2000"
+      ],
+      [
+        "p2-b3",
+        "Production lead time: 30-35 days after sample approval"
+      ],
+      [
+        "p2-b4",
+        "This conflicts with the 25-day production lead time on page 1."
+      ]
+    ]
+  },
+  "harbor_primary.pdf": {
+    "page_count": 2,
+    "blocks": [
+      [
+        "p1-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p1-b2",
+        "Harbor Pouch Works | Quote HPW-2000 | 27 September 2026"
+      ],
+      [
+        "p1-b3",
+        "Product: recycled-polyester cosmetic travel bags with custom logo"
+      ],
+      [
+        "p1-b4",
+        "Quoted quantity: 2,000 units"
+      ],
+      [
+        "p1-b5",
+        "Unit price: USD 4.60"
+      ],
+      [
+        "p1-b6",
+        "Minimum order quantity: 1,000 units"
+      ],
+      [
+        "p1-b7",
+        "Tooling/setup cost: USD 150"
+      ],
+      [
+        "p1-b8",
+        "Sample cost: USD 40"
+      ],
+      [
+        "p1-b9",
+        "Sample lead time: 7 days"
+      ],
+      [
+        "p1-b10",
+        "Production lead time: 32 days after sample approval"
+      ],
+      [
+        "p1-b11",
+        "Shipping cost: USD 320 to Manila"
+      ],
+      [
+        "p1-b12",
+        "Shipping time: 12 days after production"
+      ],
+      [
+        "p1-b13",
+        "Payment terms: 30% deposit, 70% before dispatch"
+      ],
+      [
+        "p1-b14",
+        "Quote validity: 30 days"
+      ],
+      [
+        "p2-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p2-b2",
+        "Harbor Pouch Works | Quotation supporting details"
+      ],
+      [
+        "p2-b3",
+        "Material: recycled polyester; logo: screen print"
+      ],
+      [
+        "p2-b4",
+        "Synthetic GRS record: current for this fictional supplier"
+      ],
+      [
+        "p2-b5",
+        "Synthetic material sheet: recycled-polyester bag production"
+      ],
+      [
+        "p2-b6",
+        "Synthetic branding sheet: custom screen-printed logos"
+      ],
+      [
+        "p2-b7",
+        "Exclusion: import duties are not included"
+      ]
+    ]
+  },
+  "missing_shipping.pdf": {
+    "page_count": 2,
+    "blocks": [
+      [
+        "p1-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p1-b2",
+        "Harbor Pouch Works | Quote HPW-2000 | 27 September 2026"
+      ],
+      [
+        "p1-b3",
+        "Product: recycled-polyester cosmetic travel bags with custom logo"
+      ],
+      [
+        "p1-b4",
+        "Quoted quantity: 2,000 units"
+      ],
+      [
+        "p1-b5",
+        "Unit price: USD 4.60"
+      ],
+      [
+        "p1-b6",
+        "Minimum order quantity: 1,000 units"
+      ],
+      [
+        "p1-b7",
+        "Tooling/setup cost: USD 150"
+      ],
+      [
+        "p1-b8",
+        "Sample cost: USD 40"
+      ],
+      [
+        "p1-b9",
+        "Sample lead time: 7 days"
+      ],
+      [
+        "p1-b10",
+        "Production lead time: 32 days after sample approval"
+      ],
+      [
+        "p1-b11",
+        "Payment terms: 30% deposit, 70% before dispatch"
+      ],
+      [
+        "p1-b12",
+        "Quote validity: 30 days"
+      ],
+      [
+        "p2-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p2-b2",
+        "Harbor Pouch Works | Quotation supporting details"
+      ],
+      [
+        "p2-b3",
+        "Material: recycled polyester; logo: screen print"
+      ],
+      [
+        "p2-b4",
+        "Synthetic GRS record: current for this fictional supplier"
+      ],
+      [
+        "p2-b5",
+        "Synthetic material sheet: recycled-polyester bag production"
+      ],
+      [
+        "p2-b6",
+        "Synthetic branding sheet: custom screen-printed logos"
+      ],
+      [
+        "p2-b7",
+        "Exclusion: import duties are not included"
+      ]
+    ]
+  },
+  "moss_primary.pdf": {
+    "page_count": 1,
+    "blocks": [
+      [
+        "p1-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p1-b2",
+        "Moss Thread Bags | Quote MTB-2000 | 27 September 2026"
+      ],
+      [
+        "p1-b3",
+        "Product: recycled-polyester cosmetic travel bags with custom logo"
+      ],
+      [
+        "p1-b4",
+        "Quoted quantity: 2,000 units"
+      ],
+      [
+        "p1-b5",
+        "Unit price: USD 4.45"
+      ],
+      [
+        "p1-b6",
+        "Minimum order quantity: 800 units"
+      ],
+      [
+        "p1-b7",
+        "Tooling/setup cost: USD 600"
+      ],
+      [
+        "p1-b8",
+        "Sample cost: USD 45"
+      ],
+      [
+        "p1-b9",
+        "Sample lead time: not stated in this quote"
+      ],
+      [
+        "p1-b10",
+        "Production lead time: 25 days after sample approval"
+      ],
+      [
+        "p1-b11",
+        "Shipping cost: USD 360 to Manila"
+      ],
+      [
+        "p1-b12",
+        "Shipping time: 10 days after production"
+      ],
+      [
+        "p1-b13",
+        "Material: recycled polyester; logo: custom print"
+      ],
+      [
+        "p1-b14",
+        "Payment terms: 40% deposit, 60% before dispatch"
+      ],
+      [
+        "p1-b15",
+        "Quote validity: 21 days"
+      ]
+    ]
+  },
+  "willow_primary.pdf": {
+    "page_count": 1,
+    "blocks": [
+      [
+        "p1-b1",
+        "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER"
+      ],
+      [
+        "p1-b2",
+        "Willow Stitch Studio | Quote WSS-2000 | 27 September 2026"
+      ],
+      [
+        "p1-b3",
+        "Product: recycled-polyester cosmetic travel bags with custom logo"
+      ],
+      [
+        "p1-b4",
+        "Quoted quantity: 2,000 units"
+      ],
+      [
+        "p1-b5",
+        "Unit price: USD 4.20"
+      ],
+      [
+        "p1-b6",
+        "Minimum order quantity: 1,800 units"
+      ],
+      [
+        "p1-b7",
+        "Tooling/setup cost: USD 100"
+      ],
+      [
+        "p1-b8",
+        "Sample cost: USD 35"
+      ],
+      [
+        "p1-b9",
+        "Sample lead time: 10 days"
+      ],
+      [
+        "p1-b10",
+        "Production lead time: 40 days after sample approval"
+      ],
+      [
+        "p1-b11",
+        "Shipping cost: USD 280 to Manila"
+      ],
+      [
+        "p1-b12",
+        "Shipping time: 14 days after production"
+      ],
+      [
+        "p1-b13",
+        "Preferred GRS certification: not stated in this quote"
+      ],
+      [
+        "p1-b14",
+        "Payment terms: 50% deposit, 50% before dispatch"
+      ],
+      [
+        "p1-b15",
+        "Quote validity: 30 days"
+      ]
+    ]
+  }
+}
