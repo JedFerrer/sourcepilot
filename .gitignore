@@ -17,3 +17,4 @@ __pycache__/
 .env.local
 apps/web/.env.local
 *.local
+apps/api/.local-quote-documents/

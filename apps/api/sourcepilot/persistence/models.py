@@ -297,6 +297,39 @@ class Quote(Base):
     values: Mapped[list[QuoteValue]] = relationship(
         back_populates="quote", cascade="all, delete-orphan", passive_deletes=True
     )
+    documents: Mapped[list[QuoteDocument]] = relationship(
+        back_populates="quote", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class QuoteDocument(Base):
+    """Original PDF and minimal processing metadata."""
+
+    __tablename__ = "quote_documents"
+    __table_args__ = (
+        CheckConstraint("processing_attempts >= 0", name="ck_quote_documents_attempts"),
+        CheckConstraint(
+            "processing_status IN ('PROCESSING', 'NEEDS_REVIEW', 'CONFIRMED', 'FAILED')",
+            name="ck_quote_documents_status",
+        ),
+        UniqueConstraint("storage_key", name="uq_quote_documents_storage_key"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    quote_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("quotes.id", ondelete="CASCADE"), nullable=False
+    )
+    storage_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
+    sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    page_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    processing_status: Mapped[str] = mapped_column(String(20), nullable=False)
+    processing_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    processing_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_error: Mapped[str | None] = mapped_column(Text)
+
+    quote: Mapped[Quote] = relationship(back_populates="documents")
 
 
 class QuoteValue(Base):

@@ -1,7 +1,17 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy import select
@@ -41,6 +51,17 @@ from sourcepilot.briefs.workflow import (
     edit_brief,
     project_requirements,
 )
+from sourcepilot.documents.body_limit import UploadBodyLimitMiddleware
+from sourcepilot.documents.service import (
+    PdfCommitUncertainError,
+    PdfQuoteUploadResponse,
+    PdfStorageError,
+    PdfUploadError,
+    stage_pdf_upload,
+    store_pdf_quote,
+)
+from sourcepilot.documents.settings import document_settings_from_environment
+from sourcepilot.documents.storage import DocumentStorage, storage_from_settings
 from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import Brief, DemoSession, Project, Quote
 from sourcepilot.projects.schemas import CreateProjectRequest, ProjectResponse, RenameProjectRequest
@@ -85,6 +106,7 @@ from sourcepilot.suppliers.service import (
 )
 
 app = FastAPI(title="SourcePilot API")
+app.add_middleware(UploadBodyLimitMiddleware)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
@@ -109,6 +131,10 @@ def commit_or_rollback(database_session: Session) -> None:
     except Exception:
         database_session.rollback()
         raise
+
+
+def get_document_storage() -> DocumentStorage:
+    return storage_from_settings(document_settings_from_environment())
 
 
 @app.get("/health")
@@ -267,6 +293,41 @@ def create_manual_quote_endpoint(
             409, code="QUOTE_NOT_AVAILABLE", message="A quote already exists for this supplier.",
         )
     return result
+
+
+@app.post(
+    "/projects/{project_id}/quotes/upload", response_model=PdfQuoteUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def upload_pdf_quote_endpoint(
+    project_id: UUID, request: Request,
+    supplier_id: Annotated[UUID, Form()], file: Annotated[UploadFile, File()],
+    database_session: Annotated[Session, Depends(get_database_session)],
+    storage: Annotated[DocumentStorage, Depends(get_document_storage)],
+) -> PdfQuoteUploadResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    temporary = None
+    try:
+        settings = document_settings_from_environment()
+        temporary, path, filename, sha256, page_count = stage_pdf_upload(file, settings)
+        return store_pdf_quote(
+            database_session, project, supplier_id, path=path, filename=filename,
+            sha256=sha256, page_count=page_count, storage=storage,
+        )
+    except PdfUploadError as error:
+        database_session.rollback()
+        return error_response(error.status_code, code=error.code, message=str(error))
+    except IntegrityError:
+        database_session.rollback()
+        return error_response(
+            409, code="QUOTE_ALREADY_EXISTS", message="A quote already exists for this supplier.",
+        )
+    except (PdfStorageError, PdfCommitUncertainError):
+        database_session.rollback()
+        return error_response(503, code="UPLOAD_UNAVAILABLE", message="PDF upload is unavailable.")
+    finally:
+        if temporary is not None:
+            temporary.cleanup()
 
 
 @app.get("/quotes/{quote_id}", response_model=QuoteResponse)

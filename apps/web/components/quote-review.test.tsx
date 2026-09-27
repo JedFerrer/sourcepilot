@@ -8,6 +8,22 @@ const supplier = { id: "supplier-1", name: "Fictional Bags", shortlisted: true, 
 describe("QuoteReview", () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
+  it("shows an uploaded PDF awaiting extraction without review or confirmation controls", async () => {
+    const pdfQuote = {
+      id: "quote-pdf", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 0, confirmed_at: null, notes: null, values: {},
+    };
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(
+      path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([pdfQuote]),
+    )));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("PDF uploaded. Quote data is awaiting extraction.")).toBeInTheDocument();
+    expect(screen.queryByText("Review normalized values")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Review for confirmation" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Create manual quote" })).not.toBeInTheDocument();
+  });
+
   it("creates an all-unknown draft, edits it, and explicitly confirms it", async () => {
     let quote: Record<string, unknown> | null = null;
     const requests: { path: string; body: Record<string, unknown> }[] = [];

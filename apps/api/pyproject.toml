@@ -5,9 +5,12 @@ description = "SourcePilot API"
 requires-python = ">=3.11,<3.12"
 dependencies = [
     "alembic>=1.14,<2",
+    "boto3>=1.40,<2",
     "fastapi>=0.115,<1",
     "openai>=2,<3",
     "psycopg[binary]>=3.2,<4",
+    "pymupdf>=1.26,<2",
+    "python-multipart>=0.0.20,<1",
     "sqlalchemy>=2,<3",
     "uvicorn[standard]>=0.30,<1",
 ]

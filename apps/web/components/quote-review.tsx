@@ -125,9 +125,11 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
   return <article className="supplier-card">
     <h3>{supplier.name}</h3>
     <p>Status: {quote ? quote.status.replaceAll("_", " ") : "Not Added"}</p>
+    {quote?.entry_type === "PDF" && quote.status === "PROCESSING" ?
+      <p role="status">PDF uploaded. Quote data is awaiting extraction.</p> : null}
     {quote?.status === "CONFIRMED" ? <p role="status">Confirmed manual quote. Current values are ready for comparison.</p> : null}
     {error ? <p className="form-error" role="alert">{error}</p> : null}
-    {quote && !showForm ? <>
+    {quote && !showForm && !(quote.entry_type === "PDF" && quote.status === "PROCESSING") ? <>
       <h4>Review normalized values</h4>
       <dl>{fields.map((field) => <div key={field.key}>
         <dt>{field.label}</dt><dd>{quote.values[field.key]?.current_value ?? "Unknown"}</dd>
