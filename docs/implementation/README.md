@@ -4,7 +4,7 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M3-U4 — PDF Parsing and DocumentBlock Persistence** is `READY_TO_COMMIT`. Its amended plan was recorded as `PLANNING`, approved by the human, then transitioned through `PLAN_APPROVED`, implementation, review, and a passing Done Check.
+**M3-U4 — PDF Parsing and DocumentBlock Persistence** is `COMMITTED` as `cadee28f117e5b980d2f892de5a28f2bbfbae67a`. Its amended plan was recorded as `PLANNING`, approved by the human, then transitioned through `PLAN_APPROVED`, implementation, review, and a passing Done Check.
 
 **M3-U3 — Document Storage and PDF Validation** is `COMMITTED`.
 
