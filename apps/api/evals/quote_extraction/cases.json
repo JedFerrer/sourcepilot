@@ -1,0 +1,111 @@
+[
+  {
+    "id": "harbor-primary",
+    "pdf": "harbor_primary.pdf",
+    "request_hash": "76f75a4b9a0a059761f74564d72b38f663a247e43701d16ade25a8f62d5ded7f",
+    "known": {
+      "quoted_quantity": [2000, ["p1-b4"]],
+      "unit_price": ["4.60", ["p1-b5"]],
+      "currency": ["USD", ["p1-b5"]],
+      "moq": [1000, ["p1-b6"]],
+      "tooling_cost": ["150", ["p1-b7"]],
+      "sample_cost": ["40", ["p1-b8"]],
+      "sample_lead_time": ["7 days", ["p1-b9"]],
+      "production_lead_time": ["32 days after sample approval", ["p1-b10"]],
+      "shipping_cost": ["320", ["p1-b11"]],
+      "shipping_time": ["12 days after production", ["p1-b12"]],
+      "payment_terms": ["30% deposit, 70% before dispatch", ["p1-b13"]],
+      "quote_validity": ["30 days", ["p1-b14"]],
+      "certifications": ["Synthetic GRS record: current for this fictional supplier", ["p2-b4"]],
+      "exclusions": ["import duties are not included", ["p2-b7"]]
+    },
+    "unknown_sources": {},
+    "conflicts": {}
+  },
+  {
+    "id": "willow-primary",
+    "pdf": "willow_primary.pdf",
+    "request_hash": "d6fd52af0a73dda9c9cbab50a968c0b6e96d13cbb490d8be8d5e378ee6d46b03",
+    "known": {
+      "quoted_quantity": [2000, ["p1-b4"]],
+      "unit_price": ["4.20", ["p1-b5"]],
+      "currency": ["USD", ["p1-b5"]],
+      "moq": [1800, ["p1-b6"]],
+      "tooling_cost": ["100", ["p1-b7"]],
+      "sample_cost": ["35", ["p1-b8"]],
+      "sample_lead_time": ["10 days", ["p1-b9"]],
+      "production_lead_time": ["40 days after sample approval", ["p1-b10"]],
+      "shipping_cost": ["280", ["p1-b11"]],
+      "shipping_time": ["14 days after production", ["p1-b12"]],
+      "payment_terms": ["50% deposit, 50% before dispatch", ["p1-b14"]],
+      "quote_validity": ["30 days", ["p1-b15"]]
+    },
+    "unknown_sources": {"certifications": ["p1-b13"]},
+    "conflicts": {}
+  },
+  {
+    "id": "moss-primary",
+    "pdf": "moss_primary.pdf",
+    "request_hash": "2290e044dfc055bf6ff3a0eca78d61920b02d3481c0316cc7d5a5b6a165874e2",
+    "known": {
+      "quoted_quantity": [2000, ["p1-b4"]],
+      "unit_price": ["4.45", ["p1-b5"]],
+      "currency": ["USD", ["p1-b5"]],
+      "moq": [800, ["p1-b6"]],
+      "tooling_cost": ["600", ["p1-b7"]],
+      "sample_cost": ["45", ["p1-b8"]],
+      "production_lead_time": ["25 days after sample approval", ["p1-b10"]],
+      "shipping_cost": ["360", ["p1-b11"]],
+      "shipping_time": ["10 days after production", ["p1-b12"]],
+      "payment_terms": ["40% deposit, 60% before dispatch", ["p1-b14"]],
+      "quote_validity": ["21 days", ["p1-b15"]]
+    },
+    "unknown_sources": {"sample_lead_time": ["p1-b9"]},
+    "conflicts": {}
+  },
+  {
+    "id": "missing-shipping",
+    "pdf": "missing_shipping.pdf",
+    "request_hash": "5599897f97e4b670b1693621eb5221a4fea5c18c4454da6fe782b68154b4bbad",
+    "known": {
+      "quoted_quantity": [2000, ["p1-b4"]],
+      "unit_price": ["4.60", ["p1-b5"]],
+      "currency": ["USD", ["p1-b5"]],
+      "moq": [1000, ["p1-b6"]],
+      "tooling_cost": ["150", ["p1-b7"]],
+      "sample_cost": ["40", ["p1-b8"]],
+      "sample_lead_time": ["7 days", ["p1-b9"]],
+      "production_lead_time": ["32 days after sample approval", ["p1-b10"]],
+      "payment_terms": ["30% deposit, 70% before dispatch", ["p1-b11"]],
+      "quote_validity": ["30 days", ["p1-b12"]],
+      "certifications": ["Synthetic GRS record: current for this fictional supplier", ["p2-b4"]],
+      "exclusions": ["import duties are not included", ["p2-b7"]]
+    },
+    "unknown_sources": {},
+    "conflicts": {}
+  },
+  {
+    "id": "conflicting-lead-time",
+    "pdf": "conflicting_lead_time.pdf",
+    "request_hash": "5d07e9e6b791dc53c5ff3d5ac4df61adef5f314640bae244f7bf14b71a49202c",
+    "known": {
+      "quoted_quantity": [2000, ["p1-b4"]],
+      "unit_price": ["4.45", ["p1-b5"]],
+      "currency": ["USD", ["p1-b5"]],
+      "moq": [800, ["p1-b6"]],
+      "tooling_cost": ["600", ["p1-b7"]],
+      "sample_cost": ["45", ["p1-b8"]],
+      "shipping_cost": ["360", ["p1-b11"]],
+      "shipping_time": ["10 days after production", ["p1-b12"]],
+      "payment_terms": ["40% deposit, 60% before dispatch", ["p1-b14"]],
+      "quote_validity": ["21 days", ["p1-b15"]]
+    },
+    "unknown_sources": {"sample_lead_time": ["p1-b9"]},
+    "conflicts": {
+      "production_lead_time": [
+        ["25 days after sample approval", ["p1-b10"]],
+        ["30-35 days after sample approval", ["p2-b3"]]
+      ]
+    }
+  }
+]
