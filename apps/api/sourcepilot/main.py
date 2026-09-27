@@ -2,6 +2,7 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import (
+    BackgroundTasks,
     Depends,
     FastAPI,
     File,
@@ -52,6 +53,7 @@ from sourcepilot.briefs.workflow import (
     project_requirements,
 )
 from sourcepilot.documents.body_limit import UploadBodyLimitMiddleware
+from sourcepilot.documents.processing import run_pdf_quote_processing
 from sourcepilot.documents.service import (
     PdfCommitUncertainError,
     PdfQuoteUploadResponse,
@@ -301,6 +303,7 @@ def create_manual_quote_endpoint(
 )
 def upload_pdf_quote_endpoint(
     project_id: UUID, request: Request,
+    background_tasks: BackgroundTasks,
     supplier_id: Annotated[UUID, Form()], file: Annotated[UploadFile, File()],
     database_session: Annotated[Session, Depends(get_database_session)],
     storage: Annotated[DocumentStorage, Depends(get_document_storage)],
@@ -310,10 +313,12 @@ def upload_pdf_quote_endpoint(
     try:
         settings = document_settings_from_environment()
         temporary, path, filename, sha256, page_count = stage_pdf_upload(file, settings)
-        return store_pdf_quote(
+        result = store_pdf_quote(
             database_session, project, supplier_id, path=path, filename=filename,
             sha256=sha256, page_count=page_count, storage=storage,
         )
+        background_tasks.add_task(run_pdf_quote_processing, result.document.id)
+        return result
     except PdfUploadError as error:
         database_session.rollback()
         return error_response(error.status_code, code=error.code, message=str(error))

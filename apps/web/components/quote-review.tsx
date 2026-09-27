@@ -8,6 +8,7 @@ type Quote = {
   id: string; supplier_id: string; entry_type: string; status: string;
   revision: number; confirmed_at: string | null; notes: string | null;
   values: Record<string, QuoteField>;
+  processing?: { status: string; attempts: number; started_at: string | null; completed_at: string | null; failure: string | null } | null;
 };
 type Supplier = { id: string; name: string; shortlisted: boolean; dismissed: boolean };
 type SupplierList = { suppliers: Supplier[] };
@@ -60,6 +61,7 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
   const [editing, setEditing] = useState(false);
   const [reviewing, setReviewing] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -114,6 +116,22 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
     }
   }
 
+  async function uploadPdf(file: File) {
+    setUploading(true);
+    setError(null);
+    try {
+      const body = new FormData();
+      body.append("supplier_id", supplier.id);
+      body.append("file", file);
+      await apiRequest(`/api/projects/${projectId}/quotes/upload`, { method: "POST", body });
+      await onSaved();
+    } catch (failure) {
+      setError(errorMessage(failure));
+    } finally {
+      setUploading(false);
+    }
+  }
+
   function cancelEditing() {
     setValues(draftFromQuote(quote));
     setNotes(quote?.notes ?? "");
@@ -126,10 +144,14 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
     <h3>{supplier.name}</h3>
     <p>Status: {quote ? quote.status.replaceAll("_", " ") : "Not Added"}</p>
     {quote?.entry_type === "PDF" && quote.status === "PROCESSING" ?
-      <p role="status">PDF uploaded. Quote data is awaiting extraction.</p> : null}
+      <p role="status">Processing PDF quote…</p> : null}
+    {quote?.entry_type === "PDF" && quote.status === "NEEDS_REVIEW" ?
+      <p role="status">PDF quote needs review.</p> : null}
+    {quote?.entry_type === "PDF" && quote.status === "FAILED" ?
+      <p role="alert">PDF quote processing failed.</p> : null}
     {quote?.status === "CONFIRMED" ? <p role="status">Confirmed manual quote. Current values are ready for comparison.</p> : null}
     {error ? <p className="form-error" role="alert">{error}</p> : null}
-    {quote && !showForm && !(quote.entry_type === "PDF" && quote.status === "PROCESSING") ? <>
+    {quote && quote.entry_type === "MANUAL" && !showForm ? <>
       <h4>Review normalized values</h4>
       <dl>{fields.map((field) => <div key={field.key}>
         <dt>{field.label}</dt><dd>{quote.values[field.key]?.current_value ?? "Unknown"}</dd>
@@ -145,6 +167,11 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
         </div> : null}
       </> : null}
     </> : null}
+    {!quote ? <label>Upload PDF quote
+      <input type="file" accept=".pdf,application/pdf" disabled={uploading || busy}
+        onChange={(event) => { const file = event.target.files?.[0]; if (file) void uploadPdf(file); }} />
+      {uploading ? "Uploading…" : null}
+    </label> : null}
     {showForm ? <form onSubmit={(event) => void save(event)}>
       <p>Leave a field blank if it is Unknown.</p>
       {fields.map((field) => <label key={field.key}>{field.label}
@@ -170,10 +197,9 @@ export function QuoteReview({ projectId, active, refreshKey }: { projectId: stri
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (silent = false) => {
     if (!active) return;
-    setLoading(true);
-    setError(null);
+    if (!silent) { setLoading(true); setError(null); }
     try {
       const [supplierResult, quoteResult] = await Promise.all([
         apiRequest<SupplierList>(`/api/projects/${projectId}/suppliers`),
@@ -182,13 +208,30 @@ export function QuoteReview({ projectId, active, refreshKey }: { projectId: stri
       setSuppliers(supplierResult.suppliers.filter((supplier) => supplier.shortlisted && !supplier.dismissed));
       setQuotes(quoteResult);
     } catch (failure) {
-      setError(errorMessage(failure));
+      if (!silent) setError(errorMessage(failure));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [active, projectId]);
 
   useEffect(() => { void reload(); }, [reload, refreshKey]);
+
+  useEffect(() => {
+    const processingIds = quotes.filter((quote) => quote.entry_type === "PDF" && quote.status === "PROCESSING")
+      .map((quote) => quote.id);
+    if (!active || processingIds.length === 0) return;
+    let cancelled = false;
+    const timer = window.setInterval(() => {
+      for (const id of processingIds) {
+        void apiRequest<Quote>(`/api/quotes/${id}`).then((updated) => {
+          if (cancelled) return;
+          setQuotes((current) => current.map((quote) =>
+            quote.id === id && quote.status === "PROCESSING" ? updated : quote));
+        }).catch(() => { /* The next poll can recover a transient read failure. */ });
+      }
+    }, 2000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [active, quotes]);
 
   if (!active) return null;
   return <section aria-labelledby="quotes-title">

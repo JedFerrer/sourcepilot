@@ -14,7 +14,7 @@ from sourcepilot.quotes.domain import (
     QuoteValueOrigin,
     validate_quote_value_provenance,
 )
-from sourcepilot.quotes.schemas import QuoteFieldResponse, QuoteResponse
+from sourcepilot.quotes.schemas import QuoteFieldResponse, QuoteProcessingResponse, QuoteResponse
 
 
 class QuoteCandidateNotShortlistedError(ValueError):
@@ -58,6 +58,13 @@ def quote_snapshot(quote: Quote) -> QuoteResponse:
             current_value=value.current_value, current_origin=value.current_origin,
             ai_extracted_value=value.ai_extracted_value,
         ) for value in quote.values},
+        processing=(QuoteProcessingResponse(
+            status=quote.documents[0].processing_status,
+            attempts=quote.documents[0].processing_attempts,
+            started_at=quote.documents[0].processing_started_at,
+            completed_at=quote.documents[0].processing_completed_at,
+            failure="PROCESSING_FAILED" if quote.documents[0].processing_status == "FAILED" else None,
+        ) if quote.entry_type == QuoteEntryType.PDF and quote.documents else None),
     )
 
 

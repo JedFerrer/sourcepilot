@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from uuid import UUID
@@ -50,9 +51,9 @@ class QuoteDocumentResponse(BaseModel):
     page_count: int
     processing_status: str
     processing_attempts: int
-    processing_started_at: None = None
-    processing_completed_at: None = None
-    last_error: None = None
+    processing_started_at: datetime | None = None
+    processing_completed_at: datetime | None = None
+    last_error: str | None = None
 
 
 class PdfQuoteUploadResponse(BaseModel):
@@ -152,7 +153,7 @@ def store_pdf_quote(
         document = QuoteDocument(
             storage_key=key, original_filename=filename, sha256=sha256,
             page_count=page_count, processing_status=QuoteStatus.PROCESSING.value,
-            processing_attempts=0,
+            processing_attempts=1, processing_started_at=datetime.now(UTC),
         )
         quote.documents.append(document)
         database_session.flush()
@@ -161,7 +162,8 @@ def store_pdf_quote(
             document=QuoteDocumentResponse(
                 id=document.id, original_filename=filename, sha256=sha256,
                 page_count=page_count, processing_status=document.processing_status,
-                processing_attempts=0,
+                processing_attempts=document.processing_attempts,
+                processing_started_at=document.processing_started_at,
             ),
         )
     except Exception:

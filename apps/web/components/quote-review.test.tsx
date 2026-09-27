@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QuoteReview } from "./quote-review";
 import { jsonResponse } from "../test/api-responses";
@@ -6,7 +6,7 @@ import { jsonResponse } from "../test/api-responses";
 const supplier = { id: "supplier-1", name: "Fictional Bags", shortlisted: true, dismissed: false };
 
 describe("QuoteReview", () => {
-  afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+  afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
   it("shows an uploaded PDF awaiting extraction without review or confirmation controls", async () => {
     const pdfQuote = {
@@ -17,11 +17,136 @@ describe("QuoteReview", () => {
       path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([pdfQuote]),
     )));
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
-    expect(await screen.findByText("PDF uploaded. Quote data is awaiting extraction.")).toBeInTheDocument();
+    expect(await screen.findByText("Processing PDF quote…")).toBeInTheDocument();
     expect(screen.queryByText("Review normalized values")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Review for confirmation" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Create manual quote" })).not.toBeInTheDocument();
+  });
+
+  it("uploads a PDF and shows processing without later review controls", async () => {
+    let quote: Record<string, unknown> | null = null;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes/upload")) {
+        expect(init?.body).toBeInstanceOf(FormData);
+        quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+          revision: 0, confirmed_at: null, notes: null, values: {} };
+        return Promise.resolve(jsonResponse({ quote, document: {} }, 201));
+      }
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse(quote ? [quote] : []));
+      throw new Error(`Unexpected request: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    const upload = await screen.findByLabelText("Upload PDF quote");
+    fireEvent.change(upload, { target: { files: [new File(["%PDF-"], "quote.pdf", { type: "application/pdf" })] } });
+    expect(await screen.findByText("Processing PDF quote…")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Edit draft" })).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/quotes/upload", expect.objectContaining({ method: "POST" }));
+  });
+
+  it.each(["NEEDS_REVIEW", "FAILED"])("shows PDF %s without manual controls", async (status) => {
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(
+      path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([{
+        id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status,
+        revision: 0, confirmed_at: null, notes: null, values: {},
+      }]),
+    )));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText(status === "FAILED" ? "PDF quote processing failed." : "PDF quote needs review.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Review for confirmation" })).not.toBeInTheDocument();
+  });
+
+  it("polls while processing and stops after completion or deactivation", async () => {
+    let status = "PROCESSING";
+    let quoteReads = 0;
+    const paths: string[] = [];
+    vi.stubGlobal("fetch", vi.fn((path: string) => {
+      paths.push(path);
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      const quote = {
+        id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status,
+        revision: 0, confirmed_at: null, notes: null, values: {},
+      };
+      if (path.endsWith("/quotes/pdf-1")) { quoteReads += 1; return Promise.resolve(jsonResponse(quote)); }
+      return Promise.resolve(jsonResponse([quote]));
+    }));
+    const view = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("Processing PDF quote…")).toBeInTheDocument();
+    status = "NEEDS_REVIEW";
+    expect(await screen.findByText("PDF quote needs review.", {}, { timeout: 3500 })).toBeInTheDocument();
+    expect(paths).toContain("/api/quotes/pdf-1");
+    const readsAtCompletion = quoteReads;
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 2200)); });
+    expect(quoteReads).toBe(readsAtCompletion);
+    view.rerender(<QuoteReview projectId="project-1" active={false} refreshKey={0} />);
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 2200)); });
+    expect(quoteReads).toBe(readsAtCompletion);
+  }, 10000);
+
+  it("ignores a poll response from before the Quotes page was deactivated", async () => {
+    const processingQuote = {
+      id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 0, confirmed_at: null, notes: null, values: {},
+    };
+    let resolveOldPoll!: (response: Response) => void;
+    const oldPoll = new Promise<Response>((resolve) => { resolveOldPoll = resolve; });
+    let quoteReads = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes/pdf-1")) {
+        quoteReads += 1;
+        return quoteReads === 1 ? oldPoll : Promise.resolve(jsonResponse(processingQuote));
+      }
+      return Promise.resolve(jsonResponse([processingQuote]));
+    }));
+
+    vi.useFakeTimers();
+    const view = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    await act(async () => {});
+    expect(screen.getByText("Processing PDF quote…")).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(quoteReads).toBe(1);
+
+    view.rerender(<QuoteReview projectId="project-1" active={false} refreshKey={0} />);
+    await act(async () => { resolveOldPoll(jsonResponse({ ...processingQuote, status: "NEEDS_REVIEW" })); });
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(quoteReads).toBe(2);
+    expect(screen.getByText("Processing PDF quote…")).toBeInTheDocument();
+  });
+
+  it.each(["NEEDS_REVIEW", "FAILED"])("keeps a newer %s result when an older poll returns PROCESSING", async (terminalStatus) => {
+    const processingQuote = {
+      id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 0, confirmed_at: null, notes: null, values: {},
+    };
+    let resolveOldPoll!: (response: Response) => void;
+    const oldPoll = new Promise<Response>((resolve) => { resolveOldPoll = resolve; });
+    let quoteReads = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes/pdf-1")) {
+        quoteReads += 1;
+        return quoteReads === 1 ? oldPoll : Promise.resolve(jsonResponse({ ...processingQuote, status: terminalStatus }));
+      }
+      return Promise.resolve(jsonResponse([processingQuote]));
+    }));
+
+    vi.useFakeTimers();
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    await act(async () => {});
+    expect(screen.getByText("Processing PDF quote…")).toBeInTheDocument();
+    await act(async () => { await vi.advanceTimersByTimeAsync(4000); });
+    expect(quoteReads).toBe(2);
+    expect(screen.getByText(terminalStatus === "FAILED" ? "PDF quote processing failed." : "PDF quote needs review.")).toBeInTheDocument();
+
+    await act(async () => { resolveOldPoll(jsonResponse(processingQuote)); });
+    expect(screen.queryByText("Processing PDF quote…")).not.toBeInTheDocument();
+    expect(screen.getByText(terminalStatus === "FAILED" ? "PDF quote processing failed." : "PDF quote needs review.")).toBeInTheDocument();
   });
 
   it("creates an all-unknown draft, edits it, and explicitly confirms it", async () => {

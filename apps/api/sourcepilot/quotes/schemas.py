@@ -39,6 +39,14 @@ class QuoteFieldResponse(BaseModel):
     ai_extracted_value: object | None
 
 
+class QuoteProcessingResponse(BaseModel):
+    status: str
+    attempts: int
+    started_at: datetime | None
+    completed_at: datetime | None
+    failure: str | None
+
+
 class QuoteResponse(BaseModel):
     id: UUID
     project_id: UUID
@@ -49,3 +57,4 @@ class QuoteResponse(BaseModel):
     confirmed_at: datetime | None
     notes: str | None
     values: dict[str, QuoteFieldResponse]
+    processing: QuoteProcessingResponse | None = None

@@ -4,6 +4,8 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
+**M3-U7 — Lightweight Background Quote Processing** is `COMMITTED`. Its approved plan, implementation, review recheck, Browser QA, and Done Check passed on 2026-09-27; the unit-scoped commit succeeded.
+
 **M3-U6 — Quote Extractor Structured AI Capability** is `COMMITTED` as `11f8326`. Its plan was approved by the human in this chat, and Review, Browser QA disposition, and Done Check passed on 2026-09-27.
 
 **M3-U5 — Initial Synthetic Quote PDF Fixtures** is `COMMITTED` as `b4b501c5f522d7f5eff8ca05a11e403b0d7f3502`. Its fixture-only plan was approved by the human, then passed review and Done Check.
