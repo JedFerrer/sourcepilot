@@ -330,6 +330,35 @@ class QuoteDocument(Base):
     last_error: Mapped[str | None] = mapped_column(Text)
 
     quote: Mapped[Quote] = relationship(back_populates="documents")
+    blocks: Mapped[list[DocumentBlock]] = relationship(
+        back_populates="document", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class DocumentBlock(Base):
+    """A stable text reference scoped to its original quote document."""
+
+    __tablename__ = "document_blocks"
+    __table_args__ = (
+        CheckConstraint("page_number > 0", name="ck_document_blocks_page_positive"),
+        CheckConstraint("block_number > 0", name="ck_document_blocks_number_positive"),
+        CheckConstraint("text ~ '[^[:space:]]'", name="ck_document_blocks_text_nonblank"),
+        UniqueConstraint(
+            "quote_document_id", "page_number", "block_number",
+            name="uq_document_blocks_document_page_number",
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True)
+    quote_document_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("quote_documents.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    page_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    block_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+
+    document: Mapped[QuoteDocument] = relationship(back_populates="blocks")
 
 
 class QuoteValue(Base):

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import hashlib
 import logging
 import os
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, BinaryIO, Protocol
 from uuid import uuid4
 
 import boto3
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class DocumentStorage(Protocol):
     def put(self, key: str, source: Path) -> None: ...
+    def read_to(self, key: str, destination: Path, *, max_bytes: int) -> str: ...
     def delete(self, key: str) -> None: ...
 
 
@@ -30,6 +32,19 @@ def _valid_key(key: str) -> bool:
     return key.startswith(prefix) and len(suffix) == 36 and suffix.endswith(".pdf") and all(
         character in "0123456789abcdef" for character in suffix[:-4]
     )
+
+
+def _read_bounded(source: BinaryIO, destination: Path, *, max_bytes: int) -> str:
+    digest = hashlib.sha256()
+    size = 0
+    with destination.open("xb") as snapshot:
+        while chunk := source.read(1024 * 1024):
+            size += len(chunk)
+            if size > max_bytes:
+                raise ValueError("Stored PDF exceeds the file limit.")
+            snapshot.write(chunk)
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 class LocalDocumentStorage:
@@ -62,6 +77,10 @@ class LocalDocumentStorage:
     def delete(self, key: str) -> None:
         self._path(key).unlink(missing_ok=True)
 
+    def read_to(self, key: str, destination: Path, *, max_bytes: int) -> str:
+        with self._path(key).open("rb") as original:
+            return _read_bounded(original, destination, max_bytes=max_bytes)
+
 
 class S3DocumentStorage:
     def __init__(self, bucket: str, *, endpoint_url: str | None = None,
@@ -81,6 +100,24 @@ class S3DocumentStorage:
         if not _valid_key(key):
             raise ValueError("Invalid document storage key.")
         self.client.delete_object(Bucket=self.bucket, Key=key)
+
+    def read_to(self, key: str, destination: Path, *, max_bytes: int) -> str:
+        if not _valid_key(key):
+            raise ValueError("Invalid document storage key.")
+        body = self.client.get_object(Bucket=self.bucket, Key=key)["Body"]
+        pending_error = False
+        try:
+            return _read_bounded(body, destination, max_bytes=max_bytes)
+        except BaseException:
+            pending_error = True
+            raise
+        finally:
+            try:
+                body.close()
+            except BaseException as error:
+                logger.error("PDF S3 read stream cleanup failed (%s)", type(error).__name__)
+                if not pending_error:
+                    raise
 
 
 def storage_from_settings(settings: DocumentSettings) -> DocumentStorage:
