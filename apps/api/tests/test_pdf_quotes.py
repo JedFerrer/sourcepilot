@@ -16,21 +16,23 @@ from tempfile import TemporaryDirectory
 from threading import Event, Lock
 from typing import Any, Self
 from unittest.mock import Mock
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import pymupdf
 import pytest
 from fastapi import UploadFile
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine, event, select
+from sqlalchemy import Engine, delete, event, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.ai.client import AnalystModelInvocation, ModelInvocation, ModelProviderError
 from sourcepilot.ai.quote_extraction_eval import load_recorded_outputs
+from sourcepilot.ai.quote_extractor import QuoteExtraction
 from sourcepilot.documents.body_limit import UploadBodyLimitMiddleware
 from sourcepilot.documents.inspect_pdf import PdfInspectionTimeoutError
-from sourcepilot.documents.processing import process_pdf_quote
+from sourcepilot.documents.parse_service import parse_and_persist_document
+from sourcepilot.documents.processing import _finish_success, process_pdf_quote
 from sourcepilot.documents.service import (
     PdfCommitUncertainError,
     PdfUploadError,
@@ -48,7 +50,14 @@ from sourcepilot.documents.storage import (
 )
 from sourcepilot.main import app, get_document_storage
 from sourcepilot.persistence.database import get_database_session
-from sourcepilot.persistence.models import DocumentBlock, Project, Quote, QuoteDocument, QuoteValue
+from sourcepilot.persistence.models import (
+    DocumentBlock,
+    Project,
+    Quote,
+    QuoteDocument,
+    QuoteFieldEvidence,
+    QuoteValue,
+)
 from sourcepilot.quotes.service import QuoteWorkflowError, create_manual_quote
 from sourcepilot.suppliers.seed import seed_suppliers
 from tests.database_test_support import (
@@ -77,6 +86,16 @@ class RecordedClient:
 class FailedClient(RecordedClient):
     def invoke(self, **kwargs: object) -> ModelInvocation:
         raise ModelProviderError("private provider detail", retryable=False)
+
+
+class AllUnknownClient(RecordedClient):
+    def invoke(self, **kwargs: object) -> ModelInvocation:
+        fields = load_recorded_outputs()["harbor-primary"]["fields"]
+        unknown = {key: {
+            "state": "UNKNOWN", "extracted_value": None, "source_block_ids": [],
+            "uncertainty": None, "conflicting_values": [],
+        } for key in fields}
+        return ModelInvocation(json.dumps({"fields": unknown}), 1, 1)
 
 
 @pytest.fixture(scope="module")
@@ -263,6 +282,9 @@ def test_background_failure_keeps_pdf_and_null_draft(
         assert document.last_error == "PROCESSING_FAILED"
         assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == document.quote_id)) is None
         assert storage.root.joinpath(document.storage_key).exists()
+    assert api.patch(f"/quotes/{response.json()['quote']['id']}", json={
+        "values": {"unit_price": "4.50"},
+    }).status_code == 409
 
 
 def test_extractor_failure_retains_blocks_and_exposes_only_safe_failure(
@@ -356,6 +378,269 @@ def test_unknown_and_conflicting_fields_do_not_select_a_value(
             assert field.uncertainty is not None
 
 
+def test_pdf_correction_retains_source_and_has_deterministic_origins(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "missing_shipping.pdf").read_bytes())
+    assert uploaded.status_code == 201
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    assert api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "4.50"}}).status_code == 409
+    process_pdf_quote(
+        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        storage=storage, settings=document_settings_from_environment(),
+        client_factory=lambda: RecordedClient("missing-shipping"),
+    )
+    original = api.get(f"/quotes/{quote_id}").json()
+    price = original["values"]["unit_price"]
+    assert price["ai_extracted_value"] == price["current_value"] == "4.60"
+    assert price["current_origin"] == "AI_EXTRACTED"
+    assert price["evidence"][0]["block_id"] == "p1-b5"
+    assert "4.60" in price["evidence"][0]["block_text"]
+    assert price["evidence"][0]["evidence_value"] == "4.60"
+    assert original["values"]["shipping_cost"]["ai_extracted_value"] is None
+    assert original["values"]["shipping_cost"]["review_state"] == "UNKNOWN"
+    original_evidence = price["evidence"]
+
+    corrected = api.patch(f"/quotes/{quote_id}", json={
+        "values": {"unit_price": "4.50", "shipping_cost": "12.00"},
+        "notes": "Draft correction",
+    })
+    assert corrected.status_code == 200, corrected.text
+    values = corrected.json()["values"]
+    assert values["unit_price"]["current_value"] == "4.50"
+    assert values["unit_price"]["current_origin"] == "USER_CORRECTED"
+    assert values["unit_price"]["ai_extracted_value"] == "4.60"
+    assert values["unit_price"]["evidence"] == original_evidence
+    assert values["shipping_cost"]["current_value"] == "12.00"
+    assert values["shipping_cost"]["current_origin"] == "USER_CORRECTED"
+    assert values["shipping_cost"]["evidence"] == []
+    assert corrected.json()["revision"] == 0
+    assert corrected.json()["status"] == "NEEDS_REVIEW"
+    assert api.post(f"/quotes/{quote_id}/confirm").status_code == 409
+
+    cleared = api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": None}})
+    assert cleared.status_code == 200
+    assert cleared.json()["values"]["unit_price"]["current_value"] is None
+    assert cleared.json()["values"]["unit_price"]["current_origin"] == "USER_CORRECTED"
+    restored = api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "4.60"}})
+    assert restored.status_code == 200
+    assert restored.json()["values"]["unit_price"]["current_origin"] == "AI_EXTRACTED"
+    assert restored.json()["values"]["unit_price"]["evidence"] == original_evidence
+    assert restored.json()["values"]["shipping_cost"]["current_origin"] == "USER_CORRECTED"
+    assert api.patch(f"/quotes/{quote_id}", json={"values": {"moq": 0}}).status_code == 422
+    with TestClient(app, raise_server_exceptions=False) as stranger:
+        assert stranger.post("/demo-session").status_code == 204
+        assert stranger.patch(f"/quotes/{quote_id}", json={"values": {}}).status_code == 404
+
+
+def test_conflict_alternatives_keep_citations_with_null_current(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "conflicting_lead_time.pdf").read_bytes())
+    document_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(
+        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        storage=storage, settings=document_settings_from_environment(),
+        client_factory=lambda: RecordedClient("conflicting-lead-time"),
+    )
+    field = api.get(f"/quotes/{uploaded.json()['quote']['id']}").json()["values"]["production_lead_time"]
+    assert field["current_value"] is None
+    assert field["ai_extracted_value"] is None
+    assert field["current_origin"] == "AI_EXTRACTED"
+    assert field["review_state"] == "CONFLICT"
+    assert field["uncertainty"]
+    alternatives = field["conflicting_values"]
+    assert {alternative["value"] for alternative in alternatives} == {
+        "25 days after sample approval", "30-35 days after sample approval",
+    }
+    assert {source["block_id"] for alternative in alternatives
+            for source in alternative["evidence"]} == {"p1-b10", "p2-b3"}
+    assert all(source["evidence_value"] == alternative["value"]
+               for alternative in alternatives for source in alternative["evidence"])
+    with Session(engine) as session:
+        assert all(association.block.quote_document_id == document_id
+                   for association in session.scalars(select(QuoteFieldEvidence)).all())
+
+
+def test_cross_document_citation_rejected_before_any_draft_is_written(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, first_supplier, second_supplier = setup_shortlist(
+        api, approve_shortlist=False,
+    )
+    assert api.patch(
+        f"/projects/{project_id}/suppliers/{second_supplier}",
+        json={"shortlisted": True},
+    ).status_code == 200
+    assert api.post(f"/projects/{project_id}/shortlist/approve").status_code == 200
+    first = upload(api, project_id, first_supplier,
+                   (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    second = upload(api, project_id, second_supplier, pdf_bytes())
+    assert first.status_code == second.status_code == 201
+    first_document = UUID(first.json()["document"]["id"])
+    second_document = UUID(second.json()["document"]["id"])
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    parse_and_persist_document(
+        factory, first_document, storage=storage,
+        settings=document_settings_from_environment(),
+    )
+    with Session(engine) as session, session.begin():
+        session.add(DocumentBlock(
+            id=uuid4(), quote_document_id=second_document,
+            page_number=99, block_number=99, text="Other quote only",
+        ))
+    extraction = QuoteExtraction.model_validate(load_recorded_outputs()["harbor-primary"])
+    extraction.fields.unit_price.source_block_ids = ["p99-b99"]
+    with pytest.raises(ValueError, match="outside the quote document"):
+        _finish_success(factory, first_document, 1, extraction)
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, first_document)
+        assert document is not None
+        assert document.evidence_capture_version is None
+        quote = document.quote
+        assert quote.status == "PROCESSING"
+        assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == quote.id)) is None
+        assert session.scalar(select(QuoteFieldEvidence)) is None
+
+
+def test_older_pdf_draft_without_associations_reports_indeterminate_null_fields(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "conflicting_lead_time.pdf").read_bytes())
+    document_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(
+        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        storage=storage, settings=document_settings_from_environment(),
+        client_factory=lambda: RecordedClient("conflicting-lead-time"),
+    )
+    with Session(engine) as session, session.begin():
+        session.execute(delete(QuoteFieldEvidence))
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None
+        document.evidence_capture_version = None
+    quote_id = uploaded.json()["quote"]["id"]
+    for response in (api.get(f"/quotes/{quote_id}"), api.get(f"/projects/{project_id}/quotes")):
+        assert response.status_code == 200
+        values = (response.json()["values"] if isinstance(response.json(), dict)
+                  else response.json()[0]["values"])
+        known = values["unit_price"]
+        assert known["ai_extracted_value"] is not None
+        assert known["review_state"] == "KNOWN"
+        ambiguous = values["production_lead_time"]
+        assert ambiguous["ai_extracted_value"] is None
+        assert ambiguous["review_state"] == "UNAVAILABLE"
+        assert ambiguous["evidence"] == []
+        assert ambiguous["conflicting_values"] == []
+
+
+def test_legacy_pdf_evidence_on_one_field_does_not_classify_another(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "missing_shipping.pdf").read_bytes())
+    document_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(
+        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        storage=storage, settings=document_settings_from_environment(),
+        client_factory=lambda: RecordedClient("missing-shipping"),
+    )
+    with Session(engine) as session, session.begin():
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None
+        document.evidence_capture_version = None
+    for response in (api.get(f"/quotes/{uploaded.json()['quote']['id']}"),
+                     api.get(f"/projects/{project_id}/quotes")):
+        assert response.status_code == 200
+        quote = response.json() if isinstance(response.json(), dict) else response.json()[0]
+        known = quote["values"]["unit_price"]
+        assert known["review_state"] == "KNOWN"
+        assert known["evidence"]
+        uncited = quote["values"]["shipping_cost"]
+        assert uncited["ai_extracted_value"] is None
+        assert uncited["evidence"] == []
+        assert uncited["review_state"] == "UNAVAILABLE"
+
+
+def test_new_all_unknown_pdf_without_citations_reports_unknown(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    assert uploaded.status_code == 201
+    document_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(
+        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        storage=storage, settings=document_settings_from_environment(),
+        client_factory=lambda: AllUnknownClient("harbor-primary"),
+    )
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None
+        assert document.evidence_capture_version == 1
+        assert session.scalar(select(QuoteFieldEvidence)) is None
+    for response in (api.get(f"/quotes/{uploaded.json()['quote']['id']}"),
+                     api.get(f"/projects/{project_id}/quotes")):
+        assert response.status_code == 200
+        quote = response.json() if isinstance(response.json(), dict) else response.json()[0]
+        assert quote["status"] == "NEEDS_REVIEW"
+        assert quote["values"]
+        assert {field["review_state"] for field in quote["values"].values()} == {"UNKNOWN"}
+        assert all(field["evidence"] == [] for field in quote["values"].values())
+
+
+def test_quote_listing_batches_pdf_evidence_and_skips_manual_evidence_queries(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, first_supplier, second_supplier = setup_shortlist(api, approve_shortlist=False)
+    assert api.patch(
+        f"/projects/{project_id}/suppliers/{second_supplier}",
+        json={"shortlisted": True},
+    ).status_code == 200
+    assert api.post(f"/projects/{project_id}/shortlist/approve").status_code == 200
+    for supplier_id in (first_supplier, second_supplier):
+        uploaded = upload(api, project_id, supplier_id,
+                          (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+        process_pdf_quote(
+            UUID(uploaded.json()["document"]["id"]),
+            session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+            storage=storage, settings=document_settings_from_environment(),
+            client_factory=lambda: RecordedClient("harbor-primary"),
+        )
+
+    statements: list[str] = []
+
+    def record_query(_: object, __: object, statement: str, *args: object) -> None:
+        if statement.lstrip().lower().startswith("select"):
+            statements.append(statement.lower())
+
+    event.listen(engine, "before_cursor_execute", record_query)
+    try:
+        response = api.get(f"/projects/{project_id}/quotes")
+        assert response.status_code == 200
+        assert len(response.json()) == 2
+        assert all(quote["values"]["unit_price"]["evidence"] for quote in response.json())
+        assert sum("from quote_field_evidence" in query for query in statements) == 1
+        assert sum("from document_blocks" in query for query in statements) == 1
+    finally:
+        event.remove(engine, "before_cursor_execute", record_query)
+
+
 def test_draft_persistence_error_rolls_back_before_failed_completion(
     storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
 ) -> None:
@@ -384,6 +669,7 @@ def test_draft_persistence_error_rolls_back_before_failed_completion(
         assert document.processing_status == document.quote.status == "FAILED"
         assert document.processing_completed_at is not None
         assert document.last_error == "PROCESSING_FAILED"
+        assert document.evidence_capture_version is None
         assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == document.quote_id)) is None
         assert session.scalar(select(DocumentBlock).where(DocumentBlock.quote_document_id == document_id)) is not None
 

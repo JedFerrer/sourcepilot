@@ -3,7 +3,14 @@
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
 
-type QuoteField = { current_value: string | number | null; current_origin: string; ai_extracted_value: unknown | null };
+type QuoteEvidence = { block_id: string; page: number; block_text: string; evidence_value: string | number | null };
+type QuoteField = {
+  current_value: string | number | null; current_origin: string;
+  ai_extracted_value: string | number | null; uncertainty?: string | null;
+  review_state?: "KNOWN" | "UNKNOWN" | "CONFLICT" | "UNAVAILABLE";
+  evidence?: QuoteEvidence[];
+  conflicting_values?: { value: string | number; evidence: QuoteEvidence[] }[];
+};
 type Quote = {
   id: string; supplier_id: string; entry_type: string; status: string;
   revision: number; confirmed_at: string | null; notes: string | null;
@@ -53,6 +60,19 @@ function errorMessage(error: unknown): string {
   return error instanceof ApiClientError ? error.message : "The quote could not be saved. Try again.";
 }
 
+function displayValue(value: string | number | null | undefined): string {
+  return value == null ? "Unknown" : String(value);
+}
+
+function SourceCitations({ evidence }: { evidence: QuoteEvidence[] }) {
+  return <ul>{evidence.map((source, index) => <li key={`${source.block_id}-${index}`}>
+    <p>Page {source.page}, block {source.block_id}</p>
+    <blockquote>{source.block_text}</blockquote>
+    {source.evidence_value != null ?
+      <p>Associated extracted value: {displayValue(source.evidence_value)}</p> : null}
+  </li>)}</ul>;
+}
+
 function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
   projectId: string; supplier: Supplier; quote?: Quote; onSaved: () => Promise<void>;
 }) {
@@ -92,7 +112,7 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
         });
       }
       setEditing(false);
-      setReviewing(true);
+      setReviewing(quote?.entry_type !== "PDF");
       await onSaved();
     } catch (failure) {
       setError(errorMessage(failure));
@@ -146,7 +166,44 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
     {quote?.entry_type === "PDF" && quote.status === "PROCESSING" ?
       <p role="status">Processing PDF quote…</p> : null}
     {quote?.entry_type === "PDF" && quote.status === "NEEDS_REVIEW" ?
-      <p role="status">PDF quote needs review.</p> : null}
+      <>
+        <p role="status">PDF quote needs review.</p>
+        <p>Review the PDF source, AI extraction, and current draft values. Corrections remain unconfirmed.</p>
+        <dl>{fields.map((field) => {
+          const value = quote.values[field.key];
+          const alternatives = value?.conflicting_values ?? [];
+          const sources = value?.evidence ?? [];
+          const reviewState = value?.review_state ??
+            (alternatives.length >= 2 ? "CONFLICT" :
+              value?.ai_extracted_value == null ? "UNAVAILABLE" : "KNOWN");
+          return <div key={field.key}>
+            <dt>{field.label}</dt>
+            <dd>
+              <p>Extraction: {reviewState === "UNAVAILABLE" ? "Indeterminate (source evidence unavailable)" :
+                reviewState === "CONFLICT" ? "Conflict" :
+                  reviewState === "UNKNOWN" ? "Unknown" : "Known"}</p>
+              <p>AI extracted value: {value?.ai_extracted_value == null && reviewState === "CONFLICT" ?
+                "No single value" : value?.ai_extracted_value == null && reviewState === "UNAVAILABLE" ?
+                  "Indeterminate" : displayValue(value?.ai_extracted_value)}</p>
+              <p>Current draft value: {value?.current_value == null && reviewState !== "UNKNOWN" ?
+                "Not set" : displayValue(value?.current_value)}</p>
+              <p>Current origin: {value?.current_origin?.replaceAll("_", " ") ?? "Unknown"}</p>
+              {value?.uncertainty ? <p>Uncertainty: {value.uncertainty}</p> : null}
+              {alternatives.length >= 2 ? <div>
+                <p>Conflicting PDF interpretations:</p>
+                <ul>{alternatives.map((alternative, index) => <li key={index}>
+                  <p>{displayValue(alternative.value)}</p>
+                  <SourceCitations evidence={alternative.evidence} />
+                </li>)}</ul>
+              </div> : sources.length ? <div>
+                <p>PDF source evidence:</p><SourceCitations evidence={sources} />
+              </div> : <p>No saved source citations available for this field.</p>}
+            </dd>
+          </div>;
+        })}</dl>
+        <p>Notes: {quote.notes ?? "None"}</p>
+        {!editing ? <button type="button" disabled={busy} onClick={() => setEditing(true)}>Edit PDF draft</button> : null}
+      </> : null}
     {quote?.entry_type === "PDF" && quote.status === "FAILED" ?
       <p role="alert">PDF quote processing failed.</p> : null}
     {quote?.status === "CONFIRMED" ? <p role="status">Confirmed manual quote. Current values are ready for comparison.</p> : null}

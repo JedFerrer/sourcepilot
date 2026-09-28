@@ -33,10 +33,26 @@ class ManualQuoteEditRequest(BaseModel):
         return validate_manual_values(values)
 
 
+class QuoteEvidenceResponse(BaseModel):
+    block_id: str
+    page: int
+    block_text: str
+    evidence_value: object | None
+
+
+class QuoteConflictResponse(BaseModel):
+    value: object
+    evidence: list[QuoteEvidenceResponse]
+
+
 class QuoteFieldResponse(BaseModel):
     current_value: object | None
     current_origin: str
     ai_extracted_value: object | None
+    uncertainty: str | None = None
+    review_state: str
+    evidence: list[QuoteEvidenceResponse] = Field(default_factory=list)
+    conflicting_values: list[QuoteConflictResponse] = Field(default_factory=list)
 
 
 class QuoteProcessingResponse(BaseModel):

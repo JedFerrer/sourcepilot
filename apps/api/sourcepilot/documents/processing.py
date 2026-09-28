@@ -11,12 +11,24 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.client import OpenAIResponsesClient, StructuredModelClient
-from sourcepilot.ai.quote_extractor import QuoteExtraction, extract_quote_document
+from sourcepilot.ai.quote_extractor import (
+    QuoteExtraction,
+    extract_quote_document,
+    validate_source_references,
+)
 from sourcepilot.documents.parse_service import parse_and_persist_document
 from sourcepilot.documents.settings import DocumentSettings, document_settings_from_environment
 from sourcepilot.documents.storage import DocumentStorage, storage_from_settings
 from sourcepilot.persistence.database import application_session_factory
-from sourcepilot.persistence.models import DemoSession, Project, Quote, QuoteDocument, QuoteValue
+from sourcepilot.persistence.models import (
+    DemoSession,
+    DocumentBlock,
+    Project,
+    Quote,
+    QuoteDocument,
+    QuoteFieldEvidence,
+    QuoteValue,
+)
 from sourcepilot.quotes.domain import (
     QUOTE_FIELD_KEYS,
     QuoteValueOrigin,
@@ -57,6 +69,15 @@ def _finish_success(
             return
         if quote.values:
             raise ValueError("PDF draft already contains quote values.")
+        blocks = session.scalars(
+            select(DocumentBlock).where(DocumentBlock.quote_document_id == document.id)
+        ).all()
+        block_by_reference = {
+            f"p{block.page_number}-b{block.block_number}": block for block in blocks
+        }
+        if not block_by_reference:
+            raise ValueError("PDF draft has no validated document blocks.")
+        validate_source_references(extraction, set(block_by_reference))
         for key in sorted(QUOTE_FIELD_KEYS):
             field = getattr(extraction.fields, key)
             value = field.extracted_value if field.state == "KNOWN" else None
@@ -64,15 +85,33 @@ def _finish_success(
                 field_key=key, current_value=value,
                 current_origin=QuoteValueOrigin.AI_EXTRACTED, ai_extracted_value=value,
             )
-            quote.values.append(QuoteValue(
+            record = QuoteValue(
                 field_key=key, current_value=value,
                 ai_extracted_value=value, current_origin=QuoteValueOrigin.AI_EXTRACTED.value,
                 uncertainty=field.uncertainty,
-            ))
+            )
+            associations = (
+                [(reference, field.extracted_value) for reference in field.source_block_ids]
+                if field.state == "KNOWN" else
+                [(reference, alternative.value)
+                 for alternative in field.conflicting_values
+                 for reference in alternative.source_block_ids]
+                if field.state == "CONFLICT" else
+                [(reference, None) for reference in field.source_block_ids]
+            )
+            for reference, evidence_value in associations:
+                block = block_by_reference[reference]
+                if block.quote_document_id != document.id or document.quote_id != quote.id:
+                    raise ValueError("Quote evidence belongs to another document or quote.")
+                record.evidence.append(QuoteFieldEvidence(
+                    block=block, evidence_value=evidence_value,
+                ))
+            quote.values.append(record)
         completed_at = datetime.now(UTC)
         quote.status = "NEEDS_REVIEW"
         document.processing_status = "NEEDS_REVIEW"
         document.processing_completed_at = completed_at
+        document.evidence_capture_version = 1
         document.last_error = None
         session.flush()
 

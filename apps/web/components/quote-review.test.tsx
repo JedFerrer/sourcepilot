@@ -60,6 +60,117 @@ describe("QuoteReview", () => {
     expect(screen.queryByRole("button", { name: "Review for confirmation" })).not.toBeInTheDocument();
   });
 
+  it("keeps PDF source, AI extraction, and corrected draft distinct", async () => {
+    const evidence = [{ block_id: "p1-b5", page: 1,
+      block_text: "Unit price: USD 4.22", evidence_value: "4.22" }];
+    let quote = {
+      id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "NEEDS_REVIEW",
+      revision: 0, confirmed_at: null, notes: null,
+      values: {
+        unit_price: { current_value: "4.22", current_origin: "AI_EXTRACTED",
+          ai_extracted_value: "4.22", uncertainty: null, evidence, conflicting_values: [] },
+        shipping_cost: { current_value: null as string | null, current_origin: "AI_EXTRACTED",
+          ai_extracted_value: null, uncertainty: null, review_state: "UNKNOWN",
+          evidence: [], conflicting_values: [] },
+      },
+    };
+    const patches: Record<string, unknown>[] = [];
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/pdf-1") && init?.method === "PATCH") {
+        patches.push(JSON.parse(String(init.body)) as Record<string, unknown>);
+        quote = { ...quote, values: {
+          ...quote.values,
+          unit_price: { ...quote.values.unit_price, current_value: "4.50", current_origin: "USER_CORRECTED" },
+          shipping_cost: { ...quote.values.shipping_cost, current_value: "12.00", current_origin: "USER_CORRECTED" },
+        } };
+        return Promise.resolve(jsonResponse(quote));
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    }));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("Unit price: USD 4.22")).toBeInTheDocument();
+    expect(screen.getByText("AI extracted value: 4.22")).toBeInTheDocument();
+    expect(screen.getByText("Associated extracted value: 4.22")).toBeInTheDocument();
+    expect(screen.getByText("Extraction: Unknown")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
+    fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.50" } });
+    fireEvent.change(screen.getByLabelText("Shipping cost"), { target: { value: "12.00" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await waitFor(() => expect(patches).toEqual([{
+      values: { unit_price: "4.50", shipping_cost: "12.00" },
+    }]));
+    expect(await screen.findByText("Current draft value: 4.50")).toBeInTheDocument();
+    expect(screen.getByText("AI extracted value: 4.22")).toBeInTheDocument();
+    expect(screen.getByText("Unit price: USD 4.22")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
+  });
+
+  it("shows conflict citations and discards or reports failed PDF edits", async () => {
+    const quote = {
+      id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "NEEDS_REVIEW",
+      revision: 0, confirmed_at: null, notes: null,
+      values: { production_lead_time: {
+        current_value: null, current_origin: "AI_EXTRACTED", ai_extracted_value: null,
+        uncertainty: "Contradictory production times", review_state: "CONFLICT", evidence: [],
+        conflicting_values: [
+          { value: "25 days", evidence: [{ block_id: "p1-b10", page: 1,
+            block_text: "Production: 25 days", evidence_value: "25 days" }] },
+          { value: "30-35 days", evidence: [{ block_id: "p2-b3", page: 2,
+            block_text: "Production: 30-35 days", evidence_value: "30-35 days" }] },
+        ],
+      } },
+    };
+    const patches: Record<string, unknown>[] = [];
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/pdf-1") && init?.method === "PATCH") {
+        patches.push(JSON.parse(String(init.body)) as Record<string, unknown>);
+        return Promise.resolve(jsonResponse({ error: { code: "QUOTE_NOT_EDITABLE", message: "Save failed." } }, 409));
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    }));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("Production: 25 days")).toBeInTheDocument();
+    expect(screen.getByText("Production: 30-35 days")).toBeInTheDocument();
+    expect(screen.getByText("Uncertainty: Contradictory production times")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
+    fireEvent.change(screen.getByLabelText("Production lead time"), { target: { value: "25 days" } });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    expect(patches).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
+    expect((screen.getByLabelText("Production lead time") as HTMLInputElement).value).toBe("");
+    fireEvent.change(screen.getByLabelText("Production lead time"), { target: { value: "25 days" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    expect(await screen.findByText("Save failed.")).toBeInTheDocument();
+    expect(patches).toEqual([{ values: { production_lead_time: "25 days" } }]);
+    expect(screen.getAllByText("Current draft value: Not set").length).toBeGreaterThan(0);
+  });
+
+  it("renders legacy null extraction as indeterminate while retaining known values", async () => {
+    const quote = {
+      id: "pdf-legacy", supplier_id: supplier.id, entry_type: "PDF", status: "NEEDS_REVIEW",
+      revision: 0, confirmed_at: null, notes: null,
+      values: {
+        unit_price: { current_value: "4.22", current_origin: "AI_EXTRACTED",
+          ai_extracted_value: "4.22", review_state: "KNOWN", evidence: [], conflicting_values: [] },
+        production_lead_time: { current_value: null, current_origin: "AI_EXTRACTED",
+          ai_extracted_value: null, review_state: "UNAVAILABLE", evidence: [], conflicting_values: [] },
+      },
+    };
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(
+      path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([quote]),
+    )));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("AI extracted value: 4.22")).toBeInTheDocument();
+    expect(screen.getByText("Extraction: Known")).toBeInTheDocument();
+    expect(screen.getAllByText("Extraction: Indeterminate (source evidence unavailable)").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("AI extracted value: Indeterminate").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Current draft value: Not set").length).toBeGreaterThan(0);
+  });
+
   it("polls while processing and stops after completion or deactivation", async () => {
     let status = "PROCESSING";
     let quoteReads = 0;

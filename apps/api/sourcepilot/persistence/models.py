@@ -327,6 +327,7 @@ class QuoteDocument(Base):
     processing_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     processing_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    evidence_capture_version: Mapped[int | None] = mapped_column(Integer, nullable=True)
     last_error: Mapped[str | None] = mapped_column(Text)
 
     quote: Mapped[Quote] = relationship(back_populates="documents")
@@ -359,6 +360,9 @@ class DocumentBlock(Base):
     text: Mapped[str] = mapped_column(Text, nullable=False)
 
     document: Mapped[QuoteDocument] = relationship(back_populates="blocks")
+    field_evidence: Mapped[list[QuoteFieldEvidence]] = relationship(
+        back_populates="block", passive_deletes=True
+    )
 
 
 class QuoteValue(Base):
@@ -382,6 +386,29 @@ class QuoteValue(Base):
     uncertainty: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     quote: Mapped[Quote] = relationship(back_populates="values")
+    evidence: Mapped[list[QuoteFieldEvidence]] = relationship(
+        back_populates="quote_value", cascade="all, delete-orphan", passive_deletes=True
+    )
+
+
+class QuoteFieldEvidence(Base):
+    """A document block and the extracted interpretation it supports."""
+
+    __tablename__ = "quote_field_evidence"
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    quote_value_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("quote_values.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    document_block_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("document_blocks.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    evidence_value: Mapped[object | None] = mapped_column(JSONB, nullable=True)
+
+    quote_value: Mapped[QuoteValue] = relationship(back_populates="evidence")
+    block: Mapped[DocumentBlock] = relationship(back_populates="field_evidence")
 
 
 class RequirementEvaluationRecord(Base):

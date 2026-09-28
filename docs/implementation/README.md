@@ -4,6 +4,8 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
+**M3-U8 — Quote Correction, Provenance, and Evidence UI** is `COMMITTED`. Its approved plan, implementation, review fixes, Browser QA, and Done Check passed by 2026-09-28; the unit-scoped commit succeeded. Implementation is limited to draft correction and evidence review.
+
 **M3-U7 — Lightweight Background Quote Processing** is `COMMITTED`. Its approved plan, implementation, review recheck, Browser QA, and Done Check passed on 2026-09-27; the unit-scoped commit succeeded.
 
 **M3-U6 — Quote Extractor Structured AI Capability** is `COMMITTED` as `11f8326`. Its plan was approved by the human in this chat, and Review, Browser QA disposition, and Done Check passed on 2026-09-27.

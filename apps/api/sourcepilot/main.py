@@ -84,6 +84,7 @@ from sourcepilot.quotes.service import (
     confirm_manual_quote,
     create_manual_quote,
     edit_manual_quote,
+    edit_pdf_quote,
     list_quotes,
     quote_snapshot,
 )
@@ -353,7 +354,8 @@ def edit_quote_endpoint(
 ) -> QuoteResponse | JSONResponse:
     quote = owned_quote_or_404(database_session, request, quote_id, lock=True)
     try:
-        result = edit_manual_quote(
+        edit = edit_pdf_quote if quote.entry_type == "PDF" else edit_manual_quote
+        result = edit(
             database_session, quote, payload.values,
             notes_provided="notes" in payload.model_fields_set, notes=payload.notes,
         )

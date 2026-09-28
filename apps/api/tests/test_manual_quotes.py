@@ -4,7 +4,7 @@ from collections.abc import Iterator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import Engine
+from sqlalchemy import Engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.main import app
@@ -100,6 +100,7 @@ def test_manual_quote_create_patch_confirm_and_edit_lock(client: TestClient) -> 
     assert quote["values"]["currency"]["current_value"] == "USD"
     assert quote["values"]["moq"] == {
         "current_value": None, "current_origin": "USER_ENTERED", "ai_extracted_value": None,
+        "uncertainty": None, "review_state": "UNKNOWN", "evidence": [], "conflicting_values": [],
     }
     assert quote["values"]["shipping_cost"]["current_value"] is None
     assert len(client.get(f"/projects/{project_id}/quotes").json()) == 1
@@ -129,6 +130,29 @@ def test_manual_quote_create_patch_confirm_and_edit_lock(client: TestClient) -> 
     assert client.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "5"}}).status_code == 409
     assert client.post(f"/quotes/{quote_id}/confirm").status_code == 409
     assert client.get(f"/quotes/{quote_id}").json()["values"]["unit_price"]["current_value"] == "4.50"
+
+
+def test_manual_quote_reads_do_not_query_pdf_evidence(client: TestClient, engine: Engine) -> None:
+    project_id, supplier_id, _ = setup_shortlist(client)
+    created = client.post(f"/projects/{project_id}/quotes/manual", json={
+        "supplier_id": supplier_id, "values": {"unit_price": "4.25"},
+    })
+    assert created.status_code == 201
+    statements: list[str] = []
+
+    def record_query(_: object, __: object, statement: str, *args: object) -> None:
+        if statement.lstrip().lower().startswith("select"):
+            statements.append(statement.lower())
+
+    event.listen(engine, "before_cursor_execute", record_query)
+    try:
+        assert client.get(f"/quotes/{created.json()['id']}").status_code == 200
+        assert client.get(f"/projects/{project_id}/quotes").status_code == 200
+    finally:
+        event.remove(engine, "before_cursor_execute", record_query)
+    assert not any("quote_field_evidence" in query for query in statements)
+    assert not any("document_blocks" in query for query in statements)
+    assert not any("quote_documents" in query for query in statements)
 
 
 def test_all_unknown_confirmation_and_stage_shortlist_guards(client: TestClient) -> None:
