@@ -91,6 +91,18 @@ def validate_quote_value_provenance(
     return origin
 
 
+def normalized_current_value_changed(
+    field_key: str, previous: object | None, current: object | None,
+) -> bool:
+    """Compare commercial amounts by value rather than decimal text scale."""
+    if field_key in QUOTE_MONEY_FIELDS and previous is not None and current is not None:
+        try:
+            return Decimal(str(previous)) != Decimal(str(current))
+        except InvalidOperation:
+            pass
+    return previous != current
+
+
 def authoritative_current_values(
     status: QuoteStatus | str, values: Iterable[tuple[str, object | None]]
 ) -> dict[str, object | None] | None:

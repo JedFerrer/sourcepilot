@@ -10,6 +10,13 @@ from sourcepilot.session.settings import positive_integer_from_environment
 
 MULTIPART_OVERHEAD_BYTES = 65_536
 DEFAULT_LOCAL_DIRECTORY = Path(__file__).resolve().parents[2] / ".local-quote-documents"
+DEFAULT_PROCESSING_STALE_SECONDS = 600
+
+
+def processing_stale_seconds_from_environment() -> int:
+    return positive_integer_from_environment(
+        "QUOTE_PROCESSING_STALE_SECONDS", DEFAULT_PROCESSING_STALE_SECONDS
+    )
 
 
 @dataclass(frozen=True)

@@ -81,12 +81,14 @@ from sourcepilot.quotes.schemas import (
 from sourcepilot.quotes.service import (
     QuoteCandidateNotShortlistedError,
     QuoteWorkflowError,
-    confirm_manual_quote,
+    confirm_quote,
     create_manual_quote,
     edit_manual_quote,
     edit_pdf_quote,
     list_quotes,
+    manual_fallback_quote,
     quote_snapshot,
+    retry_pdf_quote,
 )
 from sourcepilot.session.service import get_or_create_demo_session, resolve_demo_session
 from sourcepilot.session.settings import (
@@ -249,13 +251,13 @@ def owned_project_or_404(
 
 
 def owned_quote_or_404(
-    database_session: Session, request: Request, quote_id: UUID, *, lock: bool = False,
+    database_session: Session, request: Request, quote_id: UUID,
 ) -> Quote:
     demo_session = active_demo_session(request, database_session)
     query = select(Quote).join(Project).where(
         Quote.id == quote_id, Project.demo_session_id == demo_session.id,
     )
-    quote = database_session.scalars(query.with_for_update(of=Quote) if lock else query).one_or_none()
+    quote = database_session.scalars(query).one_or_none()
     if quote is None:
         database_session.rollback()
         raise HTTPException(status_code=404, detail="Quote not found.")
@@ -318,7 +320,9 @@ def upload_pdf_quote_endpoint(
             database_session, project, supplier_id, path=path, filename=filename,
             sha256=sha256, page_count=page_count, storage=storage,
         )
-        background_tasks.add_task(run_pdf_quote_processing, result.document.id)
+        background_tasks.add_task(
+            run_pdf_quote_processing, result.document.id, result.document.processing_attempts,
+        )
         return result
     except PdfUploadError as error:
         database_session.rollback()
@@ -352,7 +356,7 @@ def edit_quote_endpoint(
     quote_id: UUID, payload: ManualQuoteEditRequest, request: Request,
     database_session: Annotated[Session, Depends(get_database_session)],
 ) -> QuoteResponse | JSONResponse:
-    quote = owned_quote_or_404(database_session, request, quote_id, lock=True)
+    quote = owned_quote_or_404(database_session, request, quote_id)
     try:
         edit = edit_pdf_quote if quote.entry_type == "PDF" else edit_manual_quote
         result = edit(
@@ -371,13 +375,48 @@ def confirm_quote_endpoint(
     quote_id: UUID, request: Request,
     database_session: Annotated[Session, Depends(get_database_session)],
 ) -> QuoteResponse | JSONResponse:
-    quote = owned_quote_or_404(database_session, request, quote_id, lock=True)
+    quote = owned_quote_or_404(database_session, request, quote_id)
     try:
-        result = confirm_manual_quote(database_session, quote)
+        result = confirm_quote(database_session, quote)
         commit_or_rollback(database_session)
     except QuoteWorkflowError as error:
         database_session.rollback()
         return error_response(409, code="QUOTE_NOT_CONFIRMABLE", message=str(error))
+    return result
+
+
+@app.post("/quotes/{quote_id}/retry", response_model=QuoteResponse)
+def retry_quote_endpoint(
+    quote_id: UUID, request: Request, background_tasks: BackgroundTasks,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> QuoteResponse | JSONResponse:
+    quote = owned_quote_or_404(database_session, request, quote_id)
+    try:
+        result, scheduled_attempt = retry_pdf_quote(database_session, quote)
+        commit_or_rollback(database_session)
+    except QuoteWorkflowError as error:
+        database_session.rollback()
+        return error_response(409, code="QUOTE_NOT_RETRYABLE", message=str(error))
+    if scheduled_attempt is not None:
+        background_tasks.add_task(run_pdf_quote_processing, *scheduled_attempt)
+    return result
+
+
+@app.post("/quotes/{quote_id}/manual-fallback", response_model=QuoteResponse)
+def manual_fallback_endpoint(
+    quote_id: UUID, payload: ManualQuoteEditRequest, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> QuoteResponse | JSONResponse:
+    quote = owned_quote_or_404(database_session, request, quote_id)
+    try:
+        result = manual_fallback_quote(
+            database_session, quote, payload.values,
+            notes_provided="notes" in payload.model_fields_set, notes=payload.notes,
+        )
+        commit_or_rollback(database_session)
+    except QuoteWorkflowError as error:
+        database_session.rollback()
+        return error_response(409, code="QUOTE_NOT_AVAILABLE", message=str(error))
     return result
 
 

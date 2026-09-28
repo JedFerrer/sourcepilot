@@ -47,7 +47,7 @@ describe("QuoteReview", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/quotes/upload", expect.objectContaining({ method: "POST" }));
   });
 
-  it.each(["NEEDS_REVIEW", "FAILED"])("shows PDF %s without manual controls", async (status) => {
+  it.each(["NEEDS_REVIEW", "FAILED"])("shows PDF %s recovery or review controls", async (status) => {
     vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(
       path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([{
         id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status,
@@ -55,9 +55,10 @@ describe("QuoteReview", () => {
       }]),
     )));
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
-    expect(await screen.findByText(status === "FAILED" ? "PDF quote processing failed." : "PDF quote needs review.")).toBeInTheDocument();
+    expect(await screen.findByText(status === "FAILED" ? "We couldn't reliably extract this quotation." : "PDF quote needs review.")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Review for confirmation" })).not.toBeInTheDocument();
+    expect(Boolean(screen.queryByRole("button", { name: "Review for confirmation" }))).toBe(status === "NEEDS_REVIEW");
+    expect(Boolean(screen.queryByRole("button", { name: "Enter quote manually" }))).toBe(status === "FAILED");
   });
 
   it("keeps PDF source, AI extraction, and corrected draft distinct", async () => {
@@ -253,11 +254,11 @@ describe("QuoteReview", () => {
     expect(screen.getByText("Processing PDF quote…")).toBeInTheDocument();
     await act(async () => { await vi.advanceTimersByTimeAsync(4000); });
     expect(quoteReads).toBe(2);
-    expect(screen.getByText(terminalStatus === "FAILED" ? "PDF quote processing failed." : "PDF quote needs review.")).toBeInTheDocument();
+    expect(screen.getByText(terminalStatus === "FAILED" ? "We couldn't reliably extract this quotation." : "PDF quote needs review.")).toBeInTheDocument();
 
     await act(async () => { resolveOldPoll(jsonResponse(processingQuote)); });
     expect(screen.queryByText("Processing PDF quote…")).not.toBeInTheDocument();
-    expect(screen.getByText(terminalStatus === "FAILED" ? "PDF quote processing failed." : "PDF quote needs review.")).toBeInTheDocument();
+    expect(screen.getByText(terminalStatus === "FAILED" ? "We couldn't reliably extract this quotation." : "PDF quote needs review.")).toBeInTheDocument();
   });
 
   it("creates an all-unknown draft, edits it, and explicitly confirms it", async () => {
@@ -301,6 +302,10 @@ describe("QuoteReview", () => {
     fireEvent.click(screen.getByRole("button", { name: "Confirm Quote" }));
     expect(await screen.findByText(/Confirmed manual quote/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Edit draft" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Edit confirmed quote" }));
+    fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "5.00" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save quote" }));
+    await waitFor(() => expect(requests[2].body).toEqual({ values: { unit_price: "5.00" } }));
   });
 
   it("discards every cancelled field and note without saving them later", async () => {
@@ -401,5 +406,114 @@ describe("QuoteReview", () => {
     fails = false;
     fireEvent.click(screen.getByRole("button", { name: "Retry quotes" }));
     expect(await screen.findByRole("button", { name: "Create manual quote" })).toBeInTheDocument();
+  });
+
+  it("confirms a reviewed PDF and edits its confirmed current value", async () => {
+    let quote = {
+      id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "NEEDS_REVIEW",
+      revision: 0, confirmed_at: null as string | null, notes: null,
+      values: { unit_price: { current_value: "4.22", current_origin: "AI_EXTRACTED",
+        ai_extracted_value: "4.22", review_state: "KNOWN",
+        evidence: [{ block_id: "p1-b5", page: 1, block_text: "Unit price: USD 4.22", evidence_value: "4.22" }] } },
+    };
+    const writes: { path: string; body?: unknown }[] = [];
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/confirm")) {
+        writes.push({ path });
+        quote = { ...quote, status: "CONFIRMED", confirmed_at: "2026-09-28T00:00:00Z" };
+        return Promise.resolve(jsonResponse(quote));
+      }
+      if (path.endsWith("/quotes/pdf-1") && init?.method === "PATCH") {
+        writes.push({ path, body: JSON.parse(String(init.body)) as unknown });
+        quote = { ...quote, revision: 1, values: { unit_price: {
+          ...quote.values.unit_price, current_value: "4.50", current_origin: "USER_CORRECTED",
+        } } };
+        return Promise.resolve(jsonResponse(quote));
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    }));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("PDF quote needs review.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Review for confirmation" }));
+    fireEvent.click(screen.getByRole("button", { name: "Confirm Quote" }));
+    expect(await screen.findByText(/Confirmed PDF quote/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Edit confirmed PDF quote" }));
+    fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.50" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save quote" }));
+    await waitFor(() => expect(writes).toEqual([
+      { path: "/api/quotes/pdf-1/confirm" },
+      { path: "/api/quotes/pdf-1", body: { values: { unit_price: "4.50" } } },
+    ]));
+    expect(await screen.findByText("Current confirmed value: 4.50")).toBeInTheDocument();
+    expect(screen.getByText("Unit price: USD 4.22")).toBeInTheDocument();
+  });
+
+  it("offers only retry for stale PDF processing", async () => {
+    let quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "STALE_PROCESSING",
+      revision: 0, confirmed_at: null, notes: null, values: {} };
+    const retries: string[] = [];
+    let fail = true;
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/retry") && init?.method === "POST") {
+        retries.push(path);
+        if (fail) return Promise.resolve(jsonResponse({
+          error: { code: "RETRY_UNAVAILABLE", message: "Retry unavailable" },
+        }, 503));
+        quote = { ...quote, status: "PROCESSING" };
+        return Promise.resolve(jsonResponse(quote));
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    }));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("Processing was interrupted. Retry quote processing.")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Upload a clearer PDF")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Enter quote manually" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry processing" }));
+    expect(await screen.findByText("Retry unavailable")).toBeInTheDocument();
+    fail = false;
+    fireEvent.click(screen.getByRole("button", { name: "Retry processing" }));
+    expect(await screen.findByText("Processing PDF quote…")).toBeInTheDocument();
+    expect(screen.queryByText("Retry unavailable")).not.toBeInTheDocument();
+    expect(retries).toEqual(["/api/quotes/pdf-1/retry", "/api/quotes/pdf-1/retry"]);
+  });
+
+  it("replaces a failed PDF or converts it to a manual draft", async () => {
+    let quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "FAILED",
+      revision: 0, confirmed_at: null, notes: null, values: {} };
+    const writes: { path: string; body?: unknown }[] = [];
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes") && !init?.method) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/upload")) {
+        writes.push({ path });
+        return Promise.resolve(jsonResponse({ quote: { ...quote, status: "PROCESSING" }, document: {} }, 201));
+      }
+      if (path.endsWith("/manual-fallback")) {
+        writes.push({ path, body: JSON.parse(String(init?.body)) as unknown });
+        quote = { ...quote, entry_type: "MANUAL", status: "NEEDS_REVIEW",
+          values: { unit_price: { current_value: "4.75", current_origin: "USER_ENTERED",
+            ai_extracted_value: null } } };
+        return Promise.resolve(jsonResponse(quote));
+      }
+      throw new Error(`Unexpected request: ${path}`);
+    }));
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    expect(await screen.findByText("We couldn't reliably extract this quotation.")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Upload a clearer PDF"), {
+      target: { files: [new File(["%PDF-"], "clearer.pdf", { type: "application/pdf" })] },
+    });
+    await waitFor(() => expect(writes[0]).toEqual({ path: "/api/projects/project-1/quotes/upload" }));
+    fireEvent.click(screen.getByRole("button", { name: "Enter quote manually" }));
+    fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.75" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save manual draft" }));
+    await waitFor(() => expect(writes[1]).toEqual({
+      path: "/api/quotes/pdf-1/manual-fallback", body: { values: { unit_price: "4.75" }, notes: null },
+    }));
+    expect(await screen.findByText("Status: NEEDS REVIEW")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Review for confirmation" })).toBeInTheDocument();
   });
 });

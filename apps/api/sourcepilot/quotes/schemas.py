@@ -1,4 +1,4 @@
-"""Manual quote API contracts."""
+"""Quote API contracts."""
 
 from datetime import datetime
 from uuid import UUID

@@ -325,6 +325,7 @@ class QuoteDocument(Base):
     page_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
     processing_status: Mapped[str] = mapped_column(String(20), nullable=False)
     processing_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_active: Mapped[bool] = mapped_column(nullable=False, default=False, server_default=text("false"))
     processing_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     evidence_capture_version: Mapped[int | None] = mapped_column(Integer, nullable=True)

@@ -12,6 +12,7 @@ from sourcepilot.persistence.models import (
     Project,
     ProjectSupplier,
     Quote,
+    QuoteDocument,
     QuoteValue,
     Requirement,
     Supplier,
@@ -20,6 +21,7 @@ from sourcepilot.quotes.domain import QuoteEntryType, QuoteStatus, authoritative
 from sourcepilot.quotes.service import QuoteCandidateNotShortlistedError, create_quote
 from tests.conftest import database_session_for_engine
 from tests.database_test_support import (
+    alembic_config,
     create_test_engine,
     persistence_test_database_url_from_environment,
     reset_test_database,
@@ -65,7 +67,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0012_evidence_capture_marker"]
+    assert current_revisions == ["0013_active_quote_document"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
@@ -121,6 +123,86 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     assert not quote_columns["revision"]["nullable"]
     assert quote_columns["revision"]["default"] == "0"
     assert quote_document_columns["evidence_capture_version"]["nullable"]
+    assert not quote_document_columns["is_active"]["nullable"]
+    assert any(index["name"] == "uq_quote_documents_one_active_per_quote"
+               and index["unique"] for index in inspect(test_engine).get_indexes("quote_documents"))
+
+
+def test_active_document_migration_backfills_single_canonical_document(
+    database_session: Session, test_database_url: str, test_engine: Engine,
+) -> None:
+    from alembic import command
+
+    project, supplier = quote_candidate(database_session)
+    quote = create_quote(database_session, project_id=project.id, supplier_id=supplier.id,
+                         entry_type=QuoteEntryType.PDF, status=QuoteStatus.PROCESSING)
+    document = QuoteDocument(
+        quote_id=quote.id, storage_key="canonical-pdf", original_filename="quote.pdf",
+        sha256="a" * 64, page_count=1, processing_status="PROCESSING", processing_attempts=1,
+        is_active=True,
+    )
+    database_session.add(document)
+    database_session.commit()
+    document_id = document.id
+    config = alembic_config(test_database_url)
+    command.downgrade(config, "0012_evidence_capture_marker")
+    command.upgrade(config, "head")
+    with test_engine.connect() as connection:
+        assert connection.execute(text(
+            "SELECT is_active FROM quote_documents WHERE id = :document_id"
+        ), {"document_id": document_id}).scalar_one()
+
+
+def test_only_one_active_document_is_allowed_per_quote(database_session: Session) -> None:
+    project, supplier = quote_candidate(database_session)
+    quote = create_quote(database_session, project_id=project.id, supplier_id=supplier.id,
+                         entry_type=QuoteEntryType.PDF, status=QuoteStatus.PROCESSING)
+    database_session.add_all([
+        QuoteDocument(
+            quote_id=quote.id, storage_key=f"active-{index}", original_filename=f"{index}.pdf",
+            sha256=str(index) * 64, page_count=1, processing_status="PROCESSING",
+            processing_attempts=1, is_active=True,
+        ) for index in (1, 2)
+    ])
+    with pytest.raises(IntegrityError):
+        database_session.commit()
+    database_session.rollback()
+
+
+@pytest.mark.parametrize("document_count", [0, 2], ids=["missing", "ambiguous"])
+def test_active_document_migration_rejects_missing_or_ambiguous_existing_data(
+    database_session: Session, test_database_url: str, test_engine: Engine,
+    document_count: int,
+) -> None:
+    from alembic import command
+
+    project, supplier = quote_candidate(database_session)
+    quote = create_quote(database_session, project_id=project.id, supplier_id=supplier.id,
+                         entry_type=QuoteEntryType.PDF, status=QuoteStatus.PROCESSING)
+    if document_count == 2:
+        database_session.add(QuoteDocument(
+            quote_id=quote.id, storage_key="first-pdf", original_filename="first.pdf",
+            sha256="a" * 64, page_count=1, processing_status="PROCESSING", processing_attempts=1,
+            is_active=True,
+        ))
+    database_session.commit()
+    quote_id = quote.id
+    config = alembic_config(test_database_url)
+    command.downgrade(config, "0012_evidence_capture_marker")
+    if document_count == 2:
+        with test_engine.begin() as connection:
+            connection.execute(text("""
+                INSERT INTO quote_documents
+                    (id, quote_id, storage_key, original_filename, sha256, page_count,
+                     processing_status, processing_attempts)
+                VALUES (:id, :quote_id, 'second-pdf', 'second.pdf', :sha256, 1, 'FAILED', 1)
+            """), {"id": uuid4(), "quote_id": quote_id, "sha256": "b" * 64})
+    with pytest.raises(RuntimeError, match="canonical PDF document"):
+        command.upgrade(config, "head")
+    with test_engine.connect() as connection:
+        assert connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one() == (
+            "0012_evidence_capture_marker"
+        )
 
 
 def test_nullable_importance_preserves_existing_rows_through_upgrade(

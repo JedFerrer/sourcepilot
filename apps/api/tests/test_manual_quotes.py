@@ -127,9 +127,33 @@ def test_manual_quote_create_patch_confirm_and_edit_lock(client: TestClient) -> 
     assert confirmed.json()["status"] == "CONFIRMED"
     assert confirmed.json()["confirmed_at"] is not None
     assert confirmed.json()["revision"] == 0
-    assert client.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "5"}}).status_code == 409
+    changed_confirmed = client.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "5"}})
+    assert changed_confirmed.status_code == 200
+    assert changed_confirmed.json()["revision"] == 1
+    assert changed_confirmed.json()["values"]["unit_price"]["current_origin"] == "USER_ENTERED"
     assert client.post(f"/quotes/{quote_id}/confirm").status_code == 409
-    assert client.get(f"/quotes/{quote_id}").json()["values"]["unit_price"]["current_value"] == "4.50"
+    assert client.get(f"/quotes/{quote_id}").json()["values"]["unit_price"]["current_value"] == "5"
+
+
+def test_confirmed_manual_revision_changes_once_for_normalized_values(client: TestClient) -> None:
+    project_id, supplier_id, _ = setup_shortlist(client)
+    quote_id = client.post(f"/projects/{project_id}/quotes/manual", json={
+        "supplier_id": supplier_id, "values": {"currency": "usd", "unit_price": "4.50"},
+    }).json()["id"]
+    assert client.post(f"/quotes/{quote_id}/confirm").json()["revision"] == 0
+    same = client.patch(f"/quotes/{quote_id}", json={
+        "values": {"currency": "USD", "unit_price": "4.5"}, "notes": "Checked",
+    })
+    assert same.status_code == 200 and same.json()["revision"] == 0
+    changed = client.patch(f"/quotes/{quote_id}", json={
+        "values": {"currency": "eur", "unit_price": "4.75", "shipping_cost": "10.00"},
+    })
+    assert changed.status_code == 200 and changed.json()["revision"] == 1
+    assert all(field["current_origin"] == "USER_ENTERED" for field in changed.json()["values"].values())
+    assert client.patch(f"/quotes/{quote_id}", json={
+        "values": {"shipping_cost": None},
+    }).json()["revision"] == 2
+    assert client.patch(f"/quotes/{quote_id}", json={"notes": "Still checked"}).json()["revision"] == 2
 
 
 def test_manual_quote_reads_do_not_query_pdf_evidence(client: TestClient, engine: Engine) -> None:

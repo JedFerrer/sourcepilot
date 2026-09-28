@@ -10,10 +10,11 @@ import sys
 from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from threading import Event, Lock
+from threading import Barrier, Event, Lock
 from typing import Any, Self
 from unittest.mock import Mock
 from uuid import UUID, uuid4
@@ -31,6 +32,8 @@ from sourcepilot.ai.quote_extraction_eval import load_recorded_outputs
 from sourcepilot.ai.quote_extractor import QuoteExtraction
 from sourcepilot.documents.body_limit import UploadBodyLimitMiddleware
 from sourcepilot.documents.inspect_pdf import PdfInspectionTimeoutError
+from sourcepilot.documents.lifecycle import effective_processing_status
+from sourcepilot.documents.parse_pdf import ParsedBlock
 from sourcepilot.documents.parse_service import parse_and_persist_document
 from sourcepilot.documents.processing import _finish_success, process_pdf_quote
 from sourcepilot.documents.service import (
@@ -51,6 +54,7 @@ from sourcepilot.documents.storage import (
 from sourcepilot.main import app, get_document_storage
 from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import (
+    AIRun,
     DocumentBlock,
     Project,
     Quote,
@@ -123,7 +127,7 @@ def client(engine: Engine, database_url: str, monkeypatch: pytest.MonkeyPatch) -
             yield session
 
     app.dependency_overrides[get_database_session] = override_database_session
-    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing", lambda document_id: None)
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing", lambda document_id, attempt: None)
     with TestClient(app, raise_server_exceptions=False) as value:
         assert value.post("/demo-session").status_code == 204
         yield value
@@ -202,12 +206,13 @@ def test_upload_schedules_only_after_processing_metadata_is_committed(
     project_id, supplier_id, _ = setup_shortlist(api)
     observed: list[UUID] = []
 
-    def scheduled(document_id: UUID) -> None:
+    def scheduled(document_id: UUID, attempt: int) -> None:
         with Session(engine) as session:
             document = session.get(QuoteDocument, document_id)
             assert document is not None
             assert document.processing_status == "PROCESSING"
             assert document.processing_attempts == 1
+            assert attempt == 1
             assert document.processing_started_at is not None
             assert document.processing_completed_at is None
             observed.append(document_id)
@@ -237,8 +242,7 @@ def test_background_success_persists_unconfirmed_draft_and_completion(
     document_id = UUID(response.json()["document"]["id"])
     quote_id = UUID(response.json()["quote"]["id"])
     factory = sessionmaker(bind=engine, expire_on_commit=False)
-    process_pdf_quote(
-        document_id, session_factory=factory, storage=storage,
+    process_pdf_quote(document_id, 1, session_factory=factory, storage=storage,
         settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient("harbor-primary"),
     )
@@ -269,8 +273,7 @@ def test_background_failure_keeps_pdf_and_null_draft(
     assert response.status_code == 201
     document_id = UUID(response.json()["document"]["id"])
     factory = sessionmaker(bind=engine, expire_on_commit=False)
-    process_pdf_quote(
-        document_id, session_factory=factory, storage=storage,
+    process_pdf_quote(document_id, 1, session_factory=factory, storage=storage,
         settings=document_settings_from_environment(),
         client_factory=lambda: pytest.fail("Model called for image-only PDF"),
     )
@@ -296,8 +299,7 @@ def test_extractor_failure_retains_blocks_and_exposes_only_safe_failure(
                       (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
     document_id = UUID(response.json()["document"]["id"])
     quote_id = response.json()["quote"]["id"]
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: FailedClient("harbor-primary"),
     )
@@ -337,8 +339,7 @@ def test_changed_attempt_is_not_finalized(
         original.parse_and_persist_document(*args, **kwargs)
 
     monkeypatch.setattr("sourcepilot.documents.processing.parse_and_persist_document", changed_attempt)
-    process_pdf_quote(
-        document_id, session_factory=factory, storage=storage,
+    process_pdf_quote(document_id, 1, session_factory=factory, storage=storage,
         settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient("harbor-primary"),
     )
@@ -362,8 +363,7 @@ def test_unknown_and_conflicting_fields_do_not_select_a_value(
     project_id, supplier_id, _ = setup_shortlist(api)
     response = upload(api, project_id, supplier_id, (FIXTURE_PDFS / filename).read_bytes())
     document_id = UUID(response.json()["document"]["id"])
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient(case),
     )
@@ -389,8 +389,7 @@ def test_pdf_correction_retains_source_and_has_deterministic_origins(
     quote_id = uploaded.json()["quote"]["id"]
     document_id = UUID(uploaded.json()["document"]["id"])
     assert api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "4.50"}}).status_code == 409
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient("missing-shipping"),
     )
@@ -420,7 +419,7 @@ def test_pdf_correction_retains_source_and_has_deterministic_origins(
     assert values["shipping_cost"]["evidence"] == []
     assert corrected.json()["revision"] == 0
     assert corrected.json()["status"] == "NEEDS_REVIEW"
-    assert api.post(f"/quotes/{quote_id}/confirm").status_code == 409
+    # Confirmation is exercised after draft correction checks below.
 
     cleared = api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": None}})
     assert cleared.status_code == 200
@@ -445,8 +444,7 @@ def test_conflict_alternatives_keep_citations_with_null_current(
     uploaded = upload(api, project_id, supplier_id,
                       (FIXTURE_PDFS / "conflicting_lead_time.pdf").read_bytes())
     document_id = UUID(uploaded.json()["document"]["id"])
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient("conflicting-lead-time"),
     )
@@ -519,8 +517,7 @@ def test_older_pdf_draft_without_associations_reports_indeterminate_null_fields(
     uploaded = upload(api, project_id, supplier_id,
                       (FIXTURE_PDFS / "conflicting_lead_time.pdf").read_bytes())
     document_id = UUID(uploaded.json()["document"]["id"])
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient("conflicting-lead-time"),
     )
@@ -552,8 +549,7 @@ def test_legacy_pdf_evidence_on_one_field_does_not_classify_another(
     uploaded = upload(api, project_id, supplier_id,
                       (FIXTURE_PDFS / "missing_shipping.pdf").read_bytes())
     document_id = UUID(uploaded.json()["document"]["id"])
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: RecordedClient("missing-shipping"),
     )
@@ -583,8 +579,7 @@ def test_new_all_unknown_pdf_without_citations_reports_unknown(
                       (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
     assert uploaded.status_code == 201
     document_id = UUID(uploaded.json()["document"]["id"])
-    process_pdf_quote(
-        document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
         storage=storage, settings=document_settings_from_environment(),
         client_factory=lambda: AllUnknownClient("harbor-primary"),
     )
@@ -616,9 +611,7 @@ def test_quote_listing_batches_pdf_evidence_and_skips_manual_evidence_queries(
     for supplier_id in (first_supplier, second_supplier):
         uploaded = upload(api, project_id, supplier_id,
                           (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
-        process_pdf_quote(
-            UUID(uploaded.json()["document"]["id"]),
-            session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        process_pdf_quote(UUID(uploaded.json()["document"]["id"]), 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
             storage=storage, settings=document_settings_from_environment(),
             client_factory=lambda: RecordedClient("harbor-primary"),
         )
@@ -656,8 +649,7 @@ def test_draft_persistence_error_rolls_back_before_failed_completion(
 
     event.listen(Session, "before_flush", reject_draft)
     try:
-        process_pdf_quote(
-            document_id, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
             storage=storage, settings=document_settings_from_environment(),
             client_factory=lambda: RecordedClient("harbor-primary"),
         )
@@ -1152,3 +1144,342 @@ def test_concurrent_manual_and_pdf_creation_keeps_one_quote(
         assert len(quotes) == 1
         documents = database_session.scalars(select(QuoteDocument)).all()
         assert len(documents) == (1 if quotes[0].entry_type == "PDF" else 0)
+
+
+def test_pdf_confirmation_and_confirmed_revision_preserve_evidence(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+        storage=storage, settings=document_settings_from_environment(),
+        client_factory=lambda: RecordedClient("harbor-primary"),
+    )
+    original = api.get(f"/quotes/{quote_id}").json()
+    evidence = original["values"]["unit_price"]["evidence"]
+    confirmed = api.post(f"/quotes/{quote_id}/confirm")
+    assert confirmed.status_code == 200, confirmed.text
+    assert confirmed.json()["status"] == "CONFIRMED"
+    assert confirmed.json()["revision"] == 0
+    assert confirmed.json()["values"]["unit_price"]["evidence"] == evidence
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None and document.processing_status == "CONFIRMED"
+    assert api.post(f"/quotes/{quote_id}/confirm").status_code == 409
+    assert api.post(f"/quotes/{quote_id}/retry").status_code == 409
+    assert upload(api, project_id, supplier_id, (FIXTURE_PDFS / "moss_primary.pdf").read_bytes()).status_code == 409
+
+    same = api.patch(f"/quotes/{quote_id}", json={
+        "values": {"unit_price": "4.6"}, "notes": "Reviewed",
+    })
+    assert same.status_code == 200
+    assert same.json()["revision"] == 0
+    assert same.json()["values"]["unit_price"]["current_origin"] == "USER_CORRECTED"
+    changed = api.patch(f"/quotes/{quote_id}", json={
+        "values": {"unit_price": "4.50", "shipping_cost": "12.00"},
+    })
+    assert changed.status_code == 200, changed.text
+    assert changed.json()["revision"] == 1
+    assert changed.json()["values"]["unit_price"]["current_origin"] == "USER_CORRECTED"
+    assert changed.json()["values"]["unit_price"]["evidence"] == evidence
+    assert changed.json()["values"]["shipping_cost"]["current_origin"] == "USER_CORRECTED"
+    assert api.patch(f"/quotes/{quote_id}", json={"values": {"shipping_cost": None}}).json()["revision"] == 2
+    restored = api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "4.60"}}).json()
+    assert restored["revision"] == 3
+    assert restored["values"]["unit_price"]["current_origin"] == "AI_EXTRACTED"
+    assert restored["values"]["unit_price"]["evidence"] == evidence
+
+
+def test_stale_boundary_retry_and_no_duplicate_schedule(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, _ = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id, pdf_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    now = datetime.now(UTC)
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None
+        document.processing_started_at = now - timedelta(seconds=600)
+        assert effective_processing_status(document, now=now, stale_seconds=600) == "PROCESSING"
+        assert effective_processing_status(
+            document, now=now + timedelta(microseconds=1), stale_seconds=600
+        ) == "STALE_PROCESSING"
+        document.processing_started_at = now - timedelta(seconds=601)
+        session.commit()
+    assert api.get(f"/quotes/{quote_id}").json()["status"] == "STALE_PROCESSING"
+    assert api.post(f"/quotes/{quote_id}/manual-fallback", json={"values": {}}).status_code == 409
+    assert upload(api, project_id, supplier_id, pdf_bytes(2)).status_code == 409
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing", lambda document_id, attempt: scheduled.append((document_id, attempt)))
+    first = api.post(f"/quotes/{quote_id}/retry")
+    second = api.post(f"/quotes/{quote_id}/retry")
+    assert first.status_code == second.status_code == 200
+    assert first.json()["id"] == second.json()["id"] == quote_id
+    assert first.json()["processing"]["attempts"] == second.json()["processing"]["attempts"] == 2
+    assert scheduled == [(document_id, 2)]
+    assert api.get(f"/quotes/{quote_id}").json()["status"] == "PROCESSING"
+
+
+def test_initial_processing_attempt_cannot_be_retried(
+    storage_client: tuple[TestClient, LocalDocumentStorage],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, _ = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id, pdf_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing",
+                        lambda document_id, attempt: scheduled.append((document_id, attempt)))
+    response = api.post(f"/quotes/{quote_id}/retry")
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "QUOTE_NOT_RETRYABLE"
+    assert scheduled == []
+    assert api.get(f"/quotes/{quote_id}").json()["processing"]["attempts"] == 1
+
+
+def test_queued_old_attempt_exits_after_stale_retry_without_side_effects(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None
+        document.processing_started_at = datetime.now(UTC) - timedelta(seconds=601)
+        session.commit()
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing",
+                        lambda doc_id, attempt: scheduled.append((doc_id, attempt)))
+    assert api.post(f"/quotes/{quote_id}/retry").status_code == 200
+    assert api.post(f"/quotes/{quote_id}/retry").status_code == 200
+    assert scheduled == [(document_id, 2)]
+    with monkeypatch.context() as patch:
+        patch.setattr("sourcepilot.documents.processing.parse_and_persist_document",
+                      lambda *args, **kwargs: pytest.fail("Old worker parsed"))
+        process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+                          storage=storage, settings=document_settings_from_environment(),
+                          client_factory=lambda: pytest.fail("Old worker created model client"))
+    with Session(engine) as session:
+        assert session.scalar(select(DocumentBlock).where(DocumentBlock.quote_document_id == document_id)) is None
+        assert session.scalar(select(AIRun).where(AIRun.operation == "quote_extractor")) is None
+        assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == UUID(quote_id))) is None
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None and document.processing_attempts == 2
+        assert document.processing_status == "PROCESSING" and document.processing_completed_at is None
+
+
+def test_retry_during_extraction_cannot_update_old_attempt_trace(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing",
+                        lambda doc_id, attempt: scheduled.append((doc_id, attempt)))
+
+    class SupersedingClient(RecordedClient):
+        def invoke(self, **kwargs: object) -> ModelInvocation:
+            with Session(engine) as session:
+                document = session.get(QuoteDocument, document_id)
+                assert document is not None
+                document.processing_started_at = datetime.now(UTC) - timedelta(seconds=601)
+                session.commit()
+            assert api.post(f"/quotes/{quote_id}/retry").status_code == 200
+            return super().invoke(**kwargs)
+
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+                      storage=storage, settings=document_settings_from_environment(),
+                      client_factory=lambda: SupersedingClient("harbor-primary"))
+    assert scheduled == [(document_id, 2)]
+    with Session(engine) as session:
+        run = session.scalar(select(AIRun).where(AIRun.operation == "quote_extractor"))
+        assert run is not None
+        assert run.status == "RUNNING" and run.attempts == 1
+        assert run.completed_at is None
+        assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == UUID(quote_id))) is None
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None and document.processing_status == "PROCESSING"
+        assert document.processing_attempts == 2 and document.processing_completed_at is None
+
+
+def test_failed_replacement_has_one_active_document_and_rejects_late_worker(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    original = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    quote_id = original.json()["quote"]["id"]
+    old_id = UUID(original.json()["document"]["id"])
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    process_pdf_quote(old_id, 1, session_factory=factory, storage=storage,
+                      settings=document_settings_from_environment(),
+                      client_factory=lambda: FailedClient("harbor-primary"))
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing", lambda document_id, attempt: scheduled.append((document_id, attempt)))
+    replacement = upload(api, project_id, supplier_id,
+                         (FIXTURE_PDFS / "moss_primary.pdf").read_bytes())
+    assert replacement.status_code == 201, replacement.text
+    assert replacement.json()["quote"]["id"] == quote_id
+    new_id = UUID(replacement.json()["document"]["id"])
+    assert new_id != old_id
+    duplicate = upload(api, project_id, supplier_id,
+                       (FIXTURE_PDFS / "moss_primary.pdf").read_bytes())
+    assert duplicate.status_code == 409
+    assert duplicate.json()["error"]["code"] == "DUPLICATE_PDF"
+    assert scheduled == [(new_id, 1)]
+    with Session(engine) as session:
+        documents = session.scalars(select(QuoteDocument).where(QuoteDocument.quote_id == UUID(quote_id))).all()
+        assert len(documents) == 2
+        assert [document.id for document in documents if document.is_active] == [new_id]
+        old_blocks = session.scalars(select(DocumentBlock).where(
+            DocumentBlock.quote_document_id == old_id
+        ).order_by(DocumentBlock.page_number, DocumentBlock.block_number)).all()
+        assert old_blocks
+        original_block_texts = [block.text for block in old_blocks]
+    with monkeypatch.context() as patch:
+        patch.setattr("sourcepilot.documents.parse_service.parse_pdf_snapshot",
+                      lambda *args, **kwargs: [ParsedBlock(1, 1, "tampered late parse")])
+        parse_and_persist_document(factory, old_id, storage=storage,
+                                   settings=document_settings_from_environment(), expected_attempt=1)
+    with Session(engine) as session:
+        assert [block.text for block in session.scalars(select(DocumentBlock).where(
+            DocumentBlock.quote_document_id == old_id
+        ).order_by(DocumentBlock.page_number, DocumentBlock.block_number)).all()] == original_block_texts
+    stale_extraction = QuoteExtraction.model_validate(load_recorded_outputs()["harbor-primary"])
+    _finish_success(factory, old_id, 1, stale_extraction)
+    assert api.get(f"/quotes/{quote_id}").json()["status"] == "PROCESSING"
+    process_pdf_quote(new_id, 1, session_factory=factory, storage=storage,
+                      settings=document_settings_from_environment(),
+                      client_factory=lambda: RecordedClient("moss-primary"))
+    assert api.get(f"/quotes/{quote_id}").json()["status"] == "NEEDS_REVIEW"
+
+
+def test_failed_pdf_manual_fallback_reuses_manual_lifecycle_and_blocks_old_worker(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    process_pdf_quote(document_id, 1, session_factory=factory, storage=storage,
+                      settings=document_settings_from_environment(),
+                      client_factory=lambda: FailedClient("harbor-primary"))
+    with Session(engine) as session:
+        block = session.scalars(select(DocumentBlock).where(DocumentBlock.quote_document_id == document_id)).first()
+        assert block is not None
+        value = QuoteValue(quote_id=UUID(quote_id), field_key="unit_price", current_value="4.60",
+                           current_origin="AI_EXTRACTED", ai_extracted_value="4.60")
+        value.evidence.append(QuoteFieldEvidence(block=block, evidence_value="4.60"))
+        session.add(value)
+        session.commit()
+    fallback = api.post(f"/quotes/{quote_id}/manual-fallback", json={
+        "values": {"unit_price": "4.75", "currency": "usd"},
+    })
+    assert fallback.status_code == 200, fallback.text
+    body = fallback.json()
+    assert body["id"] == quote_id and body["entry_type"] == "MANUAL"
+    assert body["status"] == "NEEDS_REVIEW" and body["processing"] is None
+    assert body["values"]["unit_price"]["current_origin"] == "USER_ENTERED"
+    assert body["values"]["unit_price"]["ai_extracted_value"] is None
+    assert body["values"]["unit_price"]["evidence"] == []
+    assert body["values"]["currency"]["current_value"] == "USD"
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None and not document.is_active
+        assert session.scalar(select(QuoteFieldEvidence)) is None
+        assert session.scalar(select(DocumentBlock).where(DocumentBlock.quote_document_id == document_id)) is not None
+    _finish_success(factory, document_id, 1,
+                    QuoteExtraction.model_validate(load_recorded_outputs()["harbor-primary"]))
+    assert api.get(f"/quotes/{quote_id}").json() == body
+    assert api.patch(f"/quotes/{quote_id}", json={"values": {"unit_price": "4.80"}}).status_code == 200
+    assert api.post(f"/quotes/{quote_id}/confirm").json()["status"] == "CONFIRMED"
+    assert api.post(f"/quotes/{quote_id}/retry").status_code == 409
+    with TestClient(app, raise_server_exceptions=False) as stranger:
+        assert stranger.post("/demo-session").status_code == 204
+        assert stranger.post(f"/quotes/{quote_id}/retry").status_code == 404
+        assert stranger.post(f"/quotes/{quote_id}/manual-fallback", json={"values": {}}).status_code == 404
+
+
+def test_concurrent_failed_retry_schedules_one_attempt(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    quote_id = uploaded.json()["quote"]["id"]
+    document_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+                      storage=storage, settings=document_settings_from_environment(),
+                      client_factory=lambda: FailedClient("harbor-primary"))
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing", lambda document_id, attempt: scheduled.append((document_id, attempt)))
+    ready = Barrier(2)
+    with TestClient(app, raise_server_exceptions=False) as second_api, ThreadPoolExecutor(max_workers=2) as pool:
+        second_api.cookies.update(api.cookies)
+        def request_retry(client: TestClient):
+            ready.wait(timeout=10)
+            return client.post(f"/quotes/{quote_id}/retry")
+        results = [pool.submit(request_retry, client) for client in (api, second_api)]
+        responses = [future.result(timeout=20) for future in results]
+    assert [response.status_code for response in responses] == [200, 200]
+    assert all(response.json()["processing"]["attempts"] == 2 for response in responses)
+    assert scheduled == [(document_id, 2)]
+
+
+def test_concurrent_failed_replacement_schedules_one_new_document(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id,
+                      (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes())
+    old_id = UUID(uploaded.json()["document"]["id"])
+    process_pdf_quote(old_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+                      storage=storage, settings=document_settings_from_environment(),
+                      client_factory=lambda: FailedClient("harbor-primary"))
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing", lambda document_id, attempt: scheduled.append((document_id, attempt)))
+    replacement_pdf = (FIXTURE_PDFS / "moss_primary.pdf").read_bytes()
+    ready = Barrier(2)
+    with TestClient(app, raise_server_exceptions=False) as second_api, ThreadPoolExecutor(max_workers=2) as pool:
+        second_api.cookies.update(api.cookies)
+        def request_replacement(client: TestClient):
+            ready.wait(timeout=10)
+            return upload(client, project_id, supplier_id, replacement_pdf)
+        results = [pool.submit(request_replacement, client) for client in (api, second_api)]
+        responses = [future.result(timeout=20) for future in results]
+    assert sorted(response.status_code for response in responses) == [201, 409]
+    new_id = UUID(next(response for response in responses if response.status_code == 201).json()["document"]["id"])
+    assert next(response for response in responses if response.status_code == 409).json()["error"]["code"] == "DUPLICATE_PDF"
+    assert scheduled == [(new_id, 1)]
+    with Session(engine) as session:
+        documents = session.scalars(select(QuoteDocument)).all()
+        assert len(documents) == 2
+        assert [document.id for document in documents if document.is_active] == [new_id]

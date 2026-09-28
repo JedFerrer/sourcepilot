@@ -11,14 +11,24 @@ from uuid import UUID
 
 from fastapi import UploadFile
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from sourcepilot.documents.inspect_pdf import InvalidPdfError, inspect_page_count
-from sourcepilot.documents.settings import DocumentSettings
+from sourcepilot.documents.lifecycle import current_processing_status
+from sourcepilot.documents.settings import (
+    DocumentSettings,
+    processing_stale_seconds_from_environment,
+)
 from sourcepilot.documents.storage import DocumentStorage, new_storage_key
-from sourcepilot.persistence.models import Project, ProjectSupplier, Quote, QuoteDocument
+from sourcepilot.persistence.models import (
+    Project,
+    ProjectSupplier,
+    Quote,
+    QuoteDocument,
+    QuoteValue,
+)
 from sourcepilot.quotes.domain import QuoteEntryType, QuoteStatus
 from sourcepilot.quotes.schemas import QuoteResponse
 from sourcepilot.quotes.service import create_quote, quote_snapshot
@@ -131,13 +141,26 @@ def store_pdf_quote(
         raise PdfUploadError("QUOTE_NOT_AVAILABLE", "Supplier is not shortlisted.", 409)
     existing = database_session.scalar(select(Quote).where(
         Quote.project_id == project.id, Quote.supplier_id == supplier_id,
-    ))
+    ).with_for_update())
+    replaced_document: QuoteDocument | None = None
     if existing is not None:
-        if existing.entry_type == QuoteEntryType.PDF and any(
-            document.sha256 == sha256 for document in existing.documents
-        ):
+        if existing.entry_type != QuoteEntryType.PDF:
+            raise PdfUploadError("QUOTE_ALREADY_EXISTS", "A quote already exists for this supplier.", 409)
+        active = database_session.scalars(select(QuoteDocument).where(
+            QuoteDocument.quote_id == existing.id, QuoteDocument.is_active.is_(True)
+        ).with_for_update()).all()
+        if len(active) != 1:
+            raise PdfUploadError("QUOTE_NOT_AVAILABLE", "PDF quote has no unique active document.", 409)
+        replaced_document = active[0]
+        effective = current_processing_status(
+            replaced_document, processing_stale_seconds_from_environment()
+        )
+        if existing.status == QuoteStatus.PROCESSING and effective == "PROCESSING" and replaced_document.sha256 == sha256:
+            raise PdfUploadError("DUPLICATE_PDF", "This PDF is already being processed.", 409)
+        if existing.status != QuoteStatus.FAILED or replaced_document.processing_status != QuoteStatus.FAILED:
+            raise PdfUploadError("QUOTE_ALREADY_EXISTS", "A quote already exists for this supplier.", 409)
+        if any(document.sha256 == sha256 for document in existing.documents):
             raise PdfUploadError("DUPLICATE_PDF", "This PDF is already uploaded.", 409)
-        raise PdfUploadError("QUOTE_ALREADY_EXISTS", "A quote already exists for this supplier.", 409)
 
     key = new_storage_key()
     try:
@@ -146,14 +169,24 @@ def store_pdf_quote(
         _cleanup_owned_key(storage, key)
         raise PdfStorageError("PDF storage failed.") from error
     try:
-        quote = create_quote(
-            database_session, project_id=project.id, supplier_id=supplier_id,
-            entry_type=QuoteEntryType.PDF, status=QuoteStatus.PROCESSING,
-        )
+        if existing is None:
+            quote = create_quote(
+                database_session, project_id=project.id, supplier_id=supplier_id,
+                entry_type=QuoteEntryType.PDF, status=QuoteStatus.PROCESSING,
+            )
+        else:
+            quote = existing
+            assert replaced_document is not None
+            database_session.execute(delete(QuoteValue).where(QuoteValue.quote_id == quote.id))
+            database_session.expire(quote, ["values"])
+            replaced_document.is_active = False
+            database_session.flush()
+            quote.status = QuoteStatus.PROCESSING.value
         document = QuoteDocument(
             storage_key=key, original_filename=filename, sha256=sha256,
             page_count=page_count, processing_status=QuoteStatus.PROCESSING.value,
             processing_attempts=1, processing_started_at=datetime.now(UTC),
+            is_active=True,
         )
         quote.documents.append(document)
         database_session.flush()

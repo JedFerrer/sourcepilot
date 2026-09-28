@@ -1,12 +1,14 @@
-"""Quote creation and the initial manual review lifecycle."""
+"""Quote creation, review, confirmation, and recovery lifecycle."""
 
 from collections.abc import Sequence
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, object_session, selectinload
 
+from sourcepilot.documents.lifecycle import current_processing_status
+from sourcepilot.documents.settings import processing_stale_seconds_from_environment
 from sourcepilot.persistence.models import (
     DocumentBlock,
     Project,
@@ -21,6 +23,7 @@ from sourcepilot.quotes.domain import (
     QuoteEntryType,
     QuoteStatus,
     QuoteValueOrigin,
+    normalized_current_value_changed,
     validate_quote_value_provenance,
 )
 from sourcepilot.quotes.schemas import (
@@ -67,7 +70,10 @@ def quote_snapshots(database_session: Session, quotes: Sequence[Quote]) -> list[
     """Load PDF citations across quotes in bounded queries before serializing them."""
     pdf_quotes = [quote for quote in quotes if quote.entry_type == QuoteEntryType.PDF]
     documents = (database_session.scalars(
-        select(QuoteDocument).where(QuoteDocument.quote_id.in_([quote.id for quote in pdf_quotes]))
+        select(QuoteDocument).where(
+            QuoteDocument.quote_id.in_([quote.id for quote in pdf_quotes]),
+            QuoteDocument.is_active.is_(True),
+        )
     ).all() if pdf_quotes else [])
     documents_by_quote: dict[UUID, list[QuoteDocument]] = {}
     for document in documents:
@@ -90,6 +96,13 @@ def quote_snapshots(database_session: Session, quotes: Sequence[Quote]) -> list[
 
     def snapshot(quote: Quote) -> QuoteResponse:
         quote_documents = documents_by_quote.get(quote.id, [])
+        if quote.entry_type == QuoteEntryType.PDF and len(quote_documents) != 1:
+            raise ValueError("A PDF quote must have exactly one active document.")
+        processing_status = (
+            current_processing_status(
+                quote_documents[0], processing_stale_seconds_from_environment()
+            ) if quote_documents else None
+        )
         document_ids = {document.id for document in quote_documents}
         evidence_captured = any(document.evidence_capture_version is not None
                                 for document in quote_documents)
@@ -138,11 +151,13 @@ def quote_snapshots(database_session: Session, quotes: Sequence[Quote]) -> list[
 
         return QuoteResponse(
             id=quote.id, project_id=quote.project_id, supplier_id=quote.supplier_id,
-            entry_type=quote.entry_type, status=quote.status, revision=quote.revision,
+            entry_type=quote.entry_type,
+            status=(processing_status if processing_status == "STALE_PROCESSING" else quote.status),
+            revision=quote.revision,
             confirmed_at=quote.confirmed_at, notes=quote.notes,
             values={value.field_key: field_snapshot(value) for value in quote.values},
             processing=(QuoteProcessingResponse(
-                status=quote_documents[0].processing_status,
+                status=processing_status or quote_documents[0].processing_status,
                 attempts=quote_documents[0].processing_attempts,
                 started_at=quote_documents[0].processing_started_at,
                 completed_at=quote_documents[0].processing_completed_at,
@@ -178,6 +193,11 @@ def _require_shortlisted(database_session: Session, quote: Quote) -> None:
     candidate = database_session.get(ProjectSupplier, (quote.project_id, quote.supplier_id))
     if candidate is None or not candidate.shortlisted or candidate.dismissed:
         raise QuoteWorkflowError("Supplier is not currently shortlisted for this project.")
+
+
+def _lock_quote_after_project(database_session: Session, quote: Quote) -> Quote:
+    return database_session.scalars(select(Quote).where(Quote.id == quote.id)
+                                    .with_for_update().execution_options(populate_existing=True)).one()
 
 
 def create_manual_quote(
@@ -220,10 +240,14 @@ def edit_manual_quote(
         .execution_options(populate_existing=True)
     ).one()
     _require_quotes_stage(project)
+    quote = _lock_quote_after_project(database_session, quote)
     _require_shortlisted(database_session, quote)
-    if quote.entry_type != QuoteEntryType.MANUAL or quote.status != QuoteStatus.NEEDS_REVIEW:
-        raise QuoteWorkflowError("Only manual quotes awaiting review can be edited.")
+    if quote.entry_type != QuoteEntryType.MANUAL or quote.status not in (
+        QuoteStatus.NEEDS_REVIEW, QuoteStatus.CONFIRMED
+    ):
+        raise QuoteWorkflowError("Only reviewable or confirmed manual quotes can be edited.")
     by_key = {value.field_key: value for value in quote.values}
+    changed = False
     for key, current in values.items():
         validate_quote_value_provenance(
             field_key=key, current_value=current,
@@ -237,7 +261,10 @@ def edit_manual_quote(
             )
             quote.values.append(record)
         else:
+            changed |= normalized_current_value_changed(key, record.current_value, current)
             record.current_value = current
+    if changed and quote.status == QuoteStatus.CONFIRMED:
+        quote.revision += 1
     if notes_provided:
         quote.notes = notes
     database_session.flush()
@@ -254,10 +281,14 @@ def edit_pdf_quote(
         .execution_options(populate_existing=True)
     ).one()
     _require_quotes_stage(project)
+    quote = _lock_quote_after_project(database_session, quote)
     _require_shortlisted(database_session, quote)
-    if quote.entry_type != QuoteEntryType.PDF or quote.status != QuoteStatus.NEEDS_REVIEW:
-        raise QuoteWorkflowError("Only PDF quotes awaiting review can be corrected.")
+    if quote.entry_type != QuoteEntryType.PDF or quote.status not in (
+        QuoteStatus.NEEDS_REVIEW, QuoteStatus.CONFIRMED
+    ):
+        raise QuoteWorkflowError("Only reviewable or confirmed PDF quotes can be corrected.")
     by_key = {value.field_key: value for value in quote.values}
+    changed = False
     for key, current in values.items():
         record = by_key.get(key)
         if record is None:
@@ -268,24 +299,110 @@ def edit_pdf_quote(
             field_key=key, current_value=current, current_origin=origin,
             ai_extracted_value=record.ai_extracted_value,
         )
+        changed |= normalized_current_value_changed(key, record.current_value, current)
         record.current_value = current
         record.current_origin = origin.value
+    if changed and quote.status == QuoteStatus.CONFIRMED:
+        quote.revision += 1
     if notes_provided:
         quote.notes = notes
     database_session.flush()
     return quote_snapshot(quote)
 
 
-def confirm_manual_quote(database_session: Session, quote: Quote) -> QuoteResponse:
+def confirm_quote(database_session: Session, quote: Quote) -> QuoteResponse:
     project = database_session.scalars(
         select(Project).where(Project.id == quote.project_id).with_for_update()
         .execution_options(populate_existing=True)
     ).one()
     _require_quotes_stage(project)
+    quote = _lock_quote_after_project(database_session, quote)
     _require_shortlisted(database_session, quote)
-    if quote.entry_type != QuoteEntryType.MANUAL or quote.status != QuoteStatus.NEEDS_REVIEW:
-        raise QuoteWorkflowError("Only manual quotes awaiting review can be confirmed.")
+    if quote.status != QuoteStatus.NEEDS_REVIEW:
+        raise QuoteWorkflowError("Only quotes awaiting review can be confirmed.")
+    if quote.entry_type == QuoteEntryType.PDF:
+        document = database_session.scalar(select(QuoteDocument).where(
+            QuoteDocument.quote_id == quote.id, QuoteDocument.is_active.is_(True)
+        ).with_for_update())
+        if document is None or document.processing_status != QuoteStatus.NEEDS_REVIEW:
+            raise QuoteWorkflowError("PDF quote has no reviewed active document.")
+        document.processing_status = QuoteStatus.CONFIRMED.value
     quote.status = QuoteStatus.CONFIRMED.value
     quote.confirmed_at = datetime.now(UTC)
+    database_session.flush()
+    return quote_snapshot(quote)
+
+
+def _locked_active_document(database_session: Session, quote: Quote) -> QuoteDocument:
+    documents = database_session.scalars(select(QuoteDocument).where(
+        QuoteDocument.quote_id == quote.id, QuoteDocument.is_active.is_(True)
+    ).with_for_update()).all()
+    if len(documents) != 1:
+        raise QuoteWorkflowError("PDF quote must have exactly one active document.")
+    return documents[0]
+
+
+def retry_pdf_quote(database_session: Session, quote: Quote) -> tuple[QuoteResponse, tuple[UUID, int] | None]:
+    """Persist one fresh attempt; caller schedules only when an identity is returned."""
+    project = database_session.scalars(select(Project).where(Project.id == quote.project_id)
+                                       .with_for_update().execution_options(populate_existing=True)).one()
+    _require_quotes_stage(project)
+    quote = _lock_quote_after_project(database_session, quote)
+    _require_shortlisted(database_session, quote)
+    if quote.entry_type != QuoteEntryType.PDF or quote.status not in (
+        QuoteStatus.PROCESSING, QuoteStatus.FAILED
+    ):
+        raise QuoteWorkflowError("This PDF quote cannot be retried.")
+    document = _locked_active_document(database_session, quote)
+    effective = current_processing_status(document, processing_stale_seconds_from_environment())
+    if effective == "PROCESSING" and quote.status == QuoteStatus.PROCESSING:
+        if document.processing_attempts > 1:
+            return quote_snapshot(quote), None
+        raise QuoteWorkflowError("This PDF attempt is not failed or stale.")
+    if effective not in ("FAILED", "STALE_PROCESSING") or (
+        effective == "FAILED" and quote.status != QuoteStatus.FAILED
+    ):
+        raise QuoteWorkflowError("This PDF attempt is not failed or stale.")
+    database_session.execute(delete(QuoteValue).where(QuoteValue.quote_id == quote.id))
+    database_session.expire(quote, ["values"])
+    document.processing_attempts += 1
+    document.processing_status = QuoteStatus.PROCESSING.value
+    document.processing_started_at = datetime.now(UTC)
+    document.processing_completed_at = None
+    document.last_error = None
+    document.evidence_capture_version = None
+    quote.status = QuoteStatus.PROCESSING.value
+    database_session.flush()
+    return quote_snapshot(quote), (document.id, document.processing_attempts)
+
+
+def manual_fallback_quote(
+    database_session: Session, quote: Quote, values: dict[str, object | None],
+    *, notes_provided: bool, notes: str | None,
+) -> QuoteResponse:
+    project = database_session.scalars(select(Project).where(Project.id == quote.project_id)
+                                       .with_for_update().execution_options(populate_existing=True)).one()
+    _require_quotes_stage(project)
+    quote = _lock_quote_after_project(database_session, quote)
+    _require_shortlisted(database_session, quote)
+    if quote.entry_type != QuoteEntryType.PDF or quote.status != QuoteStatus.FAILED:
+        raise QuoteWorkflowError("Manual fallback requires a failed PDF quote.")
+    document = _locked_active_document(database_session, quote)
+    if document.processing_status != QuoteStatus.FAILED:
+        raise QuoteWorkflowError("The active PDF document has not failed.")
+    database_session.execute(delete(QuoteValue).where(QuoteValue.quote_id == quote.id))
+    database_session.expire(quote, ["values"])
+    document.is_active = False
+    quote.entry_type = QuoteEntryType.MANUAL.value
+    quote.status = QuoteStatus.NEEDS_REVIEW.value
+    quote.confirmed_at = None
+    for key in sorted(QUOTE_FIELD_KEYS):
+        quote.values.append(QuoteValue(
+            field_key=key, current_value=values.get(key),
+            current_origin=QuoteValueOrigin.USER_ENTERED.value,
+            ai_extracted_value=None,
+        ))
+    if notes_provided:
+        quote.notes = notes
     database_session.flush()
     return quote_snapshot(quote)
