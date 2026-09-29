@@ -48,6 +48,33 @@ def resolve_commercial_facts(
     }
 
 
+def resolve_quoted_quantity(quote: Quote | None) -> SourceResolution:
+    """Expose only the current value of a confirmed project's quote."""
+    values = (
+        {item.field_key: item for item in quote.values}
+        if quote is not None and quote.status == QuoteStatus.CONFIRMED else {}
+    )
+    return resolve_sources(
+        "quoted_quantity",
+        project_facts=_quote_fact(values.get("quoted_quantity"), "quoted_quantity"),
+    )
+
+
+def resolve_delivery_commitment(quote: Quote | None) -> SourceResolution:
+    """Current quote fields have no structured dated delivery commitment."""
+    return resolve_sources("delivery_date")
+
+
+def confirmed_quote_currency(quote: Quote | None) -> str | None:
+    """Read a quote's own confirmed currency, independently of catalog price fallback."""
+    if quote is None or quote.status != QuoteStatus.CONFIRMED:
+        return None
+    currency = next((item for item in quote.values if item.field_key == "currency"), None)
+    if currency is None or currency.current_value is None or _unresolved_quote_conflict(currency):
+        return None
+    return str(currency.current_value)
+
+
 def _quote_price_fact(values: dict[str, QuoteValue]) -> tuple[SourceFact, ...]:
     price = values.get("unit_price")
     currency = values.get("currency")
