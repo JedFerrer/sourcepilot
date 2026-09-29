@@ -70,7 +70,7 @@ def confirmed_quote_currency(quote: Quote | None) -> str | None:
     if quote is None or quote.status != QuoteStatus.CONFIRMED:
         return None
     currency = next((item for item in quote.values if item.field_key == "currency"), None)
-    if currency is None or currency.current_value is None or _unresolved_quote_conflict(currency):
+    if currency is None or currency.current_value is None or unresolved_quote_conflict(currency):
         return None
     return str(currency.current_value)
 
@@ -78,8 +78,8 @@ def confirmed_quote_currency(quote: Quote | None) -> str | None:
 def _quote_price_fact(values: dict[str, QuoteValue]) -> tuple[SourceFact, ...]:
     price = values.get("unit_price")
     currency = values.get("currency")
-    price_conflict = price is not None and _unresolved_quote_conflict(price)
-    currency_conflict = currency is not None and _unresolved_quote_conflict(currency)
+    price_conflict = price is not None and unresolved_quote_conflict(price)
+    currency_conflict = currency is not None and unresolved_quote_conflict(currency)
     if (price is None or price.current_value is None) and not (price_conflict or currency_conflict):
         return ()
     if price is not None and price.current_value is None and price_conflict:
@@ -142,7 +142,7 @@ def _quote_fact(
 ) -> tuple[SourceFact, ...]:
     if value is None:
         return ()
-    conflict = _unresolved_quote_conflict(value)
+    conflict = unresolved_quote_conflict(value)
     if value.current_value is None and not conflict:
         return ()
     evidence_ids = tuple(sorted((item.id for item in value.evidence), key=str))
@@ -158,7 +158,7 @@ def _quote_fact(
     ),)
 
 
-def _unresolved_quote_conflict(value: QuoteValue) -> bool:
+def unresolved_quote_conflict(value: QuoteValue) -> bool:
     """Recognize distinct saved PDF interpretations without choosing one."""
     if (value.current_origin == QuoteValueOrigin.USER_CORRECTED
             and value.current_value is not None):

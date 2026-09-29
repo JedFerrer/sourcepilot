@@ -438,6 +438,26 @@ class RequirementEvaluationRecord(Base):
     project_supplier: Mapped[ProjectSupplier] = relationship(back_populates="evaluations")
 
 
+class Comparison(Base):
+    __tablename__ = "comparisons"
+    __table_args__ = (
+        CheckConstraint("brief_revision >= 0", name="ck_comparisons_brief_revision"),
+    )
+
+    id: Mapped[UUID] = mapped_column(PostgreSQLUUID(as_uuid=True), primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(
+        PostgreSQLUUID(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"),
+        nullable=False, index=True,
+    )
+    brief_revision: Mapped[int] = mapped_column(Integer, nullable=False)
+    quote_revision_snapshot: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False)
+    comparison_payload: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False)
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(),
+    )
+    stale: Mapped[bool] = mapped_column(nullable=False, default=False, server_default=text("false"))
+
+
 def _validate_brief_before_persist(_: object, __: object, brief: Brief) -> None:
     if brief.quantity is not None:
         brief.quantity = validate_brief_quantity(brief.quantity)

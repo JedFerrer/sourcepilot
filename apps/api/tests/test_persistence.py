@@ -67,7 +67,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0013_active_quote_document"]
+    assert current_revisions == ["0014_comparisons"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
@@ -76,6 +76,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
         "suppliers", "supplier_capabilities", "supplier_evidence",
         "project_suppliers", "requirement_evaluations", "supplier_explanation_run_steps",
         "quotes", "quote_values", "quote_documents", "document_blocks", "quote_field_evidence",
+        "comparisons",
     }.issubset(table_names)
     assert table_names - {
         "demo_sessions",
@@ -94,6 +95,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
         "quote_documents",
         "document_blocks",
         "quote_field_evidence",
+        "comparisons",
         "alembic_version",
     } == set()
 
@@ -112,6 +114,9 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     quote_document_columns = {
         column["name"]: column for column in inspect(test_engine).get_columns("quote_documents")
     }
+    comparison_columns = {
+        column["name"]: column for column in inspect(test_engine).get_columns("comparisons")
+    }
 
     assert not project_columns["brief_revision"]["nullable"]
     assert project_columns["brief_revision"]["default"] == "0"
@@ -124,6 +129,10 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     assert quote_columns["revision"]["default"] == "0"
     assert quote_document_columns["evidence_capture_version"]["nullable"]
     assert not quote_document_columns["is_active"]["nullable"]
+    assert not comparison_columns["brief_revision"]["nullable"]
+    assert not comparison_columns["quote_revision_snapshot"]["nullable"]
+    assert not comparison_columns["comparison_payload"]["nullable"]
+    assert not comparison_columns["stale"]["nullable"]
     assert any(index["name"] == "uq_quote_documents_one_active_per_quote"
                and index["unique"] for index in inspect(test_engine).get_indexes("quote_documents"))
 

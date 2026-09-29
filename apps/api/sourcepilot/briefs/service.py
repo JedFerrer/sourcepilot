@@ -6,6 +6,7 @@ from sourcepilot.briefs.readiness import (
     ReadinessRequirement,
     evaluate_brief_readiness,
 )
+from sourcepilot.comparison.service import mark_comparisons_stale
 from sourcepilot.persistence.models import Brief, Project, Requirement
 
 
@@ -13,6 +14,7 @@ def increment_brief_revision(database_session: Session, project: Project) -> Pro
     """Advance the internal revision when a later brief-editing use case requires it."""
     project.brief_revision += 1
     database_session.flush()
+    mark_comparisons_stale(database_session, project.id)
     return project
 
 

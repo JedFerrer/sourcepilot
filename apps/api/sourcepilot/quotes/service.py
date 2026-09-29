@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import delete, select
 from sqlalchemy.orm import Session, object_session, selectinload
 
+from sourcepilot.comparison.service import mark_comparisons_stale
 from sourcepilot.documents.lifecycle import current_processing_status
 from sourcepilot.documents.settings import processing_stale_seconds_from_environment
 from sourcepilot.persistence.models import (
@@ -260,14 +261,19 @@ def edit_manual_quote(
                 current_origin=QuoteValueOrigin.USER_ENTERED.value,
             )
             quote.values.append(record)
+            changed = True
         else:
-            changed |= normalized_current_value_changed(key, record.current_value, current)
-            record.current_value = current
+            value_changed = normalized_current_value_changed(key, record.current_value, current)
+            changed |= value_changed
+            if value_changed:
+                record.current_value = current
     if changed and quote.status == QuoteStatus.CONFIRMED:
         quote.revision += 1
     if notes_provided:
         quote.notes = notes
     database_session.flush()
+    if changed and quote.status == QuoteStatus.CONFIRMED:
+        mark_comparisons_stale(database_session, quote.project_id)
     return quote_snapshot(quote)
 
 
@@ -289,6 +295,7 @@ def edit_pdf_quote(
         raise QuoteWorkflowError("Only reviewable or confirmed PDF quotes can be corrected.")
     by_key = {value.field_key: value for value in quote.values}
     changed = False
+    snapshot_changed = False
     for key, current in values.items():
         record = by_key.get(key)
         if record is None:
@@ -299,14 +306,20 @@ def edit_pdf_quote(
             field_key=key, current_value=current, current_origin=origin,
             ai_extracted_value=record.ai_extracted_value,
         )
-        changed |= normalized_current_value_changed(key, record.current_value, current)
-        record.current_value = current
-        record.current_origin = origin.value
+        value_changed = normalized_current_value_changed(key, record.current_value, current)
+        origin_changed = record.current_origin != origin.value
+        changed |= value_changed
+        snapshot_changed |= value_changed or origin_changed
+        if value_changed or origin_changed:
+            record.current_value = current
+            record.current_origin = origin.value
     if changed and quote.status == QuoteStatus.CONFIRMED:
         quote.revision += 1
     if notes_provided:
         quote.notes = notes
     database_session.flush()
+    if snapshot_changed and quote.status == QuoteStatus.CONFIRMED:
+        mark_comparisons_stale(database_session, quote.project_id)
     return quote_snapshot(quote)
 
 
@@ -330,6 +343,7 @@ def confirm_quote(database_session: Session, quote: Quote) -> QuoteResponse:
     quote.status = QuoteStatus.CONFIRMED.value
     quote.confirmed_at = datetime.now(UTC)
     database_session.flush()
+    mark_comparisons_stale(database_session, quote.project_id)
     return quote_snapshot(quote)
 
 

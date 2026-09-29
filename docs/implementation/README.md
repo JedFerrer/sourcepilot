@@ -4,6 +4,10 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
+**M4-U3 — ComparisonSnapshot Generation and Staleness** is `COMMITTED` after a passing Done Check and its unit-scoped commit on 2026-09-29.
+
+**M4-U2 — Remaining Explicit Requirement Evaluators** is `COMMITTED` after a passing Done Check and its unit-scoped commit on 2026-09-29.
+
 **M4-U1 — Source Precedence Resolver** is `COMMITTED` after a passing Done Check on 2026-09-29 and its unit-scoped commit. M3-U9 is `COMMITTED`.
 
 **M3-U9 — Quote Confirmation, Revision, Stale Processing, and Idempotent Retry** is `COMMITTED`. Browser QA and Done Check passed on 2026-09-28, followed by its unit-scoped commit.

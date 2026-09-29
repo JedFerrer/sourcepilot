@@ -52,6 +52,13 @@ from sourcepilot.briefs.workflow import (
     edit_brief,
     project_requirements,
 )
+from sourcepilot.comparison.schemas import ComparisonResponse
+from sourcepilot.comparison.service import (
+    ComparisonNotReadyError,
+    comparison_response,
+    generate_comparison,
+    latest_comparison,
+)
 from sourcepilot.documents.body_limit import UploadBodyLimitMiddleware
 from sourcepilot.documents.processing import run_pdf_quote_processing
 from sourcepilot.documents.service import (
@@ -248,6 +255,38 @@ def owned_project_or_404(
         database_session.rollback()
         raise HTTPException(status_code=404, detail="Project not found.")
     return demo_session, project
+
+
+@app.post("/projects/{project_id}/comparison/generate", response_model=ComparisonResponse,
+          status_code=status.HTTP_201_CREATED)
+def generate_comparison_endpoint(
+    project_id: UUID, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> ComparisonResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        comparison = generate_comparison(database_session, project.id)
+        result = ComparisonResponse.model_validate(comparison_response(database_session, comparison))
+        commit_or_rollback(database_session)
+        return result
+    except ComparisonNotReadyError as error:
+        database_session.rollback()
+        return error_response(409, code="COMPARISON_NOT_READY", message=str(error))
+
+
+@app.get("/projects/{project_id}/comparison", response_model=ComparisonResponse)
+def read_comparison_endpoint(
+    project_id: UUID, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> ComparisonResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    comparison = latest_comparison(database_session, project.id)
+    if comparison is None:
+        database_session.rollback()
+        return error_response(404, code="COMPARISON_NOT_FOUND", message="No comparison exists.")
+    result = ComparisonResponse.model_validate(comparison_response(database_session, comparison))
+    commit_or_rollback(database_session)
+    return result
 
 
 def owned_quote_or_404(

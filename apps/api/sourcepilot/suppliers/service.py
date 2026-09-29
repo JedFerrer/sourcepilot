@@ -7,13 +7,16 @@ from sqlalchemy.orm import Session, selectinload
 
 from sourcepilot.briefs.domain import BriefStatus, RequirementKind
 from sourcepilot.briefs.workflow import project_requirements
+from sourcepilot.comparison.service import mark_comparisons_stale
 from sourcepilot.persistence.models import (
     Brief,
     Project,
     ProjectSupplier,
+    Quote,
     RequirementEvaluationRecord,
     Supplier,
 )
+from sourcepilot.quotes.domain import QuoteStatus
 from sourcepilot.suppliers.evaluation import (
     EvaluationEvidence,
     EvaluationRequirement,
@@ -129,12 +132,16 @@ def discover_suppliers(
             select(ProjectSupplier).where(ProjectSupplier.project_id == project.id)
         )
     }
-    removed_selected = any(
-        item.shortlisted and supplier_id not in ordered_ids
-        for supplier_id, item in existing.items()
-    )
+    removed_ids = {supplier_id for supplier_id, item in existing.items()
+                   if item.shortlisted and supplier_id not in ordered_ids}
+    removed_selected = bool(removed_ids)
     if removed_selected and project.stage == "QUOTES":
         project.stage = "SUPPLIERS"
+    if removed_ids and database_session.scalar(select(Quote.id).where(
+        Quote.project_id == project.id, Quote.supplier_id.in_(removed_ids),
+        Quote.status == QuoteStatus.CONFIRMED.value,
+    )) is not None:
+        mark_comparisons_stale(database_session, project.id)
     for supplier_id, item in existing.items():
         if supplier_id not in ordered_ids:
             database_session.delete(item)
@@ -293,6 +300,11 @@ def update_supplier_review(
     if was_shortlisted != item.shortlisted and locked_project.stage == "QUOTES":
         locked_project.stage = "SUPPLIERS"
     database_session.flush()
+    if was_shortlisted != item.shortlisted and database_session.scalar(select(Quote.id).where(
+        Quote.project_id == project.id, Quote.supplier_id == supplier_id,
+        Quote.status == QuoteStatus.CONFIRMED.value,
+    )) is not None:
+        mark_comparisons_stale(database_session, project.id)
     return list_project_suppliers(database_session, project)
 
 
