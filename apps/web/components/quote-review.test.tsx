@@ -1,12 +1,66 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QuoteReview } from "./quote-review";
+import { ComparisonReview } from "./comparison-review";
 import { jsonResponse } from "../test/api-responses";
 
 const supplier = { id: "supplier-1", name: "Fictional Bags", shortlisted: true, dismissed: false };
 
+function QuoteComparisonHarness() {
+  const [refreshKey, setRefreshKey] = useState(0);
+  return <>
+    <QuoteReview projectId="project-1" active refreshKey={0} onQuoteChange={() => setRefreshKey((value) => value + 1)} />
+    <ComparisonReview projectId="project-1" refreshKey={refreshKey} />
+  </>;
+}
+
 describe("QuoteReview", () => {
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
+
+  it.each(["save", "confirmation"])("clears settled generation feedback after a successful quote %s", async (mutation) => {
+    const quote = {
+      id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL",
+      status: mutation === "save" ? "CONFIRMED" : "NEEDS_REVIEW",
+      revision: 1, confirmed_at: null, notes: null,
+      values: { unit_price: { current_value: "4.25", current_origin: "USER_ENTERED", ai_extracted_value: null } },
+    };
+    let comparisonReads = 0;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/comparison/generate") && init?.method === "POST") return Promise.resolve(jsonResponse({
+        error: { code: "COMPARISON_NOT_READY", message: "Comparison inputs need approval." },
+      }, 409));
+      if (path.endsWith("/comparison")) {
+        comparisonReads += 1;
+        return Promise.resolve(jsonResponse({ error: { code: "COMPARISON_NOT_FOUND", message: "No comparison exists." } }, 404));
+      }
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/quote-1") && init?.method === "PATCH") return Promise.resolve(jsonResponse(quote));
+      if (path.endsWith("/quotes/quote-1/confirm") && init?.method === "POST") return Promise.resolve(jsonResponse(quote));
+      throw new Error(`Unexpected request: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteComparisonHarness />);
+
+    const generate = await screen.findByRole("button", { name: "Generate Comparison" });
+    await waitFor(() => expect(generate).toBeEnabled());
+    fireEvent.click(generate);
+    expect(await screen.findByText("Comparison inputs need approval.")).toBeInTheDocument();
+    if (mutation === "save") {
+      fireEvent.click(await screen.findByRole("button", { name: "Edit confirmed quote" }));
+      fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.50" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save quote" }));
+    } else {
+      fireEvent.click(await screen.findByRole("button", { name: "Review for confirmation" }));
+      fireEvent.click(screen.getByRole("button", { name: "Confirm Quote" }));
+    }
+
+    await waitFor(() => expect(comparisonReads).toBe(2));
+    expect(screen.queryByText("Comparison inputs need approval.")).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(mutation === "save"
+      ? "/api/quotes/quote-1" : "/api/quotes/quote-1/confirm", expect.objectContaining({ method: mutation === "save" ? "PATCH" : "POST" }));
+  });
 
   it("shows an uploaded PDF awaiting extraction without review or confirmation controls", async () => {
     const pdfQuote = {
@@ -409,6 +463,7 @@ describe("QuoteReview", () => {
   });
 
   it("confirms a reviewed PDF and edits its confirmed current value", async () => {
+    const onQuoteChange = vi.fn();
     let quote = {
       id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "NEEDS_REVIEW",
       revision: 0, confirmed_at: null as string | null, notes: null,
@@ -434,11 +489,12 @@ describe("QuoteReview", () => {
       }
       throw new Error(`Unexpected request: ${path}`);
     }));
-    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} onQuoteChange={onQuoteChange} />);
     expect(await screen.findByText("PDF quote needs review.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review for confirmation" }));
     fireEvent.click(screen.getByRole("button", { name: "Confirm Quote" }));
     expect(await screen.findByText(/Confirmed PDF quote/)).toBeInTheDocument();
+    await waitFor(() => expect(onQuoteChange).toHaveBeenCalledTimes(1));
     fireEvent.click(screen.getByRole("button", { name: "Edit confirmed PDF quote" }));
     fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.50" } });
     fireEvent.click(screen.getByRole("button", { name: "Save quote" }));
@@ -448,6 +504,45 @@ describe("QuoteReview", () => {
     ]));
     expect(await screen.findByText("Current confirmed value: 4.50")).toBeInTheDocument();
     expect(screen.getByText("Unit price: USD 4.22")).toBeInTheDocument();
+    await waitFor(() => expect(onQuoteChange).toHaveBeenCalledTimes(2));
+  });
+
+  it.each(["save", "confirm"])("notifies comparison after a successful %s before a failing quote reload settles", async (mutation) => {
+    const onQuoteChange = vi.fn();
+    const quote = {
+      id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL",
+      status: mutation === "save" ? "CONFIRMED" : "NEEDS_REVIEW",
+      revision: 0, confirmed_at: null, notes: null,
+      values: { unit_price: { current_value: "4.25", current_origin: "USER_ENTERED", ai_extracted_value: null } },
+    };
+    let quoteReads = 0;
+    let finishReload: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes") && !init?.method) {
+        quoteReads += 1;
+        return quoteReads === 1 ? Promise.resolve(jsonResponse([quote]))
+          : new Promise<Response>((resolve) => { finishReload = resolve; });
+      }
+      if (init?.method === "PATCH" || path.endsWith("/confirm")) return Promise.resolve(jsonResponse(quote));
+      throw new Error(`Unexpected request: ${path}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} onQuoteChange={onQuoteChange} />);
+    if (mutation === "save") {
+      fireEvent.click(await screen.findByRole("button", { name: "Edit confirmed quote" }));
+      fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.50" } });
+      fireEvent.click(screen.getByRole("button", { name: "Save quote" }));
+    } else {
+      fireEvent.click(await screen.findByRole("button", { name: "Review for confirmation" }));
+      fireEvent.click(screen.getByRole("button", { name: "Confirm Quote" }));
+    }
+    await waitFor(() => expect(quoteReads).toBe(2));
+    expect(onQuoteChange).toHaveBeenCalledTimes(1);
+    expect(finishReload).toBeDefined();
+    await act(async () => { finishReload?.(jsonResponse({ error: { code: "SERVER_ERROR", message: "Quote list unavailable." } }, 500)); });
+    expect(onQuoteChange).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("alert")).toHaveTextContent("Quote list unavailable.");
   });
 
   it("offers only retry for stale PDF processing", async () => {

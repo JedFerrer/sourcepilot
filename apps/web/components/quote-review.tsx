@@ -309,7 +309,9 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
   </article>;
 }
 
-export function QuoteReview({ projectId, active, refreshKey }: { projectId: string; active: boolean; refreshKey: number }) {
+export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
+  projectId: string; active: boolean; refreshKey: number; onQuoteChange?: () => void;
+}) {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
@@ -333,6 +335,11 @@ export function QuoteReview({ projectId, active, refreshKey }: { projectId: stri
   }, [active, projectId]);
 
   useEffect(() => { void reload(); }, [reload, refreshKey]);
+
+  async function savedQuote() {
+    onQuoteChange?.();
+    await reload();
+  }
 
   useEffect(() => {
     const processingIds = quotes.filter((quote) => quote.entry_type === "PDF" && quote.status === "PROCESSING")
@@ -359,7 +366,7 @@ export function QuoteReview({ projectId, active, refreshKey }: { projectId: stri
     {!loading && !error && suppliers.length === 0 ? <p>No suppliers are currently shortlisted.</p> : null}
     {!loading && !error ? suppliers.map((supplier) => <ManualQuoteCard
       key={supplier.id} projectId={projectId} supplier={supplier}
-      quote={quotes.find((quote) => quote.supplier_id === supplier.id)} onSaved={reload}
+      quote={quotes.find((quote) => quote.supplier_id === supplier.id)} onSaved={savedQuote}
     />) : null}
   </section>;
 }

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
 import { BriefEditor } from "./brief-editor";
+import { ComparisonReview } from "./comparison-review";
 import { QuoteReview } from "./quote-review";
 import { SupplierReview } from "./supplier-review";
 
@@ -16,8 +17,6 @@ type Project = {
 
 type WorkspaceState = "loading" | "ready" | "unavailable" | "not-found";
 
-const laterStages = ["Comparison", "Decision"];
-
 export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [project, setProject] = useState<Project | null>(null);
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>("loading");
@@ -26,8 +25,13 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [supplierRefreshKey, setSupplierRefreshKey] = useState(0);
+  const [comparisonRefreshKey, setComparisonRefreshKey] = useState(0);
+  const [hasComparison, setHasComparison] = useState(false);
+  const handleSnapshotChange = useCallback((present: boolean) => setHasComparison(present), []);
+  const refreshComparison = useCallback(() => setComparisonRefreshKey((value) => value + 1), []);
 
   async function refreshProject() {
+    refreshComparison();
     try {
       const latest = await apiRequest<Project>(`/api/projects/${projectId}`);
       setProject(latest);
@@ -132,15 +136,15 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
       </section>
       <BriefEditor projectId={projectId} onProjectChange={refreshProject} />
       <SupplierReview projectId={projectId} refreshKey={supplierRefreshKey} onStageChange={refreshProject} />
-      <QuoteReview projectId={projectId} active={project.stage === "QUOTES"} refreshKey={supplierRefreshKey} />
+      <QuoteReview projectId={projectId} active={project.stage === "QUOTES"} refreshKey={supplierRefreshKey} onQuoteChange={refreshComparison} />
+      <ComparisonReview projectId={projectId} refreshKey={comparisonRefreshKey} onSnapshotChange={handleSnapshotChange} />
       <nav aria-label="Sourcing workflow stages">
         <ul className="stage-list">
           <li aria-current={project.stage === "BRIEF" ? "step" : undefined}><strong>Brief</strong><span>Edit the sourcing brief above.</span></li>
           <li aria-current={project.stage === "SUPPLIERS" ? "step" : undefined} data-unavailable={project.stage === "BRIEF" ? "true" : undefined}><strong>Suppliers</strong><span>{project.stage === "BRIEF" ? "Available after Brief approval." : "Review discovered suppliers above."}</span></li>
           <li aria-current={project.stage === "QUOTES" ? "step" : undefined} data-unavailable={project.stage === "QUOTES" ? undefined : "true"}><strong>Quotes</strong><span>{project.stage === "QUOTES" ? "Add and confirm manual quotes above." : "Available after shortlist approval."}</span></li>
-          {laterStages.map((stage) => (
-            <li key={stage} data-unavailable="true"><strong>{stage}</strong><span>Available in a later step.</span></li>
-          ))}
+          <li><strong>Comparison</strong><span>{hasComparison ? "Review factual comparison above." : "Check comparison availability above."}</span></li>
+          <li data-unavailable="true"><strong>Decision</strong><span>Available in a later step.</span></li>
         </ul>
       </nav>
     </section>

@@ -19,6 +19,7 @@ const readyBrief = {
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock("./supplier-review", () => ({ SupplierReview: () => null }));
 vi.mock("./quote-review", () => ({ QuoteReview: () => null }));
+vi.mock("./comparison-review", () => ({ ComparisonReview: () => null }));
 
 describe("ProjectWorkspace", () => {
   afterEach(() => {
@@ -41,9 +42,10 @@ describe("ProjectWorkspace", () => {
     expect(await screen.findByText("Travel Bag")).toBeInTheDocument();
     expect(screen.getByText("Source recycled travel bags.")).toBeInTheDocument();
     expect(screen.getByText("Brief").closest("li")).toHaveAttribute("aria-current", "step");
-    for (const stage of ["Suppliers", "Quotes", "Comparison", "Decision"]) {
+    for (const stage of ["Suppliers", "Quotes", "Decision"]) {
       expect(screen.getByText(stage).closest("li")).toHaveAttribute("data-unavailable", "true");
     }
+    expect(screen.getByText("Comparison").closest("li")).not.toHaveAttribute("data-unavailable");
   });
 
   it("synchronizes project stage after approval and an approval-revoking edit", async () => {
