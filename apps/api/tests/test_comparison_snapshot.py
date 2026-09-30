@@ -1,6 +1,7 @@
 """Comparison generation, staleness, persistence, and API isolation."""
 
 from collections.abc import Iterator
+from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 import pytest
@@ -8,6 +9,16 @@ from fastapi.testclient import TestClient
 from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
+from sourcepilot.ai.analyst_tools import (
+    AnalystToolContext,
+    AnalystToolRuntime,
+    EvaluationAvailability,
+    ToolError,
+    ToolErrorCode,
+    get_comparison_snapshot,
+    get_quote_evidence,
+    get_supplier_snapshot,
+)
 from sourcepilot.comparison.service import (
     _quote_fingerprint,
     _resolution_state,
@@ -22,7 +33,10 @@ from sourcepilot.main import app
 from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import (
     Comparison,
+    DemoSession,
     DocumentBlock,
+    Project,
+    ProjectSupplier,
     Quote,
     QuoteDocument,
     QuoteFieldEvidence,
@@ -112,6 +126,245 @@ def confirm_manual(client: TestClient, project_id: str, supplier_id: str,
     quote_id = created.json()["id"]
     assert client.post(f"/quotes/{quote_id}/confirm").status_code == 200
     return quote_id
+
+
+def _analyst_runtime(
+    engine: Engine, project_id: str, supplier_ids: list[str], quote_ids: list[str],
+    *, limit: int = 6,
+) -> AnalystToolRuntime:
+    with Session(engine) as session:
+        project = session.get(Project, UUID(project_id))
+        assert project is not None
+        return AnalystToolRuntime(AnalystToolContext(
+            demo_session_id=project.demo_session_id,
+            project_id=project.id,
+            permitted_supplier_ids=frozenset(UUID(value) for value in supplier_ids),
+            max_tool_calls=limit,
+            permitted_quote_ids=frozenset(UUID(value) for value in quote_ids),
+        ))
+
+
+def test_analyst_comparison_current_absent_and_stale(client: TestClient, engine: Engine) -> None:
+    project_id, supplier_ids = setup_project(client)
+    first_quote = confirm_manual(client, project_id, supplier_ids[0])
+    second_quote = confirm_manual(client, project_id, supplier_ids[1])
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [first_quote, second_quote])
+    with Session(engine) as session:
+        absent = get_comparison_snapshot(session, runtime)
+        assert absent.availability == EvaluationAvailability.ABSENT
+        assert absent.comparison_payload is None
+    generated = client.post(f"/projects/{project_id}/comparison/generate")
+    assert generated.status_code == 201, generated.text
+    with Session(engine) as session:
+        current = get_comparison_snapshot(session, runtime)
+        assert current.availability == EvaluationAvailability.CURRENT
+        assert current.snapshot_id == UUID(generated.json()["id"])
+        assert current.comparison_payload == generated.json()["comparison_payload"]
+        assert current.stale is False
+        assert not session.dirty and not session.new and not session.deleted
+
+    with Session(engine) as session:
+        quote = session.get(Quote, UUID(first_quote))
+        assert quote is not None
+        quote.revision += 1
+        session.commit()
+    with Session(engine) as session:
+        stale = get_comparison_snapshot(session, runtime)
+        assert stale.availability == EvaluationAvailability.STALE
+        assert stale.stale is True
+        assert stale.snapshot_id == current.snapshot_id
+        assert stale.comparison_payload is None
+        stored = session.get(Comparison, current.snapshot_id)
+        assert stored is not None
+        assert stored.stale is False
+    regenerated = client.post(f"/projects/{project_id}/comparison/generate")
+    assert regenerated.status_code == 201, regenerated.text
+    with Session(engine) as session:
+        latest = get_comparison_snapshot(session, runtime)
+        assert latest.availability == EvaluationAvailability.CURRENT
+        assert latest.snapshot_id == UUID(regenerated.json()["id"])
+    assert runtime.successful_call_count == 4
+
+
+def test_analyst_quote_allowlist_and_scope(client: TestClient, engine: Engine) -> None:
+    project_id, supplier_ids = setup_project(client)
+    allowed = confirm_manual(client, project_id, supplier_ids[0])
+    omitted = confirm_manual(client, project_id, supplier_ids[1])
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [allowed])
+    with Session(engine) as session:
+        for quote_id in (UUID(omitted), uuid4()):
+            with pytest.raises(ToolError) as error:
+                get_quote_evidence(session, runtime, quote_id, "unit_price")
+            assert error.value.code == ToolErrorCode.NOT_ALLOWED
+        assert [event.outcome for event in runtime.trace] == ["NOT_ALLOWED"] * 2
+        assert runtime.successful_call_count == 0
+        allowed_result = get_quote_evidence(session, runtime, UUID(allowed), "unit_price")
+        assert allowed_result.current_value == "4.25"
+        assert allowed_result.current_origin == "USER_ENTERED"
+        assert allowed_result.ai_extracted_value is None
+        assert allowed_result.evidence == []
+        with pytest.raises(ToolError) as error:
+            get_quote_evidence(session, runtime, UUID(allowed), "missing")
+        assert error.value.code == ToolErrorCode.NOT_FOUND
+        assert not session.dirty and not session.new and not session.deleted
+    with Session(engine) as session:
+        candidate = session.get(ProjectSupplier, (UUID(project_id), UUID(supplier_ids[0])))
+        assert candidate is not None
+        candidate.shortlisted = False
+        session.commit()
+    with Session(engine) as session:
+        with pytest.raises(ToolError) as error:
+            get_quote_evidence(session, runtime, UUID(allowed), "unit_price")
+        assert error.value.code == ToolErrorCode.NOT_ALLOWED
+
+
+def test_analyst_quote_requires_confirmation(client: TestClient, engine: Engine) -> None:
+    project_id, supplier_ids = setup_project(client)
+    created = client.post(f"/projects/{project_id}/quotes/manual", json={
+        "supplier_id": supplier_ids[0], "values": {"unit_price": "4.25"},
+    })
+    assert created.status_code == 201, created.text
+    quote_id = UUID(created.json()["id"])
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [str(quote_id)])
+    with Session(engine) as session:
+        with pytest.raises(ToolError) as error:
+            get_quote_evidence(session, runtime, quote_id, "unit_price")
+        assert error.value.code == ToolErrorCode.NOT_ALLOWED
+        assert runtime.successful_call_count == 0
+
+
+def test_analyst_quote_conflicting_pdf_values_are_provenance(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id, supplier_ids = setup_project(client)
+    quote_id = confirm_manual(client, project_id, supplier_ids[0])
+    with Session(engine) as session:
+        quote = session.get(Quote, UUID(quote_id))
+        assert quote is not None
+        quote.entry_type = "PDF"
+        document = QuoteDocument(
+            quote_id=quote.id, storage_key=f"test/{uuid4()}",
+            original_filename="conflict.pdf", sha256="2" * 64, page_count=1,
+            processing_status="CONFIRMED", is_active=True,
+        )
+        session.add(document)
+        session.flush()
+        value = next(item for item in quote.values if item.field_key == "unit_price")
+        value.current_value = None
+        value.current_origin = "AI_EXTRACTED"
+        value.ai_extracted_value = None
+        for block_number, evidence_value in enumerate(("4.25", "4.75"), start=1):
+            block = DocumentBlock(
+                id=uuid4(), quote_document_id=document.id,
+                page_number=1, block_number=block_number,
+                text=f"Price {evidence_value}",
+            )
+            session.add(block)
+            session.flush()
+            value.evidence.append(QuoteFieldEvidence(
+                document_block_id=block.id, evidence_value=evidence_value,
+            ))
+        session.commit()
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [quote_id])
+    with Session(engine) as session:
+        result = get_quote_evidence(session, runtime, UUID(quote_id), "unit_price")
+        assert result.current_value is None
+        assert [item.evidence_value for item in result.evidence] == ["4.25", "4.75"]
+        assert all(item.role == "provenance" for item in result.evidence)
+
+
+def test_analyst_tools_revalidate_session_and_preserve_pending_edits(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id, supplier_ids = setup_project(client)
+    quote_id = confirm_manual(client, project_id, supplier_ids[0])
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [quote_id])
+    with Session(engine) as session:
+        project = session.get(Project, UUID(project_id))
+        quote = session.get(Quote, UUID(quote_id))
+        candidate = session.get(ProjectSupplier, (UUID(project_id), UUID(supplier_ids[0])))
+        assert project is not None and quote is not None and candidate is not None
+        project.stage = "PENDING"
+        quote.status = "NEEDS_REVIEW"
+        candidate.shortlisted = False
+        result = get_quote_evidence(session, runtime, quote.id, "unit_price")
+        assert result.current_value == "4.25"
+        assert get_comparison_snapshot(session, runtime).availability == EvaluationAvailability.ABSENT
+        assert {project, quote, candidate} <= set(session.dirty)
+        assert project.stage == "PENDING" and quote.status == "NEEDS_REVIEW"
+        assert candidate.shortlisted is False
+        with Session(engine) as other:
+            demo = other.get(DemoSession, runtime.context.demo_session_id)
+            assert demo is not None
+            demo.expires_at = datetime.now(UTC) - timedelta(seconds=1)
+            other.commit()
+        for call in (
+            lambda: get_comparison_snapshot(session, runtime),
+            lambda: get_quote_evidence(session, runtime, quote.id, "unit_price"),
+        ):
+            with pytest.raises(ToolError) as error:
+                call()
+            assert error.value.code == ToolErrorCode.NOT_ALLOWED
+        assert project.stage == "PENDING" and quote.status == "NEEDS_REVIEW"
+        assert candidate.shortlisted is False
+
+
+def test_analyst_tools_share_budget(client: TestClient, engine: Engine) -> None:
+    project_id, supplier_ids = setup_project(client)
+    quote_id = confirm_manual(client, project_id, supplier_ids[0])
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [quote_id], limit=2)
+    with Session(engine) as session:
+        get_supplier_snapshot(session, runtime, UUID(supplier_ids[0]))
+        get_quote_evidence(session, runtime, UUID(quote_id), "unit_price")
+        with pytest.raises(ToolError) as error:
+            get_comparison_snapshot(session, runtime)
+        assert error.value.code == ToolErrorCode.LIMIT_REACHED
+        assert not session.dirty and not session.new and not session.deleted
+    assert runtime.successful_call_count == 2
+    assert [event.outcome for event in runtime.trace] == [
+        "SUCCESS", "SUCCESS", "LIMIT_REACHED",
+    ]
+    assert runtime.trace[1].quote_id == UUID(quote_id)
+    assert runtime.trace[1].field_key == "unit_price"
+
+
+def test_analyst_tools_reject_other_project_and_session(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id, supplier_ids = setup_project(client)
+    quote_id = confirm_manual(client, project_id, supplier_ids[0])
+    other_project_id, other_suppliers = setup_project(client)
+    other_quote_id = confirm_manual(client, other_project_id, other_suppliers[0])
+    runtime = _analyst_runtime(
+        engine, project_id, supplier_ids,
+        [quote_id, other_quote_id],
+    )
+    with Session(engine) as session:
+        with pytest.raises(ToolError) as error:
+            get_quote_evidence(session, runtime, UUID(other_quote_id), "unit_price")
+        assert error.value.code == ToolErrorCode.NOT_ALLOWED
+    with TestClient(app, raise_server_exceptions=False) as other_client:
+        assert other_client.post("/demo-session").status_code == 204
+        foreign_project_id, foreign_suppliers = setup_project(other_client)
+        foreign_quote_id = confirm_manual(other_client, foreign_project_id,
+                                          foreign_suppliers[0])
+    foreign_runtime = _analyst_runtime(
+        engine, foreign_project_id, foreign_suppliers, [foreign_quote_id],
+    )
+    misplaced = AnalystToolRuntime(AnalystToolContext(
+        demo_session_id=foreign_runtime.context.demo_session_id,
+        project_id=UUID(project_id),
+        permitted_supplier_ids=runtime.context.permitted_supplier_ids,
+        permitted_quote_ids=runtime.context.permitted_quote_ids,
+    ))
+    with Session(engine) as session:
+        for call in (
+            lambda: get_comparison_snapshot(session, misplaced),
+            lambda: get_quote_evidence(session, misplaced, UUID(quote_id), "unit_price"),
+        ):
+            with pytest.raises(ToolError) as error:
+                call()
+            assert error.value.code == ToolErrorCode.NOT_ALLOWED
 
 
 def test_completeness_classifies_selected_missing_and_conflict() -> None:
@@ -253,6 +506,45 @@ def test_pdf_evidence_links_to_document_blocks_without_copying_text(
     }]
     assert str(evidence_id) in str(pdf_supplier["resolved_facts"]["unit_price"])
     assert "Original PDF text" not in str(payload)
+    runtime = _analyst_runtime(engine, project_id, supplier_ids, [pdf_quote_id])
+    with Session(engine) as session:
+        evidence = get_quote_evidence(session, runtime, UUID(pdf_quote_id), "unit_price")
+        assert evidence.current_value == "4.50"
+        assert evidence.current_origin == "USER_CORRECTED"
+        assert evidence.ai_extracted_value == "4.25"
+        assert len(evidence.evidence) == 1
+        citation = evidence.evidence[0]
+        assert citation.id == evidence_id
+        assert citation.quote_document_id == document_id
+        assert citation.document_block_id == block_id
+        assert citation.page_number == 2 and citation.block_number == 3
+        assert citation.untrusted_source_text == "Original PDF text must stay in DocumentBlock."
+        assert citation.evidence_value == "4.25"
+        assert citation.role == "provenance"
+    with Session(engine) as session:
+        quote = session.get(Quote, UUID(pdf_quote_id))
+        assert quote is not None
+        value = next(item for item in quote.values if item.field_key == "unit_price")
+        inactive = QuoteDocument(
+            quote_id=quote.id, storage_key=f"test/{uuid4()}",
+            original_filename="old.pdf", sha256="1" * 64, page_count=1,
+            processing_status="CONFIRMED", is_active=False,
+        )
+        session.add(inactive)
+        session.flush()
+        other_block = DocumentBlock(
+            id=uuid4(), quote_document_id=inactive.id,
+            page_number=1, block_number=1, text="Old document value.",
+        )
+        session.add(other_block)
+        session.flush()
+        value.evidence.append(QuoteFieldEvidence(
+            document_block_id=other_block.id, evidence_value="9.99",
+        ))
+        session.commit()
+    with Session(engine) as session:
+        scoped = get_quote_evidence(session, runtime, UUID(pdf_quote_id), "unit_price")
+        assert [item.id for item in scoped.evidence] == [evidence_id]
     manual_supplier = next(item for item in payload["suppliers"]
                            if item["supplier_id"] == supplier_ids[1])
     assert all(not field["evidence"] for field in manual_supplier["quote_fields"])

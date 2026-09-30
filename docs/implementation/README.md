@@ -4,6 +4,8 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
+**M4-U5 — Complete Analyst Read-Only Tools** is `COMMITTED` after Review, Browser QA disposition, a passing Done Check, and its unit-scoped commit on 2026-09-30. The human approved the revised plan, including immutable permitted quote IDs.
+
 **M4-U4 — Comparison UI and Stale-State UX** is `COMMITTED`. Review, browser UI QA, Done Check, and its unit-scoped commit passed on 2026-09-30.
 
 **M4-U3 — ComparisonSnapshot Generation and Staleness** is `COMMITTED` after a passing Done Check and its unit-scoped commit on 2026-09-29.

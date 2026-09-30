@@ -1,4 +1,4 @@
-"""Read-only, project-scoped supplier tools for the future Sourcing Analyst."""
+"""Read-only, project-scoped tools for the bounded Sourcing Analyst."""
 
 from __future__ import annotations
 
@@ -11,16 +11,24 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from sourcepilot.comparison.facts import unresolved_quote_conflict
+from sourcepilot.comparison.service import comparison_response, latest_comparison
 from sourcepilot.persistence.models import (
     DemoSession,
+    DocumentBlock,
     Project,
     ProjectSupplier,
+    Quote,
+    QuoteDocument,
+    QuoteFieldEvidence,
+    QuoteValue,
     Requirement,
     RequirementEvaluationRecord,
     Supplier,
     SupplierCapability,
     SupplierEvidence,
 )
+from sourcepilot.quotes.domain import QuoteEntryType, QuoteStatus, QuoteValueOrigin
 
 DEFAULT_MAX_TOOL_CALLS = 6
 
@@ -49,9 +57,11 @@ class AnalystToolContext:
     project_id: UUID
     permitted_supplier_ids: frozenset[UUID]
     max_tool_calls: int = DEFAULT_MAX_TOOL_CALLS
+    permitted_quote_ids: frozenset[UUID] = frozenset()
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "permitted_supplier_ids", frozenset(self.permitted_supplier_ids))
+        object.__setattr__(self, "permitted_quote_ids", frozenset(self.permitted_quote_ids))
         if self.max_tool_calls <= 0:
             raise ValueError("max_tool_calls must be positive")
 
@@ -59,10 +69,12 @@ class AnalystToolContext:
 @dataclass(frozen=True)
 class ToolTraceEvent:
     tool_name: str
-    supplier_id: UUID
+    supplier_id: UUID | None
     claim_keys: tuple[str, ...] | None
     outcome: str
     successful_call_count: int
+    quote_id: UUID | None = None
+    field_key: str | None = None
 
 
 @dataclass
@@ -76,8 +88,8 @@ class AnalystToolRuntime:
         return tuple(self._events)
 
     def record(
-        self, tool_name: str, supplier_id: UUID, claim_keys: tuple[str, ...] | None,
-        outcome: str,
+        self, tool_name: str, supplier_id: UUID | None, claim_keys: tuple[str, ...] | None,
+        outcome: str, *, quote_id: UUID | None = None, field_key: str | None = None,
     ) -> None:
         if outcome == "SUCCESS":
             self.successful_call_count += 1
@@ -87,6 +99,8 @@ class AnalystToolRuntime:
             claim_keys=claim_keys,
             outcome=outcome,
             successful_call_count=self.successful_call_count,
+            quote_id=quote_id,
+            field_key=field_key,
         ))
 
     def check_budget(self) -> None:
@@ -137,6 +151,170 @@ class SupplierEvidenceItem(BaseModel):
 class SupplierEvidenceResult(BaseModel):
     supplier_id: UUID
     evidence: list[SupplierEvidenceItem]
+
+
+class ComparisonSnapshotResult(BaseModel):
+    availability: EvaluationAvailability
+    snapshot_id: UUID | None
+    brief_revision: int | None
+    quote_revision_snapshot: dict[str, object] | None
+    generated_at: datetime | None
+    stale: bool
+    comparison_payload: dict[str, object] | None
+
+
+class QuoteEvidenceCitation(BaseModel):
+    id: UUID
+    quote_document_id: UUID
+    document_block_id: UUID
+    page_number: int
+    block_number: int
+    untrusted_source_text: str
+    evidence_value: object | None
+    role: str
+
+
+class QuoteEvidenceResult(BaseModel):
+    quote_id: UUID
+    supplier_id: UUID
+    quote_revision: int
+    field_key: str
+    current_value: object | None
+    current_origin: str
+    ai_extracted_value: object | None
+    uncertainty: str | None
+    evidence: list[QuoteEvidenceCitation]
+
+
+def _isolated_read_session(session: Session) -> Session:
+    """Read persisted rows without touching the caller's identity map or pending edits."""
+    return Session(bind=session.connection(), autoflush=False, join_transaction_mode="rollback_only")
+
+
+def _authorized_project(session: Session, runtime: AnalystToolRuntime) -> None:
+    context = runtime.context
+    project_id = session.scalar(select(Project.id).join(
+        DemoSession, DemoSession.id == Project.demo_session_id,
+    ).where(
+        Project.id == context.project_id,
+        Project.demo_session_id == context.demo_session_id,
+        DemoSession.expires_at > datetime.now(UTC),
+    ))
+    if project_id is None:
+        raise ToolError(ToolErrorCode.NOT_ALLOWED)
+
+
+def get_comparison_snapshot(
+    session: Session, runtime: AnalystToolRuntime,
+) -> ComparisonSnapshotResult:
+    """Return only a current comparison payload; stale history stays metadata-only."""
+    tool_name = "get_comparison_snapshot"
+    try:
+        runtime.check_budget()
+        with session.no_autoflush, _isolated_read_session(session) as read_session:
+            _authorized_project(read_session, runtime)
+            comparison = latest_comparison(read_session, runtime.context.project_id)
+            if comparison is None:
+                result = ComparisonSnapshotResult(
+                    availability=EvaluationAvailability.ABSENT,
+                    snapshot_id=None, brief_revision=None, quote_revision_snapshot=None,
+                    generated_at=None, stale=False, comparison_payload=None,
+                )
+            else:
+                response = comparison_response(read_session, comparison)
+                stale = bool(response["stale"])
+                result = ComparisonSnapshotResult(
+                    availability=(EvaluationAvailability.STALE if stale
+                                  else EvaluationAvailability.CURRENT),
+                    snapshot_id=comparison.id,
+                    brief_revision=comparison.brief_revision,
+                    quote_revision_snapshot=comparison.quote_revision_snapshot,
+                    generated_at=comparison.generated_at,
+                    stale=stale,
+                    comparison_payload=None if stale else comparison.comparison_payload,
+                )
+    except ToolError as error:
+        runtime.record(tool_name, None, None, error.code.value)
+        raise
+    except Exception:
+        runtime.record(tool_name, None, None, "ERROR")
+        raise
+    runtime.record(tool_name, None, None, "SUCCESS")
+    return result
+
+
+def get_quote_evidence(
+    session: Session, runtime: AnalystToolRuntime, quote_id: UUID, field_key: str,
+) -> QuoteEvidenceResult:
+    """Return one confirmed field and citations from its active PDF only."""
+    tool_name = "get_quote_evidence"
+    try:
+        runtime.check_budget()
+        if quote_id not in runtime.context.permitted_quote_ids:
+            raise ToolError(ToolErrorCode.NOT_ALLOWED)
+        with session.no_autoflush, _isolated_read_session(session) as read_session:
+            _authorized_project(read_session, runtime)
+            quote = read_session.scalars(select(Quote).join(
+                ProjectSupplier,
+                (ProjectSupplier.project_id == Quote.project_id)
+                & (ProjectSupplier.supplier_id == Quote.supplier_id),
+            ).where(
+                Quote.id == quote_id,
+                Quote.project_id == runtime.context.project_id,
+                Quote.status == QuoteStatus.CONFIRMED.value,
+                ProjectSupplier.shortlisted.is_(True),
+                ProjectSupplier.dismissed.is_(False),
+                Quote.supplier_id.in_(runtime.context.permitted_supplier_ids),
+            )).one_or_none()
+            if quote is None:
+                raise ToolError(ToolErrorCode.NOT_ALLOWED)
+            value = read_session.scalars(select(QuoteValue).where(
+                QuoteValue.quote_id == quote_id, QuoteValue.field_key == field_key,
+            )).one_or_none()
+            if value is None:
+                raise ToolError(ToolErrorCode.NOT_FOUND)
+            citations: list[QuoteEvidenceCitation] = []
+            if quote.entry_type == QuoteEntryType.PDF.value:
+                rows = read_session.execute(select(
+                    QuoteFieldEvidence.id, QuoteDocument.id, DocumentBlock.id,
+                    DocumentBlock.page_number, DocumentBlock.block_number,
+                    DocumentBlock.text, QuoteFieldEvidence.evidence_value,
+                ).join(
+                    DocumentBlock, DocumentBlock.id == QuoteFieldEvidence.document_block_id,
+                ).join(
+                    QuoteDocument, QuoteDocument.id == DocumentBlock.quote_document_id,
+                ).where(
+                    QuoteFieldEvidence.quote_value_id == value.id,
+                    QuoteDocument.quote_id == quote_id,
+                    QuoteDocument.is_active.is_(True),
+                ).order_by(
+                    DocumentBlock.page_number, DocumentBlock.block_number,
+                    QuoteFieldEvidence.id,
+                )).all()
+                provenance = (value.current_origin == QuoteValueOrigin.USER_CORRECTED.value
+                              or unresolved_quote_conflict(value))
+                citations = [QuoteEvidenceCitation(
+                    id=row[0], quote_document_id=row[1], document_block_id=row[2],
+                    page_number=row[3], block_number=row[4], untrusted_source_text=row[5],
+                    evidence_value=row[6],
+                    role="provenance" if provenance else "supporting",
+                ) for row in rows]
+            result = QuoteEvidenceResult(
+                quote_id=quote.id, supplier_id=quote.supplier_id,
+                quote_revision=quote.revision, field_key=value.field_key,
+                current_value=value.current_value, current_origin=value.current_origin,
+                ai_extracted_value=value.ai_extracted_value,
+                uncertainty=value.uncertainty, evidence=citations,
+            )
+    except ToolError as error:
+        runtime.record(tool_name, None, None, error.code.value,
+                       quote_id=quote_id, field_key=field_key)
+        raise
+    except Exception:
+        runtime.record(tool_name, None, None, "ERROR", quote_id=quote_id, field_key=field_key)
+        raise
+    runtime.record(tool_name, None, None, "SUCCESS", quote_id=quote_id, field_key=field_key)
+    return result
 
 
 def _authorized_supplier(

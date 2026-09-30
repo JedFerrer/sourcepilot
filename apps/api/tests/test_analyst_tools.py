@@ -317,6 +317,17 @@ def test_configurable_success_budget_and_trace(client: TestClient, engine: Engin
         AnalystToolContext(demo_session_id, project_id, frozenset({supplier_id}), 0)
     default = AnalystToolContext(demo_session_id, project_id, frozenset({supplier_id}))
     assert default.max_tool_calls == 6
+    assert default.permitted_quote_ids == frozenset()
+    positional = AnalystToolContext(demo_session_id, project_id, frozenset({supplier_id}), 2)
+    assert positional.max_tool_calls == 2
+    assert positional.permitted_quote_ids == frozenset()
+    allowed_quotes = {uuid4()}
+    immutable = AnalystToolContext(
+        demo_session_id, project_id, frozenset({supplier_id}),
+        permitted_quote_ids=frozenset(allowed_quotes),
+    )
+    allowed_quotes.add(uuid4())
+    assert len(immutable.permitted_quote_ids) == 1
     runtime = _runtime(demo_session_id, project_id, frozenset({supplier_id}), max_tool_calls=2)
     with Session(engine) as session:
         _assert_error(ToolErrorCode.NOT_ALLOWED, lambda: get_supplier_snapshot(
