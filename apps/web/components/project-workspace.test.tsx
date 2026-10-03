@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
 import { jsonResponse } from "../test/api-responses";
@@ -19,12 +19,38 @@ const readyBrief = {
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock("./supplier-review", () => ({ SupplierReview: () => null }));
 vi.mock("./quote-review", () => ({ QuoteReview: () => null }));
-vi.mock("./comparison-review", () => ({ ComparisonReview: () => null }));
+const comparisonRender = vi.hoisted(() => vi.fn());
+vi.mock("./comparison-review", () => ({ ComparisonReview: (props: { refreshKey: number }) => {
+  comparisonRender(props.refreshKey);
+  return <p>Existing comparison advice</p>;
+} }));
 
 describe("ProjectWorkspace", () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    comparisonRender.mockClear();
+  });
+
+  it("updates preference without replacing comparison advice or refreshing its inputs", async () => {
+    let reads = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/brief")) return Promise.resolve(jsonResponse(emptyBrief));
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [{ id: "c", name: "Supplier C", shortlisted: true }] }));
+      const project = { id: "project-1", name: "Travel Bag", original_request: "Source bags", stage: "QUOTES", preferred_supplier_id: null, preferred_supplier_name: null, decision_notes: null };
+      if (init?.method === "PUT") return Promise.resolve(jsonResponse({ ...project, preferred_supplier_id: "c", preferred_supplier_name: "Supplier C", decision_notes: "Choice" }));
+      reads += 1;
+      return Promise.resolve(jsonResponse(project));
+    }));
+    render(<ProjectWorkspace projectId="project-1" />);
+    await screen.findByRole("option", { name: "Supplier C" });
+    fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "c" } });
+    fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Choice" } });
+    fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    expect(await screen.findByText("Preferred supplier: Supplier C")).toBeInTheDocument();
+    expect(screen.getByText("Existing comparison advice")).toBeInTheDocument();
+    expect(comparisonRender.mock.calls.every(([refreshKey]) => refreshKey === 0)).toBe(true);
+    expect(reads).toBe(1);
   });
 
   it("shows the saved request and a presentation-only five-stage shell", async () => {
@@ -42,10 +68,13 @@ describe("ProjectWorkspace", () => {
     expect(await screen.findByText("Travel Bag")).toBeInTheDocument();
     expect(screen.getByText("Source recycled travel bags.")).toBeInTheDocument();
     expect(screen.getByText("Brief").closest("li")).toHaveAttribute("aria-current", "step");
-    for (const stage of ["Suppliers", "Quotes", "Decision"]) {
+    for (const stage of ["Suppliers", "Quotes"]) {
       expect(screen.getByText(stage).closest("li")).toHaveAttribute("data-unavailable", "true");
     }
     expect(screen.getByText("Comparison").closest("li")).not.toHaveAttribute("data-unavailable");
+    const decision = within(screen.getByRole("navigation", { name: "Sourcing workflow stages" })).getByText("Decision");
+    expect(decision.closest("li")).not.toHaveAttribute("data-unavailable");
+    expect(screen.getByRole("heading", { name: "Decision" })).toBeInTheDocument();
   });
 
   it("synchronizes project stage after approval and an approval-revoking edit", async () => {

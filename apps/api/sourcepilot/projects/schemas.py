@@ -40,5 +40,20 @@ class ProjectResponse(BaseModel):
     name: str
     original_request: str
     stage: str
+    preferred_supplier_id: UUID | None
+    preferred_supplier_name: str | None
+    decision_notes: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class PreferredSupplierRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    supplier_id: UUID | None
+    decision_notes: str | None = Field(default=None, max_length=10000)
+
+    @field_validator("decision_notes")
+    @classmethod
+    def normalize_notes(cls, value: str | None) -> str | None:
+        return (value.strip() or None) if value is not None else None

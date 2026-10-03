@@ -1,0 +1,224 @@
+[
+  {
+    "id": "f8a738cf-ac13-4fdf-bedc-11c20aa4a366",
+    "operation": "comparison_advice",
+    "model": "gpt-6-luna",
+    "prompt_version": "comparison-advice-v1",
+    "input_hash": "989da29dc4b3116de7d76d26a153c2e97798adc08d5aac203f945b63bf5edd90",
+    "status": "VALIDATION_FAILED",
+    "attempts": 3,
+    "model_turn_count": 3,
+    "tool_call_count": 1,
+    "latency_ms": 67000,
+    "validation_status": "INVALID",
+    "error_type": "ValueError",
+    "started_at": "2026-10-03 15:21:20.313873+00:00",
+    "completed_at": "2026-10-03 15:22:27.603875+00:00",
+    "steps": [
+      {
+        "sequence": 1,
+        "kind": "model",
+        "outcome": "FINAL",
+        "name": null
+      },
+      {
+        "sequence": 2,
+        "kind": "validation",
+        "outcome": "INVALID",
+        "name": null
+      },
+      {
+        "sequence": 3,
+        "kind": "retry",
+        "outcome": "REPAIR",
+        "name": null
+      },
+      {
+        "sequence": 4,
+        "kind": "model",
+        "outcome": "TOOL_CALLS",
+        "name": null
+      },
+      {
+        "sequence": 5,
+        "kind": "tool",
+        "outcome": "SUCCESS",
+        "name": "get_comparison_snapshot"
+      },
+      {
+        "sequence": 6,
+        "kind": "model",
+        "outcome": "FINAL",
+        "name": null
+      },
+      {
+        "sequence": 7,
+        "kind": "validation",
+        "outcome": "INVALID",
+        "name": null
+      },
+      {
+        "sequence": 8,
+        "kind": "run",
+        "outcome": "VALIDATION_FAILED",
+        "name": null
+      }
+    ]
+  },
+  {
+    "id": "256e9610-13e3-4a64-b0ca-96cf40ced2bf",
+    "operation": "comparison_advice",
+    "model": "gpt-6-luna",
+    "prompt_version": "comparison-advice-v1",
+    "input_hash": "989da29dc4b3116de7d76d26a153c2e97798adc08d5aac203f945b63bf5edd90",
+    "status": "VALIDATION_FAILED",
+    "attempts": 4,
+    "model_turn_count": 4,
+    "tool_call_count": 3,
+    "latency_ms": 83656,
+    "validation_status": "INVALID",
+    "error_type": "ValueError",
+    "started_at": "2026-10-03 15:23:10.949012+00:00",
+    "completed_at": "2026-10-03 15:24:34.843869+00:00",
+    "steps": [
+      {
+        "sequence": 1,
+        "kind": "model",
+        "outcome": "TOOL_CALLS",
+        "name": null
+      },
+      {
+        "sequence": 2,
+        "kind": "tool",
+        "outcome": "SUCCESS",
+        "name": "get_comparison_snapshot"
+      },
+      {
+        "sequence": 3,
+        "kind": "model",
+        "outcome": "FINAL",
+        "name": null
+      },
+      {
+        "sequence": 4,
+        "kind": "validation",
+        "outcome": "INVALID",
+        "name": null
+      },
+      {
+        "sequence": 5,
+        "kind": "retry",
+        "outcome": "REPAIR",
+        "name": null
+      },
+      {
+        "sequence": 6,
+        "kind": "model",
+        "outcome": "TOOL_CALLS",
+        "name": null
+      },
+      {
+        "sequence": 7,
+        "kind": "tool",
+        "outcome": "SUCCESS",
+        "name": "get_supplier_evidence"
+      },
+      {
+        "sequence": 8,
+        "kind": "tool",
+        "outcome": "SUCCESS",
+        "name": "get_supplier_evidence"
+      },
+      {
+        "sequence": 9,
+        "kind": "model",
+        "outcome": "FINAL",
+        "name": null
+      },
+      {
+        "sequence": 10,
+        "kind": "validation",
+        "outcome": "INVALID",
+        "name": null
+      },
+      {
+        "sequence": 11,
+        "kind": "run",
+        "outcome": "VALIDATION_FAILED",
+        "name": null
+      }
+    ]
+  },
+  {
+    "id": "1fe80582-d741-4dca-8752-cbba5dc236a7",
+    "operation": "comparison_advice",
+    "model": "gpt-6-luna",
+    "prompt_version": "comparison-advice-v1",
+    "input_hash": "989da29dc4b3116de7d76d26a153c2e97798adc08d5aac203f945b63bf5edd90",
+    "status": "COMPLETED",
+    "attempts": 3,
+    "model_turn_count": 3,
+    "tool_call_count": 1,
+    "latency_ms": 75547,
+    "validation_status": "REPAIRED",
+    "error_type": null,
+    "started_at": "2026-10-03 15:32:26.310234+00:00",
+    "completed_at": "2026-10-03 15:33:42.205561+00:00",
+    "steps": [
+      {
+        "sequence": 1,
+        "kind": "model",
+        "outcome": "FINAL",
+        "name": null
+      },
+      {
+        "sequence": 2,
+        "kind": "validation",
+        "outcome": "INVALID",
+        "name": null
+      },
+      {
+        "sequence": 3,
+        "kind": "retry",
+        "outcome": "REPAIR",
+        "name": null
+      },
+      {
+        "sequence": 4,
+        "kind": "model",
+        "outcome": "TOOL_CALLS",
+        "name": null
+      },
+      {
+        "sequence": 5,
+        "kind": "tool",
+        "outcome": "SUCCESS",
+        "name": "get_comparison_snapshot"
+      },
+      {
+        "sequence": 6,
+        "kind": "model",
+        "outcome": "FINAL",
+        "name": null
+      },
+      {
+        "sequence": 7,
+        "kind": "scope",
+        "outcome": "CURRENT",
+        "name": null
+      },
+      {
+        "sequence": 8,
+        "kind": "validation",
+        "outcome": "VALID",
+        "name": null
+      },
+      {
+        "sequence": 9,
+        "kind": "run",
+        "outcome": "COMPLETED",
+        "name": null
+      }
+    ]
+  }
+]

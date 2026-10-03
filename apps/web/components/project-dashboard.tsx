@@ -12,6 +12,7 @@ type Project = {
   stage: string;
   created_at: string;
   updated_at: string;
+  preferred_supplier_name: string | null;
 };
 
 type LoadState = "loading" | "ready" | "unavailable";
@@ -105,6 +106,7 @@ export function ProjectDashboard() {
               <Link href={`/projects/${project.id}`}>
                 <strong>{project.name}</strong>
                 <span>Brief</span>
+                <span>Preferred supplier: {project.preferred_supplier_name ?? "No Decision Yet"}</span>
                 <span>Updated {new Date(project.updated_at).toLocaleDateString()}</span>
               </Link>
             </li>

@@ -77,6 +77,12 @@ class Project(Base):
     brief_revision: Mapped[int] = mapped_column(
         Integer, nullable=False, server_default=text("0"), default=0
     )
+    preferred_supplier_id: Mapped[UUID | None] = mapped_column(
+        PostgreSQLUUID(as_uuid=True),
+        ForeignKey("suppliers.id", name="fk_projects_preferred_supplier", ondelete="RESTRICT"),
+        nullable=True,
+    )
+    decision_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -85,6 +91,12 @@ class Project(Base):
     )
 
     demo_session: Mapped[DemoSession] = relationship(back_populates="projects")
+    preferred_supplier: Mapped[Supplier | None] = relationship(foreign_keys=[preferred_supplier_id])
+
+    @property
+    def preferred_supplier_name(self) -> str | None:
+        return self.preferred_supplier.name if self.preferred_supplier is not None else None
+
     brief: Mapped[Brief | None] = relationship(
         back_populates="project", cascade="all, delete-orphan", passive_deletes=True, uselist=False
     )

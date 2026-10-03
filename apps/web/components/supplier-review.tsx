@@ -159,8 +159,9 @@ function SupplierCard({ projectId, supplier, dataVersion, onUpdate, onRefresh, b
   );
 }
 
-export function SupplierReview({ projectId, refreshKey, onStageChange }: {
+export function SupplierReview({ projectId, refreshKey, onStageChange, onSuppliersChange }: {
   projectId: string; refreshKey: number; onStageChange?: () => Promise<void>;
+  onSuppliersChange?: () => void;
 }) {
   const [loaded, setLoaded] = useState<{ projectId: string; refreshKey: number; version: number; data: SupplierList } | null>(null);
   const data = loaded?.projectId === projectId && loaded.refreshKey === refreshKey ? loaded.data : null;
@@ -201,6 +202,7 @@ export function SupplierReview({ projectId, refreshKey, onStageChange }: {
     try {
       await apiRequest(`/api/projects/${projectId}/suppliers/discover`, { method: "POST" });
       await reload();
+      onSuppliersChange?.();
       if (data?.shortlist_approved) await onStageChange?.();
     } catch (failure) {
       setError(failure instanceof ApiClientError ? failure.message : "Supplier discovery failed. Try again.");
@@ -219,6 +221,7 @@ export function SupplierReview({ projectId, refreshKey, onStageChange }: {
       });
       if (request === requestSequence.current) {
         setLoaded({ projectId, refreshKey, version: request, data: updated });
+        onSuppliersChange?.();
         if (data?.shortlist_approved && !updated.shortlist_approved) await onStageChange?.();
       }
     } catch (failure) {

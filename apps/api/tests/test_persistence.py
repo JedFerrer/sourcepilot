@@ -67,7 +67,7 @@ def test_migration_smoke_creates_only_current_application_tables(test_engine: En
     with test_engine.connect() as connection:
         current_revisions = connection.execute(text("SELECT version_num FROM alembic_version")).scalars().all()
 
-    assert current_revisions == ["0014_comparisons"]
+    assert current_revisions == ["0015_preferred_supplier"]
 
     table_names = set(inspect(test_engine).get_table_names())
 
@@ -223,14 +223,15 @@ def test_nullable_importance_preserves_existing_rows_through_upgrade(
     config = alembic_config(test_database_url)
     command.downgrade(config, "0003_brief_requirement_domain")
     with Session(test_engine) as session:
-        project = Project(
-            demo_session=make_demo_session(),
-            name="Existing",
-            original_request="Source bags.",
-        )
-        session.add(project)
+        demo_session = make_demo_session()
+        session.add(demo_session)
         session.flush()
-        project_id = project.id
+        project_id = uuid4()
+        # Insert only historical columns: the current ORM includes later decision fields.
+        session.execute(text(
+            "INSERT INTO projects (id, demo_session_id, name, original_request) "
+            "VALUES (:id, :session_id, 'Existing', 'Source bags.')"
+        ), {"id": project_id, "session_id": demo_session.id})
         requirement = Requirement(
             project_id=project_id,
             kind="MATERIAL",

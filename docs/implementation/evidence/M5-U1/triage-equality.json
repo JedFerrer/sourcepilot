@@ -1,0 +1,9 @@
+{
+  "project_read_equal": true,
+  "project_list_equal": true,
+  "comparison_equal": true,
+  "quotes_equal": true,
+  "decision_writes_this_triage": 0,
+  "ai_runs_before": 2,
+  "ai_runs_after": 3
+}

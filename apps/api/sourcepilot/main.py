@@ -84,12 +84,19 @@ from sourcepilot.documents.settings import document_settings_from_environment
 from sourcepilot.documents.storage import DocumentStorage, storage_from_settings
 from sourcepilot.persistence.database import get_database_session
 from sourcepilot.persistence.models import Brief, DemoSession, Project, Quote
-from sourcepilot.projects.schemas import CreateProjectRequest, ProjectResponse, RenameProjectRequest
+from sourcepilot.projects.decision import PreferredSupplierNotShortlistedError
+from sourcepilot.projects.schemas import (
+    CreateProjectRequest,
+    PreferredSupplierRequest,
+    ProjectResponse,
+    RenameProjectRequest,
+)
 from sourcepilot.projects.service import (
     create_project,
     project_for_demo_session,
     projects_for_demo_session,
     rename_project,
+    update_preferred_supplier,
 )
 from sourcepilot.quotes.schemas import (
     ManualQuoteCreateRequest,
@@ -266,6 +273,22 @@ def owned_project_or_404(
         database_session.rollback()
         raise HTTPException(status_code=404, detail="Project not found.")
     return demo_session, project
+
+
+@app.put("/projects/{project_id}/preferred-supplier", response_model=ProjectResponse)
+def preferred_supplier_endpoint(
+    project_id: UUID, payload: PreferredSupplierRequest, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> ProjectResponse | JSONResponse:
+    _, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        updated = update_preferred_supplier(database_session, project, payload)
+        commit_or_rollback(database_session)
+        database_session.refresh(updated)
+        return ProjectResponse.model_validate(updated)
+    except PreferredSupplierNotShortlistedError as error:
+        database_session.rollback()
+        return error_response(409, code="PREFERRED_SUPPLIER_NOT_SHORTLISTED", message=str(error))
 
 
 @app.post("/projects/{project_id}/comparison/generate", response_model=ComparisonResponse,

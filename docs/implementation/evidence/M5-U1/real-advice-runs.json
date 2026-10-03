@@ -1,0 +1,26 @@
+[
+  {
+    "id": "f8a738cf-ac13-4fdf-bedc-11c20aa4a366",
+    "operation": "comparison_advice",
+    "status": "VALIDATION_FAILED",
+    "validation_status": "INVALID",
+    "error_type": "ValueError",
+    "model_turn_count": "3",
+    "tool_call_count": "1",
+    "latency_ms": "67000",
+    "started_at": "2026-10-03 15:21:20.313873+00:00",
+    "completed_at": "2026-10-03 15:22:27.603875+00:00"
+  },
+  {
+    "id": "256e9610-13e3-4a64-b0ca-96cf40ced2bf",
+    "operation": "comparison_advice",
+    "status": "VALIDATION_FAILED",
+    "validation_status": "INVALID",
+    "error_type": "ValueError",
+    "model_turn_count": "4",
+    "tool_call_count": "3",
+    "latency_ms": "83656",
+    "started_at": "2026-10-03 15:23:10.949012+00:00",
+    "completed_at": "2026-10-03 15:24:34.843869+00:00"
+  }
+]

@@ -15,6 +15,16 @@ describe("ProjectDashboard", () => {
     push.mockReset();
   });
 
+  it("shows the persisted preferred supplier and no-decision projects", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse([
+      { id: "chosen", name: "Chosen project", preferred_supplier_name: "Supplier C", updated_at: "2026-10-03T00:00:00Z" },
+      { id: "pending", name: "Pending project", preferred_supplier_name: null, updated_at: "2026-10-03T00:00:00Z" },
+    ])));
+    render(<ProjectDashboard />);
+    expect(await screen.findByRole("link", { name: /Chosen project.*Preferred supplier: Supplier C/ })).toHaveAttribute("href", "/projects/chosen");
+    expect(screen.getByRole("link", { name: /Pending project.*No Decision Yet/ })).toHaveAttribute("href", "/projects/pending");
+  });
+
   it("creates a project with its original request and opens its workspace", async () => {
     vi.stubGlobal(
       "fetch",

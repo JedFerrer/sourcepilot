@@ -1,0 +1,68 @@
+Comparison
+
+Comparison is current.
+
+Factual comparison of confirmed supplier quotes
+Criterion	Cedar Pack Co	Harbor Pouch Works
+Unit price	USD 4.25
+Confirmed project quote price
+Source details
+	USD 4.60
+Confirmed project quote price
+Source details
+
+Quoted quantity	2000
+Source details
+	2000
+Source details
+
+Minimum order quantity	5000
+Source details
+	1000
+Source details
+
+Production lead time	28 days
+Source details
+	32 days
+Source details
+
+Delivery commitment	Unknown	Unknown
+Tooling or setup cost	Unknown
+Source details
+	Unknown
+Source details
+
+Shipping cost	Unknown
+Source details
+	Unknown
+Source details
+
+Material
+Required
+Expected: recycled polyester
+	Unknown	Meets
+Source details
+
+Capability
+Required
+Expected: Yes · CUSTOM_BRANDING
+	Unknown	Meets
+Source details
+Analyze Comparison
+Tradeoff analysis
+Supplier summaries
+
+Supplemental QA fixture: investigate Harbor Pouch Works; this is controlled advice for UI retention testing.
+
+Suggested Supplier to Investigate First
+
+Harbor Pouch Works
+
+This advice supports your review. You remain responsible for the supplier decision.
+
+Supporting reasons
+
+Supplemental QA fixture: investigate Harbor Pouch Works; this is controlled advice for UI retention testing.
+
+Missing or conflicting information
+Regenerate Comparison

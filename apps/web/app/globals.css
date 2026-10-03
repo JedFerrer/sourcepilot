@@ -40,6 +40,7 @@ button:disabled {
 .project-dashboard,
 .project-workspace,
 .brief-editor,
+.decision-review,
 .brief-form {
   display: grid;
   gap: 1rem;
@@ -48,6 +49,7 @@ button:disabled {
 
 .project-form,
 .rename-form,
+.decision-form,
 .brief-form,
 .brief-requirement {
   display: grid;
@@ -60,6 +62,7 @@ button:disabled {
 
 .project-form label,
 .rename-form label,
+.decision-form label,
 .brief-form label {
   display: grid;
   gap: 0.35rem;
@@ -69,6 +72,8 @@ button:disabled {
 .project-form input,
 .project-form textarea,
 .rename-form input,
+.decision-form select,
+.decision-form textarea,
 .brief-form input,
 .brief-form textarea,
 .brief-form select {
