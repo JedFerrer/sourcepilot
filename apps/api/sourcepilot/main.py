@@ -27,6 +27,12 @@ from sourcepilot.ai.supplier_explanation import (
     analyst_limits_from_environment,
     explain_supplier,
 )
+from sourcepilot.ai.tradeoff_analysis import (
+    TradeoffAnalysisResponse,
+    TradeoffNotReadyError,
+    TradeoffUnavailableError,
+    analyze_tradeoffs,
+)
 from sourcepilot.api_errors import (
     error_response,
     http_exception_handler,
@@ -286,6 +292,31 @@ def read_comparison_endpoint(
         return error_response(404, code="COMPARISON_NOT_FOUND", message="No comparison exists.")
     result = ComparisonResponse.model_validate(comparison_response(database_session, comparison))
     commit_or_rollback(database_session)
+    return result
+
+
+@app.post("/projects/{project_id}/comparison/analysis", response_model=TradeoffAnalysisResponse)
+def analyze_comparison_endpoint(
+    project_id: UUID, request: Request,
+    database_session: Annotated[Session, Depends(get_database_session)],
+) -> TradeoffAnalysisResponse | JSONResponse:
+    demo_session, project = owned_project_or_404(database_session, request, project_id)
+    try:
+        max_model_turns, max_tool_calls = analyst_limits_from_environment()
+        result = analyze_tradeoffs(
+            database_session, demo_session_id=demo_session.id, project_id=project.id,
+            client_factory=OpenAIResponsesClient.from_environment,
+            max_model_turns=max_model_turns, max_tool_calls=max_tool_calls,
+        )
+        commit_or_rollback(database_session)
+    except TradeoffNotReadyError as error:
+        database_session.rollback()
+        return error_response(404 if error.code == "COMPARISON_NOT_FOUND" else 409,
+                              code=error.code, message=str(error))
+    except TradeoffUnavailableError:
+        database_session.rollback()
+        return error_response(503, code="TRADEOFF_ANALYSIS_UNAVAILABLE",
+                              message="We could not analyze this comparison. Please retry.")
     return result
 
 

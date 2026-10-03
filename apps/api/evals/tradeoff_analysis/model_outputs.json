@@ -1,0 +1,789 @@
+{
+  "meaningful-tradeoff": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "required-failure": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "unknown-and-conflict": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "corrected-quote-provenance": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "incomplete-evidence": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "omitted-required-failure": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "invented-shipping-cost": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": [
+          "44444444-4444-4444-4444-444444444441"
+        ]
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping costs USD 300.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  },
+  "wrong-source-for-correction": {
+    "supplier_summaries": [
+      {
+        "text": "Supplier A's confirmed unit price is USD 4.50; its PDF had USD 4.22.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          }
+        ],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier B does not meet the required certification.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      },
+      {
+        "text": "Supplier C's shipping cost is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222223",
+            "field_key": "shipping_cost"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "key_tradeoffs": [
+      {
+        "text": "Supplier B is cheaper at USD 3.90 versus Supplier A at USD 4.50, but has a longer production lead time: 38 days versus 25 days.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111",
+          "11111111-1111-1111-1111-111111111112"
+        ],
+        "requirement_ids": [],
+        "quote_fields": [
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222221",
+            "field_key": "production_lead_time"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "unit_price"
+          },
+          {
+            "quote_id": "22222222-2222-2222-2222-222222222222",
+            "field_key": "production_lead_time"
+          }
+        ],
+        "evidence_ids": []
+      }
+    ],
+    "important_unknowns": [
+      {
+        "text": "Supplier C's certification is unknown.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111113"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333331"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ],
+    "important_conflicts": [
+      {
+        "text": "Supplier A's lead-time evidence conflicts.",
+        "supplier_ids": [
+          "11111111-1111-1111-1111-111111111111"
+        ],
+        "requirement_ids": [
+          "33333333-3333-3333-3333-333333333332"
+        ],
+        "quote_fields": [],
+        "evidence_ids": []
+      }
+    ]
+  }
+}

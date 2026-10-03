@@ -1,0 +1,42 @@
+[
+  {
+    "id": "meaningful-tradeoff",
+    "topic": "meaningful tradeoff",
+    "expected_grounded": true
+  },
+  {
+    "id": "required-failure",
+    "topic": "required failure",
+    "expected_grounded": true
+  },
+  {
+    "id": "unknown-and-conflict",
+    "topic": "Unknown and Conflict",
+    "expected_grounded": true
+  },
+  {
+    "id": "corrected-quote-provenance",
+    "topic": "user correction",
+    "expected_grounded": true
+  },
+  {
+    "id": "incomplete-evidence",
+    "topic": "incomplete evidence",
+    "expected_grounded": true
+  },
+  {
+    "id": "omitted-required-failure",
+    "topic": "omitted critical fact",
+    "expected_grounded": false
+  },
+  {
+    "id": "invented-shipping-cost",
+    "topic": "unsupported claim",
+    "expected_grounded": false
+  },
+  {
+    "id": "wrong-source-for-correction",
+    "topic": "unsupported source attribution",
+    "expected_grounded": false
+  }
+]

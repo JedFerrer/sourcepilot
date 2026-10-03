@@ -4,6 +4,8 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
+**M4-U6 — Tradeoff Analysis Capability** is `READY_TO_COMMIT` after re-review and a passing Done Check on 2026-10-03. Browser QA is not applicable to this backend/API-only unit. No commit has been created.
+
 **M4-U5 — Complete Analyst Read-Only Tools** is `COMMITTED` after Review, Browser QA disposition, a passing Done Check, and its unit-scoped commit on 2026-09-30. The human approved the revised plan, including immutable permitted quote IDs.
 
 **M4-U4 — Comparison UI and Stale-State UX** is `COMMITTED`. Review, browser UI QA, Done Check, and its unit-scoped commit passed on 2026-09-30.
