@@ -1,0 +1,1293 @@
+{
+  "clear-suggestion": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A has a confirmed current unit price of USD 4.50.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "tie": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [],
+      "important_conflicts": []
+    },
+    "suggestion": {
+      "supplier_id": null,
+      "supporting_reasons": [],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "critical-unknown": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": null,
+      "supporting_reasons": [],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Supplier C certification is unknown, so more evidence is needed.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "required-failure": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111112",
+      "supporting_reasons": [
+        {
+          "text": "Supplier B has a confirmed current unit price of USD 3.90.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222222",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [
+        {
+          "text": "Supplier B does not meet the required certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "incomplete-evidence": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": null,
+      "supporting_reasons": [],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Supplier C certification is unknown, so more evidence is needed.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "user-correction": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A confirmed current unit price is USD 4.50; Supplier A PDF unit price was USD 4.22.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": [
+            "44444444-4444-4444-4444-444444444441"
+          ]
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": [
+        "44444444-4444-4444-4444-444444444441"
+      ]
+    }
+  },
+  "incomparable-prices": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": null,
+      "supporting_reasons": [],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Different currencies or quantities prevent an equivalent price comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "invented-price": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A has a confirmed current unit price of USD 99.99.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "hidden-required-failure": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111112",
+      "supporting_reasons": [
+        {
+          "text": "Supplier B has a confirmed current unit price of USD 3.90.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222222",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [
+        {
+          "text": "Supplier B certification meets the requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "wrong-correction-provenance": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A confirmed current unit price is USD 4.22; Supplier A PDF unit price was USD 4.50.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": [
+            "44444444-4444-4444-4444-444444444441"
+          ]
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": [
+        "44444444-4444-4444-4444-444444444441"
+      ]
+    }
+  },
+  "forced-critical-unknown": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A has a confirmed current unit price of USD 4.50.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "numeric-score": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A has a score of 92.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "objective-best-claim": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "11111111-1111-1111-1111-111111111111",
+      "supporting_reasons": [
+        {
+          "text": "Supplier A is objectively the best supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "22222222-2222-2222-2222-222222222221",
+              "field_key": "unit_price"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Further evidence is needed to justify one supplier.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  },
+  "unqualified-incomparable-price": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Supplier B does not meet the certification requirement.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111112"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Confirmed comparison facts summarized.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [],
+      "important_unknowns": [
+        {
+          "text": "UNKNOWN in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111113"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333331"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "CONFLICT in the deterministic comparison.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [
+            "33333333-3333-3333-3333-333333333332"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": null,
+      "supporting_reasons": [],
+      "tradeoffs": [],
+      "uncertainties": [
+        {
+          "text": "Supplier B is cheaper than Supplier A.",
+          "supplier_ids": [
+            "11111111-1111-1111-1111-111111111111"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": []
+    }
+  }
+}

@@ -15,7 +15,7 @@ const requirements = [
   { id: "informational", kind: "INFORMATIONAL", importance: "INFORMATIONAL", expected_value: { note: "Packaging" }, notes: null },
 ];
 const supplier = (id: string, name: string, corrected = false) => ({
-  supplier_id: id, supplier_name: name,
+  supplier_id: id, supplier_name: name, quote_id: `quote-${id}`,
   quote_fields: [{ field_key: "unit_price", current_value: (corrected ? "4.50" : "4.25") as string | null,
     origin: corrected ? "USER_CORRECTED" : "AI_EXTRACTED", ai_extracted_value: "4.25" as string | null,
     source_reference: "quote-value:price", evidence: [{ id: "evidence-1", value: "4.25",
@@ -574,5 +574,172 @@ describe("ComparisonReview", () => {
     rerender(<ComparisonReview projectId="project-1" refreshKey={1} />);
     expect(await screen.findByText("Comparison outdated")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+
+type AdvicePoint = { text: string; supplier_ids: string[]; requirement_ids: string[];
+  quote_fields: { quote_id: string; field_key: string }[]; evidence_ids: string[] };
+const advicePoint = (text: string): AdvicePoint => ({ text, supplier_ids: ["a"], requirement_ids: [], quote_fields: [], evidence_ids: [] });
+const adviceResponse = (selected: string | null = "a") => ({
+  run_id: "run-1", snapshot_id: "comparison-1",
+  analysis: { supplier_summaries: [advicePoint("Willow has confirmed quote information.")],
+    key_tradeoffs: [advicePoint("Compare the quote terms before proceeding.")],
+    important_unknowns: [], important_conflicts: [] },
+  suggestion: { supplier_id: selected, supporting_reasons: selected ? [advicePoint("Investigate its confirmed terms.")] : [],
+    tradeoffs: [advicePoint("Willow fails the required material requirement.")],
+    uncertainties: [advicePoint("No single supplier has enough confirmed information.")], evidence_ids: [] as string[] },
+});
+
+describe("Comparison advice", () => {
+  afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+
+  it("requests one combined result and displays analysis, suggestion and cited sources", async () => {
+    const output = adviceResponse();
+    output.suggestion.supporting_reasons[0].quote_fields = [{ quote_id: "quote-a", field_key: "unit_price" }];
+    output.suggestion.supporting_reasons[0].evidence_ids = ["evidence-1"];
+    const fetchMock = vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? output : snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    const analysis = await screen.findByRole("region", { name: "Comparison analysis" });
+    expect(within(analysis).getByText("Tradeoff analysis")).toBeInTheDocument();
+    expect(within(analysis).getByText("Suggested Supplier to Investigate First")).toBeInTheDocument();
+    expect(within(analysis).getByText("Willow fails the required material requirement.")).toBeInTheDocument();
+    expect(within(analysis).getByText(/Supporting PDF evidence/)).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/comparison/advice", expect.objectContaining({
+      method: "POST", body: JSON.stringify({ snapshot_id: "comparison-1" }),
+    }));
+  });
+
+  it.each([false, true])("renders evidence-only PDF advice citations with corrected value = %s", async (corrected) => {
+    const comparison = snapshot(false, corrected);
+    const output = adviceResponse();
+    output.snapshot_id = comparison.id;
+    for (const point of [output.analysis.supplier_summaries[0], output.suggestion.supporting_reasons[0]]) {
+      point.evidence_ids = ["evidence-1"];
+    }
+    output.suggestion.evidence_ids = ["evidence-1"];
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? output : comparison))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    const analysis = await screen.findByRole("region", { name: "Comparison analysis" });
+    for (const text of ["Willow has confirmed quote information.", "Investigate its confirmed terms."]) {
+      const point = within(analysis).getByText(text).closest("li")!;
+      fireEvent.click(within(point).getByText("Source details"));
+      expect(point.querySelector("details")).toHaveAttribute("open");
+      expect(within(point).getByText("Unit Price source: quote-value:price")).toBeInTheDocument();
+      expect(within(point).getByText(`Unit Price current origin: ${corrected ? "User Corrected" : "Ai Extracted"}`)).toBeInTheDocument();
+      expect(within(point).getByText("Original extracted value: 4.25")).toBeInTheDocument();
+      expect(within(point).getByText(`${corrected ? "Original PDF provenance" : "Supporting PDF evidence"}: page 2, block 3; extracted 4.25 · evidence-1`)).toBeInTheDocument();
+      if (corrected) expect(within(point).getByText(/does not verify the correction/)).toBeInTheDocument();
+      expect(within(point).getAllByText("Source details")).toHaveLength(1);
+    }
+  });
+
+  it("shows a successful no-suggestion explanation", async () => {
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? adviceResponse(null) : snapshot()))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    expect(await screen.findByText("No supplier suggested yet")).toBeInTheDocument();
+    expect(screen.getByText("No single supplier has enough confirmed information.")).toBeInTheDocument();
+  });
+
+  it("keeps provider failure distinct from null and retries", async () => {
+    let attempts = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(path.endsWith("/advice")
+      ? ++attempts === 1 ? jsonResponse({ error: { code: "COMPARISON_ADVICE_UNAVAILABLE", message: "Please retry analysis." } }, 503)
+        : jsonResponse(adviceResponse(null)) : jsonResponse(snapshot()))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    expect(await screen.findByText("Please retry analysis.")).toBeInTheDocument();
+    expect(screen.queryByText("No supplier suggested yet")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry analysis" }));
+    expect(await screen.findByText("No supplier suggested yet")).toBeInTheDocument();
+  });
+
+  it("blocks analysis on stale snapshots", async () => {
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse(snapshot(true)))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    expect(await screen.findByRole("button", { name: "Analyze Comparison" })).toBeDisabled();
+  });
+
+  it.each(["stale", "replacement", "missing", "failure"])("hides output when the final freshness check reports %s", async (outcome) => {
+    let reads = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(path.endsWith("/advice") ? jsonResponse(adviceResponse())
+      : ++reads === 1 ? jsonResponse(snapshot())
+        : outcome === "missing" ? notFound()
+        : outcome === "failure" ? jsonResponse({ error: { code: "SERVER_ERROR", message: "Freshness unavailable." } }, 500)
+          : jsonResponse(outcome === "replacement" ? snapshot(false, true) : snapshot(true)))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    await screen.findByRole("alert");
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
+    if (outcome !== "failure") expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
+  });
+
+  it("handles a stale API failure as regeneration-required", async () => {
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(path.endsWith("/advice")
+      ? jsonResponse({ error: { code: "COMPARISON_STALE", message: "Inputs changed during analysis." } }, 409)
+      : jsonResponse(snapshot()))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    expect(await screen.findByText("Inputs changed during analysis.")).toBeInTheDocument();
+    expect(screen.getByText("Comparison outdated")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
+  });
+
+  it.each(["refresh", "project", "regenerate", "unmount"])("discards late advice after %s", async (change) => {
+    let finish: ((response: Response) => void) | undefined;
+    vi.stubGlobal("fetch", vi.fn((path: string) => path.endsWith("/advice")
+      ? new Promise<Response>((resolve) => { finish = resolve; }) : Promise.resolve(jsonResponse(snapshot()))));
+    const view = render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    await screen.findByRole("button", { name: "Analyzing…" });
+    if (change === "refresh") view.rerender(<ComparisonReview projectId="project-1" refreshKey={1} />);
+    else if (change === "project") view.rerender(<ComparisonReview projectId="project-2" refreshKey={0} />);
+    else if (change === "regenerate") fireEvent.click(screen.getByRole("button", { name: "Regenerate Comparison" }));
+    else view.unmount();
+    await act(async () => { finish?.(jsonResponse(adviceResponse())); });
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
+  });
+
+  it("invalidates prior advice immediately on focus and failed verification", async () => {
+    let failure = false;
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(path.endsWith("/advice") ? jsonResponse(adviceResponse())
+      : failure ? jsonResponse({ error: { code: "SERVER_ERROR", message: "Could not verify comparison." } }, 500) : jsonResponse(snapshot()))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    await screen.findByRole("region", { name: "Comparison analysis" });
+    failure = true;
+    fireEvent(window, new Event("focus"));
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
+    expect(await screen.findByText("Could not verify comparison.")).toBeInTheDocument();
+  });
+
+  it("retains advice after focus verifies the same current snapshot", async () => {
+    const fetchMock = vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? adviceResponse() : snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    await screen.findByRole("region", { name: "Comparison analysis" });
+    fireEvent(window, new Event("focus"));
+    await screen.findByRole("region", { name: "Comparison analysis" });
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+    expect(screen.queryByText(/Previous analysis is outdated/)).not.toBeInTheDocument();
+  });
+
+  it("shows outdated state after a quote refresh and requires fresh analysis", async () => {
+    let stale = false;
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? adviceResponse() : snapshot(stale)))));
+    const view = render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    await screen.findByRole("region", { name: "Comparison analysis" });
+    stale = true;
+    view.rerender(<ComparisonReview projectId="project-1" refreshKey={1} />);
+    await screen.findByText("Comparison outdated");
+    expect(screen.getByText(/Previous analysis is outdated/)).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
   });
 });

@@ -8,10 +8,10 @@ import time
 from collections.abc import Callable
 from datetime import UTC, datetime
 from itertools import pairwise
-from typing import Any, cast
+from typing import Any, TypeVar, cast
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.analyst_tools import (
@@ -29,6 +29,7 @@ from sourcepilot.ai.analyst_tools import (
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
 from sourcepilot.ai.structured import provider_retry_delay_seconds, structured_input_hash
 from sourcepilot.ai.supplier_explanation import MAX_MODEL_TURNS, MAX_TOOL_CALLS
+from sourcepilot.comparison.advice import AnalysisPoint, QuoteFieldReference  # noqa: F401
 from sourcepilot.persistence.models import AIRun, SupplierExplanationRunStep
 from sourcepilot.quotes.domain import QUOTE_FIELD_KEYS
 
@@ -238,23 +239,6 @@ def _validate_state_assertions(
                     raise ValueError("Requirement-state assertion contradicts deterministic state.")
 
 
-class QuoteFieldReference(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    quote_id: UUID
-    field_key: str = Field(min_length=1)
-
-
-class AnalysisPoint(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    text: str = Field(min_length=1)
-    supplier_ids: list[UUID]
-    requirement_ids: list[UUID]
-    quote_fields: list[QuoteFieldReference]
-    evidence_ids: list[UUID]
-
-
 class TradeoffAnalysis(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -456,16 +440,41 @@ def _tool_output(
     return result.model_dump(mode="json")
 
 
+ResultT = TypeVar("ResultT", bound=BaseModel)
+
+
 def analyze_tradeoffs(
     session: Session, *, demo_session_id: UUID, project_id: UUID,
     client_factory: Callable[[], StructuredModelClient],
     max_model_turns: int = MAX_MODEL_TURNS, max_tool_calls: int = MAX_TOOL_CALLS,
     sleep: Callable[[float], None] = time.sleep,
 ) -> TradeoffAnalysisResponse:
-    """Run a bounded analyst task; never return output from changed inputs."""
+    """Preserve the M4-U6 tradeoff-only operation and structured contract."""
+    run_id, snapshot_id, analysis = run_comparison_analyst(
+        session, demo_session_id=demo_session_id, project_id=project_id,
+        client_factory=client_factory, max_model_turns=max_model_turns,
+        max_tool_calls=max_tool_calls, sleep=sleep, operation="tradeoff_analysis",
+        prompt_version=PROMPT_VERSION, base_instructions=INSTRUCTIONS,
+        result_type=TradeoffAnalysis, validate=validate_analysis,
+    )
+    return TradeoffAnalysisResponse(run_id=run_id, snapshot_id=snapshot_id, analysis=analysis)
+
+
+def run_comparison_analyst(
+    session: Session, *, demo_session_id: UUID, project_id: UUID,
+    client_factory: Callable[[], StructuredModelClient],
+    operation: str, prompt_version: str, base_instructions: str,
+    result_type: type[ResultT], validate: Callable[[ResultT, ComparisonSnapshotResult], None],
+    check_snapshot: Callable[[ComparisonSnapshotResult], None] | None = None,
+    max_model_turns: int = MAX_MODEL_TURNS, max_tool_calls: int = MAX_TOOL_CALLS,
+    sleep: Callable[[float], None] = time.sleep,
+) -> tuple[UUID, UUID, ResultT]:
+    """Shared bounded loop with task-specific contract, validation and scope checks."""
     if max_model_turns <= 0 or max_tool_calls <= 0:
         raise ValueError("Analyst limits must be positive.")
     snapshot = _current_snapshot(session, demo_session_id=demo_session_id, project_id=project_id)
+    if check_snapshot is not None:
+        check_snapshot(snapshot)
     supplier_ids, quote_ids = _snapshot_ids(snapshot)
     runtime = AnalystToolRuntime(AnalystToolContext(
         demo_session_id=demo_session_id, project_id=project_id,
@@ -475,6 +484,10 @@ def analyze_tradeoffs(
     try:
         client = client_factory()
     except RuntimeError as error:
+        if check_snapshot is not None:
+            _current_snapshot(session, demo_session_id=demo_session_id,
+                              project_id=project_id, expected=snapshot)
+            check_snapshot(snapshot)
         raise TradeoffUnavailableError("Tradeoff analysis provider is unavailable.") from error
     initial = {"snapshot_id": str(snapshot.snapshot_id),
                "brief_revision": snapshot.brief_revision,
@@ -485,8 +498,8 @@ def analyze_tradeoffs(
     ]
     air_run = AIRun(
         demo_session_id=demo_session_id, project_id=project_id,
-        operation="tradeoff_analysis", model=client.model, prompt_version=PROMPT_VERSION,
-        input_hash=structured_input_hash(instructions=INSTRUCTIONS,
+        operation=operation, model=client.model, prompt_version=prompt_version,
+        input_hash=structured_input_hash(instructions=base_instructions,
                                          input_text=json.dumps(initial, sort_keys=True)),
         status="RUNNING", attempts=0, model_turn_count=0, tool_call_count=0,
     )
@@ -497,8 +510,8 @@ def analyze_tradeoffs(
     turns = 0
     repair_used = False
     provider_retry_used = False
-    instructions = INSTRUCTIONS
-    result: TradeoffAnalysis | None = None
+    instructions = base_instructions
+    result: ResultT | None = None
 
     def step(kind: str, outcome: str, name: str | None = None) -> None:
         nonlocal sequence
@@ -521,7 +534,7 @@ def analyze_tradeoffs(
             try:
                 invocation = client.invoke_with_tools(
                     instructions=instructions, input_items=input_items, tools=TOOLS,
-                    schema_name=TradeoffAnalysis.__name__, schema=TradeoffAnalysis.model_json_schema(),
+                    schema_name=result_type.__name__, schema=result_type.model_json_schema(),
                 )
             except ModelProviderError as error:
                 step("model", "PROVIDER_ERROR")
@@ -567,8 +580,8 @@ def analyze_tradeoffs(
                     break
                 continue
             try:
-                parsed = TradeoffAnalysis.model_validate_json(invocation.output_text)
-                validate_analysis(parsed, snapshot)
+                parsed = result_type.model_validate_json(invocation.output_text)
+                validate(parsed, snapshot)
             except (ValidationError, ValueError) as error:
                 air_run.validation_status = "INVALID"
                 air_run.error_type = type(error).__name__
@@ -576,12 +589,15 @@ def analyze_tradeoffs(
                 if not repair_used:
                     repair_used = True
                     step("retry", "REPAIR")
-                    instructions = f"{INSTRUCTIONS}\nRepair the invalid final result: {error}"
+                    instructions = f"{base_instructions}\nRepair the invalid final result: {error}"
                     continue
                 air_run.status = "VALIDATION_FAILED"
                 break
             _current_snapshot(session, demo_session_id=demo_session_id,
                               project_id=project_id, expected=snapshot)
+            if check_snapshot is not None:
+                check_snapshot(snapshot)
+                step("scope", "CURRENT")
             result = parsed
             air_run.status = "COMPLETED"
             air_run.validation_status = "REPAIRED" if repair_used else "VALID"
@@ -590,6 +606,8 @@ def analyze_tradeoffs(
         if result is None:
             _current_snapshot(session, demo_session_id=demo_session_id,
                               project_id=project_id, expected=snapshot)
+            if check_snapshot is not None:
+                check_snapshot(snapshot)
     except TradeoffNotReadyError as error:
         air_run.status = "FAILED"
         air_run.error_type = error.code
@@ -599,6 +617,8 @@ def analyze_tradeoffs(
         try:
             _current_snapshot(session, demo_session_id=demo_session_id,
                               project_id=project_id, expected=snapshot)
+            if check_snapshot is not None:
+                check_snapshot(snapshot)
         except TradeoffNotReadyError as stale_error:
             air_run.status = "FAILED"
             air_run.error_type = stale_error.code
@@ -615,5 +635,4 @@ def analyze_tradeoffs(
     if result is None:
         raise TradeoffUnavailableError("Tradeoff analysis is unavailable. Please retry.")
     assert snapshot.snapshot_id is not None
-    return TradeoffAnalysisResponse(run_id=air_run.id, snapshot_id=snapshot.snapshot_id,
-                                    analysis=result)
+    return air_run.id, snapshot.snapshot_id, result

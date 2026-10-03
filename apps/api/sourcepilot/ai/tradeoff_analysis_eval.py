@@ -206,6 +206,8 @@ def score_case(case: dict[str, Any], analysis: TradeoffAnalysis,
             if first["quote_fields"][1]["current_value"] <= second["quote_fields"][1]["current_value"]:
                 return False
     focus = case["topic"]
+    if focus == "references-only":
+        return True
     if focus in {"meaningful tradeoff"}:
         return any({UUID(A), UUID(B)} <= set(point.supplier_ids)
                    and {"unit_price", "production_lead_time"} <= {

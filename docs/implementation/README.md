@@ -4,7 +4,9 @@ This directory holds the approved working context for active SourcePilot impleme
 
 ## Current implementation unit
 
-**M4-U6 — Tradeoff Analysis Capability** is `COMMITTED` as `5e8acc7` after re-review, a passing Done Check, and its unit-scoped commit on 2026-10-03. Browser QA is not applicable to this backend/API-only unit. Status was updated after the commit succeeded; M4-U7 has not been started.
+**M4-U7 — Suggested Supplier Behavior** is `COMMITTED` after a passing Done Check and its unit-scoped commit on 2026-10-03. All acceptance criteria and workflow checklist items pass: 771 PostgreSQL-backed backend tests, 238 explicit offline advice/tradeoff eval tests, 109 frontend tests, lint/type checks, and production build. Review findings are resolved; recorded Browser QA evidence is verified. Final diff, scope, documentation, dependency/infrastructure, artifact, and secret checks pass. Browser QA used deterministic HTTP responses; live-provider quality remains unverified and live evals remain opt-in. Full evidence and limits are recorded in `M4-U7.md`. Status was updated only after commit success and included by amending the same unit commit. Stopped; M5-U1 has not begun.
+
+**M4-U6 — Tradeoff Analysis Capability** is `COMMITTED` as `5e8acc7` after re-review, a passing Done Check, and its unit-scoped commit on 2026-10-03. Browser QA is not applicable to this backend/API-only unit. Status was updated after the commit succeeded; M4-U7 had not been started at that checkpoint.
 
 **M4-U5 — Complete Analyst Read-Only Tools** is `COMMITTED` after Review, Browser QA disposition, a passing Done Check, and its unit-scoped commit on 2026-09-30. The human approved the revised plan, including immutable permitted quote IDs.
 

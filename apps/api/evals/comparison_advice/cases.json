@@ -1,0 +1,279 @@
+[
+  {
+    "id": "clear-suggestion",
+    "snapshot_id": "55555555-5555-5555-5555-555555555561",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "tie",
+    "snapshot_id": "55555555-5555-5555-5555-555555555562",
+    "brief_revision": 2,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "4.50",
+      "11111111-1111-1111-1111-111111111113": "4.50"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "states": {
+      "11111111-1111-1111-1111-111111111111": {
+        "33333333-3333-3333-3333-333333333331": "MEETS",
+        "33333333-3333-3333-3333-333333333332": "MEETS"
+      },
+      "11111111-1111-1111-1111-111111111112": {
+        "33333333-3333-3333-3333-333333333331": "MEETS",
+        "33333333-3333-3333-3333-333333333332": "MEETS"
+      },
+      "11111111-1111-1111-1111-111111111113": {
+        "33333333-3333-3333-3333-333333333331": "MEETS",
+        "33333333-3333-3333-3333-333333333332": "MEETS"
+      }
+    },
+    "fields": {
+      "11111111-1111-1111-1111-111111111111": {
+        "quoted_quantity": 2000,
+        "production_lead_time": 25,
+        "moq": 500
+      },
+      "11111111-1111-1111-1111-111111111112": {
+        "quoted_quantity": 2000,
+        "production_lead_time": 25,
+        "moq": 500
+      },
+      "11111111-1111-1111-1111-111111111113": {
+        "quoted_quantity": 2000,
+        "production_lead_time": 25,
+        "moq": 500
+      }
+    },
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "critical-unknown",
+    "snapshot_id": "55555555-5555-5555-5555-555555555563",
+    "brief_revision": 3,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "states": {
+      "11111111-1111-1111-1111-111111111111": {
+        "33333333-3333-3333-3333-333333333331": "UNKNOWN"
+      },
+      "11111111-1111-1111-1111-111111111112": {
+        "33333333-3333-3333-3333-333333333331": "UNKNOWN"
+      },
+      "11111111-1111-1111-1111-111111111113": {
+        "33333333-3333-3333-3333-333333333331": "UNKNOWN"
+      }
+    },
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "required-failure",
+    "snapshot_id": "55555555-5555-5555-5555-555555555564",
+    "brief_revision": 4,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111112"
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "incomplete-evidence",
+    "snapshot_id": "55555555-5555-5555-5555-555555555565",
+    "brief_revision": 5,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "user-correction",
+    "snapshot_id": "55555555-5555-5555-5555-555555555566",
+    "brief_revision": 6,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "incomparable-prices",
+    "snapshot_id": "55555555-5555-5555-5555-555555555567",
+    "brief_revision": 7,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": false,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "invented-price",
+    "snapshot_id": "55555555-5555-5555-5555-555555555561",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": false,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "hidden-required-failure",
+    "snapshot_id": "55555555-5555-5555-5555-555555555564",
+    "brief_revision": 4,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111112"
+    ],
+    "expected_grounded": false,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "wrong-correction-provenance",
+    "snapshot_id": "55555555-5555-5555-5555-555555555566",
+    "brief_revision": 6,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": false,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "forced-critical-unknown",
+    "snapshot_id": "55555555-5555-5555-5555-555555555563",
+    "brief_revision": 3,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": false,
+    "states": {
+      "11111111-1111-1111-1111-111111111111": {
+        "33333333-3333-3333-3333-333333333331": "UNKNOWN"
+      },
+      "11111111-1111-1111-1111-111111111112": {
+        "33333333-3333-3333-3333-333333333331": "UNKNOWN"
+      },
+      "11111111-1111-1111-1111-111111111113": {
+        "33333333-3333-3333-3333-333333333331": "UNKNOWN"
+      }
+    },
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "numeric-score",
+    "snapshot_id": "55555555-5555-5555-5555-555555555561",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": false,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "objective-best-claim",
+    "snapshot_id": "55555555-5555-5555-5555-555555555561",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": false,
+    "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "unqualified-incomparable-price",
+    "snapshot_id": "55555555-5555-5555-5555-555555555567",
+    "brief_revision": 7,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": false,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": false,
+    "contract_version": "comparison-advice-v1"
+  }
+]

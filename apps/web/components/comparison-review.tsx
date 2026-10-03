@@ -22,7 +22,7 @@ type Requirement = { id: string; kind: string; importance: string | null; expect
 type Result = { requirement_id: string | null; kind: string; status: string; selected_fact: Fact | null; evidence_ids: string[]; conflicting_facts: Fact[] };
 type Warning = { code: string; requirement_id: string | null };
 type Supplier = {
-  supplier_id: string; supplier_name: string; quote_fields: QuoteField[];
+  supplier_id: string; supplier_name: string; quote_id: string; quote_fields: QuoteField[];
   resolved_facts: Record<string, Resolution>;
   evaluation: { results: Result[]; informational_requirement_ids: string[]; warnings: Warning[] };
   completeness: { field_key: string; state: "known" | "missing" | "conflicting"; source_references: string[] }[];
@@ -33,6 +33,58 @@ type Comparison = {
   id: string; generated_at: string; stale: boolean;
   comparison_payload: { brief: { requirements: Requirement[] }; suppliers: Supplier[] };
 };
+
+type AnalysisPoint = {
+  text: string; supplier_ids: string[]; requirement_ids: string[];
+  quote_fields: { quote_id: string; field_key: string }[]; evidence_ids: string[];
+};
+type Advice = {
+  run_id: string; snapshot_id: string;
+  analysis: { supplier_summaries: AnalysisPoint[]; key_tradeoffs: AnalysisPoint[];
+    important_unknowns: AnalysisPoint[]; important_conflicts: AnalysisPoint[] };
+  suggestion: { supplier_id: string | null; supporting_reasons: AnalysisPoint[];
+    tradeoffs: AnalysisPoint[]; uncertainties: AnalysisPoint[]; evidence_ids: string[] };
+};
+
+function AdvicePoints({ title, points, comparison }: { title: string; points: AnalysisPoint[]; comparison: Comparison }) {
+  if (!points.length) return null;
+  return <div><h4>{title}</h4><ul>{points.map((point, index) => <li key={index}>
+    <p>{point.text}</p>
+    {comparison.comparison_payload.suppliers.filter((supplier) => point.supplier_ids.includes(supplier.supplier_id)).map((supplier) => {
+      const fieldKeys = new Set(point.quote_fields.filter((ref) => ref.quote_id === supplier.quote_id).map((ref) => ref.field_key));
+      for (const field of supplier.quote_fields) {
+        if (field.evidence.some((evidence) => point.evidence_ids.includes(evidence.id))) fieldKeys.add(field.field_key);
+      }
+      const fields = [...fieldKeys];
+      const results = supplier.evaluation.results.filter((result) => result.requirement_id && point.requirement_ids.includes(result.requirement_id));
+      return <div key={supplier.supplier_id}>
+        {results.map((result) => <div key={result.requirement_id}>
+          <p>{supplier.supplier_name}: {label(result.kind)} — {label(result.status)}</p>
+          <SourceDetails supplier={supplier} fact={result.selected_fact} evidenceIds={result.evidence_ids} />
+        </div>)}
+        {fields.map((fieldKey) => <SourceDetails key={fieldKey} supplier={supplier} fieldKey={fieldKey} evidenceIds={point.evidence_ids} />)}
+        {!fields.length ? <SourceDetails supplier={supplier} evidenceIds={point.evidence_ids} /> : null}
+      </div>;
+    })}
+  </li>)}</ul></div>;
+}
+
+function ComparisonAdviceView({ advice, comparison }: { advice: Advice; comparison: Comparison }) {
+  const selected = comparison.comparison_payload.suppliers.find((supplier) => supplier.supplier_id === advice.suggestion.supplier_id);
+  return <section aria-label="Comparison analysis">
+    <h3>Tradeoff analysis</h3>
+    <AdvicePoints title="Supplier summaries" points={advice.analysis.supplier_summaries} comparison={comparison} />
+    <AdvicePoints title="Key tradeoffs" points={advice.analysis.key_tradeoffs} comparison={comparison} />
+    <AdvicePoints title="Important unknowns" points={advice.analysis.important_unknowns} comparison={comparison} />
+    <AdvicePoints title="Important conflicts" points={advice.analysis.important_conflicts} comparison={comparison} />
+    <h3>{selected ? "Suggested Supplier to Investigate First" : "No supplier suggested yet"}</h3>
+    {selected ? <p><strong>{selected.supplier_name}</strong></p> : null}
+    <p>This advice supports your review. You remain responsible for the supplier decision.</p>
+    <AdvicePoints title="Supporting reasons" points={advice.suggestion.supporting_reasons} comparison={comparison} />
+    <AdvicePoints title="Tradeoffs" points={advice.suggestion.tradeoffs} comparison={comparison} />
+    <AdvicePoints title="Uncertainties" points={advice.suggestion.uncertainties} comparison={comparison} />
+  </section>;
+}
 
 const commercialRows = [
   ["unit_price", "Unit price"], ["quoted_quantity", "Quoted quantity"],
@@ -203,12 +255,31 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generationError, setGenerationError] = useState<string | null>(null);
+  const [advice, setAdvice] = useState<Advice | null>(null);
+  const [adviceBusy, setAdviceBusy] = useState(false);
+  const [adviceError, setAdviceError] = useState<string | null>(null);
+  const [adviceOutdated, setAdviceOutdated] = useState(false);
+  const adviceSequence = useRef(0);
+  const advicePresent = useRef(false);
+  const adviceRef = useRef<Advice | null>(null);
   const displaySequence = useRef(0);
   const mutationSequence = useRef(0);
   const currentProjectId = useRef(projectId);
   const active = useRef(false);
 
-  const reload = useCallback(async () => {
+  const invalidateAdvice = useCallback(() => {
+    adviceSequence.current += 1;
+    if (advicePresent.current) setAdviceOutdated(true);
+    advicePresent.current = false;
+    adviceRef.current = null;
+    setAdvice(null);
+    setAdviceBusy(false);
+    setAdviceError(null);
+  }, []);
+
+  const reload = useCallback(async (preserveAdvice = false) => {
+    const prior = preserveAdvice ? adviceRef.current : null;
+    invalidateAdvice();
     const request = ++displaySequence.current;
     setLoading(true);
     setError(null);
@@ -217,6 +288,12 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
       if (!latest.comparison_payload?.suppliers || !latest.comparison_payload?.brief) throw new Error("Invalid comparison response");
       if (request === displaySequence.current) {
         setComparison(latest);
+        if (prior && prior.snapshot_id === latest.id && !latest.stale) {
+          setAdvice(prior);
+          adviceRef.current = prior;
+          advicePresent.current = true;
+          setAdviceOutdated(false);
+        }
         onSnapshotChange?.(true);
       }
     } catch (failure) {
@@ -230,17 +307,70 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
     } finally {
       if (request === displaySequence.current) setLoading(false);
     }
-  }, [projectId, onSnapshotChange]);
+  }, [projectId, onSnapshotChange, invalidateAdvice]);
 
   useEffect(() => {
     active.current = true;
     currentProjectId.current = projectId;
     setGenerationError(null);
     void reload();
-    return () => { active.current = false; displaySequence.current += 1; };
+    return () => { active.current = false; displaySequence.current += 1; adviceSequence.current += 1; };
   }, [reload, refreshKey, projectId]);
 
+  useEffect(() => {
+    const onFocus = () => { void reload(true); };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [reload]);
+
+  async function analyze() {
+    if (!comparison || comparison.stale || loading || busy) return;
+    const bound = comparison.id;
+    const request = ++adviceSequence.current;
+    const current = () => active.current && request === adviceSequence.current && projectId === currentProjectId.current;
+    setAdvice(null);
+    advicePresent.current = false;
+    adviceRef.current = null;
+    setAdviceBusy(true);
+    setAdviceError(null);
+    try {
+      const result = await apiRequest<Advice>(`/api/projects/${projectId}/comparison/advice`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ snapshot_id: bound }),
+      });
+      if (!current()) return;
+      let latest: Comparison;
+      try {
+        latest = await apiRequest<Comparison>(`/api/projects/${projectId}/comparison`);
+      } catch (failure) {
+        if (failure instanceof ApiClientError && failure.code === "COMPARISON_NOT_FOUND") {
+          throw new ApiClientError("The comparison changed. Regenerate it and analyze again.", "COMPARISON_STALE", 409);
+        }
+        throw failure;
+      }
+      if (!current()) return;
+      setComparison(latest);
+      if (latest.stale || latest.id !== bound || result.snapshot_id !== bound) {
+        throw new ApiClientError("The comparison changed. Regenerate it and analyze again.", "COMPARISON_STALE", 409);
+      }
+      setAdvice(result);
+      adviceRef.current = result;
+      advicePresent.current = true;
+      setAdviceOutdated(false);
+    } catch (failure) {
+      if (!current()) return;
+      setAdvice(null);
+      setAdviceError(failure instanceof ApiClientError ? failure.message : "Analysis could not be verified. Try again.");
+      if (failure instanceof ApiClientError && failure.code === "COMPARISON_STALE") {
+        setAdviceOutdated(true);
+        setComparison((previous) => previous ? { ...previous, stale: true } : previous);
+      }
+    } finally {
+      if (current()) setAdviceBusy(false);
+    }
+  }
+
   async function generate() {
+    invalidateAdvice();
     const request = ++displaySequence.current;
     const mutation = ++mutationSequence.current;
     setBusy(true);
@@ -278,6 +408,12 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
     {!loading && comparison ? <>
       {comparison.stale ? <div className="comparison-stale" role="status"><strong>Comparison outdated</strong><p>Inputs have changed. These are previous facts. Regenerate after the current Brief and shortlist are approved.</p></div> : <p role="status">Comparison is current.</p>}
       <ComparisonTable comparison={comparison} />
+      {adviceOutdated ? <p role="status">Previous analysis is outdated. Analyze the current comparison again.</p> : null}
+      {adviceError ? <p className="form-error" role="alert">{adviceError}</p> : null}
+      <button type="button" disabled={adviceBusy || busy || comparison.stale} onClick={() => void analyze()}>
+        {adviceBusy ? "Analyzing…" : adviceError ? "Retry analysis" : "Analyze Comparison"}
+      </button>
+      {advice && advice.snapshot_id === comparison.id && !comparison.stale ? <ComparisonAdviceView advice={advice} comparison={comparison} /> : null}
       {warnings.length ? <div><h3>Warnings</h3><ul>{[...new Set(warnings)].map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
       {missing.length ? <details><summary>Missing or conflicting information</summary><ul>{missing.map((item) => <li key={item}>{item}</li>)}</ul></details> : null}
     </> : null}
