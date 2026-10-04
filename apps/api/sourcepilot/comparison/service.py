@@ -8,7 +8,7 @@ from decimal import Decimal
 from enum import Enum
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import Select, select, update
 from sqlalchemy.orm import Session, selectinload
 
 from sourcepilot.briefs.domain import BriefStatus, RequirementKind
@@ -59,21 +59,68 @@ def _json_value(value: object) -> object:
     return value
 
 
-def active_quote_revisions(database_session: Session, project_id: UUID) -> dict[str, object]:
-    """Key current quotes by supplier, identity, revision, and comparison facts."""
-    quotes = database_session.scalars(
-        select(Quote)
+def eligible_confirmed_quotes() -> Select[tuple[Quote]]:
+    """The authoritative M4 active quote selection, shared with workflow reads."""
+    return (select(Quote)
         .join(ProjectSupplier, (ProjectSupplier.project_id == Quote.project_id)
               & (ProjectSupplier.supplier_id == Quote.supplier_id))
-        .where(Quote.project_id == project_id, Quote.status == QuoteStatus.CONFIRMED.value,
-               ProjectSupplier.shortlisted.is_(True), ProjectSupplier.dismissed.is_(False))
+        .where(Quote.status == QuoteStatus.CONFIRMED.value,
+               ProjectSupplier.shortlisted.is_(True), ProjectSupplier.dismissed.is_(False)))
+
+
+def active_quote_revisions_by_project(
+    database_session: Session, project_ids: list[UUID],
+) -> dict[UUID, dict[str, object]]:
+    """Batch current comparison inputs without per-project reads."""
+    result: dict[UUID, dict[str, object]] = {key: {} for key in project_ids}
+    if not project_ids:
+        return result
+    quotes = database_session.scalars(
+        eligible_confirmed_quotes().where(Quote.project_id.in_(project_ids))
         .order_by(Quote.supplier_id)
         .options(selectinload(Quote.values).selectinload(QuoteValue.evidence))
     ).all()
-    return {str(quote.supplier_id): {
-        "quote_id": str(quote.id), "revision": quote.revision,
-        "facts_fingerprint": _quote_fingerprint(quote),
-    } for quote in quotes}
+    for quote in quotes:
+        result[quote.project_id][str(quote.supplier_id)] = {
+            "quote_id": str(quote.id), "revision": quote.revision,
+            "facts_fingerprint": _quote_fingerprint(quote),
+        }
+    return result
+
+
+def active_quote_revisions(database_session: Session, project_id: UUID) -> dict[str, object]:
+    return active_quote_revisions_by_project(database_session, [project_id])[project_id]
+
+
+def comparison_approval_prerequisite(*, brief_approved: bool, stage: str) -> str | None:
+    if not brief_approved:
+        return "Approve the Brief before generating a comparison."
+    if stage != "QUOTES":
+        return "Approve the current shortlist before generating a comparison."
+    return None
+
+
+def comparison_prerequisite(
+    *, brief_approved: bool, stage: str, confirmed_count: int, quantity: int | None,
+) -> str | None:
+    """Existing M4 generation guards in their original precedence."""
+    approval = comparison_approval_prerequisite(brief_approved=brief_approved, stage=stage)
+    if approval:
+        return approval
+    if confirmed_count < 2:
+        return "At least two shortlisted suppliers need confirmed quotes."
+    if quantity is None:
+        return "The approved Brief needs a requested quantity."
+    return None
+
+
+def comparison_is_stale(
+    *, stored_stale: bool, stage: str, brief_revision: int,
+    snapshot_brief_revision: int, quote_snapshot: dict[str, object],
+    active_revisions: dict[str, object],
+) -> bool:
+    return (stored_stale or stage != "QUOTES"
+            or snapshot_brief_revision != brief_revision or quote_snapshot != active_revisions)
 
 
 def _quote_fingerprint(quote: Quote) -> str:
@@ -173,17 +220,20 @@ def _comparison_payload(database_session: Session, project: Project, brief: Brie
     ).all()
     rows = sorted(rows, key=lambda item: str(item.supplier_id))
     quotes = database_session.scalars(
-        select(Quote).where(Quote.project_id == project.id, Quote.status == QuoteStatus.CONFIRMED.value)
+        eligible_confirmed_quotes().where(Quote.project_id == project.id)
         .options(selectinload(Quote.values).selectinload(QuoteValue.evidence)
                  .selectinload(QuoteFieldEvidence.block))
     ).all()
     by_supplier = {quote.supplier_id: quote for quote in quotes}
     included = [(row, by_supplier[row.supplier_id]) for row in rows
                 if row.supplier_id in by_supplier]
-    if len(included) < 2:
-        raise ComparisonNotReadyError("At least two shortlisted suppliers need confirmed quotes.")
-    if brief.quantity is None:
-        raise ComparisonNotReadyError("The approved Brief needs a requested quantity.")
+    prerequisite = comparison_prerequisite(
+        brief_approved=brief.status == BriefStatus.APPROVED, stage=project.stage,
+        confirmed_count=len(included), quantity=brief.quantity,
+    )
+    if prerequisite:
+        raise ComparisonNotReadyError(prerequisite)
+    assert brief.quantity is not None
     requirements = sorted(project.requirements, key=lambda item: str(item.id))
     evaluator_requirements = [
         EvaluationRequirement(item.id, RequirementKind(item.kind), item.expected_value)
@@ -246,9 +296,12 @@ def comparison_response(database_session: Session, comparison: Comparison) -> di
     project = database_session.get(Project, comparison.project_id)
     if project is None:
         raise ValueError("Comparison project is missing.")
-    stale = (comparison.stale or project.stage != "QUOTES"
-             or comparison.brief_revision != project.brief_revision
-             or comparison.quote_revision_snapshot != active_quote_revisions(database_session, project.id))
+    stale = comparison_is_stale(
+        stored_stale=comparison.stale, stage=project.stage, brief_revision=project.brief_revision,
+        snapshot_brief_revision=comparison.brief_revision,
+        quote_snapshot=comparison.quote_revision_snapshot,
+        active_revisions=active_quote_revisions(database_session, project.id),
+    )
     return {
         "id": comparison.id, "project_id": comparison.project_id,
         "brief_revision": comparison.brief_revision,
@@ -271,10 +324,13 @@ def generate_comparison(database_session: Session, project_id: UUID) -> Comparis
         .execution_options(populate_existing=True)
     ).one()
     brief = database_session.get(Brief, project.id)
-    if brief is None or brief.status != BriefStatus.APPROVED:
-        raise ComparisonNotReadyError("Approve the Brief before generating a comparison.")
-    if project.stage != "QUOTES":
-        raise ComparisonNotReadyError("Approve the current shortlist before generating a comparison.")
+    prerequisite = comparison_approval_prerequisite(
+        brief_approved=brief is not None and brief.status == BriefStatus.APPROVED,
+        stage=project.stage,
+    )
+    if prerequisite:
+        raise ComparisonNotReadyError(prerequisite)
+    assert brief is not None
     payload = _comparison_payload(database_session, project, brief)
     revisions = active_quote_revisions(database_session, project.id)
     mark_comparisons_stale(database_session, project.id)

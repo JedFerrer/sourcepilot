@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
-import { jsonResponse } from "../test/api-responses";
+import { workspaceFixtureResponse as jsonResponse } from "../test/workflow-fixtures";
 
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock("./brief-editor", () => ({ BriefEditor: () => null }));

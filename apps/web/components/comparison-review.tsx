@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { WorkflowSummary, workflowReasons } from "../lib/workflow";
 import { ApiClientError, apiRequest } from "../lib/api";
 
 type Evidence = {
@@ -247,8 +248,8 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
   </div>;
 }
 
-export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
-  projectId: string; refreshKey: number; onSnapshotChange?: (hasSnapshot: boolean) => void;
+export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, workflow, onGenerated }: {
+  projectId: string; refreshKey: number; onSnapshotChange?: (hasSnapshot: boolean) => void; workflow?: WorkflowSummary; onGenerated?: () => void;
 }) {
   const [comparison, setComparison] = useState<Comparison | null>(null);
   const [loading, setLoading] = useState(true);
@@ -265,6 +266,7 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
   const displaySequence = useRef(0);
   const mutationSequence = useRef(0);
   const currentProjectId = useRef(projectId);
+  currentProjectId.current = projectId;
   const active = useRef(false);
 
   const invalidateAdvice = useCallback(() => {
@@ -308,6 +310,12 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
       if (request === displaySequence.current) setLoading(false);
     }
   }, [projectId, onSnapshotChange, invalidateAdvice]);
+
+  useEffect(() => {
+    mutationSequence.current += 1;
+    setBusy(false);
+    return () => { mutationSequence.current += 1; };
+  }, [projectId]);
 
   useEffect(() => {
     active.current = true;
@@ -373,11 +381,14 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
     invalidateAdvice();
     const request = ++displaySequence.current;
     const mutation = ++mutationSequence.current;
+    const current = () => mutation === mutationSequence.current && active.current && projectId === currentProjectId.current;
     setBusy(true);
     setError(null);
     setGenerationError(null);
     try {
       const latest = await apiRequest<Comparison>(`/api/projects/${projectId}/comparison/generate`, { method: "POST" });
+      if (!current()) return;
+      onGenerated?.();
       if (request === displaySequence.current) {
         setComparison(latest);
         onSnapshotChange?.(true);
@@ -385,11 +396,11 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
         void reload();
       }
     } catch (failure) {
-      if (mutation === mutationSequence.current && active.current && projectId === currentProjectId.current) {
+      if (current()) {
         setGenerationError(failure instanceof ApiClientError ? failure.message : "The comparison could not be generated. Try again.");
       }
     } finally {
-      if (mutation === mutationSequence.current) setBusy(false);
+      if (current()) setBusy(false);
     }
   }
 
@@ -401,6 +412,7 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
 
   return <section className="comparison-review" aria-labelledby="comparison-title" id="comparison">
     <h2 id="comparison-title">Comparison</h2>
+    {workflow?.stage_prerequisites.COMPARISON ? <p role="status">{workflowReasons[workflow.stage_prerequisites.COMPARISON]}</p> : null}
     {loading ? <p role="status">Loading comparison…</p> : null}
     {error ? <div className="form-error" role="alert"><p>{error}</p><button type="button" onClick={() => void reload()}>Retry comparison</button></div> : null}
     {generationError ? <p className="form-error" role="alert">{generationError}</p> : null}
@@ -417,7 +429,7 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange }: {
       {warnings.length ? <div><h3>Warnings</h3><ul>{[...new Set(warnings)].map((warning) => <li key={warning}>{warning}</li>)}</ul></div> : null}
       {missing.length ? <details><summary>Missing or conflicting information</summary><ul>{missing.map((item) => <li key={item}>{item}</li>)}</ul></details> : null}
     </> : null}
-    {!error || comparison || generationError ? <button type="button" disabled={busy || loading} onClick={() => void generate()}>
+    {!error || comparison || generationError ? <button type="button" id="comparison-generate" disabled={busy || loading || (workflow !== undefined && !workflow.comparison_ready)} onClick={() => void generate()}>
       {busy ? "Generating…" : generationError && !comparison ? "Retry generation" : comparison ? "Regenerate Comparison" : "Generate Comparison"}
     </button> : null}
   </section>;

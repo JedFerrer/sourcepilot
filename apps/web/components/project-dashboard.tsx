@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { stageLabels, workflowActions, WorkflowSummary } from "../lib/workflow";
 import { ApiClientError, apiRequest } from "../lib/api";
 
 type Project = {
@@ -10,6 +11,7 @@ type Project = {
   name: string;
   original_request: string;
   stage: string;
+  workflow?: WorkflowSummary;
   created_at: string;
   updated_at: string;
   preferred_supplier_name: string | null;
@@ -27,18 +29,28 @@ export function ProjectDashboard() {
   const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
+    let current = true;
     setLoadState("loading");
     setLoadError(null);
     void apiRequest<Project[]>("/api/projects")
       .then((loadedProjects) => {
+        if (!current) return;
         setProjects(loadedProjects);
         setLoadState("ready");
       })
       .catch((error: unknown) => {
+        if (!current) return;
         setLoadError(error instanceof ApiClientError ? error.message : "Projects are unavailable. Please try again.");
         setLoadState("unavailable");
       });
+    return () => { current = false; };
   }, [loadAttempt]);
+
+  useEffect(() => {
+    const onFocus = () => setLoadAttempt((value) => value + 1);
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, []);
 
   async function handleCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,7 +117,12 @@ export function ProjectDashboard() {
             <li key={project.id}>
               <Link href={`/projects/${project.id}`}>
                 <strong>{project.name}</strong>
-                <span>Brief</span>
+                <span>{project.workflow ? stageLabels[project.workflow.current_stage] : "Progress unavailable"}</span>
+                {project.workflow ? <>
+                  <span>Next: {workflowActions[project.workflow.next_action.code].label}</span>
+                  <span>Shortlisted: {project.workflow.shortlist_count} · Confirmed quotes: {project.workflow.confirmed_quote_count}</span>
+                  <span>{project.workflow.comparison_stale ? "Comparison needs refreshing" : project.workflow.comparison_ready ? "Comparison ready" : "Comparison prerequisites incomplete"}</span>
+                </> : null}
                 <span>Preferred supplier: {project.preferred_supplier_name ?? "No Decision Yet"}</span>
                 <span>Updated {new Date(project.updated_at).toLocaleDateString()}</span>
               </Link>

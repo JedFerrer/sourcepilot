@@ -98,6 +98,7 @@ from sourcepilot.projects.service import (
     rename_project,
     update_preferred_supplier,
 )
+from sourcepilot.projects.workflow import project_responses
 from sourcepilot.quotes.schemas import (
     ManualQuoteCreateRequest,
     ManualQuoteEditRequest,
@@ -217,7 +218,7 @@ def create_project_endpoint(
     )
     commit_or_rollback(database_session)
     database_session.refresh(project)
-    return ProjectResponse.model_validate(project)
+    return project_responses(database_session, [project])[0]
 
 
 @app.get("/projects", response_model=list[ProjectResponse])
@@ -228,7 +229,7 @@ def list_projects_endpoint(
     demo_session = active_demo_session(request, database_session)
     projects = projects_for_demo_session(database_session, demo_session)
     commit_or_rollback(database_session)
-    return [ProjectResponse.model_validate(project) for project in projects]
+    return project_responses(database_session, projects)
 
 
 @app.get("/projects/{project_id}", response_model=ProjectResponse)
@@ -243,7 +244,7 @@ def read_project_endpoint(
         database_session.rollback()
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
     commit_or_rollback(database_session)
-    return ProjectResponse.model_validate(project)
+    return project_responses(database_session, [project])[0]
 
 
 @app.patch("/projects/{project_id}", response_model=ProjectResponse)
@@ -261,7 +262,7 @@ def rename_project_endpoint(
     rename_project(database_session, project, name=payload.name)
     commit_or_rollback(database_session)
     database_session.refresh(project)
-    return ProjectResponse.model_validate(project)
+    return project_responses(database_session, [project])[0]
 
 
 def owned_project_or_404(
@@ -285,7 +286,7 @@ def preferred_supplier_endpoint(
         updated = update_preferred_supplier(database_session, project, payload)
         commit_or_rollback(database_session)
         database_session.refresh(updated)
-        return ProjectResponse.model_validate(updated)
+        return project_responses(database_session, [updated])[0]
     except PreferredSupplierNotShortlistedError as error:
         database_session.rollback()
         return error_response(409, code="PREFERRED_SUPPLIER_NOT_SHORTLISTED", message=str(error))

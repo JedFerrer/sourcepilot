@@ -1,0 +1,206 @@
+[
+  {
+    "event": "request",
+    "method": "POST",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison/advice",
+    "time": 1791123451655
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison/advice",
+    "time": 1791123451660
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123451661
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123451699
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123452328
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123452333
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123452413
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123452422
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123462005
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123462005
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123462062
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123462072
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123478951
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123478956
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123479022
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123479117
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123479119
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123479157
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123479186
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123479211
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123494502
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123494503
+  },
+  {
+    "event": "response",
+    "status": 503,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123494506
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123494546
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123494597
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123494635
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123519031
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123519032
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/comparison",
+    "time": 1791123519075
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e",
+    "time": 1791123519098
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/suppliers",
+    "time": 1791123519126
+  },
+  {
+    "event": "request",
+    "method": "GET",
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/quotes",
+    "time": 1791123519126
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/quotes",
+    "time": 1791123519158
+  },
+  {
+    "event": "response",
+    "status": 200,
+    "url": "http://localhost:3000/api/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e/suppliers",
+    "time": 1791123519180
+  }
+]

@@ -56,6 +56,11 @@ class ShortlistApprovalError(ValueError):
     pass
 
 
+def supplier_evaluation_is_stale(evaluated_revision: int, brief_revision: int) -> bool:
+    """Authoritative M2 freshness check; workflow summaries reuse it."""
+    return evaluated_revision != brief_revision
+
+
 def _candidate_response(supplier: Supplier) -> SupplierCandidateResponse:
     return SupplierCandidateResponse(
         id=supplier.id,
@@ -213,7 +218,7 @@ def list_project_suppliers(database_session: Session, project: Project) -> Suppl
     reviewed: list[ReviewedSupplierResponse] = []
     for item in rows:
         supplier = item.supplier
-        stale = item.evaluated_against_brief_revision != project.brief_revision
+        stale = supplier_evaluation_is_stale(item.evaluated_against_brief_revision, project.brief_revision)
         evaluations = []
         derived_context = []
         informational_requirements = []
@@ -329,7 +334,7 @@ def approve_shortlist(database_session: Session, project: Project) -> SupplierLi
         raise ShortlistApprovalError("Select one to three suppliers before approval.")
     if any(item.dismissed for item in selected):
         raise ShortlistApprovalError("Restore dismissed suppliers before approval.")
-    if any(item.evaluated_against_brief_revision != locked_project.brief_revision for item in selected):
+    if any(supplier_evaluation_is_stale(item.evaluated_against_brief_revision, locked_project.brief_revision) for item in selected):
         raise ShortlistApprovalError("Re-discover and re-evaluate suppliers before approval.")
     locked_project.stage = "QUOTES"
     database_session.flush()

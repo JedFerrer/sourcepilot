@@ -67,6 +67,39 @@ describe("ComparisonReview", () => {
     expect(screen.getByRole("columnheader", { name: "Willow" })).toBeInTheDocument();
   });
 
+  it("ignores A generation before B's read resolves and lets B complete normally", async () => {
+    let resolveGeneration!: (response: Response) => void;
+    let resolveB!: (response: Response) => void;
+    const onGeneratedA = vi.fn();
+    const onGeneratedB = vi.fn();
+    const onSnapshotChange = vi.fn();
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "POST") return path.includes("/a/")
+        ? new Promise<Response>((resolve) => { resolveGeneration = resolve; })
+        : Promise.resolve(jsonResponse(snapshot(false, true), 201));
+      return path.includes("/b/")
+        ? new Promise<Response>((resolve) => { resolveB = resolve; })
+        : Promise.resolve(notFound());
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { rerender } = render(<ComparisonReview projectId="a" refreshKey={0} onGenerated={onGeneratedA} onSnapshotChange={onSnapshotChange} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Generate Comparison" }));
+    rerender(<ComparisonReview projectId="b" refreshKey={0} onGenerated={onGeneratedB} onSnapshotChange={onSnapshotChange} />);
+    onSnapshotChange.mockClear();
+    await act(async () => resolveGeneration(jsonResponse(snapshot(), 201)));
+    expect(onGeneratedA).not.toHaveBeenCalled();
+    expect(onGeneratedB).not.toHaveBeenCalled();
+    expect(onSnapshotChange).not.toHaveBeenCalled();
+    expect(screen.getByText("Loading comparison…")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    await act(async () => resolveB(notFound()));
+    fireEvent.click(screen.getByRole("button", { name: "Generate Comparison" }));
+    await screen.findByText("Comparison is current.");
+    expect(onGeneratedB).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Regenerate Comparison" })).toBeEnabled();
+    expect(screen.getByRole("row", { name: /Unit price/ })).toHaveTextContent("USD 4.50");
+  });
+
   it("does not display a previously current snapshot when refresh fails", async () => {
     let failure = false;
     vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(failure

@@ -243,6 +243,9 @@ def test_empty_extraction_can_retry_without_revision(client: TestClient, engine:
     assert first.status_code == 200
     assert first.json()["brief_revision"] == 0
     assert first.json()["can_analyze"] is True
+    assert client.get(f"/projects/{project_id}").json()["workflow"]["next_action"] == {
+        "code": "ANALYZE_BRIEF", "reason_code": "BRIEF_ANALYSIS_AVAILABLE", "target_stage": "BRIEF",
+    }
     with Session(engine) as session:
         assert session.get(Brief, project_id) is None
     FakeClient.outputs = [ModelInvocation(json.dumps(extraction()), None, None)]
@@ -308,6 +311,7 @@ def test_patch_add_update_remove_clear_and_noop_revision(client: TestClient) -> 
     cleared = client.patch(path, json=empty_edit()).json()
     assert cleared["brief_revision"] == 3
     assert cleared["can_analyze"] is False
+    assert client.get(f"/projects/{project_id}").json()["workflow"]["next_action"]["code"] == "COMPLETE_BRIEF"
     assert cleared["requirements"] == []
     assert client.patch(path, json=empty_edit()).json()["brief_revision"] == 3
     assert client.post(f"{path}/analyze").status_code == 409

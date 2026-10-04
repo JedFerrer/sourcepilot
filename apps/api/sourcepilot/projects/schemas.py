@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -33,6 +34,39 @@ class RenameProjectRequest(BaseModel):
         return trimmed_value
 
 
+WorkflowStage = Literal["BRIEF", "SUPPLIERS", "QUOTES", "COMPARISON", "DECISION"]
+WorkflowAction = Literal[
+    "ANALYZE_BRIEF", "COMPLETE_BRIEF", "APPROVE_BRIEF", "DISCOVER_SUPPLIERS",
+    "REFRESH_SUPPLIERS", "REVIEW_SHORTLIST", "APPROVE_SHORTLIST", "COMPLETE_QUOTES",
+    "GENERATE_COMPARISON", "REGENERATE_COMPARISON", "RECORD_PREFERENCE", "MANAGE_PREFERENCE",
+]
+WorkflowReason = Literal[
+    "BRIEF_ANALYSIS_AVAILABLE", "BRIEF_INCOMPLETE", "BRIEF_APPROVAL_REQUIRED",
+    "SUPPLIERS_NOT_DISCOVERED", "SUPPLIER_EVALUATIONS_STALE", "SHORTLIST_EMPTY",
+    "SHORTLIST_OVER_LIMIT", "SHORTLIST_APPROVAL_REQUIRED", "INSUFFICIENT_CONFIRMED_QUOTES",
+    "COMPARISON_NOT_GENERATED", "COMPARISON_STALE", "PREFERENCE_NOT_RECORDED",
+    "PREFERENCE_RECORDED",
+]
+
+
+class WorkflowNextAction(BaseModel):
+    code: WorkflowAction
+    reason_code: WorkflowReason
+    target_stage: WorkflowStage
+
+
+class WorkflowSummary(BaseModel):
+    current_stage: WorkflowStage
+    next_action: WorkflowNextAction
+    shortlist_count: int
+    confirmed_quote_count: int
+    comparison_ready: bool
+    comparison_present: bool
+    comparison_stale: bool
+    suppliers_stale: bool
+    stage_prerequisites: dict[WorkflowStage, WorkflowReason | None]
+
+
 class ProjectResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -40,6 +74,7 @@ class ProjectResponse(BaseModel):
     name: str
     original_request: str
     stage: str
+    workflow: WorkflowSummary
     preferred_supplier_id: UUID | None
     preferred_supplier_name: str | None
     decision_notes: str | None

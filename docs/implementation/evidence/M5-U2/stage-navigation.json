@@ -1,0 +1,27 @@
+[
+  {
+    "stage": "Brief",
+    "url": "http://localhost:3000/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e#brief",
+    "marker": "Decision"
+  },
+  {
+    "stage": "Suppliers",
+    "url": "http://localhost:3000/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e#suppliers",
+    "marker": "Decision"
+  },
+  {
+    "stage": "Quotes",
+    "url": "http://localhost:3000/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e#quotes",
+    "marker": "Decision"
+  },
+  {
+    "stage": "Comparison",
+    "url": "http://localhost:3000/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e#comparison",
+    "marker": "Decision"
+  },
+  {
+    "stage": "Decision",
+    "url": "http://localhost:3000/projects/adc643a3-c0bd-407c-a2de-f54b32d2460e#decision",
+    "marker": "Decision"
+  }
+]

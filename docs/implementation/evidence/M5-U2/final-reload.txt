@@ -1,0 +1,63 @@
+- main:
+  - paragraph: Demo session ready
+  - region "M5-U2 final QA project":
+    - link "Back to projects":
+      - /url: /
+    - paragraph: "Current stage: Decision"
+    - generic "Next action":
+      - paragraph: Your preference is recorded. You can change it, edit notes, or clear it.
+      - 'link "Next: Manage your preferred supplier"':
+        - /url: "#decision-choice"
+    - heading "M5-U2 final QA project" [level=1]
+    - paragraph: "Preferred supplier: Moss Thread Bags"
+    - navigation "Sourcing workflow stages":
+      - list:
+        - link "Brief":
+          - /url: "#brief"
+          - strong: Brief
+        - link "Suppliers":
+          - /url: "#suppliers"
+          - strong: Suppliers
+        - link "Quotes":
+          - /url: "#quotes"
+          - strong: Quotes
+        - link "Comparison":
+          - /url: "#comparison"
+          - strong: Comparison
+        - link "Decision":
+          - /url: "#decision"
+          - strong: Decision
+    - text: Rename project
+    - textbox "Rename project": M5-U2 final QA project
+    - button "Save name"
+    - region "Original sourcing request":
+      - heading "Original sourcing request" [level=2]
+      - paragraph: 2000 recycled polyester cosmetic bags with custom logo, USD 5 target, Sydney, January 2027. Synthetic browser QA.
+    - paragraph: Loading Brief…
+    - region "Suppliers":
+      - heading "Suppliers" [level=2]
+      - paragraph: Loading suppliers…
+    - region "Quotes":
+      - heading "Quotes" [level=2]
+      - paragraph: Loading quotes…
+    - region "Comparison":
+      - heading "Comparison" [level=2]
+      - status: Loading comparison…
+      - button "Generate Comparison" [disabled]
+    - region "Decision":
+      - heading "Decision" [level=2]
+      - paragraph:
+        - text: "Current preference:"
+        - strong: Moss Thread Bags
+      - paragraph: This records your choice. It does not place an order or contact a supplier.
+      - paragraph: Loading shortlist for decision…
+      - text: Preferred supplier
+      - combobox "Preferred supplier" [disabled]:
+        - option "Choose a shortlisted supplier" [selected]
+      - text: Decision notes
+      - textbox "Decision notes": Final persisted M5-U2 QA notes.
+      - button "Mark as Preferred Supplier" [disabled]
+      - button "Save decision notes"
+      - button "Clear preferred supplier"
+- button "Open Next.js Dev Tools":
+- alert

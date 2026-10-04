@@ -351,7 +351,7 @@ export function BriefEditor({ projectId, onProjectChange }: { projectId: string;
   if (!draft || !brief) return <div className="form-error" role="alert"><p>{error}</p><button type="button" onClick={() => setReload((value) => value + 1)}>Try again</button></div>;
   const hasUnsavedEdits = JSON.stringify(draft) !== JSON.stringify(brief);
 
-  return <section className="brief-editor" aria-labelledby="brief-title">
+  return <section id="brief" className="brief-editor" aria-labelledby="brief-title">
     <h2 id="brief-title">Sourcing Brief</h2>
     <p>Readiness: {brief.status === "READY_FOR_REVIEW" ? "Ready for review" : brief.status === "APPROVED" ? "Approved" : "In progress"}</p>
     {brief.approved_at ? <p>Approved on {new Date(brief.approved_at).toLocaleDateString()}</p> : null}
@@ -373,12 +373,12 @@ export function BriefEditor({ projectId, onProjectChange }: { projectId: string;
       )}</ul> : <p>No additional requirements or context saved.</p>}
       {brief.requirements.some((item) => item.importance === null) ? <p>Some requirement importance values are not set. Review them before approving.</p> : null}
       {brief.uncertainties.length > 0 ? <section aria-label="Uncertainties to review"><h4>Uncertainties to review</h4><ul>{brief.uncertainties.map((item, index) => <li key={index}>{item}</li>)}</ul></section> : null}
-      <button type="button" onClick={() => void approve()} disabled={busy !== null || hasUnsavedEdits || needsConflictRefresh}>{busy === "approve" ? "Approving…" : "Approve Brief"}</button>
+      <button type="button" id="brief-approve" onClick={() => void approve()} disabled={busy !== null || hasUnsavedEdits || needsConflictRefresh}>{busy === "approve" ? "Approving…" : "Approve Brief"}</button>
       {hasUnsavedEdits ? <p>Save your Brief edits before approving.</p> : null}
     </section> : null}
-    {brief.can_analyze ? <button type="button" onClick={() => void analyze()} disabled={busy !== null}>{busy === "analyze" ? "Analyzing…" : "Analyze request"}</button> : null}
+    {brief.can_analyze ? <button type="button" id="brief-analyze" onClick={() => void analyze()} disabled={busy !== null}>{busy === "analyze" ? "Analyzing…" : "Analyze request"}</button> : null}
     {hasSavedContent(brief) && brief.missing_fields.length > 0 ? <>
-      <button type="button" onClick={() => void generateQuestions()} disabled={busy !== null || hasUnsavedEdits}>{busy === "clarify" ? "Generating questions…" : "Get clarification questions"}</button>
+      <button type="button" id="brief-clarify" onClick={() => void generateQuestions()} disabled={busy !== null || hasUnsavedEdits}>{busy === "clarify" ? "Generating questions…" : "Get clarification questions"}</button>
       {hasUnsavedEdits ? <p>Save your Brief edits before generating questions.</p> : null}
     </> : null}
     {clarifications ? <form className="clarification-form" onSubmit={(event) => void saveAnswers(event)} aria-label="Clarification questions">
@@ -402,7 +402,7 @@ export function BriefEditor({ projectId, onProjectChange }: { projectId: string;
       {fieldErrors.length > 0 ? <ul>{fieldErrors.map((field, index) => <li key={`${field.field}-${index}`}>{fieldMessage(field)}</li>)}</ul> : null}
     </div> : null}
     {needsConflictRefresh ? <button type="button" onClick={() => { setBusy("refresh"); void refreshAfterConflict(true).finally(() => setBusy(null)); }} disabled={busy !== null}>Reload Brief</button> : null}
-    <form className="brief-form" onSubmit={(event) => void save(event)}>
+    <form id="brief-complete" className="brief-form" onSubmit={(event) => void save(event)}>
       <h3>Product and delivery</h3>
       <label>Product name<input value={draft.product_name ?? ""} onChange={(event) => updateField("product_name", event.target.value)} /></label>
       <label>Category<input value={draft.category ?? ""} onChange={(event) => updateField("category", event.target.value)} /></label>

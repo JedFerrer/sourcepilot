@@ -317,7 +317,7 @@ export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const reload = useCallback(async (silent = false) => {
+  const reload = useCallback(async (silent = false, reconcileSaved = false) => {
     if (!active) return;
     if (!silent) { setLoading(true); setError(null); }
     try {
@@ -326,7 +326,12 @@ export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
         apiRequest<Quote[]>(`/api/projects/${projectId}/quotes`),
       ]);
       setSuppliers(supplierResult.suppliers.filter((supplier) => supplier.shortlisted && !supplier.dismissed));
-      setQuotes(quoteResult);
+      // Unchanged reads must not reset unsaved card state. A save explicitly reconciles it.
+      setQuotes((current) => quoteResult.map((quote) => {
+        const previous = current.find((item) => item.id === quote.id);
+        return !reconcileSaved && previous && JSON.stringify(previous) === JSON.stringify(quote)
+          ? previous : quote;
+      }));
     } catch (failure) {
       if (!silent) setError(errorMessage(failure));
     } finally {
@@ -338,7 +343,7 @@ export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
 
   async function savedQuote() {
     onQuoteChange?.();
-    await reload();
+    await reload(false, true);
   }
 
   useEffect(() => {
@@ -350,23 +355,32 @@ export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
       for (const id of processingIds) {
         void apiRequest<Quote>(`/api/quotes/${id}`).then((updated) => {
           if (cancelled) return;
+          if (updated.status !== "PROCESSING") onQuoteChange?.();
           setQuotes((current) => current.map((quote) =>
             quote.id === id && quote.status === "PROCESSING" ? updated : quote));
         }).catch(() => { /* The next poll can recover a transient read failure. */ });
       }
     }, 2000);
     return () => { cancelled = true; window.clearInterval(timer); };
-  }, [active, quotes]);
+  }, [active, quotes, onQuoteChange]);
 
-  if (!active) return null;
-  return <section aria-labelledby="quotes-title">
+  return <section id="quotes" aria-labelledby="quotes-title">
     <h2 id="quotes-title">Quotes</h2>
-    {loading ? <p>Loading quotes…</p> : null}
-    {error ? <div role="alert" className="form-error"><p>{error}</p><button type="button" onClick={() => void reload()}>Retry quotes</button></div> : null}
-    {!loading && !error && suppliers.length === 0 ? <p>No suppliers are currently shortlisted.</p> : null}
-    {!loading && !error ? suppliers.map((supplier) => <ManualQuoteCard
-      key={supplier.id} projectId={projectId} supplier={supplier}
-      quote={quotes.find((quote) => quote.supplier_id === supplier.id)} onSaved={savedQuote}
-    />) : null}
+    {!active ? <>
+      <p>Approve the current shortlist before adding or reviewing quotes.</p>
+      <a href="#shortlist-review">Review shortlist</a>
+    </> : null}
+    <div hidden={!active}>
+      <div id="quotes-review" />
+      {loading ? <p>Loading quotes…</p> : null}
+      {error ? <div role="alert" className="form-error"><p>{error}</p><button type="button" onClick={() => void reload()}>Retry quotes</button></div> : null}
+      {!loading && !error && suppliers.length === 0 ? <p>No suppliers are currently shortlisted.</p> : null}
+      <fieldset className="quote-controls" disabled={!active || loading || Boolean(error)}>
+        {suppliers.map((supplier) => <ManualQuoteCard
+          key={supplier.id} projectId={projectId} supplier={supplier}
+          quote={quotes.find((quote) => quote.supplier_id === supplier.id)} onSaved={savedQuote}
+        />)}
+      </fieldset>
+    </div>
   </section>;
 }

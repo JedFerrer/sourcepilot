@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { jsonResponse } from "../test/api-responses";
+import { workspaceFixtureResponse as jsonResponse } from "../test/workflow-fixtures";
 import { ProjectWorkspace } from "./project-workspace";
 
 const brief = {

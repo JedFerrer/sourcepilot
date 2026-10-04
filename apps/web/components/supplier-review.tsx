@@ -202,8 +202,8 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
     try {
       await apiRequest(`/api/projects/${projectId}/suppliers/discover`, { method: "POST" });
       await reload();
-      onSuppliersChange?.();
       if (data?.shortlist_approved) await onStageChange?.();
+      else onSuppliersChange?.();
     } catch (failure) {
       setError(failure instanceof ApiClientError ? failure.message : "Supplier discovery failed. Try again.");
     } finally {
@@ -221,8 +221,8 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
       });
       if (request === requestSequence.current) {
         setLoaded({ projectId, refreshKey, version: request, data: updated });
-        onSuppliersChange?.();
         if (data?.shortlist_approved && !updated.shortlist_approved) await onStageChange?.();
+        else onSuppliersChange?.();
       }
     } catch (failure) {
       setError(failure instanceof ApiClientError ? failure.message : "Supplier review could not be saved. Try again.");
@@ -255,19 +255,19 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
     && selected.every((item) => !item.dismissed && !item.stale);
 
   return (
-    <section aria-labelledby="suppliers-title" className="supplier-review">
+    <section id="suppliers" aria-labelledby="suppliers-title" className="supplier-review">
       <h2 id="suppliers-title">Suppliers</h2>
       {loading ? <p>Loading suppliers…</p> : null}
       {error ? <div className="form-error" role="alert"><p>{error}</p><button type="button" onClick={() => void reload()}>Retry</button></div> : null}
       {data?.suppliers.some((item) => item.stale) ? <p role="status" className="form-error">Your sourcing requirements changed. Existing supplier evaluations may no longer reflect the current Brief.</p> : null}
-      {data?.brief_approved ? <button type="button" disabled={busy} onClick={() => void discover()}>{data.suppliers.length ? "Re-discover and re-evaluate" : "Discover Suppliers"}</button> : data ? <p>Approve the Brief to discover or re-evaluate suppliers.</p> : null}
-      {data ? <section aria-labelledby="shortlist-title">
-        <h3 id="shortlist-title">Shortlist</h3>
+      {data?.brief_approved ? <button type="button" disabled={busy} id="supplier-discover" onClick={() => void discover()}>{data.suppliers.length ? "Re-discover and re-evaluate" : "Discover Suppliers"}</button> : data ? <p>Approve the Brief to discover or re-evaluate suppliers.</p> : null}
+      {data ? <section aria-labelledby="shortlist-review">
+        <h3 id="shortlist-review">Shortlist</h3>
         <p>{selected.length} selected · maximum 3 for approval</p>
         {selected.length > 3 ? <p role="status" className="form-error">Remove suppliers until no more than three remain.</p> : null}
         {data.shortlist_approved ? <p role="status">Shortlist approved. The project is ready for Quotes.</p> : null}
         {selected.length === 1 ? <p>One supplier can proceed; side-by-side comparison later requires at least two.</p> : null}
-        {selected.length > 0 ? <button type="button" disabled={busy} onClick={() => setReviewOpen(true)}>Review selected suppliers</button> : null}
+        {selected.length > 0 ? <button type="button" disabled={busy} id="shortlist-approve" onClick={() => setReviewOpen(true)}>Review selected suppliers</button> : null}
         {reviewOpen ? <div aria-label="Shortlist approval summary">
           <h4>Review before approval</h4>
           {selected.map((item) => <section key={item.id} aria-label={`${item.name} approval details`}>

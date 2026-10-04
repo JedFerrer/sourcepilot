@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
-import { jsonResponse } from "../test/api-responses";
+import { workspaceFixtureResponse as jsonResponse } from "../test/workflow-fixtures";
 
 vi.mock("next/link", () => ({ default: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a> }));
 vi.mock("./brief-editor", () => ({ BriefEditor: ({ onProjectChange }: { onProjectChange: () => Promise<void> }) => <button onClick={() => void onProjectChange()}>Refresh project fixture</button> }));
@@ -94,8 +94,8 @@ describe("Workspace decision review regressions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
     await screen.findByText("Preferred supplier: Supplier A");
     await act(async () => finishOlder());
-    expect(screen.getByRole("heading", { name: "Older response project" })).toBeInTheDocument();
-    expect(screen.getByText("Current stage: Quotes")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: path === "refresh" ? "Project" : "Older response project" })).toBeInTheDocument();
+    expect(screen.getByText("Current stage: Suppliers")).toBeInTheDocument();
     expect(screen.getByText("Preferred supplier: Supplier A")).toBeInTheDocument();
     expect(screen.getByLabelText("Decision notes")).toHaveValue("New decision notes");
     fireEvent.click(screen.getByRole("button", { name: "Save decision notes" }));

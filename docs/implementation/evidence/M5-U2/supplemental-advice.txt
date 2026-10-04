@@ -1,0 +1,74 @@
+Comparison
+
+Comparison is current.
+
+Factual comparison of confirmed supplier quotes
+Criterion	Moss Thread Bags	Harbor Pouch Works
+Unit price	USD 4.2
+Confirmed project quote price
+Source details
+	USD 4.6
+Confirmed project quote price
+Source details
+
+Quoted quantity	2000
+Source details
+	2000
+Source details
+
+Minimum order quantity	800
+Source details
+	1000
+Source details
+
+Production lead time	37 days
+Source details
+	32 days
+Source details
+
+Delivery commitment	Unknown	Unknown
+Tooling or setup cost	Unknown
+Source details
+	Unknown
+Source details
+
+Shipping cost	Unknown
+Source details
+	Unknown
+Source details
+
+Material
+Required
+Expected: recycled polyester
+	Meets
+Source details
+	Meets
+Source details
+
+Capability
+Required
+Expected: Yes · CUSTOM_BRANDING
+	Unknown	Meets
+Source details
+Analyze Comparison
+Tradeoff analysis
+Supplier summaries
+
+SUPPLEMENTAL DETERMINISTIC QA FIXTURE: inspect confirmed terms.
+
+Key tradeoffs
+
+SUPPLEMENTAL DETERMINISTIC QA FIXTURE: inspect confirmed terms.
+
+Suggested Supplier to Investigate First
+
+Moss Thread Bags
+
+This advice supports your review. You remain responsible for the supplier decision.
+
+Supporting reasons
+
+SUPPLEMENTAL DETERMINISTIC QA FIXTURE: inspect confirmed terms.
+
+Missing or conflicting information
+Regenerate Comparison

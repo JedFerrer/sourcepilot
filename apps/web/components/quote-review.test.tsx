@@ -18,6 +18,65 @@ function QuoteComparisonHarness() {
 describe("QuoteReview", () => {
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
+  it.each([false, true])("preserves unsaved fields and editor state across unavailable prerequisites (existing quote: %s)", async (existing) => {
+    const quote = { id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW",
+      revision: 1, confirmed_at: null, notes: "Saved notes", values: {} };
+    const fetchMock = vi.fn((path: string) => Promise.resolve(path.endsWith("/suppliers")
+      ? jsonResponse({ suppliers: [supplier] }) : jsonResponse(existing ? [quote] : [])));
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    await waitFor(() => expect(screen.queryByText("Loading quotes…")).not.toBeInTheDocument());
+    if (existing) fireEvent.click(await screen.findByRole("button", { name: "Edit draft" }));
+    const notes = await screen.findByLabelText("Quote notes");
+    fireEvent.change(notes, { target: { value: "UNSAVED FOCUS QUOTE" } });
+    fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.75" } });
+    view.rerender(<QuoteReview projectId="project-1" active={false} refreshKey={1} />);
+    expect(screen.getByText("Approve the current shortlist before adding or reviewing quotes.")).toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: "Quote notes" })).not.toBeInTheDocument();
+    expect(notes).toBeDisabled();
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={1} />);
+    await waitFor(() => expect(screen.queryByText("Loading quotes…")).not.toBeInTheDocument());
+    expect(screen.getByLabelText("Quote notes")).toBe(notes);
+    expect(notes).toHaveValue("UNSAVED FOCUS QUOTE");
+    expect(notes).toBeEnabled();
+    expect(screen.getByLabelText("Unit price")).toHaveValue(4.75);
+    expect(screen.queryByText("Approve the current shortlist before adding or reviewing quotes.")).not.toBeInTheDocument();
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={2} />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(6));
+    await waitFor(() => expect(screen.queryByText("Loading quotes…")).not.toBeInTheDocument());
+    expect(notes).toHaveValue("UNSAVED FOCUS QUOTE");
+  });
+
+  it("reconciles changed server quotes, explicit cancellation, and successful saves", async () => {
+    let quote = { id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW",
+      revision: 1, confirmed_at: null, notes: "Saved notes", values: {} };
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "PATCH") {
+        const body = JSON.parse(String(init.body));
+        quote = { ...quote, notes: body.notes };
+        return Promise.resolve(jsonResponse(quote));
+      }
+      return Promise.resolve(path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([quote]));
+    }));
+    const view = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Edit draft" }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Unsaved notes" } });
+    // Notes-only server updates need not advance the quote value revision.
+    quote = { ...quote, notes: "External saved notes" };
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={1} />);
+    await waitFor(() => expect(screen.getByLabelText("Quote notes")).toHaveValue("External saved notes"));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Discard me" } });
+    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("External saved notes");
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "  External saved notes  " } });
+    fireEvent.click(screen.getByRole("button", { name: "Save draft" }));
+    await screen.findByRole("button", { name: "Edit draft" });
+    await waitFor(() => expect(screen.queryByText("Loading quotes…")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("External saved notes");
+  });
+
   it.each(["save", "confirmation"])("clears settled generation feedback after a successful quote %s", async (mutation) => {
     const quote = {
       id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL",

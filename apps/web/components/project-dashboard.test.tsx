@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectDashboard } from "./project-dashboard";
+import { workflowFixture } from "../test/workflow-fixtures";
 import { jsonResponse } from "../test/api-responses";
 
 const push = vi.fn();
@@ -59,6 +60,7 @@ describe("ProjectDashboard", () => {
             name: "Recycled Cosmetic Travel Bag",
             original_request: "Source bags",
             stage: "BRIEF",
+            workflow: workflowFixture(),
             updated_at: "2026-09-22T00:00:00Z",
           },
         ],

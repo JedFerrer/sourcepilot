@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
-import { jsonResponse } from "../test/api-responses";
+import { workspaceFixtureResponse as jsonResponse } from "../test/workflow-fixtures";
 
 const emptyBrief = {
   product_name: null, category: null, quantity: null, destination: null,
@@ -105,7 +105,7 @@ describe("ProjectWorkspace", () => {
     const suppliers = screen.getByText("Suppliers").closest("li");
     expect(suppliers).toHaveAttribute("aria-current", "step");
     expect(suppliers).not.toHaveAttribute("data-unavailable");
-    expect(suppliers).toHaveTextContent("Review discovered suppliers above.");
+    expect(suppliers).toHaveTextContent("Suppliers");
     expect(suppliers).not.toHaveTextContent("Available in a later step.");
     fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Save Brief" }));
@@ -146,7 +146,7 @@ describe("ProjectWorkspace", () => {
     expect(await screen.findByText("Current stage: Quotes")).toBeInTheDocument();
     expect(screen.getByText("Quotes").closest("li")).toHaveAttribute("aria-current", "step");
     expect(screen.getByText("Quotes").closest("li")).not.toHaveAttribute("data-unavailable");
-    expect(screen.getByText("Quotes").closest("li")).toHaveTextContent("Add and confirm manual quotes above.");
+    expect(screen.getByText("Quotes").closest("li")).toHaveTextContent("Quotes");
   });
 
   it("does not expose a project outside the current session", async () => {

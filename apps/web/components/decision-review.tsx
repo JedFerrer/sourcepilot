@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { WorkflowSummary } from "../lib/workflow";
 import { ApiClientError, apiRequest } from "../lib/api";
 
 export type DecisionProject = {
@@ -8,6 +9,7 @@ export type DecisionProject = {
   preferred_supplier_id: string | null;
   preferred_supplier_name: string | null;
   decision_notes: string | null;
+  workflow?: WorkflowSummary;
 };
 
 type Supplier = { id: string; name: string; shortlisted: boolean };
@@ -91,7 +93,7 @@ function DecisionPanel({ project, refreshKey, onSaved }: DecisionProps) {
     && !suppliers.some((supplier) => supplier.id === project.preferred_supplier_id);
   const selectedAvailable = suppliers.some((supplier) => supplier.id === selected);
 
-  return <section className="decision-review" aria-labelledby="decision-title">
+  return <section id="decision" className="decision-review" aria-labelledby="decision-title">
     <h2 id="decision-title">Decision</h2>
     <p>Current preference: <strong>{project.preferred_supplier_name ?? "No Decision Yet"}</strong></p>
     <p>This records your choice. It does not place an order or contact a supplier.</p>
@@ -101,7 +103,7 @@ function DecisionPanel({ project, refreshKey, onSaved }: DecisionProps) {
     {!loading && !listError && !suppliers.length ? <p>No shortlisted suppliers are available for a new selection.</p> : null}
     <form className="decision-form" onSubmit={(event) => { event.preventDefault(); if (selectedAvailable && !loading && !listError) void save(selected, "Preferred supplier saved."); }}>
       <label>Preferred supplier
-        <select value={selected} onChange={(event) => setSelected(event.target.value)} disabled={busy || loading || !!listError}>
+        <select id="decision-choice" value={selected} onChange={(event) => setSelected(event.target.value)} disabled={busy || loading || !!listError}>
           <option value="">Choose a shortlisted supplier</option>
           {suppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.name}</option>)}
         </select>

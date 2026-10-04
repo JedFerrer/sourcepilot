@@ -1,0 +1,38 @@
+[
+  {
+    "type": "blur",
+    "trusted": true,
+    "at": 1791124949071,
+    "focused": false
+  },
+  {
+    "type": "focus",
+    "trusted": true,
+    "at": 1791124949087,
+    "focused": true
+  },
+  {
+    "type": "blur",
+    "trusted": true,
+    "at": 1791124958751,
+    "focused": false
+  },
+  {
+    "type": "focus",
+    "trusted": true,
+    "at": 1791124978386,
+    "focused": true
+  },
+  {
+    "type": "blur",
+    "trusted": true,
+    "at": 1791124992638,
+    "focused": false
+  },
+  {
+    "type": "focus",
+    "trusted": true,
+    "at": 1791124992840,
+    "focused": true
+  }
+]
