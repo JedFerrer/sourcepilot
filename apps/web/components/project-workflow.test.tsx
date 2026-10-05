@@ -53,6 +53,39 @@ function fixture(initial: WorkflowSummary) {
 describe("M5-U2 workflow integration", () => {
   afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
+  it.each(["COMPLETE_BRIEF", "APPROVE_BRIEF"] as const)("refreshes guidance to %s after request analysis without a reload", async (action) => {
+    const empty = { ...brief, product_name: null, category: null, quantity: null,
+      destination: null, delivery_target: null, status: "IN_PROGRESS", brief_revision: 0,
+      approved_at: null, can_analyze: true, missing_fields: [] };
+    const extracted = { ...brief, status: action === "COMPLETE_BRIEF" ? "IN_PROGRESS" : "READY_FOR_REVIEW",
+      brief_revision: 1, approved_at: null, can_analyze: false,
+      delivery_target: action === "COMPLETE_BRIEF" ? null : brief.delivery_target };
+    const updated: WorkflowSummary = { ...workflowFixture("BRIEF"), next_action: {
+      code: action, reason_code: action === "COMPLETE_BRIEF" ? "BRIEF_INCOMPLETE" : "BRIEF_APPROVAL_REQUIRED",
+      target_stage: "BRIEF",
+    } };
+    let analyzed = false;
+    vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path.endsWith("/brief/analyze") && init?.method === "POST") {
+        analyzed = true;
+        return Promise.resolve(jsonResponse(extracted));
+      }
+      return Promise.resolve(jsonResponse(
+        path.endsWith("/brief") ? analyzed ? extracted : empty :
+          path.endsWith("/suppliers") ? { suppliers: [], brief_approved: false, shortlist_approved: false } :
+            path.endsWith("/quotes") ? [] : path.endsWith("/comparison") ? snapshot :
+              project(analyzed ? updated : workflowFixture("BRIEF")),
+      ));
+    }));
+    render(<ProjectWorkspace projectId="p" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze request" }));
+    await waitFor(() => expect(screen.queryByRole("button", { name: "Analyze request" })).not.toBeInTheDocument());
+    const next = within(screen.getByLabelText("Next action")).getByRole("link");
+    await waitFor(() => expect(next).toHaveTextContent(`Next: ${workflowActions[action].label}`));
+    expect(next).toHaveAttribute("href", `#${workflowActions[action].anchor}`);
+    expect(document.getElementById(workflowActions[action].anchor)).toBeInTheDocument();
+  });
+
   it("preserves quote drafts through focus prerequisite updates and isolates project visits", async () => {
     let summary = workflowFixture("QUOTES");
     const fetchMock = fixture(summary);

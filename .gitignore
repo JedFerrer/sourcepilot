@@ -4,6 +4,10 @@ node_modules/
 .next/
 coverage/
 *.tsbuildinfo
+apps/web/playwright-report/
+apps/web/test-results/
+apps/web/e2e-logs/
+apps/web/e2e-upload/
 
 # Python
 .venv/

@@ -6,6 +6,9 @@
     "lint": "pnpm --filter @sourcepilot/web lint",
     "typecheck": "pnpm --filter @sourcepilot/web typecheck",
     "test": "pnpm --filter @sourcepilot/web test",
-    "build": "pnpm --filter @sourcepilot/web build"
+    "build": "pnpm --filter @sourcepilot/web build",
+    "test:e2e": "node scripts/e2e.mjs all",
+    "test:e2e:repeat": "node scripts/e2e.mjs repeat",
+    "test:e2e:targeted": "node scripts/e2e.mjs targeted"
   }
 }

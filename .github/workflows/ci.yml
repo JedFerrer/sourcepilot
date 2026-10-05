@@ -6,6 +6,79 @@ on:
     branches: [main]
 
 jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql+psycopg://sourcepilot:sourcepilot@127.0.0.1:5432/sourcepilot
+      TEST_DATABASE_URL: postgresql+psycopg://sourcepilot:sourcepilot@127.0.0.1:5432/sourcepilot_test
+      E2E_DATABASE_URL: postgresql+psycopg://sourcepilot:sourcepilot@127.0.0.1:5432/sourcepilot_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.1"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Start PostgreSQL and provision disposable E2E database
+        run: |
+          docker compose up -d --wait --wait-timeout 60 postgres
+          docker compose exec -T postgres createdb -U sourcepilot sourcepilot_e2e
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          cd apps/api
+          uv sync --dev --locked
+      - name: Install Chromium
+        run: pnpm --filter @sourcepilot/web exec playwright install --with-deps chromium
+      - name: Harness and artifact security regressions
+        run: |
+          cd apps/api
+          uv run pytest tests/test_e2e_support.py tests/test_e2e_artifacts.py
+          cd ../..
+          node scripts/test-e2e-artifacts.mjs
+      - name: Golden path three consecutive times without retries
+        id: golden
+        run: pnpm test:e2e:repeat
+      - name: Sanitize golden-path diagnostics
+        id: golden_artifacts
+        if: ${{ !cancelled() && steps.golden.outcome != 'skipped' }}
+        working-directory: apps/api
+        run: uv run --no-sync python -m tests.e2e_support.artifacts golden
+      - name: Retain golden-path diagnostics
+        if: ${{ !cancelled() && steps.golden_artifacts.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-golden-diagnostics
+          path: apps/web/e2e-upload/golden/diagnostics.zip
+          if-no-files-found: error
+          retention-days: 3
+      - name: Independent targeted scenarios without retries
+        id: targeted
+        if: ${{ !cancelled() && steps.golden.outcome != 'skipped' }}
+        run: pnpm test:e2e:targeted
+      - name: Sanitize targeted diagnostics
+        id: targeted_artifacts
+        if: ${{ !cancelled() && steps.targeted.outcome != 'skipped' }}
+        working-directory: apps/api
+        run: uv run --no-sync python -m tests.e2e_support.artifacts targeted
+      - name: Retain targeted diagnostics
+        if: ${{ !cancelled() && steps.targeted_artifacts.outcome == 'success' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-targeted-diagnostics
+          path: apps/web/e2e-upload/targeted/diagnostics.zip
+          if-no-files-found: error
+          retention-days: 3
+
   lint:
     runs-on: ubuntu-latest
     steps:

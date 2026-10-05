@@ -1,0 +1,26 @@
+{
+  "request": "Source 2,000 custom cosmetic travel bags made from recycled polyester with a custom logo. Target unit cost below USD 5, delivery to Sydney, preferred GRS certification. Delivery timing is not decided yet.",
+  "brief": {
+    "product_name": "custom cosmetic travel bags",
+    "category": "cosmetic travel bags",
+    "quantity": 2000,
+    "destination": "Sydney",
+    "delivery_target": null,
+    "target_unit_price": "5",
+    "attributes": [],
+    "requirements": [
+      {"kind": "MATERIAL", "importance": null, "expected_value": {"value": "recycled polyester"}},
+      {"kind": "CAPABILITY", "importance": "REQUIRED", "expected_value": {"capability_key": "CUSTOM_BRANDING", "value": true}},
+      {"kind": "CERTIFICATION", "importance": "PREFERRED", "expected_value": {"value": "GRS"}}
+    ],
+    "ambiguities": []
+  },
+  "delivery_answer": "2026-12-15",
+  "quote_prices": ["4.60", "4.20", "4.45"],
+  "advisory": {
+    "supplier_id": null,
+    "supporting_reasons": [],
+    "tradeoffs": [],
+    "uncertainty": "Review the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture."
+  }
+}

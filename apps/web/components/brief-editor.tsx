@@ -180,6 +180,7 @@ export function BriefEditor({ projectId, onProjectChange }: { projectId: string;
       setBrief(result);
       setDraft(result);
       setClarifications(null);
+      await onProjectChange?.();
     } catch (caught) {
       setError(caught instanceof ApiClientError ? caught.message : "Analysis failed. Try again or enter the Brief manually.");
     } finally {

@@ -78,6 +78,74 @@ The smoke request uses `foundation-smoke-v1` and sends `store=false` to the Resp
 
 ## Checks
 
+### Deterministic browser workflow (M5-U3)
+
+The browser suite runs the real web/API/PostgreSQL/PDF path with a test-only
+model client. It never calls a live provider. Suppliers, PDFs, extraction outputs,
+and the scenario contract are synthetic. The advisory fixture deliberately returns
+no suggested supplier; only the browser user's explicit decision records a preference.
+The existing PDFs retain their original shipping destinations and unknowns, even
+when they differ from the Sydney Brief.
+
+After installing the existing web/API dependencies and starting PostgreSQL, provision
+the disposable database once:
+
+```text
+docker compose exec -T postgres createdb -U sourcepilot sourcepilot_e2e
+pnpm --filter @sourcepilot/web exec playwright install chromium
+```
+
+Export all three URLs before running. Use your configured credentials; these values
+are the local Compose defaults. PowerShell:
+
+```powershell
+$env:DATABASE_URL = 'postgresql+psycopg://sourcepilot:sourcepilot@127.0.0.1:5432/sourcepilot'
+$env:TEST_DATABASE_URL = 'postgresql+psycopg://sourcepilot:sourcepilot@127.0.0.1:5432/sourcepilot_test'
+$env:E2E_DATABASE_URL = 'postgresql+psycopg://sourcepilot:sourcepilot@127.0.0.1:5432/sourcepilot_e2e'
+pnpm test:e2e
+```
+
+For POSIX shells, use `export KEY=value` for the same URLs. Run from the repository
+root; commands start and stop their own API and production-built web server on
+127.0.0.1 ports 18000 and 13000. Occupied ports cause failure rather than server reuse.
+The runner owns temporary document storage and removes it after either success or
+failure, including on Windows where server termination may bypass Python cleanup.
+
+`pnpm test:e2e` runs the golden path once, then the six independent targeted scenarios
+(correction/provenance, failed-PDF manual fallback, abandoned-processing retry,
+supplier staleness, comparison/advice staleness, session isolation). Targets still run
+if the golden path fails, and the command retains a failing exit status.
+`pnpm test:e2e:repeat` runs the golden path three consecutive times; all commands use
+one worker and zero retries. `pnpm test:e2e:targeted` runs only the independent targets.
+Do not run E2E commands concurrently with each other; each invocation resets its database.
+Pytest uses its separate database and may run independently.
+
+The launcher refuses reset unless every guard passes: explicit valid URLs/credentials, E2E name
+`sourcepilot_e2e`, loopback-only resolution, existing identity checks against both
+protected databases, distinct database names, and a successful connection confirming
+the database name and user. It pins the resolved loopback address/port and verifies the
+connected libpq endpoint. All inherited `PG*` settings are rejected, including host-address,
+service-file, options, and multi-host routing overrides; unset them before E2E commands.
+Errors abort before writes. Validation, reset, migrations, and catalog seeding share one
+open connection and transaction; migrations cannot fall back to another connection.
+The abandoned-processing helper additionally requires
+the exact project/quote IDs and designated first abandoned upload before aging its timestamp;
+normal application reads and Retry processing perform recovery.
+
+Stage-labelled reports live in `apps/web/playwright-report`, failure screenshots/traces
+in `apps/web/test-results`, and captured server/runner output in `apps/web/e2e-logs`.
+CI separately requires the three golden runs and the targeted suite, even after a
+golden failure, and retains sanitized diagnostics for three days. Each upload is gated
+by successful sanitization and contains only `apps/web/e2e-upload/<stage>/diagnostics.zip`.
+Raw reports/traces/logs are never uploaded. Sanitization covers Cookie/Set-Cookie headers,
+browser cookie storage, session-token fields, encoded buffers/attachments, nested trace
+ZIPs, and the compressed report embedded in HTML. Unknown binary attachments are redacted;
+stage errors, timings, network status, reports, and credential-free screenshots remain.
+Raw local artifacts can contain anonymous-session cookies; do not share or commit them.
+Run `node scripts/test-e2e-artifacts.mjs` to generate a deliberate Playwright failure and
+verify that the actual upload bundle contains no known dummy token while retaining diagnostics.
+Live-model quality and live-provider E2E remain separate and unverified.
+
 Run these from the repository root:
 
 ```text
