@@ -1,0 +1,1592 @@
+{
+  "source_hashes_unchanged": true,
+  "human_review": "10 PENDING/null",
+  "runtime_inspection": [
+    {
+      "category": "comparison",
+      "id": "meaningful-tradeoff",
+      "air_run_id": "c74d58ba-8373-4cfe-aa87-5bb993d2c7ec",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "required-failure",
+      "air_run_id": "2acb217c-4333-4104-a786-37f00c19f499",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 4,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "unknown-and-conflict",
+      "air_run_id": "30884f4c-00a7-44be-9dab-5a724d2b737a",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "corrected-quote-provenance",
+      "air_run_id": "f2b9b901-a279-4c6c-be7d-4529d468e373",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 4,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "incomplete-evidence",
+      "air_run_id": "8eb13281-eb10-4ecd-9627-53b255f3c204",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 4,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has ambiguous references."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "general-vs-project",
+      "air_run_id": "b2dc276a-45c7-4a3f-83e6-c1c0fa38e800",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "mixed-currencies",
+      "air_run_id": "082400c6-5b93-4ee8-ab60-6953397e497c",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "unequal-quantities",
+      "air_run_id": "b7933a41-5bca-4957-bb91-3a63e973dd3a",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "required-conflict",
+      "air_run_id": "bcafecac-37ba-4be6-a2f5-2829cd4d7854",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 4,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "clear-suggestion",
+      "air_run_id": "2df2352c-7e59-418b-8a3b-75ec0a15b827",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "tie",
+      "air_run_id": "28097f82-deb2-43d6-a9be-b385f9458b5d",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 4,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has ambiguous references."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "UNKNOWN point contradicts comparison completeness."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "critical-unknown",
+      "air_run_id": "ed9382ae-9742-4648-954f-1223354c0f1c",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 7,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 12,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has ambiguous references."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has ambiguous references."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "required-failure",
+      "air_run_id": "b0ec11a9-e19a-41f3-b1ef-73afe39f2e9d",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "incomplete-evidence",
+      "air_run_id": "aac306d7-31ae-496c-a067-2528484834fd",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "user-correction",
+      "air_run_id": "d2978007-011f-423b-abf2-c2a333618b1c",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "incomparable-prices",
+      "air_run_id": "7459b78f-0c11-47c9-92e1-45e6fec9a5d3",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "general-vs-project",
+      "air_run_id": "4c8ece8e-fca9-44e1-be80-ea74664689e4",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 7,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 12,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "mixed-currencies",
+      "air_run_id": "82531e07-5352-4f71-962e-9e3f79a5d14e",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 11,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "unequal-quantities",
+      "air_run_id": "faeb0080-cb2e-4d53-96ca-fed27cc1e1cc",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 4,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_supplier_evidence"
+        },
+        {
+          "sequence": 5,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 9,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 10,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    },
+    {
+      "category": "suggestion",
+      "id": "required-conflict",
+      "air_run_id": "4ba53bd2-7b90-40dc-ba3f-618e74caca8a",
+      "steps": [
+        {
+          "sequence": 1,
+          "kind": "model",
+          "outcome": "TOOL_CALLS",
+          "name": null
+        },
+        {
+          "sequence": 2,
+          "kind": "tool",
+          "outcome": "SUCCESS",
+          "name": "get_quote_evidence"
+        },
+        {
+          "sequence": 3,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 4,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 5,
+          "kind": "retry",
+          "outcome": "REPAIR",
+          "name": null
+        },
+        {
+          "sequence": 6,
+          "kind": "model",
+          "outcome": "FINAL",
+          "name": null
+        },
+        {
+          "sequence": 7,
+          "kind": "validation",
+          "outcome": "INVALID",
+          "name": null
+        },
+        {
+          "sequence": 8,
+          "kind": "run",
+          "outcome": "VALIDATION_FAILED",
+          "name": null
+        }
+      ],
+      "final_validation": [
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Analysis references an unknown quote field."
+        },
+        {
+          "schema": "PASS",
+          "semantic": "FAIL",
+          "reason": "Requirement-state assertion has an unsupported topic or supplier."
+        }
+      ]
+    }
+  ]
+}

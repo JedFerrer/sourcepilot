@@ -1,0 +1,11 @@
+{
+  "extraction.json": "60d02d5dd008d7cbd0b80e6e7129911ba9ee92a74afc52d0dbbb592db0b6a602",
+  "fixture-checks.json": "6c3ce18025a4d3bb68e7a786b8a3faf07fc884e308fd64cb9703a2216e6ffa9d",
+  "inspection.json": "8e59605a1f40a6965a79eb082dd16b996b6eb74dd74830f7ad5e1313c68d9c1a",
+  "launcher-verification.json": "8d306fb4a262b5aae44e891368849064d4bc851db746651d33a0365f913830b8",
+  "outcome.json": "e04de23da3f5e83cf9e50ffb599758c20971b30bec11da22bead5abdbe3236dd",
+  "preflight.json": "cd80e1b53be44e9ca052724580beb32bd97ea394ce0e317a0b11d26638553aba",
+  "preservation.json": "23f5cc1a692d118deb4f6442ed3392ac4e0d07c8237404c8dd267d8f9592d3b8",
+  "provenance.json": "07944eb6f90b49063f41a055b3df4c0343f54691b80dfa4c16da149038db7730",
+  "schema-verification.json": "928d968c0c72a8663ac9b04ef863a5490b2e7a92fe42f5495bd8dc5a2af730ca"
+}

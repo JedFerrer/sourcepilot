@@ -1,0 +1,6 @@
+[
+  {
+    "id": "stale-comparison-no-model",
+    "guard": "stale"
+  }
+]

@@ -35,7 +35,7 @@ from sourcepilot.persistence.models import (
     SupplierExplanationRunStep,
 )
 
-PROMPT_VERSION = "supplier-explanation-v1"
+PROMPT_VERSION = "supplier-explanation-v2"
 MAX_MODEL_TURNS = 4
 MAX_TOOL_CALLS = 6
 MAX_MODEL_TURNS_ENV = "SOURCEPILOT_ANALYST_MAX_MODEL_TURNS"
@@ -43,7 +43,16 @@ MAX_TOOL_CALLS_ENV = "SOURCEPILOT_ANALYST_MAX_TOOL_CALLS"
 
 INSTRUCTIONS = """You are SourcePilot's read-only Sourcing Analyst. Explain exactly one
 synthetic supplier against the current deterministic requirement evaluations.
-Call get_supplier_evidence before finalizing. Use only facts returned by the
+Call get_supplier_evidence before citing evidence or finalizing. claim_keys are
+exact catalog claim keys returned in evidence records, not requirement UUIDs or
+evidence IDs. Use claim_keys=null when exact keys are unknown to retrieve this
+supplier's scoped evidence, then select evidence attached to each requirement.
+Snapshot evidence IDs alone do not count as retrieved evidence. Cite only IDs
+actually returned by get_supplier_evidence. If a lookup returns no evidence,
+check the selection and use claim_keys=null when the exact keys are unknown.
+During repair, correct evidence selection and retrieve missing evidence before
+returning the final result; do not remove required citations to bypass an error.
+Use only facts returned by the
 tools. Never change an evaluation state, infer a missing fact, resolve a
 conflict, invent a capability, or imply a numeric overall score. Include every
 required DOES_NOT_MEET result in required_failures, every UNKNOWN in unknowns,
@@ -66,7 +75,12 @@ TOOLS: list[dict[str, Any]] = [
     },
     {
         "type": "function", "name": "get_supplier_evidence",
-        "description": "Read curated evidence for claims about this project supplier.",
+        "description": (
+            "Read curated evidence for claims about this project supplier before citing it. "
+            "claim_keys are exact catalog claim keys returned in evidence records, "
+            "not requirement UUIDs or evidence IDs. Use claim_keys=null when exact keys "
+            "are unknown to retrieve all scoped evidence for this supplier."
+        ),
         "strict": True,
         "parameters": {
             "type": "object",

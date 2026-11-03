@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "unchanged_copy_of_previous_launcher": true,
+  "sha256": "e1d99e230b62cf8b1cc6dfd093c6a513a04351cbcfc1715a82b801c1ef8fec39",
+  "runner_call_sites": 1,
+  "categories": [
+    "quote_extraction"
+  ],
+  "syntax": "PASS",
+  "fresh_execution_marker": true
+}

@@ -19,6 +19,11 @@ TEXT_PDFS = {
     "moss_primary.pdf",
     "missing_shipping.pdf",
     "conflicting_lead_time.pdf",
+    "included_tooling.pdf",
+    "missing_moq.pdf",
+    "quantity_mismatch.pdf",
+    "non_usd.pdf",
+    "explicit_unknown.pdf",
 }
 
 
@@ -51,7 +56,7 @@ def test_versioned_quote_pdf_parser_blocks_are_repeatable(name: str, tmp_path: P
 
 
 def test_corpus_is_complete_synthetic_and_has_primary_tradeoffs() -> None:
-    assert {path.name for path in FIXTURES.glob("*.pdf")} == TEXT_PDFS | {"image_only.pdf"}
+    assert {path.name for path in FIXTURES.glob("*.pdf")} == TEXT_PDFS | {"image_only.pdf", "malformed.pdf"}
     assert set(_expected()) == TEXT_PDFS
     for name in TEXT_PDFS:
         pages = _expected()[name]["page_count"]

@@ -1,0 +1,533 @@
+{
+  "started_at": "2026-11-01T07:50:55.042661+00:00",
+  "credential_source": "root .env; child process only",
+  "before": {
+    "DATABASE_URL": {
+      "identity": {
+        "database": "sourcepilot",
+        "database_oid": 16384,
+        "server_address": "192.168.112.2/32",
+        "server_port": 5432
+      },
+      "revisions": [
+        "0015_preferred_supplier"
+      ],
+      "tables": {
+        "demo_sessions": {
+          "row_count": 11,
+          "content_hash": "4374b0a32c31a3efbf510ca7b4050987"
+        },
+        "suppliers": {
+          "row_count": 15,
+          "content_hash": "78f9bc9c829982af0c0b4fadb5136c37"
+        },
+        "projects": {
+          "row_count": 34,
+          "content_hash": "64f39f810fd1be296923dadcdc5e91bb"
+        },
+        "supplier_capabilities": {
+          "row_count": 47,
+          "content_hash": "2990ad56bb04c223694963bf56967647"
+        },
+        "supplier_evidence": {
+          "row_count": 33,
+          "content_hash": "0cca0325e5cf71ca0e6c67ee866d3b22"
+        },
+        "ai_runs": {
+          "row_count": 30,
+          "content_hash": "e3fa6a8d1403dac5b621613a7f787fc3"
+        },
+        "briefs": {
+          "row_count": 16,
+          "content_hash": "80f9ac7630ac54e824347bc03df037ac"
+        },
+        "comparisons": {
+          "row_count": 6,
+          "content_hash": "0dcbcc25a0d20dc7c5ce4c882e0caeca"
+        },
+        "project_suppliers": {
+          "row_count": 30,
+          "content_hash": "f492f7452b17d779903b7db66a13c883"
+        },
+        "quotes": {
+          "row_count": 8,
+          "content_hash": "9253d3ca7fa23d5b0879229fbe71431f"
+        },
+        "requirements": {
+          "row_count": 29,
+          "content_hash": "26734688b4b34f052b670da420bace05"
+        },
+        "quote_documents": {
+          "row_count": 2,
+          "content_hash": "a70f06aff5f20ed16cd79ffff87587c0"
+        },
+        "quote_values": {
+          "row_count": 147,
+          "content_hash": "8983ff6ef0dbb0da78e02458c6079175"
+        },
+        "requirement_evaluations": {
+          "row_count": 75,
+          "content_hash": "de88d7f3f63fa392616709cbab9a1f93"
+        },
+        "supplier_explanation_run_steps": {
+          "row_count": 64,
+          "content_hash": "2606f64030a40af176eba6b02b237d8e"
+        },
+        "document_blocks": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_field_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        }
+      }
+    },
+    "TEST_DATABASE_URL": {
+      "identity": {
+        "database": "sourcepilot_test",
+        "database_oid": 16389,
+        "server_address": "192.168.112.2/32",
+        "server_port": 5432
+      },
+      "revisions": [
+        "0015_preferred_supplier"
+      ],
+      "tables": {
+        "demo_sessions": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "suppliers": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "projects": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_capabilities": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "ai_runs": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "briefs": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "comparisons": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "project_suppliers": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quotes": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "requirements": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_documents": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_values": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "requirement_evaluations": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_explanation_run_steps": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "document_blocks": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_field_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        }
+      }
+    },
+    "EVAL_DATABASE_URL": {
+      "identity": {
+        "database": "sourcepilot_eval",
+        "database_oid": 13091166,
+        "server_address": "192.168.112.2/32",
+        "server_port": 5432
+      },
+      "revisions": [
+        "0015_preferred_supplier"
+      ],
+      "tables": {
+        "demo_sessions": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "suppliers": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "projects": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_capabilities": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "ai_runs": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "briefs": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "comparisons": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "project_suppliers": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quotes": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "requirements": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_documents": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_values": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "requirement_evaluations": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_explanation_run_steps": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "document_blocks": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_field_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        }
+      }
+    }
+  },
+  "preserved_file_hashes": {
+    "apps/api/evals/README.md": "6c412820fee310b1e453d28b25d0fc18240f1e827ccc5c8ab491f41178baae0d",
+    "apps/api/evals/brief/cases.json": "21dc1d52b677fbcde3df1efe7875c4c89c3077404d33105697b8f6db260a39a9",
+    "apps/api/evals/brief/model_outputs.json": "c17a7e72e202280ed1501654cda05b03a5a815f9f187b1c1334854ab17c0f987",
+    "apps/api/evals/clarification/cases.json": "0994a72d5b4e4ec0db1c8febd9d627f30b7a25d5f9ce33abbe1b21ca6bb61be6",
+    "apps/api/evals/comparison_advice/cases.json": "d9b44bdbac983143274131429bd5e15cc4677978f14856aa970a745e055eb7aa",
+    "apps/api/evals/comparison_advice/guard_cases.json": "5abcb539c7f062413a59e28fa05a05e404b276c30c202a415653fc575e81614a",
+    "apps/api/evals/comparison_advice/model_outputs.json": "5dbb98812850b65c9a6d695d3d1a754799e5d45019414280294d5a2fcc719332",
+    "apps/api/evals/human_review/narrative_cases.json": "464d07408e8b10134405de1a4d6497332dc966a3a4338c5f64d51b85ab35f9ae",
+    "apps/api/evals/quote_extraction/cases.json": "a4f7e72df173a9682ad54989ac2529ec8b1a26140ed7f52180f529885bf65809",
+    "apps/api/evals/quote_extraction/model_outputs.json": "8048a7c376347d99d5d7264fe29016e7f6f472ab792421e474db9b78e18c34fa",
+    "apps/api/evals/quote_extraction/parser_cases.json": "b189f0096380c9dc85ceccac7e426f2506d637e53b61b619b89a617d6a798bdc",
+    "apps/api/evals/supplier_explanation/cases.json": "fcb06fda75f78bc7225b050d9337420802c28b166e13226b9294d087ca4405b9",
+    "apps/api/evals/tradeoff_analysis/cases.json": "0274f9503a9026cc5eadffca67d6fad564de54201b82a48b5ddf3f25e39f9dc4",
+    "apps/api/evals/tradeoff_analysis/model_outputs.json": "8e4b427c8880f5da7aaca4626effc36c6d3bdfaebf3a82023a8cd741493531e4",
+    "apps/api/tests/fixtures/quote_pdfs/conflicting_lead_time.pdf": "bd462c60113b15919768568abf7db55201db5d8db45047676a7dd042553eb366",
+    "apps/api/tests/fixtures/quote_pdfs/expected_blocks.json": "a8682233177c1c811f93e20d5e5feb83885d5b118555b8881f4a49570fbf69e1",
+    "apps/api/tests/fixtures/quote_pdfs/explicit_unknown.pdf": "1325e491182427afa11a841d388046606a2427d03119651a99b09d8de3009494",
+    "apps/api/tests/fixtures/quote_pdfs/generate.py": "077817f1e5b4ab231aa486f8d97cfe41f0b782c5322606b942ac54ab25465691",
+    "apps/api/tests/fixtures/quote_pdfs/generate_m6.py": "ce352a4a8bb7a23486a9c295a487466ec9a4413cca720c08e531a7f1f4754589",
+    "apps/api/tests/fixtures/quote_pdfs/harbor_primary.pdf": "7785960b17022d7fab3e690e5b42c78c9bae7427345813227efe333078567486",
+    "apps/api/tests/fixtures/quote_pdfs/image_only.pdf": "a6f8992dea5c62fd41bae17dbc50b9d3f47db835061a7dd756f8e16c52fd1cc5",
+    "apps/api/tests/fixtures/quote_pdfs/included_tooling.pdf": "e072564b0347f6158775cce589a7e542e5abe34ec13a1543a68a991cec6eefe6",
+    "apps/api/tests/fixtures/quote_pdfs/malformed.pdf": "2d9f585a4b80782f17e2978ec345c8c5a1e3598cf8bec651f5de01a35d8741d6",
+    "apps/api/tests/fixtures/quote_pdfs/missing_moq.pdf": "05b8e2ef1e877a444f4c8bd2cb06b685be2ec273f175756f851d7014e8a2606c",
+    "apps/api/tests/fixtures/quote_pdfs/missing_shipping.pdf": "18c8a55cf321114ce5f339e9761793288bce45d28c23b245b05c6829081f2479",
+    "apps/api/tests/fixtures/quote_pdfs/moss_primary.pdf": "09177d296d772f6a32fd14d52e0cae107736f6c80ba207deea7216968771afc7",
+    "apps/api/tests/fixtures/quote_pdfs/non_usd.pdf": "3ce4aa858e0a2f91d1af4feb25401e8cdcea4451239c3ef93144ff7941f658e6",
+    "apps/api/tests/fixtures/quote_pdfs/quantity_mismatch.pdf": "dd06d3730d31929c16ae6c8f3aa5b0292323b54c71338adaa04d3c5f1e2d5e33",
+    "apps/api/tests/fixtures/quote_pdfs/README.md": "74d2ad66f572a0ac6d0fa25a7004435deaa8ff168be0b7723f3b5a0126357800",
+    "apps/api/tests/fixtures/quote_pdfs/willow_primary.pdf": "0657fde17067f21838fb738905f206d86ec91c1338858d6ca0133c122e39519c",
+    "docs/implementation/evidence/M6-U1/offline/results.json": "ec05901719f8279626f6bc80a78d2d913c30865feabf3a5a42cb45bac496f67a",
+    "docs/implementation/evidence/M6-U1/offline/summary.md": "78665a395ad0b84fa5caa6f4ceda85dc101cf56bae0405e1eeb6c9c027ed6f36"
+  },
+  "completed_at": "2026-11-01T08:04:00.992212+00:00",
+  "after": {
+    "DATABASE_URL": {
+      "identity": {
+        "database": "sourcepilot",
+        "database_oid": 16384,
+        "server_address": "192.168.112.2/32",
+        "server_port": 5432
+      },
+      "revisions": [
+        "0015_preferred_supplier"
+      ],
+      "tables": {
+        "demo_sessions": {
+          "row_count": 11,
+          "content_hash": "4374b0a32c31a3efbf510ca7b4050987"
+        },
+        "suppliers": {
+          "row_count": 15,
+          "content_hash": "78f9bc9c829982af0c0b4fadb5136c37"
+        },
+        "projects": {
+          "row_count": 34,
+          "content_hash": "64f39f810fd1be296923dadcdc5e91bb"
+        },
+        "supplier_capabilities": {
+          "row_count": 47,
+          "content_hash": "2990ad56bb04c223694963bf56967647"
+        },
+        "supplier_evidence": {
+          "row_count": 33,
+          "content_hash": "0cca0325e5cf71ca0e6c67ee866d3b22"
+        },
+        "ai_runs": {
+          "row_count": 30,
+          "content_hash": "e3fa6a8d1403dac5b621613a7f787fc3"
+        },
+        "briefs": {
+          "row_count": 16,
+          "content_hash": "80f9ac7630ac54e824347bc03df037ac"
+        },
+        "comparisons": {
+          "row_count": 6,
+          "content_hash": "0dcbcc25a0d20dc7c5ce4c882e0caeca"
+        },
+        "project_suppliers": {
+          "row_count": 30,
+          "content_hash": "f492f7452b17d779903b7db66a13c883"
+        },
+        "quotes": {
+          "row_count": 8,
+          "content_hash": "9253d3ca7fa23d5b0879229fbe71431f"
+        },
+        "requirements": {
+          "row_count": 29,
+          "content_hash": "26734688b4b34f052b670da420bace05"
+        },
+        "quote_documents": {
+          "row_count": 2,
+          "content_hash": "a70f06aff5f20ed16cd79ffff87587c0"
+        },
+        "quote_values": {
+          "row_count": 147,
+          "content_hash": "8983ff6ef0dbb0da78e02458c6079175"
+        },
+        "requirement_evaluations": {
+          "row_count": 75,
+          "content_hash": "de88d7f3f63fa392616709cbab9a1f93"
+        },
+        "supplier_explanation_run_steps": {
+          "row_count": 64,
+          "content_hash": "2606f64030a40af176eba6b02b237d8e"
+        },
+        "document_blocks": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_field_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        }
+      }
+    },
+    "TEST_DATABASE_URL": {
+      "identity": {
+        "database": "sourcepilot_test",
+        "database_oid": 16389,
+        "server_address": "192.168.112.2/32",
+        "server_port": 5432
+      },
+      "revisions": [
+        "0015_preferred_supplier"
+      ],
+      "tables": {
+        "demo_sessions": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "suppliers": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "projects": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_capabilities": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "ai_runs": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "briefs": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "comparisons": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "project_suppliers": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quotes": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "requirements": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_documents": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_values": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "requirement_evaluations": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_explanation_run_steps": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "document_blocks": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "quote_field_evidence": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        }
+      }
+    },
+    "EVAL_DATABASE_URL": {
+      "identity": {
+        "database": "sourcepilot_eval",
+        "database_oid": 13091166,
+        "server_address": "192.168.112.2/32",
+        "server_port": 5432
+      },
+      "revisions": [
+        "0015_preferred_supplier"
+      ],
+      "tables": {
+        "demo_sessions": {
+          "row_count": 73,
+          "content_hash": "d0941bcf3cdf1376c547ddd56adbb629"
+        },
+        "suppliers": {
+          "row_count": 79,
+          "content_hash": "eaa71cd64c642809fde7c611568780a3"
+        },
+        "projects": {
+          "row_count": 73,
+          "content_hash": "c0c6bdfc8e801734ecd02348b9e554dd"
+        },
+        "supplier_capabilities": {
+          "row_count": 0,
+          "content_hash": "d41d8cd98f00b204e9800998ecf8427e"
+        },
+        "supplier_evidence": {
+          "row_count": 6,
+          "content_hash": "28ddc2495eae9dd62b69e44b1a99e40c"
+        },
+        "ai_runs": {
+          "row_count": 69,
+          "content_hash": "a3585f64a8d567f863d16e53566f86b7"
+        },
+        "briefs": {
+          "row_count": 21,
+          "content_hash": "f721f81092d701de82de188a3dfdd3dc"
+        },
+        "comparisons": {
+          "row_count": 21,
+          "content_hash": "d5fc1873de6e46c8682f515239c8e7bc"
+        },
+        "project_suppliers": {
+          "row_count": 69,
+          "content_hash": "de53f646ac303b80b8e2f943db58f829"
+        },
+        "quotes": {
+          "row_count": 73,
+          "content_hash": "cb721361117efdaff870ca24b747f390"
+        },
+        "requirements": {
+          "row_count": 50,
+          "content_hash": "b3dae857de916f659ab373dac8d2accc"
+        },
+        "quote_documents": {
+          "row_count": 73,
+          "content_hash": "f21eab9163ee6b27aeccdd96c49027ea"
+        },
+        "quote_values": {
+          "row_count": 276,
+          "content_hash": "36db38c91b648ccd21ad60c23b4fe3a8"
+        },
+        "requirement_evaluations": {
+          "row_count": 134,
+          "content_hash": "b7dc86df0994833859a3908c2648f519"
+        },
+        "supplier_explanation_run_steps": {
+          "row_count": 254,
+          "content_hash": "a544ca47a9ee81d6d4361f8a49c48510"
+        },
+        "document_blocks": {
+          "row_count": 214,
+          "content_hash": "818518633221410075d1163c16d3f74a"
+        },
+        "quote_field_evidence": {
+          "row_count": 21,
+          "content_hash": "58b621976098ac539779e520f2112668"
+        }
+      }
+    }
+  },
+  "application_unchanged": true,
+  "test_unchanged": true,
+  "root_env_unchanged": true,
+  "existing_evidence_and_fixtures_unchanged": true
+}

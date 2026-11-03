@@ -345,3 +345,27 @@ def test_configurable_success_budget_and_trace(client: TestClient, engine: Engin
         "NOT_ALLOWED", "SUCCESS", "SUCCESS", "LIMIT_REACHED"
     ]
     assert [event.successful_call_count for event in runtime.trace] == [0, 1, 2, 2]
+
+
+
+def test_evidence_filters_use_catalog_keys_not_requirement_or_evidence_ids(
+    client: TestClient, engine: Engine,
+) -> None:
+    demo_session_id, project_id, supplier_id = _discovered_project(client, engine)
+    runtime = _runtime(demo_session_id, project_id, frozenset({supplier_id}))
+    with Session(engine) as session:
+        snapshot = get_supplier_snapshot(session, runtime, supplier_id)
+        all_evidence = get_supplier_evidence(session, runtime, supplier_id, None).evidence
+        assert all_evidence
+        keys = {e.claim_key for e in all_evidence}
+        requirement_ids = tuple(str(f.requirement_id) for f in snapshot.evaluations)
+        evidence_ids = tuple(str(e.id) for e in all_evidence)
+        assert not keys.intersection(requirement_ids + evidence_ids)
+        assert get_supplier_evidence(session, runtime, supplier_id, requirement_ids).evidence == []
+        assert get_supplier_evidence(session, runtime, supplier_id, evidence_ids).evidence == []
+        key = all_evidence[0].claim_key
+        exact = get_supplier_evidence(session, runtime, supplier_id, (key,)).evidence
+        assert exact == [e for e in all_evidence if e.claim_key == key]
+        assert get_supplier_evidence(session, runtime, supplier_id, None).evidence == all_evidence
+        assert not session.dirty and not session.new and not session.deleted
+    assert runtime.successful_call_count == 6

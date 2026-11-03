@@ -1,0 +1,185 @@
+{
+  "fields": {
+    "quoted_quantity": {
+      "state": "KNOWN",
+      "extracted_value": 2000,
+      "source_block_ids": [
+        "p1-b4"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "unit_price": {
+      "state": "KNOWN",
+      "extracted_value": "4.60",
+      "source_block_ids": [
+        "p1-b5"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "currency": {
+      "state": "KNOWN",
+      "extracted_value": "USD",
+      "source_block_ids": [
+        "p1-b5",
+        "p1-b7",
+        "p1-b8",
+        "p1-b11"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "moq": {
+      "state": "KNOWN",
+      "extracted_value": 1000,
+      "source_block_ids": [
+        "p1-b6"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "sample_cost": {
+      "state": "KNOWN",
+      "extracted_value": "40",
+      "source_block_ids": [
+        "p1-b8"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "tooling_cost": {
+      "state": "KNOWN",
+      "extracted_value": "150",
+      "source_block_ids": [
+        "p1-b7"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "packaging_cost": {
+      "state": "UNKNOWN",
+      "extracted_value": null,
+      "source_block_ids": [],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "shipping_cost": {
+      "state": "KNOWN",
+      "extracted_value": "320",
+      "source_block_ids": [
+        "p1-b11"
+      ],
+      "uncertainty": "Shipping is to Manila.",
+      "conflicting_values": []
+    },
+    "sample_lead_time": {
+      "state": "KNOWN",
+      "extracted_value": "7 days",
+      "source_block_ids": [
+        "p1-b9"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "production_lead_time": {
+      "state": "KNOWN",
+      "extracted_value": "32 days after sample approval",
+      "source_block_ids": [
+        "p1-b10"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "shipping_time": {
+      "state": "KNOWN",
+      "extracted_value": "12 days after production",
+      "source_block_ids": [
+        "p1-b12"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "total_lead_time": {
+      "state": "UNKNOWN",
+      "extracted_value": null,
+      "source_block_ids": [],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "payment_terms": {
+      "state": "KNOWN",
+      "extracted_value": "30% deposit, 70% before dispatch",
+      "source_block_ids": [
+        "p1-b13"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "incoterm": {
+      "state": "UNKNOWN",
+      "extracted_value": null,
+      "source_block_ids": [],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "quote_validity": {
+      "state": "KNOWN",
+      "extracted_value": "30 days",
+      "source_block_ids": [
+        "p1-b14"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "warranty": {
+      "state": "UNKNOWN",
+      "extracted_value": null,
+      "source_block_ids": [],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "certifications": {
+      "state": "KNOWN",
+      "extracted_value": "GRS",
+      "source_block_ids": [
+        "p2-b4"
+      ],
+      "uncertainty": "The document describes this as a synthetic record, current for this fictional supplier.",
+      "conflicting_values": []
+    },
+    "compliance_notes": {
+      "state": "UNKNOWN",
+      "extracted_value": null,
+      "source_block_ids": [],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "exclusions": {
+      "state": "KNOWN",
+      "extracted_value": "Import duties are not included",
+      "source_block_ids": [
+        "p2-b7"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "special_conditions": {
+      "state": "UNKNOWN",
+      "extracted_value": null,
+      "source_block_ids": [],
+      "uncertainty": null,
+      "conflicting_values": []
+    },
+    "supplier_notes": {
+      "state": "KNOWN",
+      "extracted_value": "Synthetic demo quote - not a real supplier offer",
+      "source_block_ids": [
+        "p1-b1",
+        "p2-b1"
+      ],
+      "uncertainty": null,
+      "conflicting_values": []
+    }
+  }
+}

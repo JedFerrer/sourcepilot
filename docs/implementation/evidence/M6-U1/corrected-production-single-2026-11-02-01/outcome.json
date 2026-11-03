@@ -1,0 +1,336 @@
+{
+  "case_id": "harbor-primary",
+  "started_at": "2026-11-02T15:46:48.426939+00:00",
+  "single_case_adapter_calls": 1,
+  "full_baseline": false,
+  "model": "gpt-6-luna",
+  "classification": "QUALITY_FINDING",
+  "output_available": true,
+  "response_count": 1,
+  "air_run_status": "COMPLETED",
+  "attempts": 1,
+  "error_type": null,
+  "validation_status": "VALID",
+  "air_run_id": "0795404f-7e2a-4f17-84f4-61b93783825e",
+  "scorer_checks": [
+    {
+      "name": "source_references",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": "supplier_notes cites a block outside the quote document"
+    },
+    {
+      "name": "field_accuracy",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "numeric_accuracy",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "currency_accuracy",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "unknown_detection",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "conflict_detection",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "source_block_accuracy",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "hallucination_rate",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.quoted_quantity.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.quoted_quantity.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.unit_price.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.unit_price.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.currency.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.currency.sources",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.moq.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.moq.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.sample_cost.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.sample_cost.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.tooling_cost.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.tooling_cost.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.packaging_cost.unknown",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.shipping_cost.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.shipping_cost.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.sample_lead_time.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.sample_lead_time.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.production_lead_time.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.production_lead_time.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.shipping_time.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.shipping_time.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.total_lead_time.unknown",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.payment_terms.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.payment_terms.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.incoterm.unknown",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.quote_validity.value",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.quote_validity.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.warranty.unknown",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.certifications.value",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.certifications.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.compliance_notes.unknown",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.exclusions.value",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.exclusions.sources",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.special_conditions.unknown",
+      "kind": "exact",
+      "passed": true,
+      "critical": true,
+      "detail": null
+    },
+    {
+      "name": "field.supplier_notes.unknown",
+      "kind": "exact",
+      "passed": false,
+      "critical": true,
+      "detail": null
+    }
+  ],
+  "air_run": {
+    "id": "0795404f-7e2a-4f17-84f4-61b93783825e",
+    "operation": "quote_extractor",
+    "model": "gpt-6-luna",
+    "prompt_version": "quote-extractor-v2",
+    "input_hash": "1b48b67a08bf3d538a35a24fe63ba86f291d4fd16dfbf70f2e0c5c5cf0daf3c1",
+    "status": "COMPLETED",
+    "attempts": 1,
+    "validation_status": "VALID",
+    "error_type": null,
+    "latency_ms": 20328,
+    "input_tokens": 4861,
+    "output_tokens": 1736,
+    "model_turn_count": null,
+    "tool_call_count": null
+  },
+  "completed_at": "2026-11-02T15:47:09.337665+00:00",
+  "wrapper_invocations": 1
+}

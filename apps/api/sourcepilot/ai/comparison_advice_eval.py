@@ -25,6 +25,9 @@ def scenario_snapshot(case: dict[str, Any]) -> ComparisonSnapshotResult:
     snapshot.snapshot_id = UUID(case["snapshot_id"])
     snapshot.brief_revision = case["brief_revision"]
     payload = cast(dict[str, Any], snapshot.comparison_payload)
+    if "payload" in case:
+        snapshot.comparison_payload = deepcopy(case["payload"])
+        return snapshot
     for supplier in payload["suppliers"]:
         for result in supplier["evaluation"]["results"]:
             override = case.get("states", {}).get(supplier["supplier_id"], {}).get(result["requirement_id"])
@@ -46,15 +49,17 @@ def recorded_advice(case: dict[str, Any]) -> ComparisonAdvice:
 
 
 def score_case(case: dict[str, Any], advice: ComparisonAdvice,
-               snapshot: ComparisonSnapshotResult) -> bool:
-    """Check actual advice, including narrative grounding using existing offline checks."""
+               snapshot: ComparisonSnapshotResult, *, check_price: bool = True,
+               check_lead: bool = True) -> bool:
+    """Check structured advice and recognized narrative hazards, not all prose meaning."""
     try:
         validate_advice(advice, snapshot)
         # Offline narrative checks reuse the M4-U6 evaluator, never runtime parsing.
         joined = advice.analysis.model_copy(deep=True)
         joined.supplier_summaries.extend(advice.suggestion.supporting_reasons
                                         + advice.suggestion.tradeoffs + advice.suggestion.uncertainties)
-        if not score_tradeoffs({"topic": "references-only"}, joined, snapshot):
+        if not score_tradeoffs({"topic": "references-only"}, joined, snapshot,
+                               check_price=check_price, check_lead=check_lead):
             return False
     except (ValueError, KeyError, StopIteration):
         return False
@@ -64,12 +69,8 @@ def score_case(case: dict[str, Any], advice: ComparisonAdvice,
     if re.search(r"\bis (?:objectively |definitively )?(?:the )?best supplier\b",
                  all_text, re.IGNORECASE):
         return False
-    if selected not in case["allowed_supplier_ids"]:
+    if selected not in case.get("live_allowed_supplier_ids", case["allowed_supplier_ids"]):
         return False
-    if not case["price_comparable"]:
-        text = " ".join(point.text for point in joined.supplier_summaries + joined.key_tradeoffs)
-        if re.search(r"\b(cheapest|cheaper|lowest price)\b", text, re.IGNORECASE):
-            return False
     if selected:
         payload = cast(dict[str, Any], snapshot.comparison_payload)
         requirements = {item["id"]: item for item in payload["brief"]["requirements"]}

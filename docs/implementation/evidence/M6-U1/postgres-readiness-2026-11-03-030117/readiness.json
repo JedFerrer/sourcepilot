@@ -1,0 +1,66 @@
+{
+  "started_at": "2026-11-03T03:01:17.531483+00:00",
+  "status": "PASS",
+  "databases": {
+    "app": {
+      "connectivity": "PASS",
+      "connected_database": "sourcepilot",
+      "identity_matches": true,
+      "read_only": true,
+      "required_tables": 17,
+      "required_columns": "PASS",
+      "heads": [
+        "0015_preferred_supplier"
+      ],
+      "heads_match": true
+    },
+    "test": {
+      "connectivity": "PASS",
+      "connected_database": "sourcepilot_test",
+      "identity_matches": true,
+      "read_only": true,
+      "required_tables": 17,
+      "required_columns": "PASS",
+      "heads": [
+        "0015_preferred_supplier"
+      ],
+      "heads_match": true
+    },
+    "eval": {
+      "connectivity": "PASS",
+      "connected_database": "sourcepilot_eval",
+      "identity_matches": true,
+      "read_only": true,
+      "required_tables": 17,
+      "required_columns": "PASS",
+      "heads": [
+        "0015_preferred_supplier"
+      ],
+      "heads_match": true
+    }
+  },
+  "provider_calls": 0,
+  "fixture_writes": 0,
+  "live_cases": 0,
+  "model": "gpt-6-luna",
+  "configured_eval_isolation": "PASS",
+  "all_configured_targets_distinct": true,
+  "repository_heads": [
+    "0015_preferred_supplier"
+  ],
+  "connected_isolation": "PASS",
+  "existing_eval_preflight": "PASS",
+  "root_env_unchanged": true,
+  "completed_at": "2026-11-03T03:01:18.236017+00:00",
+  "container": {
+    "name": "source-pilot-postgres-1",
+    "id": "01db90f2ef279363c83244a606eddb4d01fa82fcfbd3b237723f2d1eb1ff9170",
+    "state": "running",
+    "running": true,
+    "health": "healthy",
+    "started_at": "2026-11-03T03:00:42.401048835Z",
+    "action": "docker compose start postgres",
+    "action_exit_code": 0,
+    "same_existing_container": true
+  }
+}

@@ -275,5 +275,882 @@
     ],
     "expected_grounded": false,
     "contract_version": "comparison-advice-v1"
+  },
+  {
+    "id": "general-vs-project",
+    "snapshot_id": "55555555-5555-5555-5555-555555555571",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      "11111111-1111-1111-1111-111111111111"
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1",
+    "payload": {
+      "brief": {
+        "quantity": 2000,
+        "requirements": [
+          {
+            "id": "33333333-3333-3333-3333-333333333331",
+            "kind": "CERTIFICATION",
+            "importance": "REQUIRED"
+          },
+          {
+            "id": "33333333-3333-3333-3333-333333333332",
+            "kind": "PRODUCTION_LEAD_TIME",
+            "importance": "PREFERRED"
+          }
+        ]
+      },
+      "suppliers": [
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111111",
+          "quote_id": "22222222-2222-2222-2222-222222222221",
+          "supplier_name": "Supplier A",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.50",
+              "current_origin": "USER_CORRECTED",
+              "evidence": [
+                {
+                  "id": "44444444-4444-4444-4444-444444444441",
+                  "evidence_value": "4.22"
+                }
+              ]
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 25,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 500,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": [],
+            "general_lead_time_days": 50
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "MEETS"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "CONFLICT"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111112",
+          "quote_id": "22222222-2222-2222-2222-222222222222",
+          "supplier_name": "Supplier B",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "3.90",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 38,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 5000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 1000,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "DOES_NOT_MEET"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111113",
+          "quote_id": "22222222-2222-2222-2222-222222222223",
+          "supplier_name": "Supplier C",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.10",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 30,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 300,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            },
+            {
+              "field_key": "shipping_cost",
+              "state": "missing"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "UNKNOWN"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        }
+      ],
+      "price_comparable": true
+    }
+  },
+  {
+    "id": "mixed-currencies",
+    "snapshot_id": "55555555-5555-5555-5555-555555555572",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": false,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1",
+    "payload": {
+      "brief": {
+        "quantity": 2000,
+        "requirements": [
+          {
+            "id": "33333333-3333-3333-3333-333333333331",
+            "kind": "CERTIFICATION",
+            "importance": "REQUIRED"
+          },
+          {
+            "id": "33333333-3333-3333-3333-333333333332",
+            "kind": "PRODUCTION_LEAD_TIME",
+            "importance": "PREFERRED"
+          }
+        ]
+      },
+      "suppliers": [
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111111",
+          "quote_id": "22222222-2222-2222-2222-222222222221",
+          "supplier_name": "Supplier A",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.50",
+              "current_origin": "USER_CORRECTED",
+              "evidence": [
+                {
+                  "id": "44444444-4444-4444-4444-444444444441",
+                  "evidence_value": "4.22"
+                }
+              ]
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 25,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 500,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "MEETS"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "CONFLICT"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111112",
+          "quote_id": "22222222-2222-2222-2222-222222222222",
+          "supplier_name": "Supplier B",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "3.90",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 38,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 5000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 1000,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "AUD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "DOES_NOT_MEET"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111113",
+          "quote_id": "22222222-2222-2222-2222-222222222223",
+          "supplier_name": "Supplier C",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.10",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 30,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 300,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            },
+            {
+              "field_key": "shipping_cost",
+              "state": "missing"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "UNKNOWN"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        }
+      ],
+      "price_comparable": false
+    }
+  },
+  {
+    "id": "unequal-quantities",
+    "snapshot_id": "55555555-5555-5555-5555-555555555573",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": false,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1",
+    "payload": {
+      "brief": {
+        "quantity": 2000,
+        "requirements": [
+          {
+            "id": "33333333-3333-3333-3333-333333333331",
+            "kind": "CERTIFICATION",
+            "importance": "REQUIRED"
+          },
+          {
+            "id": "33333333-3333-3333-3333-333333333332",
+            "kind": "PRODUCTION_LEAD_TIME",
+            "importance": "PREFERRED"
+          }
+        ]
+      },
+      "suppliers": [
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111111",
+          "quote_id": "22222222-2222-2222-2222-222222222221",
+          "supplier_name": "Supplier A",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.50",
+              "current_origin": "USER_CORRECTED",
+              "evidence": [
+                {
+                  "id": "44444444-4444-4444-4444-444444444441",
+                  "evidence_value": "4.22"
+                }
+              ]
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 25,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 500,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "MEETS"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "CONFLICT"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111112",
+          "quote_id": "22222222-2222-2222-2222-222222222222",
+          "supplier_name": "Supplier B",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "3.90",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 38,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 5000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 1000,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "DOES_NOT_MEET"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111113",
+          "quote_id": "22222222-2222-2222-2222-222222222223",
+          "supplier_name": "Supplier C",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.10",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 30,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 300,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            },
+            {
+              "field_key": "shipping_cost",
+              "state": "missing"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "UNKNOWN"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        }
+      ],
+      "price_comparable": false
+    }
+  },
+  {
+    "id": "required-conflict",
+    "snapshot_id": "55555555-5555-5555-5555-555555555574",
+    "brief_revision": 1,
+    "prices": {
+      "11111111-1111-1111-1111-111111111111": "4.50",
+      "11111111-1111-1111-1111-111111111112": "3.90",
+      "11111111-1111-1111-1111-111111111113": "4.10"
+    },
+    "price_comparable": true,
+    "allowed_supplier_ids": [
+      null
+    ],
+    "expected_grounded": true,
+    "contract_version": "comparison-advice-v1",
+    "payload": {
+      "brief": {
+        "quantity": 2000,
+        "requirements": [
+          {
+            "id": "33333333-3333-3333-3333-333333333331",
+            "kind": "CERTIFICATION",
+            "importance": "REQUIRED"
+          },
+          {
+            "id": "33333333-3333-3333-3333-333333333332",
+            "kind": "PRODUCTION_LEAD_TIME",
+            "importance": "PREFERRED"
+          }
+        ]
+      },
+      "suppliers": [
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111111",
+          "quote_id": "22222222-2222-2222-2222-222222222221",
+          "supplier_name": "Supplier A",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.50",
+              "current_origin": "USER_CORRECTED",
+              "evidence": [
+                {
+                  "id": "44444444-4444-4444-4444-444444444441",
+                  "evidence_value": "4.22"
+                }
+              ]
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 25,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 500,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "MEETS"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "CONFLICT"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111112",
+          "quote_id": "22222222-2222-2222-2222-222222222222",
+          "supplier_name": "Supplier B",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "3.90",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 38,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 5000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 1000,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "CONFLICT"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        },
+        {
+          "supplier_id": "11111111-1111-1111-1111-111111111113",
+          "quote_id": "22222222-2222-2222-2222-222222222223",
+          "supplier_name": "Supplier C",
+          "quote_fields": [
+            {
+              "field_key": "unit_price",
+              "current_value": "4.10",
+              "current_origin": "USER_ENTERED",
+              "evidence": []
+            },
+            {
+              "field_key": "production_lead_time",
+              "current_value": 30,
+              "evidence": []
+            },
+            {
+              "field_key": "quoted_quantity",
+              "current_value": 2000,
+              "evidence": []
+            },
+            {
+              "field_key": "moq",
+              "current_value": 300,
+              "evidence": []
+            },
+            {
+              "field_key": "currency",
+              "current_value": "USD",
+              "evidence": []
+            }
+          ],
+          "completeness": [
+            {
+              "field_key": "unit_price",
+              "state": "known"
+            },
+            {
+              "field_key": "production_lead_time",
+              "state": "known"
+            },
+            {
+              "field_key": "shipping_cost",
+              "state": "missing"
+            }
+          ],
+          "supplier_facts": {
+            "evidence": []
+          },
+          "evaluation": {
+            "results": [
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333331",
+                "status": "UNKNOWN"
+              },
+              {
+                "requirement_id": "33333333-3333-3333-3333-333333333332",
+                "status": "MEETS"
+              }
+            ]
+          }
+        }
+      ],
+      "price_comparable": true
+    }
   }
 ]

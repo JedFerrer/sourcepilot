@@ -1,0 +1,12 @@
+[
+  {
+    "id": "unsupported-image-only",
+    "pdf": "image_only.pdf",
+    "expected_error": "NoExtractableTextError"
+  },
+  {
+    "id": "malformed-pdf",
+    "pdf": "malformed.pdf",
+    "expected_error": "PdfParseError"
+  }
+]

@@ -1,0 +1,45 @@
+{
+  "started_at": "2026-11-02T15:46:46.565546+00:00",
+  "status": "PASS",
+  "databases": {
+    "app": {
+      "connectivity": "PASS",
+      "identity_matches": true,
+      "read_only": true,
+      "schema": "PASS",
+      "required_tables": 17,
+      "heads_match": true
+    },
+    "test": {
+      "connectivity": "PASS",
+      "identity_matches": true,
+      "read_only": true,
+      "schema": "PASS",
+      "required_tables": 17,
+      "heads_match": true
+    },
+    "eval": {
+      "connectivity": "PASS",
+      "identity_matches": true,
+      "read_only": true,
+      "schema": "PASS",
+      "required_tables": 17,
+      "heads_match": true
+    }
+  },
+  "provider_calls_before_preflight": 0,
+  "fixture_writes_before_preflight": 0,
+  "repository_heads": [
+    "0015_preferred_supplier"
+  ],
+  "connected_isolation": "PASS",
+  "corrected_schema_sha256": "79906b87def4657c4e7c5b9327f4c0f6791051e79c039a485d44e804396139fb",
+  "production_serialization_no_output_limit": true,
+  "selected_fixture_scorer_parser": "PASS",
+  "selected_case_ids": [
+    "harbor-primary"
+  ],
+  "fixture_parse_count": 1,
+  "model": "gpt-6-luna",
+  "completed_at": "2026-11-02T15:46:48.424420+00:00"
+}

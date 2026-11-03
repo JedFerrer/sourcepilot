@@ -6,7 +6,7 @@ from sourcepilot.ai.clarification_eval import load_cases, readiness_keys, score_
 
 def test_curated_clarification_cases_follow_deterministic_readiness() -> None:
     cases = load_cases()
-    assert len(cases) == 10
+    assert len(cases) == 12
     for case in cases:
         assert readiness_keys(case) == case["expected_keys"], case["id"]
         questions = [ClarificationQuestion.model_validate(item) for item in case["questions"]]

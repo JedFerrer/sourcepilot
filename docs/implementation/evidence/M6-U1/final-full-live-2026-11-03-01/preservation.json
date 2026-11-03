@@ -1,0 +1,41 @@
+{
+  "databases": {
+    "app": {
+      "existing_rows_unchanged": true,
+      "existing_shared_suppliers_unchanged": true,
+      "additions": {}
+    },
+    "test": {
+      "existing_rows_unchanged": true,
+      "existing_shared_suppliers_unchanged": true,
+      "additions": {}
+    },
+    "eval": {
+      "existing_rows_unchanged": true,
+      "existing_shared_suppliers_unchanged": true,
+      "additions": {
+        "demo_sessions": 73,
+        "suppliers": 79,
+        "projects": 73,
+        "supplier_evidence": 6,
+        "ai_runs": 69,
+        "briefs": 21,
+        "comparisons": 21,
+        "project_suppliers": 69,
+        "quotes": 73,
+        "requirements": 50,
+        "quote_documents": 73,
+        "quote_values": 276,
+        "requirement_evaluations": 134,
+        "supplier_explanation_run_steps": 247,
+        "document_blocks": 214,
+        "quote_field_evidence": 21
+      }
+    }
+  },
+  "files": {
+    "inventoried": 413,
+    "changed_or_missing": []
+  },
+  "root_env_unchanged": true
+}

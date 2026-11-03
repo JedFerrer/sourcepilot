@@ -7,7 +7,7 @@ from sourcepilot.ai.supplier_explanation_eval import load_cases, score_case
 
 def test_supplier_explanation_groundedness_cases() -> None:
     cases = load_cases()
-    assert len(cases) == 6
+    assert len(cases) == 11
     assert len({case["id"] for case in cases}) == len(cases)
     for case in cases:
         assert score_case(case) is case["expected_valid"], case["id"]

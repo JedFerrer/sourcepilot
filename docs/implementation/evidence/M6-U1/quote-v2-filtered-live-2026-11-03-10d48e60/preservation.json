@@ -1,0 +1,32 @@
+{
+  "databases": {
+    "app": {
+      "existing_rows_unchanged": true,
+      "existing_shared_suppliers_unchanged": true,
+      "additions": {}
+    },
+    "test": {
+      "existing_rows_unchanged": true,
+      "existing_shared_suppliers_unchanged": true,
+      "additions": {}
+    },
+    "eval": {
+      "existing_rows_unchanged": true,
+      "existing_shared_suppliers_unchanged": true,
+      "additions": {
+        "demo_sessions": 10,
+        "suppliers": 10,
+        "projects": 10,
+        "ai_runs": 10,
+        "quotes": 10,
+        "quote_documents": 10,
+        "document_blocks": 193
+      }
+    }
+  },
+  "files": {
+    "inventoried": 386,
+    "changed_or_missing": []
+  },
+  "root_env_unchanged": true
+}

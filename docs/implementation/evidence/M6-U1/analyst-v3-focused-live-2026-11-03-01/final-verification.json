@@ -1,0 +1,19 @@
+{
+  "changed_existing_files": [
+    "docs/implementation/M6-U1.md"
+  ],
+  "new_paths": [
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/baseline/results.json",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/baseline/summary.md",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/files-before.json",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/inspect_results.py",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/inspection-output.txt",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/inspection.json",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/preflight.json",
+    "docs/implementation/evidence/M6-U1/analyst-v3-focused-live-2026-11-03-01/preservation.json"
+  ],
+  "official_status": "ERROR",
+  "official_exit_code": 2,
+  "scope_complete": true,
+  "all_selected_review_results_null": true
+}

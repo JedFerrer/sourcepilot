@@ -23,7 +23,7 @@ QA, QB, QC = ("22222222-2222-2222-2222-222222222221",
 CERT, LEAD = ("33333333-3333-3333-3333-333333333331",
               "33333333-3333-3333-3333-333333333332")
 PDF_PRICE = "44444444-4444-4444-4444-444444444441"
-PRICE = re.compile(r"\bUSD\s*(\d+(?:\.\d+)?)|\b(\d+\.\d{2})\b", re.IGNORECASE)
+PRICE = re.compile(r"\b(USD|AUD|EUR|GBP|CNY|CAD|JPY)\s*(\d+(?:\.\d+)?)|\b(\d+\.\d{2})\b", re.IGNORECASE)
 QUANTITY = re.compile(
     r"\b(quoted quantity|MOQ|minimum order quantity|requested quantity)\s*"
     r"(?:is|of|:|=)?\s*([\d,]+)\b", re.IGNORECASE,
@@ -37,6 +37,38 @@ PROVENANCE_CLAUSE = re.compile(
     r"(?:PDF|source|evidence|current|confirmed|corrected)\b)",
     re.IGNORECASE,
 )
+PRICE_CONCEPT = re.compile(
+    r"\b(?:price|prices|priced|cost|costs|rate|rates|charges?|cheap|cheaper|cheapest|"
+    r"expensive)\b|\b(?:USD|AUD|EUR|GBP|CNY|CAD|JPY)\s*\d",
+    re.IGNORECASE,
+)
+PRICE_RANK = re.compile(
+    r"\b(?:cheaper|cheapest|lower[- ]priced|higher[- ]priced|more expensive|"
+    r"better priced|worse priced|(?:lowest|highest) (?:unit )?price|"
+    r"(?:better|worse) (?:unit )?(?:price|cost|rate)|lower (?:unit )?(?:price|cost|rate)|"
+    r"higher (?:unit )?(?:price|cost|rate)|costs? (?:less|more)|charges? (?:less|more)|"
+    r"undercuts?|wins on price|more competitive (?:unit )?rate|takes the lead)\b|"
+    r"\bprice is (?:lower|higher)\b|\bpriced below\b",
+    re.IGNORECASE,
+)
+# Only explicit epistemic rejection immediately governing a named supplier claim.
+# Direct negation ("B is not cheaper") still makes a comparative assertion.
+PRICE_RANK_REJECTION = re.compile(
+    r"\b(?:(?:(?:cannot|can't|can not|unable to)\s+"
+    r"(?:conclude|determine|establish|say)|"
+    r"(?:no basis|insufficient (?:evidence|information))\s+to\s+"
+    r"(?:conclude|determine|establish|say))"
+    r"\s+(?:(?:that|whether)\s+)?|"
+    r"(?:unclear|uncertain|not clear)\s+whether\s+)"
+    r"(?:Supplier\s+)?[ABC]\s+(?:(?:is|has)\s+)?(?:the\s+)?$|"
+    r"\b(?:do not|don't)\s+rank\s+(?:Supplier\s+)?[ABC]\s+as\s+$",
+    re.IGNORECASE,
+)
+LEAD_NUMBER = re.compile(r"\b(?P<days>\d+)\s*(?:-\s*day|\s+days?)\b", re.IGNORECASE)
+LEAD_TERM = re.compile(r"\b(?:production\s+)?lead[- ]time\b", re.IGNORECASE)
+GENERAL_LEAD_WORDS = {"general", "catalog", "typical", "typically", "usual", "usually",
+                      "normal", "normally", "standard"}
+PROJECT_LEAD_WORDS = {"quote", "quoted", "project", "order"}
 
 
 def load_cases() -> list[dict[str, Any]]:
@@ -57,8 +89,7 @@ def fixture_snapshot() -> ComparisonSnapshotResult:
             "supplier_name": f"Supplier {'ABC'[(A, B, C).index(supplier_id)]}",
             "quote_fields": [price_field, {"field_key": "production_lead_time",
                                            "current_value": days, "evidence": []},
-                             {"field_key": "quoted_quantity", "current_value": {
-                                 A: 2000, B: 5000, C: 2000}[supplier_id],
+                             {"field_key": "quoted_quantity", "current_value": 2000,
                               "evidence": []},
                              {"field_key": "moq", "current_value": {
                                  A: 500, B: 1000, C: 300}[supplier_id], "evidence": []}],
@@ -100,10 +131,140 @@ def _assertion_clause(text: str, position: int) -> str:
     return text[start:end]
 
 
+def _price_supplier_text(text: str, suppliers: list[dict[str, Any]]) -> str:
+    """Resolve only A/B/C aliases of unique, explicitly named scenario suppliers."""
+    names = [supplier.get("supplier_name") for supplier in suppliers]
+    aliases = {
+        name[-1]: f"Supplier {label}"
+        for label, name in zip("ABC", names, strict=True)
+        if isinstance(name, str) and re.fullmatch(r"Supplier [ABC]", name)
+        and names.count(name) == 1 and name[-1] not in names
+    }
+    return re.sub(
+        r"\b(?:(?i:Supplier\s+([ABC]))|([ABC]))\b",
+        lambda match: aliases.get((match.group(1) or match.group(2)).upper(), match.group()),
+        text,
+    )
+
+
+def _price_comparison_safe(text: str, payload: dict[str, Any],
+                           suppliers: list[dict[str, Any]]) -> bool:
+    # Inspect each recognized ranking separately. A rejection cannot suppress a
+    # later asserted ranking, and an unrelated warning never suppresses one.
+    # These local cues are deliberately non-exhaustive, not semantic validation.
+    ranks = list(PRICE_RANK.finditer(text))
+    previous_end = 0
+    asserted = False
+    for rank in ranks:
+        if not PRICE_RANK_REJECTION.search(text[previous_end:rank.start()]):
+            asserted = True
+        previous_end = rank.end()
+    if not PRICE_CONCEPT.search(text) or not asserted:
+        return True
+    named = {name.upper() for name in re.findall(r"\bSupplier\s+([ABC])\b",
+                                                 _price_supplier_text(text, suppliers),
+                                                 re.IGNORECASE)}
+    relevant = ([supplier for label, supplier in zip("ABC", suppliers, strict=True)
+                 if label in named]
+                if len(named) >= 2 else suppliers)
+    currencies = {next((field["current_value"] for field in supplier["quote_fields"]
+                        if field["field_key"] == "currency"), "USD") for supplier in relevant}
+    quantities = {next((field["current_value"] for field in supplier["quote_fields"]
+                        if field["field_key"] == "quoted_quantity"), None)
+                  for supplier in relevant}
+    incomparable = (payload.get("price_comparable") is False or len(currencies) != 1
+                    or len(quantities) != 1 or None in quantities)
+    # Accurate figures and warnings without a recognized ranking stay inspectable.
+    # A warning does not erase a separate unsupported relative price conclusion.
+    return not incomparable
+
+
+def _lead_claims(text: str) -> list[tuple[int, int, int, str]]:
+    """Resolve each day value from its own nearby words and clause boundaries."""
+    claims = [(match.start(), match.end(), int(match.group("days")))
+              for match in LEAD_NUMBER.finditer(text)]
+    for match in re.finditer(r"\blead[- ]time(?:\s+[a-z]+){0,3}\s+(\d+)\b", text,
+                             re.IGNORECASE):
+        start, end = match.span(1)
+        if not any(first <= start < last for first, last, _ in claims):
+            claims.append((start, end, int(match.group(1))))
+    claims.sort()
+    resolved = []
+    for index, (start, end, days) in enumerate(claims):
+        previous_end = claims[index - 1][1] if index else 0
+        next_start = claims[index + 1][0] if index + 1 < len(claims) else len(text)
+        left = text.rfind(";", previous_end, start) + 1
+        right_boundary = text.find(";", end, next_start)
+        right = right_boundary if right_boundary >= 0 else next_start
+        for boundary in re.finditer(r"[.!?](?!\d)|\b(?:and|versus)\b", text[previous_end:start],
+                                    re.IGNORECASE):
+            left = max(left, previous_end + boundary.end())
+        following = re.search(r"[.!?](?!\d)|\b(?:and|versus)\b", text[end:right],
+                              re.IGNORECASE)
+        if following:
+            right = end + following.start()
+        before = re.findall(r"[a-z]+", text[left:start].casefold())[-12:]
+        after = re.findall(r"[a-z]+", text[end:right].casefold())[:8]
+        paired_value = (index > 0 and len(resolved) == index
+                        and re.search(r"\bversus\b", text[previous_end:start],
+                                      re.IGNORECASE) is not None)
+        if not LEAD_TERM.search(text[left:right]) and not paired_value:
+            continue
+        words = set(before + after)
+        general = bool(words & GENERAL_LEAD_WORDS)
+        project = bool(words & PROJECT_LEAD_WORDS)
+        if general and project:
+            source = "ambiguous"
+        elif general:
+            source = "general"
+        else:
+            source = "project"
+        resolved.append((start, end, days, source))
+    return resolved
+
+
+def narrative_signals(analysis: TradeoffAnalysis,
+                      snapshot: ComparisonSnapshotResult) -> dict[str, list[str]]:
+    """Return inspectable bounded cues; absence does not establish grounding."""
+    payload = snapshot.comparison_payload
+    if payload is None:
+        return {}
+    suppliers = cast(list[dict[str, Any]], payload["suppliers"])
+    by_name = {name: supplier for name, supplier in zip("ABC", suppliers, strict=True)}
+    signals: dict[str, list[str]] = {}
+    sections = ("supplier_summaries", "key_tradeoffs", "important_unknowns",
+                "important_conflicts")
+    for section in sections:
+        for index, point in enumerate(getattr(analysis, section)):
+            text = point.text
+            location = f"{section}[{index}]: {text}"
+            if not _price_comparison_safe(text, payload, suppliers):
+                signals.setdefault("incomparable_price_ranking", []).append(location)
+            leads = _lead_claims(text)
+            names = re.findall(r"\bSupplier ([ABC])\b", text, re.IGNORECASE)
+            paired = (names[:2] if len(leads) == 2 and len(names) >= 2
+                      and re.search(r"\bversus\b", text, re.IGNORECASE) else None)
+            for lead_index, (start, _, days, source) in enumerate(leads):
+                if source == "ambiguous":
+                    continue
+                owners = list(re.finditer(r"\bSupplier ([ABC])\b", text[:start], re.IGNORECASE))
+                if not owners:
+                    continue
+                owner = paired[lead_index].upper() if paired else owners[-1].group(1).upper()
+                supplier = by_name[owner]
+                expected = (supplier["supplier_facts"].get("general_lead_time_days")
+                            if source == "general" else
+                            next((field["current_value"] for field in supplier["quote_fields"]
+                                  if field["field_key"] == "production_lead_time"), None))
+                if expected is not None and days != expected:
+                    signals.setdefault("lead_time_context_mismatch", []).append(location)
+    return signals
+
+
 def _numeric_claims_grounded(point: Any, by_name: dict[str, dict[str, Any]],
                              requested_quantity: object) -> bool:
     """Check each bounded comparison number in its own supplier/field/source context."""
-    text = point.text
+    text = _price_supplier_text(point.text, list(by_name.values()))
     owners = list(re.finditer(r"\bSupplier ([ABC])\b", text, re.IGNORECASE))
     references = {(ref.quote_id, ref.field_key) for ref in point.quote_fields}
     for match in sorted((*PRICE.finditer(text), *QUANTITY.finditer(text)), key=lambda item: item.start()):
@@ -123,7 +284,12 @@ def _numeric_claims_grounded(point: Any, by_name: dict[str, dict[str, Any]],
             value = match.group(2).replace(",", "")
         else:
             key = "shipping_cost" if "shipping" in assertion.lower() else "unit_price"
-            value = match.group(1) or match.group(2)
+            value = match.group(2) or match.group(3)
+            currency = match.group(1)
+            current_currency = next((item["current_value"] for item in supplier["quote_fields"]
+                                     if item["field_key"] == "currency"), "USD")
+            if currency is not None and currency.upper() != current_currency:
+                return False
         if (UUID(supplier["quote_id"]), key) not in references:
             return False
         field = next((item for item in supplier["quote_fields"]
@@ -150,7 +316,8 @@ def _numeric_claims_grounded(point: Any, by_name: dict[str, dict[str, Any]],
 
 
 def score_case(case: dict[str, Any], analysis: TradeoffAnalysis,
-               snapshot: ComparisonSnapshotResult) -> bool:
+               snapshot: ComparisonSnapshotResult, *, check_price: bool = True,
+               check_lead: bool = True) -> bool:
     """Check each produced point against comparison states, values, and cited provenance."""
     try:
         validate_analysis(analysis, snapshot)
@@ -165,10 +332,34 @@ def score_case(case: dict[str, Any], analysis: TradeoffAnalysis,
                   + analysis.important_unknowns + analysis.important_conflicts)
     by_name = {name: supplier for name, supplier in zip("ABC", suppliers, strict=True)}
     for point in all_points:
-        names = re.findall(r"\bSupplier ([ABC])\b", point.text, re.IGNORECASE)
-        names = [name.upper() for name in names]
+        contextual_leads = _lead_claims(point.text) if check_lead else []
         fields = {(ref.quote_id, ref.field_key) for ref in point.quote_fields}
-        day_values = re.findall(r"\b(\d+)\s+days\b", point.text, re.IGNORECASE)
+        names = [name.upper() for name in re.findall(r"\bSupplier ([ABC])\b", point.text,
+                                                 re.IGNORECASE)]
+        paired_names = (names[:2] if len(contextual_leads) == 2 and len(names) >= 2
+                        and re.search(r"\bversus\b", point.text, re.IGNORECASE)
+                        else None)
+        for index, (start, _, days, source) in enumerate(contextual_leads):
+            owners = list(re.finditer(r"\bSupplier ([ABC])\b", point.text[:start], re.IGNORECASE))
+            if not owners:
+                return False
+            owner = paired_names[index] if paired_names else owners[-1].group(1).upper()
+            supplier = by_name[owner]
+            if source == "ambiguous":
+                continue
+            if source == "project":
+                quote_lead = next((field["current_value"] for field in supplier["quote_fields"]
+                                   if field["field_key"] == "production_lead_time"), None)
+                if quote_lead != days or (UUID(supplier["quote_id"]), "production_lead_time") not in fields:
+                    return False
+            else:
+                if supplier["supplier_facts"].get("general_lead_time_days") != days:
+                    return False
+        day_values = [match.group(1) for match in re.finditer(r"\b(\d+)\s+days\b", point.text, re.IGNORECASE)
+                      if not any(start <= match.start(1) < end
+                                 for start, end, _, _ in contextual_leads)] if check_lead else []
+        if check_price and not _price_comparison_safe(point.text, payload, suppliers):
+            return False
         if day_values and not names:
             return False
         if not _numeric_claims_grounded(point, by_name, brief.get("quantity")):

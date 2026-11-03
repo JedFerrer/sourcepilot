@@ -547,6 +547,513 @@ def test_unbound_or_ambiguous_requirement_assertions_fail_closed(
     assert not score_case(case, analysis, fixture_snapshot())
 
 
+@pytest.mark.parametrize("text", [
+    "Supplier A meets the certification and Supplier B does not meet it.",
+    "Supplier A meets the certification but Supplier B does not meet it.",
+    "A meets the certification and B: DOES_NOT_MEET.",
+    "A meets the certification and B = DOES_NOT_MEET.",
+    "The certification results: A MEETS, B DOES_NOT_MEET, and C UNKNOWN.",
+    ("For preferred production lead time, C has status MEETS; A has status CONFLICT; "
+     "B has status MEETS."),
+    "A's certification MEETS and B’s certification DOES_NOT_MEET.",
+    "A, B and C's lead-time requirement MEETS.",
+    "Supplier A's certification MEETS and its lead-time requirement is CONFLICT.",
+    ("Supplier B's 38-day quote conflicts with the deterministic MEETS result "
+     "for the preferred production lead-time requirement."),
+    ("B's quote production lead time conflicts with the evaluation; "
+     "B's lead-time requirement MEETS."),
+    "Supplier B does not meet the certification; supplier evidence lookup returned no evidence.",
+    "B fails the certification and C's certification is UNKNOWN.",
+])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_binding_remediation_accepts_bounded_assertions(text: str, reverse: bool) -> None:
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    if reverse:
+        cast(dict[str, Any], snapshot.comparison_payload)["suppliers"].reverse()
+    if text.startswith("A, B and C"):
+        for supplier in cast(dict[str, Any], snapshot.comparison_payload)["suppliers"]:
+            supplier["evaluation"]["results"][1]["status"] = "MEETS"
+    case = load_cases()[0]
+    analysis = deepcopy(recorded_analysis(case))
+    if text.startswith("A, B and C"):
+        analysis.important_conflicts = []
+    analysis.key_tradeoffs.append(AnalysisPoint(
+        text=text, supplier_ids=[UUID(C), UUID(A), UUID(B)],
+        requirement_ids=[UUID(CERT), UUID(LEAD)],
+        quote_fields=[QuoteFieldReference(quote_id=UUID(QB), field_key="production_lead_time")],
+        evidence_ids=[],
+    ))
+    validate_analysis(analysis, snapshot)
+    # The existing numeric scorer has its own order-sensitive fixture aliases;
+    # order invariance here concerns production state binding, not that scorer.
+    if not reverse:
+        assert score_case(case, analysis, snapshot)
+
+
+@pytest.mark.parametrize("mutation", [
+    "supplier", "requirement", "state", "missing-citation", "foreign-supplier",
+    "foreign-requirement", "foreign-quote", "wrong-quote-owner", "foreign-evidence",
+    "second-state", "sentence-leak", "topic-leak", "point-leak", "unknown-alias",
+    "renamed-alias", "duplicate-name", "casefold-collision", "alias-name-collision",
+    "relational-and-false-state", "ambiguous-requirement", "negative-conflict",
+    "ambiguous-heading", "uncited-alias", "bare-foreign-alias", "multi-field-conflict",
+    "foreign-name", "relational-same-clause", "ambiguous-relation",
+    "swapped-cited-owner", "changed-requirement-reference",
+    "foreign-alias-fails", "numeric-topic-leak",
+    "punctuated-wrong-state", "punctuated-foreign-alias", "unsupported-topic",
+])
+def test_binding_remediation_rejects_mutations(mutation: str) -> None:
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    analysis = deepcopy(recorded_analysis(load_cases()[0]))
+    point = AnalysisPoint(
+        text="A meets the certification and B does not meet it.",
+        supplier_ids=[UUID(A), UUID(B)], requirement_ids=[UUID(CERT), UUID(LEAD)],
+        quote_fields=[], evidence_ids=[],
+    )
+    # Exercise the mutated assertion before the recorded baseline points, so a
+    # changed snapshot state cannot fail first on an unrelated baseline claim.
+    analysis.supplier_summaries.insert(0, point)
+    if mutation == "supplier":
+        point.text = point.text.replace("B does not", "C does not")
+    elif mutation == "requirement":
+        point.text = point.text.replace("certification", "lead-time requirement")
+    elif mutation == "state":
+        payload["suppliers"][1]["evaluation"]["results"][0]["status"] = "MEETS"
+    elif mutation == "missing-citation":
+        point.requirement_ids = [UUID(LEAD)]
+    elif mutation == "foreign-supplier":
+        point.supplier_ids.append(UUID("99999999-0000-0000-0000-000000000001"))
+    elif mutation == "foreign-requirement":
+        point.requirement_ids.append(UUID("99999999-0000-0000-0000-000000000001"))
+    elif mutation == "foreign-quote":
+        point.quote_fields = [QuoteFieldReference(
+            quote_id=UUID("99999999-0000-0000-0000-000000000001"), field_key="unit_price")]
+    elif mutation == "wrong-quote-owner":
+        point.quote_fields = [QuoteFieldReference(quote_id=UUID(QC), field_key="unit_price")]
+    elif mutation == "foreign-evidence":
+        point.evidence_ids = [UUID("99999999-0000-0000-0000-000000000001")]
+    elif mutation == "second-state":
+        point.text = point.text.replace("B does not meet", "B meets")
+    elif mutation == "sentence-leak":
+        point.text = "A meets the certification. B does not meet it."
+    elif mutation == "topic-leak":
+        point.text = "A meets the certification and its shipping cost is listed and B meets it."
+    elif mutation == "point-leak":
+        point.text = "A meets the certification."
+        analysis.key_tradeoffs.append(point.model_copy(update={
+            "text": "B does not meet it.", "supplier_ids": [UUID(B)]}))
+    elif mutation == "unknown-alias":
+        point.text = "Supplier Z meets the certification."
+        point.supplier_ids = [UUID(A)]  # Must not fall back to this owner.
+    elif mutation == "renamed-alias":
+        payload["suppliers"][0]["supplier_name"] = "Acme"
+    elif mutation == "duplicate-name":
+        payload["suppliers"][1]["supplier_name"] = "Supplier A"
+    elif mutation == "casefold-collision":
+        payload["suppliers"][1]["supplier_name"] = "supplier a"
+    elif mutation == "alias-name-collision":
+        payload["suppliers"][1]["supplier_name"] = "A"
+    elif mutation == "relational-and-false-state":
+        point.text = ("B's quote conflicts with the evaluation and "
+                      "B's lead-time requirement is CONFLICT.")
+    elif mutation == "ambiguous-requirement":
+        point.text = "A meets the certification and lead-time requirement."
+    elif mutation == "ambiguous-heading":
+        point.text = "The certification and lead-time requirement: A MEETS."
+    elif mutation == "uncited-alias":
+        point.supplier_ids = [UUID(A)]
+    elif mutation == "bare-foreign-alias":
+        point.text = "D meets the certification."
+        point.supplier_ids = [UUID(A)]
+    elif mutation == "multi-field-conflict":
+        point.text = "A and B's lead-time requirement is CONFLICT."
+    elif mutation == "foreign-name":
+        point.text = "Supplier Zebra meets the certification."
+        point.supplier_ids = [UUID(A)]
+    elif mutation == "relational-same-clause":
+        point.text = "B's quote conflicts with the evaluation: lead-time status CONFLICT."
+    elif mutation == "ambiguous-relation":
+        point.text = "B's quote conflicts over the preferred lead-time requirement."
+    elif mutation == "swapped-cited-owner":
+        point.text = point.text.replace("B does not", "C does not")
+        point.supplier_ids.append(UUID(C))
+    elif mutation == "changed-requirement-reference":
+        point.requirement_ids = [UUID(LEAD)]
+    elif mutation == "foreign-alias-fails":
+        point.text = "D fails the certification."
+        point.supplier_ids = [UUID(B)]
+    elif mutation == "numeric-topic-leak":
+        point.text = ("A meets the certification and its quote production lead time is 25 days "
+                      "and B MEETS.")
+    elif mutation == "punctuated-wrong-state":
+        point.text = "A meets the certification and B: MEETS."
+    elif mutation == "punctuated-foreign-alias":
+        point.text = "A meets the certification and D: MEETS."
+    elif mutation == "unsupported-topic":
+        point.text = "A meets the certification and C's insurance status is UNKNOWN."
+        point.supplier_ids.append(UUID(C))
+    else:
+        point.text = "A's lead-time requirement has no conflict."
+    with pytest.raises(ValueError):
+        validate_analysis(analysis, snapshot)
+
+
+def test_binding_remediation_does_not_treat_article_as_alias() -> None:
+    snapshot = fixture_snapshot()
+    analysis = deepcopy(recorded_analysis(load_cases()[0]))
+    analysis.key_tradeoffs.append(AnalysisPoint(
+        text="Supplier B does not meet a certification requirement.",
+        supplier_ids=[UUID(B)], requirement_ids=[UUID(CERT)], quote_fields=[], evidence_ids=[],
+    ))
+    validate_analysis(analysis, snapshot)
+
+
+@pytest.mark.parametrize("section,owner,requirement,text", [
+    ("important_unknowns", C, CERT, "C’s certification status is UNKNOWN."),
+    ("important_conflicts", A, LEAD, "A's lead-time requirement is CONFLICT."),
+])
+def test_binding_remediation_sections_preserve_state_checks(
+    section: str, owner: str, requirement: str, text: str,
+) -> None:
+    snapshot = fixture_snapshot()
+    analysis = deepcopy(recorded_analysis(load_cases()[0]))
+    point = AnalysisPoint(text=text, supplier_ids=[UUID(owner)], requirement_ids=[UUID(requirement)],
+                          quote_fields=[], evidence_ids=[])
+    getattr(analysis, section).append(point)
+    validate_analysis(analysis, snapshot)
+    point.text = point.text.replace("UNKNOWN", "MEETS").replace("CONFLICT", "MEETS")
+    with pytest.raises(ValueError):
+        validate_analysis(analysis, snapshot)
+
+
+@pytest.mark.parametrize("text,owners,valid", [
+    ("A meets the certification and (B) does not meet it.", [A, B], True),
+    ("A meets the certification and (B) meets the certification.", [A, B], False),
+    ("A meets the certification and (D) meets the certification.", [A], False),
+    ("A meets the certification and (C) does not meet it.", [A, C], False),
+    ("A meets the certification and (C) is UNKNOWN.", [A, C], True),
+    ("A meets the certification and its shipping cost is listed and C's insurance status is UNKNOWN.",
+     [A, C], False),
+    ("A meets the certification and C's field is UNKNOWN.", [A, C], False),
+    ("A meets the certification and additional details follow and B DOES_NOT_MEET.",
+     [A, B], False),
+    ("A meets the certification. B DOES_NOT_MEET.", [A, B], False),
+    ("B's requirement state is DOES_NOT_MEET.", [B], True),
+])
+def test_binding_rules_keep_scorer_and_validator_consistent(
+    text: str, owners: list[str], valid: bool,
+) -> None:
+    case = load_cases()[0]
+    snapshot = fixture_snapshot()
+    analysis = deepcopy(recorded_analysis(case))
+    analysis.key_tradeoffs.append(AnalysisPoint(
+        text=text, supplier_ids=list(map(UUID, owners)), requirement_ids=[UUID(CERT)],
+        quote_fields=[], evidence_ids=[],
+    ))
+    if valid:
+        validate_analysis(analysis, snapshot)
+    else:
+        with pytest.raises(ValueError):
+            validate_analysis(analysis, snapshot)
+    assert score_case(case, analysis, snapshot) is valid
+
+
+def test_binding_rules_preserve_explicit_full_snapshot_names() -> None:
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    payload["suppliers"][1]["supplier_name"] = "Acme (Factory)"
+    # Use fresh minimal summaries so the pre-existing 'Supplier B' text is not
+    # itself an unresolved name after this deliberate snapshot mutation.
+    from sourcepilot.ai.tradeoff_analysis import TradeoffAnalysis
+    from tests.test_tradeoff_analysis import valid_output
+
+    analysis = TradeoffAnalysis.model_validate(valid_output(payload))
+    point = AnalysisPoint(
+        text="A meets the certification and Acme (Factory) does not meet it.",
+        supplier_ids=[UUID(A), UUID(B)], requirement_ids=[UUID(CERT)],
+        quote_fields=[], evidence_ids=[],
+    )
+    analysis.key_tradeoffs.append(point)
+    validate_analysis(analysis, snapshot)
+    point.text = point.text.replace("does not meet", "meets")
+    with pytest.raises(ValueError):
+        validate_analysis(analysis, snapshot)
+
+
+def test_binding_rules_preserve_single_owner_generic_quote_field() -> None:
+    snapshot = fixture_snapshot()
+    analysis = deepcopy(recorded_analysis(load_cases()[0]))
+    point = AnalysisPoint(
+        text="The field is unknown.", supplier_ids=[UUID(C)], requirement_ids=[],
+        quote_fields=[QuoteFieldReference(quote_id=UUID(QC), field_key="shipping_cost")],
+        evidence_ids=[],
+    )
+    analysis.key_tradeoffs.append(point)
+    validate_analysis(analysis, snapshot)
+    point.requirement_ids = [UUID(CERT)]
+    with pytest.raises(ValueError):
+        validate_analysis(analysis, snapshot)
+
+
+@pytest.mark.parametrize("entrypoint", ["analysis", "advice"])
+@pytest.mark.parametrize("text,owners", [
+    ("A meets the certification, (D1) meets the certification.", [A]),
+    ("A meets the certification, Acme meets the certification.", [A]),
+    ("C's certification status is UNKNOWN, its insurance status is UNKNOWN.", [C]),
+])
+@pytest.mark.parametrize("targets", [[CERT], [CERT, LEAD]])
+def test_assertion_local_reported_failures(
+    entrypoint: str, text: str, owners: list[str], targets: list[str],
+) -> None:
+    from sourcepilot.ai.comparison_advice import ComparisonAdvice, validate_advice
+    from tests.test_comparison_advice import suggestion
+    from tests.test_tradeoff_analysis import valid_output
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    advice = ComparisonAdvice.model_validate({
+        "analysis": valid_output(snapshot.comparison_payload),
+        "suggestion": suggestion(snapshot.comparison_payload),
+    })
+    advice.analysis.key_tradeoffs.insert(0, AnalysisPoint(
+        text=text, supplier_ids=list(map(UUID, owners)), requirement_ids=list(map(UUID, targets)),
+        quote_fields=[], evidence_ids=[],
+    ))
+    with pytest.raises(ValueError):
+        if entrypoint == "analysis":
+            validate_analysis(advice.analysis, snapshot)
+        else:
+            validate_advice(advice, snapshot)
+
+
+@pytest.mark.parametrize("entrypoint", ["analysis", "advice"])
+@pytest.mark.parametrize("mutation", [
+    "none", "wrong-state", "unmapped", "collision", "uncited", "unsupported-qualifier",
+])
+def test_assertion_local_snapshot_names(entrypoint: str, mutation: str) -> None:
+    from sourcepilot.ai.comparison_advice import ComparisonAdvice, validate_advice
+    from tests.test_comparison_advice import suggestion
+    from tests.test_tradeoff_analysis import valid_output
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    payload["suppliers"][1]["supplier_name"] = "Acme (Factory)"
+    text = "A meets the certification, Acme (Factory)'s certification is DOES_NOT_MEET."
+    owners = list(map(UUID, [A, B]))
+    if mutation == "wrong-state":
+        text = text.replace("DOES_NOT_MEET", "MEETS")
+    elif mutation == "unmapped":
+        payload["suppliers"][1]["supplier_name"] = "Different Factory"
+    elif mutation == "collision":
+        payload["suppliers"][2]["supplier_name"] = "acme (factory)"
+    elif mutation == "uncited":
+        owners = [UUID(A)]
+    elif mutation == "unsupported-qualifier":
+        text = text.replace("certification is", "insurance certification is")
+    advice = ComparisonAdvice.model_validate({
+        "analysis": valid_output(payload), "suggestion": suggestion(payload),
+    })
+    advice.analysis.key_tradeoffs.insert(0, AnalysisPoint(
+        text=text, supplier_ids=owners, requirement_ids=[UUID(CERT)], quote_fields=[], evidence_ids=[],
+    ))
+    if mutation == "none":
+        if entrypoint == "analysis":
+            validate_analysis(advice.analysis, snapshot)
+        else:
+            validate_advice(advice, snapshot)
+    else:
+        with pytest.raises(ValueError):
+            if entrypoint == "analysis":
+                validate_analysis(advice.analysis, snapshot)
+            else:
+                validate_advice(advice, snapshot)
+
+
+@pytest.mark.parametrize("entrypoint", ["analysis", "advice"])
+@pytest.mark.parametrize("changed", ["none", "first", "second", "unrelated"])
+def test_assertion_local_independent_ground_truth(entrypoint: str, changed: str) -> None:
+    from sourcepilot.ai.comparison_advice import ComparisonAdvice, validate_advice
+    from tests.test_comparison_advice import suggestion
+    from tests.test_tradeoff_analysis import valid_output
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    if changed != "none":
+        owner, target = {"first": (0, 0), "second": (0, 1), "unrelated": (2, 1)}[changed]
+        payload["suppliers"][owner]["evaluation"]["results"][target]["status"] = "UNKNOWN"
+    # Construct disclosures from the mutated truth so only the new assertion can fail.
+    advice = ComparisonAdvice.model_validate({
+        "analysis": valid_output(payload), "suggestion": suggestion(payload),
+    })
+    advice.analysis.key_tradeoffs.insert(0, AnalysisPoint(
+        text="A's certification is MEETS, its lead-time requirement is CONFLICT.",
+        supplier_ids=[UUID(A)], requirement_ids=list(map(UUID, [CERT, LEAD])),
+        quote_fields=[], evidence_ids=[],
+    ))
+    if changed in {"none", "unrelated"}:
+        if entrypoint == "analysis":
+            validate_analysis(advice.analysis, snapshot)
+        else:
+            validate_advice(advice, snapshot)
+    else:
+        with pytest.raises(ValueError):
+            if entrypoint == "analysis":
+                validate_analysis(advice.analysis, snapshot)
+            else:
+                validate_advice(advice, snapshot)
+
+
+@pytest.mark.parametrize("entrypoint", ["analysis", "advice"])
+@pytest.mark.parametrize("mutation", ["none", "wrong-state", "ambiguous", "uncited", "foreign-value"])
+def test_assertion_local_same_kind_targets(entrypoint: str, mutation: str) -> None:
+    from sourcepilot.ai.comparison_advice import ComparisonAdvice, validate_advice
+    from tests.test_comparison_advice import suggestion
+    from tests.test_tradeoff_analysis import valid_output
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    other = "33333333-3333-3333-3333-333333333339"
+    payload["brief"]["requirements"][0]["expected_value"] = {"value": "GOTS"}
+    payload["brief"]["requirements"].append({
+        "id": other, "kind": "CERTIFICATION", "importance": "PREFERRED",
+        "expected_value": {"value": "OEKO-TEX"},
+    })
+    for supplier in payload["suppliers"]:
+        supplier["evaluation"]["results"].append({"requirement_id": other, "status": "MEETS"})
+    advice = ComparisonAdvice.model_validate({
+        "analysis": valid_output(payload), "suggestion": suggestion(payload),
+    })
+    text = "C's GOTS certification is UNKNOWN, its OEKO-TEX certification is MEETS."
+    targets = list(map(UUID, [CERT, other]))
+    if mutation == "wrong-state":
+        text = text.replace("is MEETS", "is UNKNOWN")
+    elif mutation == "ambiguous":
+        text = text.replace("OEKO-TEX ", "")
+    elif mutation == "uncited":
+        targets = [UUID(CERT)]
+    elif mutation == "foreign-value":
+        text = text.replace("OEKO-TEX", "UNSUPPORTED")
+    advice.analysis.key_tradeoffs.insert(0, AnalysisPoint(
+        text=text, supplier_ids=[UUID(C)], requirement_ids=targets, quote_fields=[], evidence_ids=[],
+    ))
+    if mutation == "none":
+        if entrypoint == "analysis":
+            validate_analysis(advice.analysis, snapshot)
+        else:
+            validate_advice(advice, snapshot)
+    else:
+        with pytest.raises(ValueError):
+            if entrypoint == "analysis":
+                validate_analysis(advice.analysis, snapshot)
+            else:
+                validate_advice(advice, snapshot)
+
+
+@pytest.mark.parametrize("entrypoint", ["analysis", "advice"])
+@pytest.mark.parametrize("first", ["MEETS", "UNKNOWN", "DOES_NOT_MEET", "CONFLICT"])
+@pytest.mark.parametrize("second", ["MEETS", "UNKNOWN", "DOES_NOT_MEET", "CONFLICT"])
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("citation_reverse", [False, True])
+def test_shared_requirement_states(
+    entrypoint: str, first: str, second: str, reverse: bool, citation_reverse: bool,
+) -> None:
+    _check_shared_requirements(entrypoint, first, second, reverse, citation_reverse, "none")
+
+
+@pytest.mark.parametrize("entrypoint", ["analysis", "advice"])
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("mutation", [
+    "missing-first", "missing-second", "ambiguous-first", "ambiguous-second",
+    "foreign-first", "foreign-second", "unsupported-first", "unsupported-second",
+    "collision", "uncoordinated", "replacement-heading", "reset", "dangling",
+    "missing-snapshot-first", "missing-snapshot-second", "missing-state-first", "missing-state-second",
+])
+def test_shared_requirement_references(entrypoint: str, reverse: bool, mutation: str) -> None:
+    _check_shared_requirements(entrypoint, "MEETS", "MEETS", reverse, False, mutation)
+
+
+def _check_shared_requirements(
+    entrypoint: str, first: str, second: str, reverse: bool,
+    citation_reverse: bool, mutation: str,
+) -> None:
+    from sourcepilot.ai.comparison_advice import ComparisonAdvice, validate_advice
+    from tests.test_comparison_advice import suggestion
+    from tests.test_tradeoff_analysis import valid_output
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    other = "33333333-3333-3333-3333-333333333339"
+    payload["brief"]["requirements"][0]["expected_value"] = {"value": "GOTS"}
+    payload["brief"]["requirements"].append({
+        "id": other, "kind": "CERTIFICATION", "importance": "PREFERRED",
+        "expected_value": {"value": "OEKO-TEX"},
+    })
+    for supplier in payload["suppliers"]:
+        supplier["evaluation"]["results"].append({"requirement_id": other, "status": second})
+        if supplier["supplier_id"] == C:
+            supplier["evaluation"]["results"][0]["status"] = first
+    targets = list(map(UUID, [CERT, other]))
+    parts = ["GOTS certification", "OEKO-TEX certification"]
+    if mutation.startswith(("missing-snapshot-", "missing-state-")):
+        missing = CERT if mutation.endswith("first") else other
+        if mutation.startswith("missing-snapshot-"):
+            payload["brief"]["requirements"] = [
+                item for item in payload["brief"]["requirements"] if item["id"] != missing]
+        for supplier in payload["suppliers"]:
+            if mutation.startswith("missing-snapshot-") or supplier["supplier_id"] == C:
+                supplier["evaluation"]["results"] = [
+                    item for item in supplier["evaluation"]["results"]
+                    if item["requirement_id"] != missing]
+    elif mutation.startswith("missing-"):
+        targets.pop(0 if mutation.endswith("first") else 1)
+    elif mutation.startswith("ambiguous-"):
+        parts[0 if mutation.endswith("first") else 1] = "certification"
+    elif mutation.startswith("foreign-"):
+        parts[0 if mutation.endswith("first") else 1] = "FOREIGN certification"
+    elif mutation.startswith("unsupported-"):
+        parts[0 if mutation.endswith("first") else 1] = "insurance"
+    elif mutation == "collision":
+        payload["brief"]["requirements"][-1]["expected_value"] = {"value": "GOTS"}
+        parts[1] = "GOTS certification"
+    if reverse:
+        parts.reverse()
+        payload["suppliers"].reverse()
+        payload["brief"]["requirements"].reverse()
+    if citation_reverse:
+        targets.reverse()
+    text = " and ".join(parts) + " are MEETS."
+    if mutation == "uncoordinated":
+        text = " ".join(parts) + " are MEETS."
+    elif mutation == "replacement-heading":
+        text = parts[0] + "; " + parts[1] + ": C MEETS."
+    elif mutation == "reset":
+        text = parts[0] + " and additional details follow and " + parts[1] + " is MEETS."
+    elif mutation == "dangling":
+        text = " and ".join(parts) + "."
+    advice = ComparisonAdvice.model_validate({
+        "analysis": valid_output(payload), "suggestion": suggestion(payload),
+    })
+    advice.analysis.key_tradeoffs.insert(0, AnalysisPoint(
+        text=text, supplier_ids=[UUID(C)], requirement_ids=targets,
+        quote_fields=[], evidence_ids=[],
+    ))
+    validate = (lambda: validate_analysis(advice.analysis, snapshot)) if entrypoint == "analysis" else (
+        lambda: validate_advice(advice, snapshot))
+    if mutation == "none" and first == second == "MEETS":
+        validate()
+    else:
+        with pytest.raises(ValueError):
+            validate()
+
+
 def test_tradeoff_groundedness_cases() -> None:
     cases = load_cases()
     assert len(cases) == 8
@@ -654,7 +1161,7 @@ def test_quantity_assertions_bind_supplier_and_semantic_field() -> None:
     original = recorded_analysis(case)
     for supplier_index, quote_id, quantity, moq in (
         (0, "22222222-2222-2222-2222-222222222221", 2000, 500),
-        (1, "22222222-2222-2222-2222-222222222222", 5000, 1000),
+        (1, "22222222-2222-2222-2222-222222222222", 2000, 1000),
     ):
         valid = deepcopy(original)
         point = valid.supplier_summaries[supplier_index]

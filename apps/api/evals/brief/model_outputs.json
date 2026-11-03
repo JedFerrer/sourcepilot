@@ -1,14 +1,400 @@
 {
-  "complete-demo":{"product_name":"cosmetic travel bags","category":"cosmetic travel bags","quantity":2000,"destination":"Sydney","delivery_target":{"kind":"DATE","date":"2026-11-01"},"target_unit_price":"5","attributes":[],"requirements":[{"kind":"MATERIAL","importance":null,"expected_value":{"value":"recycled polyester"}},{"kind":"CERTIFICATION","importance":"PREFERRED","expected_value":{"value":"GRS"}}],"ambiguities":[]},
-  "missing-destination":{"product_name":"cotton pouches","category":"pouches","quantity":500,"destination":null,"delivery_target":{"kind":"DATE","date":"2026-12-01"},"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":[]},
-  "missing-delivery":{"product_name":"canvas totes","category":"tote bags","quantity":800,"destination":"Manila","delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":[]},
-  "missing-quantity":{"product_name":"cosmetic bags","category":"cosmetic bags","quantity":null,"destination":"Sydney","delivery_target":{"kind":"DATE","date":"2026-11-01"},"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":[]},
-  "no-price":{"product_name":"glass bottles","category":"bottles","quantity":100,"destination":"Cebu","delivery_target":{"kind":"DATE","date":"2026-10-01"},"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":[]},
-  "required-certification":{"product_name":"bags","category":"bags","quantity":200,"destination":null,"delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[{"kind":"CERTIFICATION","importance":"REQUIRED","expected_value":{"value":"GRS"}}],"ambiguities":[]},
-  "preferred-certification":{"product_name":"bags","category":"bags","quantity":200,"destination":null,"delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[{"kind":"CERTIFICATION","importance":"PREFERRED","expected_value":{"value":"GRS"}}],"ambiguities":[]},
-  "unstated-importance":{"product_name":"bags","category":"bags","quantity":200,"destination":null,"delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[{"kind":"MATERIAL","importance":null,"expected_value":{"value":"recycled polyester"}}],"ambiguities":[]},
-  "ambiguous-delivery":{"product_name":"pouches","category":"pouches","quantity":100,"destination":"Perth","delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":["Delivery may be in November or December."]},
-  "dimensions-attribute":{"product_name":"bags","category":"bags","quantity":300,"destination":"Brisbane","delivery_target":null,"target_unit_price":null,"attributes":[{"subject":"DIMENSIONS","text":"20 by 15 centimeters"}],"requirements":[],"ambiguities":[]},
-  "branding-unknown":{"product_name":"bags","category":"bags","quantity":500,"destination":"Auckland","delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":["Branding has not been decided."]},
-  "non-invention":{"product_name":"cosmetic bags","category":"cosmetic bags","quantity":null,"destination":null,"delivery_target":null,"target_unit_price":null,"attributes":[],"requirements":[],"ambiguities":[]}
+  "complete-demo": {
+    "product_name": "cosmetic travel bags",
+    "category": "cosmetic travel bags",
+    "quantity": 2000,
+    "destination": "Sydney",
+    "delivery_target": {
+      "kind": "DATE",
+      "date": "2026-11-01"
+    },
+    "target_unit_price": "5",
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "MATERIAL",
+        "importance": null,
+        "expected_value": {
+          "value": "recycled polyester"
+        }
+      },
+      {
+        "kind": "CERTIFICATION",
+        "importance": "PREFERRED",
+        "expected_value": {
+          "value": "GRS"
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "missing-destination": {
+    "product_name": "cotton pouches",
+    "category": "pouches",
+    "quantity": 500,
+    "destination": null,
+    "delivery_target": {
+      "kind": "DATE",
+      "date": "2026-12-01"
+    },
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "missing-delivery": {
+    "product_name": "canvas totes",
+    "category": "tote bags",
+    "quantity": 800,
+    "destination": "Manila",
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "missing-quantity": {
+    "product_name": "cosmetic bags",
+    "category": "cosmetic bags",
+    "quantity": null,
+    "destination": "Sydney",
+    "delivery_target": {
+      "kind": "DATE",
+      "date": "2026-11-01"
+    },
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "no-price": {
+    "product_name": "glass bottles",
+    "category": "bottles",
+    "quantity": 100,
+    "destination": "Cebu",
+    "delivery_target": {
+      "kind": "DATE",
+      "date": "2026-10-01"
+    },
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "required-certification": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 200,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "CERTIFICATION",
+        "importance": "REQUIRED",
+        "expected_value": {
+          "value": "GRS"
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "preferred-certification": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 200,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "CERTIFICATION",
+        "importance": "PREFERRED",
+        "expected_value": {
+          "value": "GRS"
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "unstated-importance": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 200,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "MATERIAL",
+        "importance": null,
+        "expected_value": {
+          "value": "recycled polyester"
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "ambiguous-delivery": {
+    "product_name": "pouches",
+    "category": "pouches",
+    "quantity": 100,
+    "destination": "Perth",
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": [
+      "Delivery may be in November or December."
+    ]
+  },
+  "dimensions-attribute": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 300,
+    "destination": "Brisbane",
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [
+      {
+        "subject": "DIMENSIONS",
+        "text": "20 by 15 centimeters"
+      }
+    ],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "branding-unknown": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 500,
+    "destination": "Auckland",
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": [
+      "Branding has not been decided."
+    ]
+  },
+  "non-invention": {
+    "product_name": "cosmetic bags",
+    "category": "cosmetic bags",
+    "quantity": null,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "boolean-branding": {
+    "product_name": "cosmetic bags",
+    "category": "cosmetic bags",
+    "quantity": 600,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "CAPABILITY",
+        "importance": "REQUIRED",
+        "expected_value": {
+          "capability_key": "CUSTOM_BRANDING",
+          "value": true
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "no-branding": {
+    "product_name": "cosmetic bags",
+    "category": "cosmetic bags",
+    "quantity": 400,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "CAPABILITY",
+        "importance": null,
+        "expected_value": {
+          "capability_key": "CUSTOM_BRANDING",
+          "value": false
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "categorical-branding": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 750,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "CAPABILITY",
+        "importance": "REQUIRED",
+        "expected_value": {
+          "capability_key": "BRANDING_METHOD",
+          "value": "screen printing"
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "production-limit": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 200,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "PRODUCTION_LEAD_TIME",
+        "importance": "REQUIRED",
+        "expected_value": {
+          "max_days": 30
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "explicit-moq": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 2000,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "MOQ",
+        "importance": "REQUIRED",
+        "expected_value": {
+          "quantity": 500
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "price-currency": {
+    "product_name": "pouches",
+    "category": "pouches",
+    "quantity": 100,
+    "destination": "Perth",
+    "delivery_target": null,
+    "target_unit_price": "6",
+    "attributes": [],
+    "requirements": [
+      {
+        "kind": "UNIT_PRICE",
+        "importance": "REQUIRED",
+        "expected_value": {
+          "amount": "6",
+          "currency": "AUD"
+        }
+      }
+    ],
+    "ambiguities": []
+  },
+  "delivery-period": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 900,
+    "destination": "Sydney",
+    "delivery_target": {
+      "kind": "PERIOD",
+      "label": "November 2026",
+      "start_date": "2026-11-01",
+      "end_date": "2026-11-30"
+    },
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "relative-delivery": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 200,
+    "destination": "Cebu",
+    "delivery_target": {
+      "kind": "PERIOD",
+      "label": "next month",
+      "start_date": null,
+      "end_date": null
+    },
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "informational-color": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 300,
+    "destination": "Manila",
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [
+      {
+        "subject": "COLOR",
+        "text": "blue"
+      }
+    ],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "informational-packaging": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 350,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [
+      {
+        "subject": "PACKAGING",
+        "text": "individual paper sleeves"
+      }
+    ],
+    "requirements": [],
+    "ambiguities": []
+  },
+  "ambiguous-material": {
+    "product_name": "bags",
+    "category": "bags",
+    "quantity": 450,
+    "destination": "Sydney",
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": [
+      "Material may be cotton or polyester."
+    ]
+  },
+  "untrusted-request": {
+    "product_name": "cosmetic bags",
+    "category": "cosmetic bags",
+    "quantity": null,
+    "destination": null,
+    "delivery_target": null,
+    "target_unit_price": null,
+    "attributes": [],
+    "requirements": [],
+    "ambiguities": []
+  }
 }

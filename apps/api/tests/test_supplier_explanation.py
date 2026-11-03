@@ -478,3 +478,113 @@ def test_api_enforces_scope_and_staleness(
     stale = client.post(endpoint)
     assert stale.status_code == 409
     assert stale.json()["error"]["code"] == "SUPPLIER_EVALUATION_STALE"
+
+
+@pytest.mark.parametrize("state", ["MEETS", "UNKNOWN", "CONFLICT"])
+@pytest.mark.parametrize("repair", ["fetch", "strip", "unfetched", "no_lookup"])
+def test_evidence_selection_and_repair_preserve_citation_guards(
+    client: TestClient, engine: Engine, state: str, repair: str,
+) -> None:
+    from sourcepilot.ai.supplier_explanation import INSTRUCTIONS, PROMPT_VERSION, TOOLS
+
+    demo_session_id, project_id, _ = discovered(client, engine)
+    suppliers = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"]
+    supplier = next(item for item in suppliers if
+                    any(f["status"] == state for f in item["evaluations"])
+                    and any(f["evidence_ids"] for f in item["evaluations"]))
+    supplier_id = UUID(supplier["id"])
+    errors: list[str] = []
+
+    class SelectionClient(FakeClient):
+        def invoke_with_tools(self, **kwargs: object) -> AnalystModelInvocation:
+            self.calls += 1
+            assert kwargs["tools"] == TOOLS
+            assert str(kwargs["instructions"]).startswith(INSTRUCTIONS)
+            items = kwargs["input_items"]
+            assert isinstance(items, list)
+            first = json.loads(str(items[0]["content"]))
+            if self.calls == 1 and repair != "no_lookup":
+                # Historical misuse: valid argument strings select no catalog claims.
+                keys = [f["requirement_id"] for f in first["snapshot"]["evaluations"]]
+            elif self.calls == 3 and repair == "fetch":
+                errors.append(str(kwargs["instructions"]))
+                keys = None
+            else:
+                outputs = [json.loads(item["output"]) for item in items
+                           if item.get("type") == "function_call_output"]
+                if repair != "no_lookup":
+                    assert outputs[0]["evidence"] == []
+                payload = json.loads(json.dumps(valid_payload(items, supplier_id)))
+                assert payload["evidence_ids"]  # IDs in the snapshot are real but unfetched.
+                if self.calls == 3 or (repair == "no_lookup" and self.calls == 2):
+                    errors.append(str(kwargs["instructions"]))
+                if self.calls == 3 and repair == "strip":
+                    for section in ("strengths", "required_failures", "preferred_findings",
+                                    "unknowns", "conflicts", "concerns"):
+                        for point in payload[section]:
+                            point["evidence_ids"] = []
+                    payload["evidence_ids"] = []
+                if self.calls == 4:
+                    fetched = {e["id"] for e in outputs[-1]["evidence"]}
+                    assert set(payload["evidence_ids"]).issubset(fetched)
+                return invocation(text=json.dumps(payload))
+            return invocation(output_items=({
+                "type": "function_call", "call_id": f"evidence-{self.calls}",
+                "name": "get_supplier_evidence", "arguments": json.dumps({
+                    "supplier_id": str(supplier_id), "claim_keys": keys,
+                }),
+            },))
+
+    fake = SelectionClient(supplier_id)
+    with Session(engine) as session:
+        if repair == "fetch":
+            result = explain_supplier(
+                session, demo_session_id=demo_session_id, project_id=project_id,
+                supplier_id=supplier_id, client_factory=lambda: fake,
+            )
+            for section, status in (("unknowns", "UNKNOWN"), ("conflicts", "CONFLICT")):
+                points = getattr(result.explanation, section)
+                assert {str(p.requirement_id) for p in points} == {
+                    f["requirement_id"] for f in supplier["evaluations"] if f["status"] == status
+                }
+                for point in points:
+                    assert point.text.endswith(f": {status.title()}.")
+            assert result.explanation.evidence_ids
+        else:
+            with pytest.raises(ExplanationUnavailableError):
+                explain_supplier(
+                    session, demo_session_id=demo_session_id, project_id=project_id,
+                    supplier_id=supplier_id, client_factory=lambda: fake,
+                )
+    assert len(errors) == 1
+    assert ("Evidence tool was not used." if repair == "no_lookup" else
+            "Explanation cites evidence not returned by the evidence tool.") in errors[0]
+    with Session(engine) as session:
+        run = session.scalar(select(AIRun).order_by(AIRun.started_at.desc(), AIRun.id.desc()))
+        assert run is not None and run.prompt_version == PROMPT_VERSION == "supplier-explanation-v2"
+        assert run.status == ("COMPLETED" if repair == "fetch" else "VALIDATION_FAILED")
+        assert run.validation_status == ("REPAIRED" if repair == "fetch" else "INVALID")
+        assert run.model_turn_count == (4 if repair == "fetch" else
+                                        2 if repair == "no_lookup" else 3)
+        assert run.tool_call_count == (3 if repair == "fetch" else
+                                      1 if repair == "no_lookup" else 2)
+        steps = list(session.scalars(select(SupplierExplanationRunStep).where(
+            SupplierExplanationRunStep.air_run_id == run.id
+        )))
+        assert sum(s.kind == "retry" and s.outcome == "REPAIR" for s in steps) == 1
+        assert sum(s.kind == "validation" and s.outcome == "INVALID" for s in steps) == (
+            1 if repair == "fetch" else 2
+        )
+
+
+def test_evidence_prompt_explains_selection_and_repair() -> None:
+    from sourcepilot.ai.supplier_explanation import INSTRUCTIONS, TOOLS
+
+    description = next(t["description"] for t in TOOLS if t["name"] == "get_supplier_evidence")
+    for guidance in (INSTRUCTIONS, description):
+        assert "catalog claim keys" in guidance
+        assert "not requirement UUIDs or" in guidance
+        assert "evidence IDs" in guidance
+        assert "claim_keys=null when exact keys" in guidance
+    assert "before citing evidence or finalizing" in INSTRUCTIONS
+    assert "do not remove required citations" in INSTRUCTIONS

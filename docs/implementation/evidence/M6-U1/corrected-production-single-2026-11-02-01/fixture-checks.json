@@ -1,0 +1,317 @@
+[
+  {
+    "name": "parser_blocks",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "extraction_input_hash",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "source_references",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field_accuracy",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "numeric_accuracy",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "currency_accuracy",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "unknown_detection",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "conflict_detection",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "source_block_accuracy",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "hallucination_rate",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.quoted_quantity.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.quoted_quantity.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.unit_price.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.unit_price.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.currency.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.currency.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.moq.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.moq.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.sample_cost.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.sample_cost.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.tooling_cost.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.tooling_cost.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.packaging_cost.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.shipping_cost.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.shipping_cost.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.sample_lead_time.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.sample_lead_time.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.production_lead_time.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.production_lead_time.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.shipping_time.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.shipping_time.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.total_lead_time.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.payment_terms.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.payment_terms.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.incoterm.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.quote_validity.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.quote_validity.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.warranty.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.certifications.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.certifications.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.compliance_notes.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.exclusions.value",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.exclusions.sources",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.special_conditions.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  },
+  {
+    "name": "field.supplier_notes.unknown",
+    "kind": "exact",
+    "passed": true,
+    "critical": true,
+    "detail": null
+  }
+]

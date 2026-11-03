@@ -6,13 +6,17 @@ import json
 from pathlib import Path
 from typing import Any
 
-from sourcepilot.ai.clarification import ClarificationQuestion
+from sourcepilot.ai.clarification import MAX_QUESTIONS, ClarificationQuestion
 from sourcepilot.briefs.readiness import (
     ReadinessRequirement,
     evaluate_brief_readiness,
 )
 
 CASES_PATH = Path(__file__).resolve().parents[2] / "evals" / "clarification" / "cases.json"
+WORDING_HEURISTICS = {
+    "clarity_rate": "Fraction of questions ending in '?' with at least three words.",
+    "conciseness_rate": "Fraction of questions with at most 120 characters.",
+}
 
 
 def load_cases() -> list[dict[str, Any]]:
@@ -32,7 +36,7 @@ def readiness_keys(case: dict[str, Any]) -> list[str]:
             for item in brief["requirements"]
         ),
     )
-    return [field.field_key for field in readiness.missing_fields[:5]]
+    return [field.field_key for field in readiness.missing_fields[:MAX_QUESTIONS]]
 
 
 def score_questions(

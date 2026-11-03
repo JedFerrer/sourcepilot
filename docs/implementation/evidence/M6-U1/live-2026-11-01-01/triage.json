@@ -1,0 +1,1267 @@
+{
+  "status": "Analysis of one recorded run; no reruns or provider calls",
+  "diagnostic_limit": "An initial triage read-only transaction rejected the snapshot helper SELECT FOR SHARE; no writes occurred. Final replay uses direct persisted snapshot reads and pure validators, without lock-taking helpers.",
+  "case_triage": [
+    {
+      "category": "brief",
+      "id": "complete-demo",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "9f4328d1-79dd-41e8-87e5-1528c5c49d0f",
+      "failed_assertions": [
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[{'kind': 'MATERIAL', 'importance': None, 'expected_value': {'value': 'recycled polyester'}}, {'kind': 'CERTIFICATION', 'importance': 'PREFERRED', 'expected_value': {'value': 'GRS'}}]; actual=[{'kind': 'MATERIAL', 'importance': None, 'expected_value': {'value': 'recycled polyester'}}, {'kind': 'CAPABILITY', 'importance': None, 'expected_value': {'capability_key': 'CUSTOM_BRANDING', 'value': True}}, {'kind': 'UNIT_PRICE', 'importance': None, 'expected_value': {'amount': '5', 'currency': 'USD'}}, {'kind': 'DELIVERY', 'importance': None, 'expected_value': {'kind': 'DATE', 'date': '2026-11-01'}}, {'kind': 'CERTIFICATION', 'importance': 'PREFERRED', 'expected_value': {'value': 'GRS'}}]"
+        },
+        {
+          "name": "brief.ambiguities",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[\"The price is stated as under USD 5 each; the schema's price fields represent only the numeric threshold and do not encode the strict 'under' condition.\"]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "missing-destination",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "4d03d47e-ebc5-473b-acd2-28b3e65681b1",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='pouches'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'MATERIAL', 'importance': None, 'expected_value': {'value': 'cotton'}}, {'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 500}}, {'kind': 'DELIVERY', 'importance': None, 'expected_value': {'kind': 'DATE', 'date': '2026-12-01'}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "missing-delivery",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "ab250821-59e7-48c2-b696-9878c60029c2",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='tote bags'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 800}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "missing-quantity",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "176b0623-7610-4323-8349-03638f540859",
+      "failed_assertions": [
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'MATERIAL', 'importance': None, 'expected_value': {'value': 'recycled'}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "no-price",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "ade4806d-190e-46c4-a9e3-4f1d74479942",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bottles'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 100}}, {'kind': 'DELIVERY', 'importance': None, 'expected_value': {'kind': 'DATE', 'date': '2026-10-01'}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "required-certification",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "d19f1082-40d4-404e-abe1-a3318a9c14df",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "preferred-certification",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "3828e9d7-10da-4ec3-adf9-b7c68f49ac20",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "unstated-importance",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "e29cc39d-1e0c-498e-ace4-7ed3e26c0ffc",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "ambiguous-delivery",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "30a920cd-f383-450c-a02d-66c55a24e082",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='pouches'; actual=None"
+        },
+        {
+          "name": "brief.delivery_target",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=None; actual={'kind': 'PERIOD', 'label': 'around November, maybe December', 'start_date': None, 'end_date': None}"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 100}}]"
+        },
+        {
+          "name": "brief.ambiguities",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=['Delivery may be in November or December.']; actual=['The delivery timing is approximate and may be around November or possibly December; no year is stated.']"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "dimensions-attribute",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "663543cf-99fd-4fd8-9b7c-55822017017a",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "branding-unknown",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "0ab58eff-2653-4ff4-88be-ceb29163a4e2",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.attributes",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'subject': 'BRANDING_NOTES', 'text': 'Branding has not been decided.'}]"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 500}}]"
+        },
+        {
+          "name": "brief.ambiguities",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=['Branding has not been decided.']; actual=[]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "non-invention",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "aa2f3f2a-57f6-4ad4-92d9-635cbb8768d1",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='cosmetic bags'; actual=None"
+        },
+        {
+          "name": "brief.attributes",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'subject': 'BRANDING_NOTES', 'text': 'for our new brand'}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "boolean-branding",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "cb695bc4-ecc1-43fd-9d6f-0d088261e456",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='cosmetic bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "categorical-branding",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "f150ecaa-9c5f-401e-befd-ed61e5d38e60",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "production-limit",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "f7d891b8-1b5c-4eb0-9df2-f5cc8a8ee31b",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[{'kind': 'PRODUCTION_LEAD_TIME', 'importance': 'REQUIRED', 'expected_value': {'max_days': 30}}]; actual=[{'kind': 'PRODUCTION_LEAD_TIME', 'importance': None, 'expected_value': {'max_days': 30}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "explicit-moq",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "c6f6b9f0-872f-4af5-b415-2c2e418f6aa5",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[{'kind': 'MOQ', 'importance': 'REQUIRED', 'expected_value': {'quantity': 500}}]; actual=[{'kind': 'MOQ', 'importance': None, 'expected_value': {'quantity': 500}}]"
+        },
+        {
+          "name": "brief.ambiguities",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=['The MOQ is stated as a maximum of 500 units; the requirement value schema does not encode an upper-bound operator.']"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "price-currency",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "ddf7e4c0-7cf5-434a-806a-ffb9e8e5ee10",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [
+            "requirements",
+            0
+          ],
+          "type": "value_error",
+          "reason": "Value error, UNIT_PRICE must contain amount and optional currency only"
+        }
+      ]
+    },
+    {
+      "category": "brief",
+      "id": "delivery-period",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "313fe6d0-02a1-4e9b-b627-154842693c70",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [
+            "requirements",
+            1
+          ],
+          "type": "value_error",
+          "reason": "Value error, delivery period must contain exactly: end_date, kind, label, start_date"
+        }
+      ]
+    },
+    {
+      "category": "brief",
+      "id": "relative-delivery",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "2c59246c-38f8-48c2-9a04-f8faa7af4871",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [
+            "requirements",
+            1
+          ],
+          "type": "value_error",
+          "reason": "Value error, delivery period must contain exactly: end_date, kind, label, start_date"
+        }
+      ]
+    },
+    {
+      "category": "brief",
+      "id": "informational-color",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "139e9987-fbb2-4802-815d-a4fc1af0d536",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 300}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "informational-packaging",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "494a8ef8-ebe3-4925-9c73-daac0b0f38e5",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'QUANTITY', 'importance': None, 'expected_value': {'quantity': 350}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "ambiguous-material",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "77b8ae47-320b-48da-8037-fda970c11a65",
+      "failed_assertions": [
+        {
+          "name": "brief.product_name",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='bags'; actual=None"
+        },
+        {
+          "name": "brief.requirements",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected=[]; actual=[{'kind': 'MATERIAL', 'importance': None, 'expected_value': {'value': 'cotton or polyester'}}]"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "brief",
+      "id": "untrusted-request",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "3ec5b3dc-a076-4e4a-a4d9-6bb30ce7cbb0",
+      "failed_assertions": [
+        {
+          "name": "brief.category",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "expected='cosmetic bags'; actual=None"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "VALID"
+    },
+    {
+      "category": "supplier_explanation",
+      "id": "clear-match",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "2f5d6832-6fea-4895-9f97-e3df760ea295",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 1,
+      "final_response_schema": "VALID",
+      "read_only_semantic_replay": "REJECTED",
+      "semantic_rejection_reason": "Point omits available requirement evidence.",
+      "attribution": "Retain RUNTIME_ERROR: schema-valid final output; semantic rejection alone does not establish model-only causality."
+    },
+    {
+      "category": "supplier_explanation",
+      "id": "conflict",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "33e26fbb-2e2a-4665-9472-7d0a9e1b6aae",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 2,
+      "final_response_schema": "VALID",
+      "read_only_semantic_replay": "REJECTED",
+      "semantic_rejection_reason": "Point omits available requirement evidence.",
+      "attribution": "Retain RUNTIME_ERROR: schema-valid final output; semantic rejection alone does not establish model-only causality."
+    },
+    {
+      "category": "quote_extraction",
+      "id": "harbor-primary",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "94da6f28-d1f9-460c-b370-a2b344871222",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, moq must be a positive whole number"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "willow-primary",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "7b197e84-ed43-44ac-8b27-402b8c56d331",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, sample_cost must be a decimal string"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "moss-primary",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "ed350054-8c2d-436e-b83f-930fa4feb215",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, moq must be a positive whole number"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "missing-shipping",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "db647911-9bea-4b3c-a61e-774607ec9759",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, sample_cost must be a decimal string"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "conflicting-lead-time",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "e68cc278-37b4-44f3-9e61-73163cb541bc",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, sample_cost must be a decimal string"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "included-tooling",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "aedb17e2-58c0-4a31-a800-ef54218c218d",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, moq must be a positive whole number"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "missing-moq",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "87d59f8e-4438-49ac-8f23-6c8af0dce20c",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, sample_cost must be a decimal string"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "quantity-mismatch",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "800d921f-25df-45ca-b6fd-2bfae3850551",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, moq must be a positive whole number"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "non-usd",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "09b5e59f-a187-49ec-8f50-745c3b1b165b",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, moq must be a positive whole number"
+        }
+      ]
+    },
+    {
+      "category": "quote_extraction",
+      "id": "explicit-unknown",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "c87b4101-3562-4159-bb5b-13d15d1b771e",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 0,
+      "final_response_schema": "INVALID",
+      "schema_errors": [
+        {
+          "path": [],
+          "type": "value_error",
+          "reason": "Value error, tooling_cost must be a decimal string"
+        }
+      ]
+    },
+    {
+      "category": "comparison",
+      "id": "meaningful-tradeoff",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "d5dd1f98-231a-4a9a-850d-e0a94acbfdd5",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 9,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "comparison",
+      "id": "required-failure",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "d0e0f6be-4148-49d4-a22a-947881e769e8",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 13,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "comparison",
+      "id": "unknown-and-conflict",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "0f04e2cf-9bfe-4046-be54-99d0171b26d6",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 5,
+      "final_response_schema": "VALID",
+      "read_only_semantic_replay": "REJECTED",
+      "semantic_rejection_reason": "Quote-field state assertion contradicts deterministic state.",
+      "attribution": "Retain RUNTIME_ERROR: schema-valid final output; semantic rejection alone does not establish model-only causality."
+    },
+    {
+      "category": "comparison",
+      "id": "corrected-quote-provenance",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "b8554079-84b7-4706-a15f-8c4e86f57c10",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 9,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "comparison",
+      "id": "incomplete-evidence",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "ffa247eb-0bea-4e2a-adca-5d89731179ff",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 5,
+      "final_response_schema": "VALID",
+      "read_only_semantic_replay": "REJECTED",
+      "semantic_rejection_reason": "Requirement-state assertion has ambiguous references.",
+      "attribution": "Retain RUNTIME_ERROR: schema-valid final output; semantic rejection alone does not establish model-only causality."
+    },
+    {
+      "category": "comparison",
+      "id": "general-vs-project",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "60c6dd71-448a-4484-a41f-2272bfa996b5",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "comparison",
+      "id": "mixed-currencies",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "0fd0fdb2-f119-4e53-83fd-b3e4942909d5",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 5,
+      "final_response_schema": "VALID",
+      "read_only_semantic_replay": "REJECTED",
+      "semantic_rejection_reason": "Requirement-state assertion has ambiguous references.",
+      "attribution": "Retain RUNTIME_ERROR: schema-valid final output; semantic rejection alone does not establish model-only causality."
+    },
+    {
+      "category": "comparison",
+      "id": "unequal-quantities",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "8fbca7ee-6789-464d-a67f-4cc38080544e",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "comparison",
+      "id": "required-conflict",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "3a16767e-2766-4818-a6f7-eefc6ec17bec",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "clear-suggestion",
+      "recorded_classification": "RUNTIME_ERROR",
+      "air_run_id": "a29dc736-9740-409d-bec4-0da10eaded6d",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "VALIDATION_FAILED"
+        }
+      ],
+      "captured_tool_call_count": 5,
+      "final_response_schema": "VALID",
+      "read_only_semantic_replay": "REJECTED",
+      "semantic_rejection_reason": "Requirement-state assertion has ambiguous references.",
+      "attribution": "Retain RUNTIME_ERROR: schema-valid final output; semantic rejection alone does not establish model-only causality."
+    },
+    {
+      "category": "suggestion",
+      "id": "tie",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "6d05d2dc-58f7-4165-936f-530dd3bad619",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "critical-unknown",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "3b223f01-2b7b-46db-aa9f-6d9774bb0f4d",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "required-failure",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "54ff4e64-ca78-4046-98db-5fb6a2fdfed9",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "incomplete-evidence",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "3d05b31f-1dab-4b5e-ac01-47dd071b186a",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "user-correction",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "b867ec56-9000-40f5-8c68-263afd0e8734",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "incomparable-prices",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "1fa5089c-0f9e-4320-8c17-9733d2d49ada",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "general-vs-project",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "31918190-28cb-4c02-9c0e-dee5756d0fb9",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 7,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "mixed-currencies",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "8481d6f2-9ebc-4308-9660-1899b9772bc0",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "unequal-quantities",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "bb66d726-ca69-4cb6-ac5a-2297457a5dfb",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    },
+    {
+      "category": "suggestion",
+      "id": "required-conflict",
+      "recorded_classification": "QUALITY_FINDING",
+      "air_run_id": "e2c5956e-1ec4-435d-9602-382bc7e85fff",
+      "failed_assertions": [
+        {
+          "name": "runtime_completion",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "FAILED_LIMIT_REACHED"
+        }
+      ],
+      "captured_tool_call_count": 8,
+      "final_response_schema": "NO_FINAL_JSON"
+    }
+  ],
+  "persisted_airun_count": 69,
+  "persisted_airun_status_counts": {
+    "COMPLETED": 34,
+    "VALIDATION_FAILED": 20,
+    "FAILED_LIMIT_REACHED": 15
+  },
+  "category_counts": {
+    "brief": {
+      "QUALITY_FINDING": 23,
+      "PASS": 1
+    },
+    "clarification": {
+      "PASS": 12
+    },
+    "supplier_explanation": {
+      "PASS": 4,
+      "EXPECTED_REJECTION": 5,
+      "RUNTIME_ERROR": 2
+    },
+    "quote_extraction": {
+      "QUALITY_FINDING": 10,
+      "EXPECTED_REJECTION": 2
+    },
+    "comparison": {
+      "QUALITY_FINDING": 5,
+      "RUNTIME_ERROR": 4,
+      "EXPECTED_REJECTION": 4
+    },
+    "suggestion": {
+      "RUNTIME_ERROR": 1,
+      "QUALITY_FINDING": 10,
+      "EXPECTED_REJECTION": 7
+    }
+  },
+  "provider_error_count": 0,
+  "run_usage": {
+    "input_tokens": 206713,
+    "output_tokens": 58714,
+    "latency_ms": 750666
+  },
+  "airun_metadata_count": 69,
+  "usage_available_runs": 69,
+  "required_cases_exactly_once": true,
+  "consumed_hash_count": 90,
+  "consumed_hashes_match": true,
+  "human_review_pending": true,
+  "critical_assertion_counts": {
+    "brief.requirements": 12,
+    "brief.ambiguities": 4,
+    "brief.category": 12,
+    "brief.product_name": 10,
+    "brief.delivery_target": 1,
+    "brief.attributes": 2,
+    "runtime_completion": 28
+  },
+  "preservation": {
+    "application_unchanged": true,
+    "test_unchanged": true,
+    "root_env_unchanged": true,
+    "existing_evidence_and_fixtures_unchanged": true
+  }
+}

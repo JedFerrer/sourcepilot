@@ -1,0 +1,391 @@
+{
+  "classification": "PROVIDER_EXECUTION_FAILURE; no model-quality verdict",
+  "provider_cause": "Not established: existing evidence retains ModelProviderError, not provider HTTP status or body.",
+  "runner_exit_code": 2,
+  "full_scope": false,
+  "selected_scope_complete": true,
+  "cases": [
+    {
+      "id": "harbor-primary",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "fd26aef5-0cee-42aa-8191-a61085c1f701",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "1b48b67a08bf3d538a35a24fe63ba86f291d4fd16dfbf70f2e0c5c5cf0daf3c1",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 4891,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "willow-primary",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "4a2c7ab3-d50d-401b-a192-bb0cecc542d3",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "46170fdc2ed88c253d4e5e7ab955153d6ce3ad345106c6cc6091ff53f8655a6e",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 1468,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "moss-primary",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "15c8a098-1f5f-4155-b1aa-2ceede8813d4",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "04e7ade14b7b5d1457350f89865d1b37299eb8bc47b90bd7a3f53fb67c9d1fe5",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 625,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "missing-shipping",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "04367619-175e-47ab-bddf-5c51c9d32a5a",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "f1e31e3f259d8bb132c7449805993ca0b1008c6871dd223393ec5b653b7435f6",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 750,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "conflicting-lead-time",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "83f3574d-3631-47ae-98c0-68b6cbe9d1bf",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "4519d5a5800bbb4055316f79e74fdbf5d78ca094e45c6b88de2d9f90e238b377",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 625,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "included-tooling",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "17073af4-64a9-4f34-82d8-b9e82246dba0",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "71b7ef05d47f147ae7b8eab223f8dc3b286f38640a75c131c15e49e8c1bacf35",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 577,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "missing-moq",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "6792c304-c412-42f1-8ee3-62b69f3991e9",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "d578a81fec477e8c9cf27b8462d8c110875eebaa580b48a2f428d2b476fdfe78",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 531,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "quantity-mismatch",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "66ab443d-ac91-48f0-8194-bbea3e7e2924",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "7a129383eee27cb35c16053b89c0cab94b16de6e65bdd17bf86f90e971c2df42",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 625,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "non-usd",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "98d931aa-9601-43dc-8804-d0e039e08d19",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "1c8953716f6d3a7ef57998e6ee22bb99bc1b29dc614768dc3b4048b6fbe94df1",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 577,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "explicit-unknown",
+      "status": "PROVIDER_ERROR",
+      "air_run": {
+        "id": "c28951a9-8a6f-4571-8127-c12dfed7cb24",
+        "operation": "quote_extractor",
+        "model": "gpt-6-luna",
+        "prompt_version": "quote-extractor-v2",
+        "input_hash": "36f642804340a40d0c6208a5a4e88c4992077fd8b6a256f2c2c79427550934fd",
+        "status": "PROVIDER_FAILED",
+        "attempts": 1,
+        "validation_status": null,
+        "error_type": "ModelProviderError",
+        "latency_ms": 609,
+        "input_tokens": null,
+        "output_tokens": null,
+        "model_turn_count": null,
+        "tool_call_count": null
+      },
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not reached; no model response",
+      "input_fingerprint_matches_v2_case": true,
+      "inspection": {
+        "monetary_values": "NOT_ASSESSABLE: no returned model output",
+        "integer_quantities_and_moq": "NOT_ASSESSABLE: no returned model output",
+        "original_currency": "NOT_ASSESSABLE: no returned model output",
+        "included_tooling": "NOT_ASSESSABLE: no returned model output",
+        "unknown_handling": "NOT_ASSESSABLE: no returned model output",
+        "conflict_handling": "NOT_ASSESSABLE: no returned model output",
+        "source_block_provenance": "NOT_ASSESSABLE: no returned model output"
+      }
+    },
+    {
+      "id": "unsupported-image-only",
+      "status": "EXPECTED_REJECTION",
+      "air_run": null,
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not applicable: expected parser rejection before provider",
+      "input_fingerprint_matches_v2_case": null,
+      "inspection": {
+        "monetary_values": "NOT_APPLICABLE: parser rejection",
+        "integer_quantities_and_moq": "NOT_APPLICABLE: parser rejection",
+        "original_currency": "NOT_APPLICABLE: parser rejection",
+        "included_tooling": "NOT_APPLICABLE: parser rejection",
+        "unknown_handling": "NOT_APPLICABLE: parser rejection",
+        "conflict_handling": "NOT_APPLICABLE: parser rejection",
+        "source_block_provenance": "NOT_APPLICABLE: parser rejection"
+      }
+    },
+    {
+      "id": "malformed-pdf",
+      "status": "EXPECTED_REJECTION",
+      "air_run": null,
+      "captured_response_count": 0,
+      "validation_failures": null,
+      "validation_note": "Not applicable: expected parser rejection before provider",
+      "input_fingerprint_matches_v2_case": null,
+      "inspection": {
+        "monetary_values": "NOT_APPLICABLE: parser rejection",
+        "integer_quantities_and_moq": "NOT_APPLICABLE: parser rejection",
+        "original_currency": "NOT_APPLICABLE: parser rejection",
+        "included_tooling": "NOT_APPLICABLE: parser rejection",
+        "unknown_handling": "NOT_APPLICABLE: parser rejection",
+        "conflict_handling": "NOT_APPLICABLE: parser rejection",
+        "source_block_provenance": "NOT_APPLICABLE: parser rejection"
+      }
+    }
+  ],
+  "available_latency_ms": {
+    "total": 11278,
+    "note": "AIRun operation latency; not provider-only latency"
+  },
+  "usage": "Unavailable: input/output tokens null for all ten AIRuns; no zero-token claim",
+  "metrics": {
+    "parser_rejection": "2/2",
+    "runtime_completion": "0/10",
+    "extraction_measurements": "Unavailable; no output for any of ten attempted extractions"
+  },
+  "fingerprints_recomputed_match": true,
+  "human_review": {
+    "status": "PENDING",
+    "case_count": 10,
+    "review_results": "All null; no human verdict recorded. Filtered report selects zero narrative cases; this does not clear the full ten-case set."
+  }
+}

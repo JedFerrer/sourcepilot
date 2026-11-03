@@ -415,3 +415,121 @@ def test_api_preconditions_do_not_call_provider(client: TestClient, engine: Engi
         session.commit()
     stale = client.post(f"/projects/{project_id}/comparison/analysis")
     assert stale.status_code == 409 and stale.json()["error"]["code"] == "COMPARISON_STALE"
+
+
+def test_n4_tradeoff_prompt_guidance() -> None:
+    assert PROMPT_VERSION == "tradeoff-analysis-v3"
+    for guidance in (
+        "Use the supplied current comparison first", "do not reread",
+        "specific claims", "reuse retrieved results", "four model turns",
+        "six successful tool calls", "Every call in a batch",
+        "Reserve capacity for final output", "Provider retries",
+        "Known quote fields and MEETS requirements", "grouped citations",
+        "original PDF value as provenance", "all required",
+    ):
+        assert guidance in INSTRUCTIONS
+
+
+@pytest.mark.parametrize("mutation", [
+    "none", "known-field", "meets-requirement", "mixed-meets-group",
+    "omit-conflict", "omit-unknown", "omit-failure",
+])
+def test_n4_conflicts_and_required_disclosures(mutation: str) -> None:
+    from sourcepilot.ai.tradeoff_analysis_eval import CERT, LEAD, A, B, fixture_snapshot
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    payload = cast(dict[str, Any], snapshot.comparison_payload)
+    output = valid_output(payload)
+    # Correction provenance belongs in a summary, while A's genuine lead-time
+    # conflict and C's certification unknown remain in their own sections.
+    output["supplier_summaries"][0]["text"] = (
+        "Current confirmed price is USD 4.50; original PDF price was USD 4.22, "
+        "which does not verify the user correction.")
+    point = {"text": "Comparison finding.", "supplier_ids": [A],
+             "requirement_ids": [], "quote_fields": [], "evidence_ids": []}
+    if mutation == "known-field":
+        point["quote_fields"] = [{"quote_id": payload["suppliers"][0]["quote_id"],
+                                  "field_key": "unit_price"}]
+        output["important_conflicts"].append(point)
+    elif mutation == "meets-requirement":
+        point.update(supplier_ids=[B], requirement_ids=[LEAD])
+        output["important_conflicts"].append(point)
+    elif mutation == "mixed-meets-group":
+        output["important_conflicts"][0]["supplier_ids"].append(B)
+    elif mutation == "omit-conflict":
+        output["important_conflicts"] = []
+    elif mutation == "omit-unknown":
+        output["important_unknowns"] = []
+    elif mutation == "omit-failure":
+        for summary in output["supplier_summaries"]:
+            summary["requirement_ids"] = []
+    analysis = TradeoffAnalysis.model_validate(output)
+    if mutation == "none":
+        validate_analysis(analysis, snapshot)
+        assert analysis.important_conflicts[0].requirement_ids == [UUID(LEAD)]
+        assert any(UUID(CERT) in point.requirement_ids for point in analysis.important_unknowns)
+    else:
+        with pytest.raises(ValueError):
+            validate_analysis(analysis, snapshot)
+
+
+def semantic_repair_output(payload: dict[str, Any]) -> dict[str, Any]:
+    """Canonical states plus separately cited facts/provenance, using the eval snapshot."""
+    from sourcepilot.ai.tradeoff_analysis_eval import CERT, PDF_PRICE, A, C
+
+    output = valid_output(payload)
+    labels = {"CERTIFICATION": "certification", "PRODUCTION_LEAD_TIME": "production lead time"}
+    requirements = {row["id"]: row for row in payload["brief"]["requirements"]}
+    for summary, supplier in zip(output["supplier_summaries"], payload["suppliers"], strict=True):
+        summary["requirement_ids"] = [CERT]
+        state = supplier["evaluation"]["results"][0]["status"]
+        summary["text"] = f"{supplier['supplier_name']} certification is {state}."
+    for section in ("important_unknowns", "important_conflicts"):
+        for point in output[section]:
+            supplier = next(row for row in payload["suppliers"]
+                            if row["supplier_id"] == point["supplier_ids"][0])
+            kind = labels[requirements[point["requirement_ids"][0]]["kind"]]
+            state = "UNKNOWN" if section == "important_unknowns" else "CONFLICT"
+            point["text"] = f"{supplier['supplier_name']} {kind} is {state}."
+    first, _, third = payload["suppliers"]
+    output["key_tradeoffs"] = [{
+        "text": "Supplier A quoted production lead time is 25 days.",
+        "supplier_ids": [A], "requirement_ids": [], "evidence_ids": [],
+        "quote_fields": [{"quote_id": first["quote_id"], "field_key": "production_lead_time"}],
+    }, {
+        "text": ("Supplier A current confirmed price is USD 4.50. Original PDF price was "
+                 "USD 4.22; it does not verify the user correction. Currency must be "
+                 "established before comparing any price without a currency."),
+        "supplier_ids": [A], "requirement_ids": [], "evidence_ids": [PDF_PRICE],
+        "quote_fields": [{"quote_id": first["quote_id"], "field_key": "unit_price"}],
+    }]
+    output["supplier_summaries"][2]["text"] = (
+        "Supplier C quoted production lead time is 30 days. Supplier C certification is UNKNOWN.")
+    output["important_unknowns"].append({
+        "text": "Supplier C shipping cost is UNKNOWN.", "supplier_ids": [C],
+        "requirement_ids": [], "evidence_ids": [],
+        "quote_fields": [{"quote_id": third["quote_id"], "field_key": "shipping_cost"}],
+    })
+    return output
+
+
+@pytest.mark.parametrize("text", [
+    "Supplier A is marked MEETS for certification.",
+    "Supplier A certification is evaluated as MEETS.",
+    "According to the comparison Supplier A certification is MEETS.",
+    "Supplier A GRS requirement is MEETS.",
+    "Supplier A certification is MEETS whereas Supplier B does not meet it.",
+    "Supplier A certification is MEETS. Its certification is MEETS.",
+    "Supplier A (11111111-1111-1111-1111-111111111111) certification is MEETS.",
+])
+def test_semantic_repair_keeps_closed_grammar(text: str) -> None:
+    from sourcepilot.ai.tradeoff_analysis_eval import fixture_snapshot
+
+    snapshot = fixture_snapshot()
+    assert snapshot.comparison_payload is not None
+    output = semantic_repair_output(cast(dict[str, Any], snapshot.comparison_payload))
+    validate_analysis(TradeoffAnalysis.model_validate(output), snapshot)
+    output["supplier_summaries"][0]["text"] = text
+    with pytest.raises(ValueError):
+        validate_analysis(TradeoffAnalysis.model_validate(output), snapshot)

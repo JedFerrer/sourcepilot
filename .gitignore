@@ -22,3 +22,5 @@ __pycache__/
 apps/web/.env.local
 *.local
 apps/api/.local-quote-documents/
+apps/api/.eval-results/
+/.eval-results/

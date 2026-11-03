@@ -1,0 +1,84 @@
+[
+  {
+    "id": "mixed-currency-ranking",
+    "category": "comparison",
+    "fixture_case_id": "mixed-currencies",
+    "narrative_example": "Supplier B wins on unit price over Supplier A, although B quotes AUD and A quotes USD.",
+    "review_criteria": "Flag a relative price conclusion when original currencies differ and no conversion basis exists; inspect the full paragraph for qualification.",
+    "why_automation_is_insufficient": "A word list cannot determine every implied ranking or whether a warning qualifies the conclusion."
+  },
+  {
+    "id": "mixed-currency-warning",
+    "category": "suggestion",
+    "fixture_case_id": "mixed-currencies",
+    "narrative_example": "A quotes USD 4.50 and B quotes AUD 3.90; those unit prices have no common basis for a direct ranking.",
+    "review_criteria": "Accept accurate supplier-bound prices and an unambiguous warning; do not infer an FX conversion.",
+    "why_automation_is_insufficient": "Valid warnings can be phrased without the scorer's warning vocabulary."
+  },
+  {
+    "id": "unequal-quantity-ranking",
+    "category": "comparison",
+    "fixture_case_id": "unequal-quantities",
+    "narrative_example": "Supplier B has the better unit rate for this order, despite quoting 5,000 units against A's 2,000.",
+    "review_criteria": "Flag an equivalent-order price ranking when quoted quantities differ and the mismatch is not resolved.",
+    "why_automation_is_insufficient": "The intended comparison and force of a quantity caveat depend on sentence context."
+  },
+  {
+    "id": "unequal-quantity-warning",
+    "category": "suggestion",
+    "fixture_case_id": "unequal-quantities",
+    "narrative_example": "B's 5,000-unit quotation is USD 3.90 per unit; A's 2,000-unit quotation is USD 4.50, so the figures are not like-for-like.",
+    "review_criteria": "Accept the exact figures when tied to their suppliers and quantities and the mismatch is clear.",
+    "why_automation_is_insufficient": "A valid like-for-like warning need not use a fixed comparison phrase."
+  },
+  {
+    "id": "unsupported-supplier-action",
+    "category": "supplier_explanation",
+    "fixture_case_id": "clear-match",
+    "narrative_example": "The supplier designs surgical implants.",
+    "evidence_context": "The cited fetched evidence supports recycled polyester bags only.",
+    "review_criteria": "Flag the surgical-implant design capability; a valid but unrelated evidence ID does not support it.",
+    "why_automation_is_insufficient": "Evidence-ID validity and word overlap do not establish whether an authored capability follows from the evidence."
+  },
+  {
+    "id": "supported-capability-paraphrase",
+    "category": "supplier_explanation",
+    "fixture_case_id": "clear-match",
+    "narrative_example": "The workshop can fabricate recycled polyester bags.",
+    "evidence_context": "The cited fetched evidence says the supplier produces recycled polyester bags.",
+    "review_criteria": "Accept the making-action paraphrase if the cited evidence supports the same product and capability.",
+    "why_automation_is_insufficient": "Lexical equivalence is bounded and cannot certify arbitrary paraphrases."
+  },
+  {
+    "id": "general-lead-paraphrase",
+    "category": "comparison",
+    "fixture_case_id": "general-vs-project",
+    "narrative_example": "Across its catalog, Supplier A normally needs about 50 days; this project's quote is 25 days.",
+    "review_criteria": "Accept 50 days as general context and 25 days as the project quotation, with both sources kept distinct.",
+    "why_automation_is_insufficient": "Clause scope and source attribution cannot be settled exhaustively by nearby keywords."
+  },
+  {
+    "id": "wrong-general-lead",
+    "category": "comparison",
+    "fixture_case_id": "general-vs-project",
+    "narrative_example": "Supplier A's normal catalog lead time is 25 days.",
+    "review_criteria": "Flag the 25-day value when attributed to the catalog; 25 days belongs to the project quote, while general lead time is 50 days.",
+    "why_automation_is_insufficient": "The source implied by natural phrasing may be outside a fixed lexical window."
+  },
+  {
+    "id": "combined-correct-lead",
+    "category": "suggestion",
+    "fixture_case_id": "general-vs-project",
+    "narrative_example": "Supplier A usually takes 50 days for catalog work, but its quoted production period for this order is 25 days.",
+    "review_criteria": "Accept the combined sentence only if each duration is attributed to its correct general or project-specific source.",
+    "why_automation_is_insufficient": "Two source scopes in one sentence can defeat local keyword matching."
+  },
+  {
+    "id": "combined-wrong-lead",
+    "category": "suggestion",
+    "fixture_case_id": "general-vs-project",
+    "narrative_example": "Supplier A usually takes 25 days for catalog work, but its quoted production period for this order is 50 days.",
+    "review_criteria": "Flag both reversed attributions; the catalog value is 50 days and the project quote is 25 days.",
+    "why_automation_is_insufficient": "Keyword proximity alone can misassign the two values in a combined sentence."
+  }
+]

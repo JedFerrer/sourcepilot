@@ -1,0 +1,12 @@
+{
+  "started_at": "2026-11-03T02:40:40.859574+00:00",
+  "status": "BLOCKED",
+  "databases": {},
+  "provider_calls_before_preflight": 0,
+  "fixture_writes_before_preflight": 0,
+  "repository_heads": [
+    "0015_preferred_supplier"
+  ],
+  "error_type": "EvalPreflightError",
+  "completed_at": "2026-11-03T02:40:51.341941+00:00"
+}
