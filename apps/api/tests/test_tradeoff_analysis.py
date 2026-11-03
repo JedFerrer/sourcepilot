@@ -227,7 +227,11 @@ def test_contract_rejects_unpermitted_references_and_scores() -> None:
         validate_analysis(TradeoffAnalysis.model_validate(output), snapshot)
 
 
-def test_preconditions_and_success(client: TestClient, engine: Engine) -> None:
+def test_preconditions_and_success(client: TestClient, engine: Engine, monkeypatch: pytest.MonkeyPatch) -> None:
+    from tests.test_ai_tracing import Observation
+
+    calls = []
+    monkeypatch.setattr("sourcepilot.ai.tracing.langfuse_client", lambda: Observation(calls))
     project_id, supplier_ids = setup_project(client)
     with Session(engine) as session:
         project = session.get(Project, UUID(project_id))
@@ -252,6 +256,9 @@ def test_preconditions_and_success(client: TestClient, engine: Engine) -> None:
         run = session.get(AIRun, response.run_id)
         assert run is not None and run.status == "COMPLETED"
         assert run.model_turn_count == 2 and run.tool_call_count == 1
+        assert (run.input_tokens, run.output_tokens) == (4, 2)
+        assert any(call.get("name") == "tradeoff_analysis" for call in calls)
+        assert sum("usage_details" in call for call in calls) == 2
         assert run.prompt_version == PROMPT_VERSION
         initial = {key: model.inputs[0][key] for key in (
             "snapshot_id", "brief_revision", "quote_revision_snapshot", "comparison_payload")}

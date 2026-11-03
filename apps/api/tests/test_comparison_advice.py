@@ -772,7 +772,13 @@ def invoke(session: Session, project: Project, snapshot_id: UUID, model: AdviceM
 
 
 @pytest.mark.parametrize("selected", [False, True])
-def test_combined_success_trace_and_hash(client: TestClient, engine: Engine, selected: bool) -> None:
+def test_combined_success_trace_and_hash(
+    client: TestClient, engine: Engine, selected: bool, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tests.test_ai_tracing import Observation
+
+    calls = []
+    monkeypatch.setattr("sourcepilot.ai.tracing.langfuse_client", lambda: Observation(calls))
     project_id, _, _ = ready(client)
     snapshot_id = UUID(client.get(f"/projects/{project_id}/comparison").json()["id"])
     with Session(engine) as session:
@@ -785,6 +791,8 @@ def test_combined_success_trace_and_hash(client: TestClient, engine: Engine, sel
         assert (run.operation, run.prompt_version, run.validation_status) == (
             "comparison_advice", PROMPT_VERSION, "REPAIRED")
         assert (run.model_turn_count, run.tool_call_count, run.status) == (3, 1, "COMPLETED")
+        assert any(call.get("name") == "comparison_advice" for call in calls)
+        assert sum("usage_details" in call for call in calls) == 3
         assert run.input_hash == structured_input_hash(
             instructions=INSTRUCTIONS, input_text=json.dumps(model.inputs[0], sort_keys=True))
         steps = session.scalars(select(SupplierExplanationRunStep).where(
@@ -796,6 +804,38 @@ def test_combined_success_trace_and_hash(client: TestClient, engine: Engine, sel
         assert result.snapshot_id == snapshot_id
         assert model.last_schema == "ComparisonAdviceV1"
         assert str(model.last_instructions).startswith(INSTRUCTIONS)
+
+
+@pytest.mark.parametrize("partial", [False, True])
+def test_analyst_usage_does_not_invent_missing_tokens(
+    client: TestClient, engine: Engine, partial: bool,
+) -> None:
+    class UsageModel(AdviceModel):
+        def invoke_with_tools(self, **kwargs: object) -> AnalystModelInvocation:
+            response = super().invoke_with_tools(**kwargs)
+            return AnalystModelInvocation(
+                response.output_text, response.output_items,
+                2 if partial and self.calls == 2 else None, None,
+            )
+
+    project_id, _, _ = ready(client)
+    snapshot_id = UUID(client.get(f"/projects/{project_id}/comparison").json()["id"])
+    with Session(engine) as session:
+        project = session.get(Project, UUID(project_id))
+        assert project is not None
+        result = invoke(session, project, snapshot_id, UsageModel(actions=["tool", "final"]))
+        run = session.get(AIRun, result.run_id)
+        assert run is not None and run.status == "COMPLETED"
+        assert run.input_tokens == (2 if partial else None)
+        assert run.output_tokens is None
+        steps = session.scalars(select(SupplierExplanationRunStep).where(
+            SupplierExplanationRunStep.air_run_id == run.id,
+            SupplierExplanationRunStep.kind == "usage",
+        ).order_by(SupplierExplanationRunStep.sequence)).all()
+        assert [(step.name, step.outcome) for step in steps] == [
+            ("input_tokens", "PARTIAL" if partial else "UNAVAILABLE"),
+            ("output_tokens", "UNAVAILABLE"),
+        ]
 
 
 @pytest.mark.parametrize("actions,limits,status", [

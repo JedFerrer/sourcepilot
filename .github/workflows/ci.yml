@@ -177,6 +177,11 @@ jobs:
       - name: Full offline eval baseline (no provider calls)
         working-directory: apps/api
         run: uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode offline --output .eval-results/ci
+      - name: Optional metadata-only tracing adapter (no network export)
+        working-directory: apps/api
+        run: |
+          uv sync --dev --extra observability --locked
+          uv run --no-sync pytest tests/test_ai_tracing.py
 
   build:
     runs-on: ubuntu-latest

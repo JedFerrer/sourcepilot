@@ -61,6 +61,7 @@ from sourcepilot.persistence.models import (
     QuoteDocument,
     QuoteFieldEvidence,
     QuoteValue,
+    SupplierExplanationRunStep,
 )
 from sourcepilot.quotes.service import QuoteWorkflowError, create_manual_quote
 from sourcepilot.suppliers.seed import seed_suppliers
@@ -1282,9 +1283,14 @@ def test_queued_old_attempt_exits_after_stale_retry_without_side_effects(
         assert document.processing_status == "PROCESSING" and document.processing_completed_at is None
 
 
-def test_retry_during_extraction_cannot_update_old_attempt_trace(
+@pytest.mark.parametrize("prior,outcome,complete_newer", [
+    (None, "FINAL", False), ("repair", "FINAL", False), ("provider", "FINAL", False),
+    (None, "PROVIDER_ERROR", False), (None, "TIMEOUT", False), (None, "ERROR", False),
+    (None, "FINAL", True),
+])
+def test_retry_during_extraction_finalizes_only_old_attempt_trace(
     storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, prior: str | None, outcome: str, complete_newer: bool,
 ) -> None:
     api, storage = storage_client
     project_id, supplier_id, _ = setup_shortlist(api)
@@ -1295,30 +1301,83 @@ def test_retry_during_extraction_cannot_update_old_attempt_trace(
     scheduled: list[tuple[UUID, int]] = []
     monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing",
                         lambda doc_id, attempt: scheduled.append((doc_id, attempt)))
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+    newer_result: dict[str, Any] | None = None
 
     class SupersedingClient(RecordedClient):
+        calls = 0
+
         def invoke(self, **kwargs: object) -> ModelInvocation:
+            nonlocal newer_result
+            self.calls += 1
+            if prior is not None and self.calls == 1:
+                if prior == "provider":
+                    raise ModelProviderError("private provider detail", retryable=True)
+                return ModelInvocation("private invalid model output", 1, 1)
             with Session(engine) as session:
                 document = session.get(QuoteDocument, document_id)
                 assert document is not None
                 document.processing_started_at = datetime.now(UTC) - timedelta(seconds=601)
                 session.commit()
             assert api.post(f"/quotes/{quote_id}/retry").status_code == 200
+            if complete_newer:
+                process_pdf_quote(document_id, 2, session_factory=factory,
+                                  storage=storage, settings=document_settings_from_environment(),
+                                  client_factory=lambda: RecordedClient("harbor-primary"))
+                newer_result = api.get(f"/quotes/{quote_id}").json()
+            if outcome == "ERROR":
+                raise RuntimeError("private unexpected detail")
+            if outcome == "TIMEOUT":
+                raise ModelProviderError("private provider detail", retryable=True) from TimeoutError(
+                    "private timeout detail")
+            if outcome == "PROVIDER_ERROR":
+                raise ModelProviderError("private provider detail", retryable=True)
             return super().invoke(**kwargs)
 
-    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+    model = SupersedingClient("harbor-primary")
+    process_pdf_quote(document_id, 1, session_factory=factory,
                       storage=storage, settings=document_settings_from_environment(),
-                      client_factory=lambda: SupersedingClient("harbor-primary"))
+                      client_factory=lambda: model)
     assert scheduled == [(document_id, 2)]
+    assert model.calls == (2 if prior else 1)
     with Session(engine) as session:
-        run = session.scalar(select(AIRun).where(AIRun.operation == "quote_extractor"))
+        runs = session.scalars(select(AIRun).where(AIRun.operation == "quote_extractor")
+                               .order_by(AIRun.started_at)).all()
+        assert len(runs) == (2 if complete_newer else 1)
+        run = runs[0]
         assert run is not None
-        assert run.status == "RUNNING" and run.attempts == 1
-        assert run.completed_at is None
-        assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == UUID(quote_id))) is None
+        assert run.status == "FAILED" and run.attempts == model.calls
+        assert run.error_type == "StalePdfAttemptError"
+        assert run.completed_at is not None
+        steps = session.scalars(select(SupplierExplanationRunStep).where(
+            SupplierExplanationRunStep.air_run_id == run.id,
+        ).order_by(SupplierExplanationRunStep.sequence)).all()
+        prefix = ([('model', 'FINAL', None), ('validation', 'INVALID', None),
+                   ('retry', 'REPAIR', None)] if prior == "repair" else
+                  [('model', 'PROVIDER_ERROR', None), ('retry', 'PROVIDER', None)]
+                  if prior == "provider" else [])
+        usage = ("PARTIAL" if prior == "provider" else "COMPLETE") if outcome == "FINAL" else "UNAVAILABLE"
+        assert [(step.kind, step.outcome, step.name) for step in steps] == prefix + [
+            ("model", outcome, None), ("scope", "CHANGED", None),
+            ("usage", usage, "input_tokens"), ("usage", usage, "output_tokens"),
+            ("run", "FAILED", None),
+        ]
+        assert [step.sequence for step in steps] == list(range(1, len(steps) + 1))
+        assert run.input_tokens == run.output_tokens == (
+            (2 if prior == "repair" else 1) if outcome == "FINAL" else None)
+        assert run.estimated_cost is None
+        if not complete_newer:
+            assert session.scalar(select(QuoteValue).where(QuoteValue.quote_id == UUID(quote_id))) is None
+            assert session.scalar(select(QuoteFieldEvidence)) is None
+        else:
+            assert runs[1].status == "COMPLETED" and runs[1].completed_at is not None
         document = session.get(QuoteDocument, document_id)
-        assert document is not None and document.processing_status == "PROCESSING"
-        assert document.processing_attempts == 2 and document.processing_completed_at is None
+        assert document is not None and document.processing_attempts == 2
+        assert document.processing_status == document.quote.status == (
+            "NEEDS_REVIEW" if complete_newer else "PROCESSING")
+        assert (document.processing_completed_at is not None) == complete_newer
+    if complete_newer:
+        assert api.get(f"/quotes/{quote_id}").json() == newer_result
 
 
 def test_failed_replacement_has_one_active_document_and_rejects_late_worker(

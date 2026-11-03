@@ -43,6 +43,7 @@ from sourcepilot.persistence.models import (
     QuoteDocument,
     QuoteValue,
     Supplier,
+    SupplierExplanationRunStep,
 )
 from sourcepilot.quotes.domain import QUOTE_INTEGER_FIELDS, QUOTE_MONEY_FIELDS
 from tests.database_test_support import (
@@ -501,7 +502,9 @@ def test_numeric_runtime_delivery_and_limits_without_database(
         assert "tools" not in call
         assert '"id":"p1-b8","text":"Sample cost: USD 40"' in str(call["input_text"])
     assert quote.status == document.processing_status == "PROCESSING"
-    assert all(isinstance(call.args[0], AIRun) for call in database.add.call_args_list)
+    assert all(isinstance(call.args[0], (AIRun, SupplierExplanationRunStep))
+               for call in database.add.call_args_list)
+    assert sum(isinstance(call.args[0], AIRun) for call in database.add.call_args_list) == 1
 
 
 def resolved_schema(value: Any, root: dict[str, Any]) -> Any:

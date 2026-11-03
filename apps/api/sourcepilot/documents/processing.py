@@ -5,9 +5,10 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
 
-from sqlalchemy import delete, event, select
+from sqlalchemy import delete, event, func, select
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.client import OpenAIResponsesClient, StructuredModelClient
@@ -21,6 +22,7 @@ from sourcepilot.documents.settings import DocumentSettings, document_settings_f
 from sourcepilot.documents.storage import DocumentStorage, storage_from_settings
 from sourcepilot.persistence.database import application_session_factory
 from sourcepilot.persistence.models import (
+    AIRun,
     DemoSession,
     DocumentBlock,
     Project,
@@ -28,6 +30,7 @@ from sourcepilot.persistence.models import (
     QuoteDocument,
     QuoteFieldEvidence,
     QuoteValue,
+    SupplierExplanationRunStep,
 )
 from sourcepilot.quotes.domain import (
     QUOTE_FIELD_KEYS,
@@ -157,6 +160,7 @@ def process_pdf_quote(
         owner = _current_attempt(session, document_id, attempt)
     if owner is None:
         return
+    run_metadata: dict[str, Any] = {}
     try:
         parse_and_persist_document(
             session_factory, document_id, storage=storage, settings=settings,
@@ -168,8 +172,33 @@ def process_pdf_quote(
             # Structured extraction commits its AIRun several times. Guard each
             # commit in that transaction, including completion after model work.
             def guard_trace_write(active_session: Session) -> None:
+                # Remember only this worker's AI metadata for terminal failure cleanup.
+                # The guard still rejects every write from a superseded attempt.
                 with active_session.no_autoflush:
+                    for candidate in list(active_session.new) + list(active_session.identity_map.values()):
+                        if (isinstance(candidate, AIRun) and candidate.operation == "quote_extractor"
+                                and candidate.id is not None):
+                            run_metadata.update(
+                                id=candidate.id, demo_session_id=candidate.demo_session_id,
+                                project_id=candidate.project_id, attempts=candidate.attempts,
+                                input_tokens=candidate.input_tokens,
+                                output_tokens=candidate.output_tokens, latency_ms=candidate.latency_ms,
+                                usage={step.name: step.outcome for step in active_session.new
+                                       if isinstance(step, SupplierExplanationRunStep)
+                                       and step.air_run_id == candidate.id and step.kind == "usage"},
+                            )
                     if _locked_active_attempt(active_session, document_id, attempt) is None:
+                        # Capture only the first rejected write. Finalization may try
+                        # again with a synthetic ERROR after an actual FINAL/TIMEOUT.
+                        # Keep scalar, allowlisted outcomes, never the rejected ORM state.
+                        if run_metadata:
+                            run_metadata.setdefault("model_outcomes", sorted(
+                                (step.sequence, step.outcome) for step in active_session.new
+                                if isinstance(step, SupplierExplanationRunStep)
+                                and step.air_run_id == run_metadata["id"]
+                                and step.kind == "model"
+                                and step.outcome in {"FINAL", "PROVIDER_ERROR", "TIMEOUT", "ERROR"}
+                            ))
                         raise StalePdfAttemptError("PDF attempt was superseded.")
 
             event.listen(session, "before_commit", guard_trace_write)
@@ -181,10 +210,56 @@ def process_pdf_quote(
         _finish_success(session_factory, document_id, attempt, extraction)
     except Exception as error:  # noqa: BLE001 - background failures must become durable FAILED state
         logger.warning("PDF quote processing failed for document %s (%s)", document_id, type(error).__name__)
+        if run_metadata:
+            try:
+                _finish_interrupted_ai_run(session_factory, run_metadata, error)
+            except Exception:  # noqa: BLE001 - retain quote recovery if trace cleanup fails
+                logger.warning("Could not finalize interrupted quote AI run for document %s", document_id)
         try:
             _finish_failure(session_factory, document_id, attempt, "PROCESSING_FAILED")
         except Exception:
             logger.exception("Could not persist failed PDF quote processing for document %s", document_id)
+
+
+def _finish_interrupted_ai_run(
+    session_factory: Callable[[], Session], metadata: dict[str, Any], error: Exception,
+) -> None:
+    """Finalize only this worker's existing run after its guarded transaction rolls back.
+
+    Never persist the rejected draft or document/quote changes. Recover only
+    captured model outcomes that are absent from the committed run steps.
+    The newer attempt remains protected by the original guard and failure predicate.
+    """
+    with session_factory() as session, session.begin():
+        run = session.scalar(select(AIRun).where(
+            AIRun.id == metadata["id"], AIRun.demo_session_id == metadata["demo_session_id"],
+            AIRun.project_id == metadata["project_id"], AIRun.operation == "quote_extractor",
+            AIRun.completed_at.is_(None),
+        ).with_for_update())
+        if run is None:
+            return
+        run.status = "FAILED"
+        run.error_type = "StalePdfAttemptError" if isinstance(error, StalePdfAttemptError) else "PROCESSING_FAILED"
+        run.completed_at = datetime.now(UTC)
+        for key in ("attempts", "input_tokens", "output_tokens", "latency_ms"):
+            setattr(run, key, metadata[key])
+        sequence = session.scalar(select(func.max(SupplierExplanationRunStep.sequence)).where(
+            SupplierExplanationRunStep.air_run_id == run.id,
+        )) or 0
+        events = [("model", outcome, None)
+                  for original_sequence, outcome in metadata.get("model_outcomes", [])
+                  if original_sequence > sequence]
+        if isinstance(error, StalePdfAttemptError):
+            events.append(("scope", "CHANGED", None))
+        events += [("usage", metadata["usage"].get(
+            key, "PARTIAL" if metadata[key] is not None else "UNAVAILABLE",
+        ), key)
+                   for key in ("input_tokens", "output_tokens")]
+        events.append(("run", "FAILED", None))
+        for offset, (kind, outcome, name) in enumerate(events, 1):
+            session.add(SupplierExplanationRunStep(
+                air_run_id=run.id, sequence=sequence + offset, kind=kind, outcome=outcome, name=name,
+            ))
 
 
 class StalePdfAttemptError(RuntimeError):

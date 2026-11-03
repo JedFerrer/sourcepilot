@@ -27,12 +27,12 @@ from sourcepilot.ai.analyst_tools import (
 )
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
 from sourcepilot.ai.structured import provider_retry_delay_seconds, structured_input_hash
+from sourcepilot.ai.tracing import RunTrace, provider_failure_outcome
 from sourcepilot.persistence.models import (
     AIRun,
     DemoSession,
     Project,
     ProjectSupplier,
-    SupplierExplanationRunStep,
 )
 
 PROMPT_VERSION = "supplier-explanation-v2"
@@ -359,8 +359,8 @@ def explain_supplier(
     )
     session.add(air_run)
     session.commit()
-    started = time.monotonic()
-    sequence = 0
+    trace = RunTrace(session, air_run, max_model_turns=max_model_turns,
+                     max_tool_calls=max_tool_calls)
     fetched_evidence_ids: set[UUID] = set()
     evidence_tool_used = False
     repair_used = False
@@ -369,17 +369,10 @@ def explain_supplier(
     instructions = INSTRUCTIONS
     result: SupplierExplanation | None = None
 
-    def step(kind: str, outcome: str, name: str | None = None) -> None:
-        nonlocal sequence
-        sequence += 1
-        session.add(SupplierExplanationRunStep(
-            air_run_id=air_run.id, sequence=sequence, kind=kind,
-            outcome=outcome, name=name,
-        ))
-        session.commit()
+    step = trace.step
 
-    step("tool", "SUCCESS", "get_supplier_snapshot")
     try:
+        step("tool", "SUCCESS", "get_supplier_snapshot")
         while result is None:
             if turn_count >= max_model_turns:
                 air_run.status = "FAILED_LIMIT_REACHED"
@@ -389,6 +382,7 @@ def explain_supplier(
             air_run.model_turn_count = turn_count
             air_run.attempts = turn_count
             session.commit()
+            trace.begin("model")
             try:
                 invocation = client.invoke_with_tools(
                     instructions=instructions, input_items=input_items, tools=TOOLS,
@@ -396,7 +390,7 @@ def explain_supplier(
                     schema=ModelSupplierExplanation.model_json_schema(),
                 )
             except ModelProviderError as error:
-                step("model", "PROVIDER_ERROR")
+                step("model", provider_failure_outcome(error))
                 air_run.error_type = type(error).__name__
                 if error.retryable and not provider_retry_used:
                     provider_retry_used = True
@@ -405,8 +399,7 @@ def explain_supplier(
                     continue
                 air_run.status = "PROVIDER_FAILED"
                 break
-            air_run.input_tokens = (air_run.input_tokens or 0) + (invocation.input_tokens or 0)
-            air_run.output_tokens = (air_run.output_tokens or 0) + (invocation.output_tokens or 0)
+            trace.usage(invocation.input_tokens, invocation.output_tokens)
             calls = [item for item in invocation.output_items if item.get("type") == "function_call"]
             step("model", "TOOL_CALLS" if calls else "FINAL")
             if calls:
@@ -414,6 +407,7 @@ def explain_supplier(
                 for call in calls:
                     name = call.get("name")
                     call_id = call.get("call_id")
+                    trace.begin("tool", name if isinstance(name, str) else None)
                     try:
                         if not isinstance(call_id, str) or name not in {
                             "get_supplier_snapshot", "get_supplier_evidence",
@@ -513,9 +507,7 @@ def explain_supplier(
         raise
     finally:
         air_run.tool_call_count = runtime.successful_call_count
-        air_run.latency_ms = int((time.monotonic() - started) * 1000)
-        air_run.completed_at = datetime.now(UTC)
-        step("run", air_run.status)
+        trace.finish()
     if result is None:
         raise ExplanationUnavailableError("Supplier explanation is unavailable. Please retry.")
     return SupplierExplanationResponse(run_id=air_run.id, explanation=result)

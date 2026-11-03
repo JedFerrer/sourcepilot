@@ -1,3 +1,5 @@
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from typing import Annotated
 from uuid import UUID
 
@@ -18,6 +20,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from starlette.concurrency import run_in_threadpool
 
 from sourcepilot.ai.client import OpenAIResponsesClient
 from sourcepilot.ai.comparison_advice import (
@@ -32,6 +35,7 @@ from sourcepilot.ai.supplier_explanation import (
     analyst_limits_from_environment,
     explain_supplier,
 )
+from sourcepilot.ai.tracing import shutdown_tracing
 from sourcepilot.ai.tradeoff_analysis import (
     TradeoffAnalysisResponse,
     TradeoffNotReadyError,
@@ -136,7 +140,16 @@ from sourcepilot.suppliers.service import (
     update_supplier_review,
 )
 
-app = FastAPI(title="SourcePilot API")
+
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    try:
+        yield
+    finally:
+        await run_in_threadpool(shutdown_tracing)
+
+
+app = FastAPI(title="SourcePilot API", lifespan=lifespan)
 app.add_middleware(UploadBodyLimitMiddleware)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)

@@ -5,7 +5,6 @@ import json
 import random
 import time
 from collections.abc import Callable
-from datetime import UTC, datetime
 from typing import TypeVar
 from uuid import UUID
 
@@ -13,7 +12,7 @@ from pydantic import BaseModel, ValidationError
 from sqlalchemy.orm import Session
 
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
-from sourcepilot.ai.tracing import AIRunTracer, NoOpAIRunTracer
+from sourcepilot.ai.tracing import AIRunTracer, RunTrace, provider_failure_outcome
 from sourcepilot.persistence.models import AIRun, DemoSession
 
 MAX_PROVIDER_INVOCATIONS = 3
@@ -72,8 +71,7 @@ def run_structured_operation(
     database_session.add(air_run)
     database_session.commit()
 
-    active_tracer = tracer or NoOpAIRunTracer()
-    started = time.monotonic()
+    trace = RunTrace(database_session, air_run, tracer=tracer)
     current_instructions = instructions
     final_result: ResultModel | None = None
     provider_retry_used = False
@@ -84,6 +82,7 @@ def run_structured_operation(
         for invocation_number in range(1, MAX_PROVIDER_INVOCATIONS + 1):
             air_run.attempts = invocation_number
             database_session.commit()
+            trace.begin("model")
             try:
                 response = client.invoke(
                     instructions=current_instructions,
@@ -94,15 +93,17 @@ def run_structured_operation(
             except ModelProviderError as error:
                 provider_failure_seen = True
                 air_run.error_type = type(error).__name__
+                trace.step("model", provider_failure_outcome(error))
                 if error.retryable and not provider_retry_used:
                     provider_retry_used = True
+                    trace.step("retry", "PROVIDER")
                     sleep(provider_retry_delay_seconds(invocation_number))
                     continue
                 air_run.status = PROVIDER_FAILED
                 break
 
-            air_run.input_tokens = response.input_tokens
-            air_run.output_tokens = response.output_tokens
+            trace.usage(response.input_tokens, response.output_tokens)
+            trace.step("model", "FINAL")
             try:
                 final_result = result_model.model_validate_json(response.output_text)
                 if post_validate is not None:
@@ -111,8 +112,10 @@ def run_structured_operation(
                 final_result = None
                 air_run.validation_status = INVALID
                 air_run.error_type = type(error).__name__
+                trace.step("validation", "INVALID")
                 if not schema_repair_used:
                     schema_repair_used = True
+                    trace.step("retry", "REPAIR")
                     if isinstance(error, ValidationError):
                         current_instructions = f"{instructions}\nRepair the JSON schema failure: {error.errors()}"
                     else:
@@ -126,17 +129,12 @@ def run_structured_operation(
                     REPAIRED if air_run.validation_status == INVALID else VALID
                 )
                 air_run.error_type = ModelProviderError.__name__ if provider_failure_seen else None
+                trace.step("validation", "VALID")
                 break
     except Exception as error:
         air_run.status = FAILED
         air_run.error_type = type(error).__name__
-        air_run.latency_ms = int((time.monotonic() - started) * 1000)
-        air_run.completed_at = datetime.now(UTC)
-        database_session.commit()
         raise
-
-    air_run.latency_ms = int((time.monotonic() - started) * 1000)
-    air_run.completed_at = datetime.now(UTC)
-    database_session.commit()
-    active_tracer.record(air_run)
+    finally:
+        trace.finish()
     return final_result, air_run

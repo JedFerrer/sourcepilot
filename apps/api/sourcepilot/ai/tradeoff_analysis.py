@@ -6,7 +6,6 @@ import json
 import re
 import time
 from collections.abc import Callable
-from datetime import UTC, datetime
 from itertools import pairwise
 from typing import Any, TypeVar, cast
 from uuid import UUID
@@ -29,8 +28,9 @@ from sourcepilot.ai.analyst_tools import (
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
 from sourcepilot.ai.structured import provider_retry_delay_seconds, structured_input_hash
 from sourcepilot.ai.supplier_explanation import MAX_MODEL_TURNS, MAX_TOOL_CALLS
+from sourcepilot.ai.tracing import RunTrace, provider_failure_outcome
 from sourcepilot.comparison.advice import AnalysisPoint, QuoteFieldReference  # noqa: F401
-from sourcepilot.persistence.models import AIRun, SupplierExplanationRunStep
+from sourcepilot.persistence.models import AIRun
 from sourcepilot.quotes.domain import QUOTE_FIELD_KEYS
 
 PROMPT_VERSION = "tradeoff-analysis-v3"
@@ -742,21 +742,15 @@ def run_comparison_analyst(
     )
     session.add(air_run)
     session.commit()
-    started = time.monotonic()
-    sequence = 0
+    trace = RunTrace(session, air_run, max_model_turns=max_model_turns,
+                     max_tool_calls=max_tool_calls)
     turns = 0
     repair_used = False
     provider_retry_used = False
     instructions = base_instructions
     result: ResultT | None = None
 
-    def step(kind: str, outcome: str, name: str | None = None) -> None:
-        nonlocal sequence
-        sequence += 1
-        session.add(SupplierExplanationRunStep(
-            air_run_id=air_run.id, sequence=sequence, kind=kind, outcome=outcome, name=name,
-        ))
-        session.commit()
+    step = trace.step
 
     try:
         while result is None:
@@ -768,13 +762,14 @@ def run_comparison_analyst(
             air_run.model_turn_count = turns
             air_run.attempts = turns
             session.commit()
+            trace.begin("model")
             try:
                 invocation = client.invoke_with_tools(
                     instructions=instructions, input_items=input_items, tools=TOOLS,
                     schema_name=result_type.__name__, schema=result_type.model_json_schema(),
                 )
             except ModelProviderError as error:
-                step("model", "PROVIDER_ERROR")
+                step("model", provider_failure_outcome(error))
                 air_run.error_type = type(error).__name__
                 if error.retryable and not provider_retry_used:
                     provider_retry_used = True
@@ -783,14 +778,14 @@ def run_comparison_analyst(
                     continue
                 air_run.status = "PROVIDER_FAILED"
                 break
-            air_run.input_tokens = (air_run.input_tokens or 0) + (invocation.input_tokens or 0)
-            air_run.output_tokens = (air_run.output_tokens or 0) + (invocation.output_tokens or 0)
+            trace.usage(invocation.input_tokens, invocation.output_tokens)
             calls = [item for item in invocation.output_items if item.get("type") == "function_call"]
             step("model", "TOOL_CALLS" if calls else "FINAL")
             if calls:
                 input_items.extend(invocation.output_items)
                 for call in calls:
                     name, call_id = call.get("name"), call.get("call_id")
+                    trace.begin("tool", name if isinstance(name, str) else None)
                     try:
                         if not isinstance(name, str) or not isinstance(call_id, str):
                             raise TypeError("Invalid tool call.")
@@ -867,9 +862,7 @@ def run_comparison_analyst(
         raise
     finally:
         air_run.tool_call_count = runtime.successful_call_count
-        air_run.latency_ms = int((time.monotonic() - started) * 1000)
-        air_run.completed_at = datetime.now(UTC)
-        step("run", air_run.status)
+        trace.finish()
     if result is None:
         raise TradeoffUnavailableError("Tradeoff analysis is unavailable. Please retry.")
     assert snapshot.snapshot_id is not None

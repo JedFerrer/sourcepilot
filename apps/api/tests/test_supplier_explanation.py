@@ -235,8 +235,12 @@ class FakeClient:
 
 
 def test_grounded_success_persists_ordered_steps_and_run_id(
-    client: TestClient, engine: Engine,
+    client: TestClient, engine: Engine, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from tests.test_ai_tracing import Observation
+
+    calls = []
+    monkeypatch.setattr("sourcepilot.ai.tracing.langfuse_client", lambda: Observation(calls))
     demo_session_id, project_id, supplier_id = discovered(client, engine)
     with Session(engine) as session:
         result = explain_supplier(
@@ -252,8 +256,12 @@ def test_grounded_success_persists_ordered_steps_and_run_id(
     assert run.model_turn_count == 2 and run.tool_call_count == 2
     assert [(step.sequence, step.kind, step.outcome) for step in steps] == [
         (1, "tool", "SUCCESS"), (2, "model", "TOOL_CALLS"), (3, "tool", "SUCCESS"),
-        (4, "model", "FINAL"), (5, "validation", "VALID"), (6, "run", "COMPLETED"),
+        (4, "model", "FINAL"), (5, "validation", "VALID"),
+        (6, "usage", "COMPLETE"), (7, "usage", "COMPLETE"), (8, "run", "COMPLETED"),
     ]
+    assert (run.input_tokens, run.output_tokens) == (20, 10)
+    assert any(call.get("name") == "supplier_explanation" for call in calls)
+    assert sum("usage_details" in call for call in calls) == 2
     assert result.explanation.supplier_id == supplier_id
     assert result.explanation.evidence_ids
     suppliers = client.get(f"/projects/{project_id}/suppliers").json()["suppliers"]

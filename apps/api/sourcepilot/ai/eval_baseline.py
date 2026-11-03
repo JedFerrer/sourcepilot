@@ -414,7 +414,8 @@ def classify_live(
         terminal = None
         if analyst:
             steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
-            terminal = next((step for step in reversed(steps) if step.kind != "run"), None)
+            # Usage availability is terminal metadata, not the cause of the outcome.
+            terminal = next((step for step in reversed(steps) if step.kind not in {"run", "usage"}), None)
         if run.status == "FAILED_LIMIT_REACHED":
             model_caused = analyst and terminal is not None and (
                 (terminal.kind, terminal.outcome, terminal.name) == ("limit", "REACHED", "model_turns")

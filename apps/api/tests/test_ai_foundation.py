@@ -26,7 +26,7 @@ from sourcepilot.ai.structured import (
     run_structured_operation,
     structured_input_hash,
 )
-from sourcepilot.persistence.models import AIRun, DemoSession
+from sourcepilot.persistence.models import AIRun, DemoSession, SupplierExplanationRunStep
 from tests.database_test_support import (
     create_test_engine,
     persistence_test_database_url_from_environment,
@@ -283,6 +283,112 @@ def test_unexpected_error_finalizes_the_running_air_run_before_propagating(
     assert stored.status == FAILED
     assert stored.error_type == RuntimeError.__name__
     assert stored.completed_at is not None
+
+
+@pytest.mark.parametrize("operation", [
+    "brief_interpreter", "clarification_generator", "quote_extractor",
+])
+def test_structured_operations_record_repair_and_total_usage(
+    database_session: Session, operation: str, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from tests.test_ai_tracing import Observation
+
+    calls = []
+    monkeypatch.setattr("sourcepilot.ai.tracing.langfuse_client", lambda: Observation(calls))
+    result, run = run_structured_operation(
+        database_session, demo_session=demo_session(database_session), project_id=None,
+        operation=operation, prompt_version="fixture-v1", instructions="fixture", input_text="fixture",
+        result_model=Answer, client=FakeClient([
+            ModelInvocation("invalid", 3, 1), ModelInvocation('{"answer":"ok"}', 5, 2),
+        ]), sleep=lambda _: None,
+    )
+    assert result == Answer(answer="ok")
+    assert (run.input_tokens, run.output_tokens) == (8, 3)
+    steps = database_session.scalars(select(SupplierExplanationRunStep).where(
+        SupplierExplanationRunStep.air_run_id == run.id,
+    ).order_by(SupplierExplanationRunStep.sequence)).all()
+    assert [(step.kind, step.outcome, step.name) for step in steps] == [
+        ("model", "FINAL", None), ("validation", "INVALID", None),
+        ("retry", "REPAIR", None), ("model", "FINAL", None), ("validation", "VALID", None),
+        ("usage", "COMPLETE", "input_tokens"), ("usage", "COMPLETE", "output_tokens"),
+        ("run", "COMPLETED", None),
+    ]
+    assert [step.sequence for step in steps] == list(range(1, len(steps) + 1))
+    assert any(call.get("name") == operation for call in calls)
+    assert sum("usage_details" in call for call in calls) == 2
+
+
+@pytest.mark.parametrize("tokens,expected,outcome", [
+    ((None, None), None, "UNAVAILABLE"), ((0, 0), 0, "COMPLETE"),
+    ((None, 4), 4, "PARTIAL"), ((2, None), 2, "PARTIAL"),
+])
+def test_usage_preserves_unknown_partial_and_zero(
+    database_session: Session, tokens: tuple[int | None, int | None],
+    expected: int | None, outcome: str,
+) -> None:
+    _, run = run_for_test(database_session, FakeClient([
+        ModelInvocation("invalid", tokens[0], tokens[0]),
+        ModelInvocation('{"answer":"ok"}', tokens[1], tokens[1]),
+    ]))
+    assert run.input_tokens == run.output_tokens == expected
+    assert run.estimated_cost is None
+    steps = database_session.scalars(select(SupplierExplanationRunStep).where(
+        SupplierExplanationRunStep.air_run_id == run.id, SupplierExplanationRunStep.kind == "usage",
+    )).all()
+    assert [step.outcome for step in steps] == [outcome, outcome]
+
+
+def test_failing_optional_tracer_preserves_success_and_original_exception(database_session: Session) -> None:
+    class BrokenTracer:
+        def record(self, air_run: AIRun) -> None:
+            raise RuntimeError("optional tracing failed")
+
+    owner = demo_session(database_session)
+    for error in (None, ValueError("original failure")):
+        def execute(error: ValueError | None = error) -> tuple[Answer | None, AIRun]:
+            return run_structured_operation(
+                database_session, demo_session=owner, project_id=None, operation="brief_interpreter",
+                prompt_version="fixture", instructions="fixture", input_text="fixture",
+                result_model=Answer, tracer=BrokenTracer(),
+                client=FakeClient([error if error else ModelInvocation('{"answer":"ok"}', 1, 1)]),
+            )
+
+        if error is None:
+            assert execute()[0] == Answer(answer="ok")
+        else:
+            with pytest.raises(ValueError, match="original failure"):
+                execute()
+    runs = database_session.scalars(select(AIRun)).all()
+    assert len(runs) == 2 and all(run.completed_at is not None for run in runs)
+    assert {run.status for run in runs} == {"COMPLETED", "FAILED"}
+
+
+def test_timeout_retry_remains_visible_after_success(database_session: Session) -> None:
+    timeout = ModelProviderError("sensitive provider body", retryable=True)
+    timeout.__cause__ = TimeoutError("sensitive timeout")
+    _, run = run_for_test(database_session, FakeClient([
+        timeout, ModelInvocation('{"answer":"ok"}', 4, 2),
+    ]))
+    steps = database_session.scalars(select(SupplierExplanationRunStep).where(
+        SupplierExplanationRunStep.air_run_id == run.id,
+    ).order_by(SupplierExplanationRunStep.sequence)).all()
+    assert [(step.kind, step.outcome) for step in steps][:2] == [
+        ("model", "TIMEOUT"), ("retry", "PROVIDER"),
+    ]
+    assert [step.outcome for step in steps if step.kind == "usage"] == ["PARTIAL", "PARTIAL"]
+    assert run.status == "COMPLETED" and run.attempts == 2
+
+
+def test_interruption_is_terminal_without_swallowing_it(database_session: Session) -> None:
+    class InterruptedClient(FakeClient):
+        def invoke(self, **kwargs: object) -> ModelInvocation:
+            raise KeyboardInterrupt()
+
+    with pytest.raises(KeyboardInterrupt):
+        run_for_test(database_session, InterruptedClient([]))
+    run = database_session.scalar(select(AIRun))
+    assert run is not None and run.status == "FAILED"
+    assert run.error_type == "INTERRUPTED" and run.completed_at is not None
 
 
 def test_migration_includes_nullable_ai_run_counts(test_engine: Engine) -> None:
