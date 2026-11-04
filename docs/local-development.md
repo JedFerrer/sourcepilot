@@ -8,15 +8,32 @@
 
 ## Configure and start
 
-1. Copy `.env.example` to `.env` to configure the local PostgreSQL databases and API database URL.
+Run root commands from the repository root; keep the API and web server in separate terminals.
+
+1. Copy `.env.example` to `.env` to configure the local PostgreSQL databases and API database URL. For interactive AI actions, also complete [model configuration](#model-configuration).
 2. Copy `apps/web/.env.example` to `apps/web/.env.local` only when FastAPI is not running at `http://localhost:8000`.
-3. Start PostgreSQL with `docker compose up -d postgres`.
+3. Start PostgreSQL with `docker compose up -d postgres` and verify [database readiness](#postgresql-reachability).
 4. From the repository root, install the web dependencies with `pnpm install`.
-5. From `apps/api`, install the API environment with `uv sync --dev`.
-6. Start FastAPI from `apps/api` with `uv run --env-file ../../.env uvicorn sourcepilot.main:app --reload --port 8000`.
-7. Start the web app from the repository root with `pnpm --filter @sourcepilot/web dev`.
+5. From `apps/api`, install the API environment with `uv sync --dev --locked`.
+6. From `apps/api`, apply the [existing migrations](#migrations-and-persistence-tests), then run the [supplier seed command](#synthetic-supplier-catalog). Both are required before using the workflow; startup does not seed the catalog.
+7. Start FastAPI from `apps/api` with `uv run --env-file ../../.env uvicorn sourcepilot.main:app --reload --port 8000`.
+8. Start the web app from the repository root with `pnpm --filter @sourcepilot/web dev`.
 
 Open `http://localhost:3000`. The browser requests `/api/health`; Next.js proxies that request to FastAPI `http://localhost:8000/health` by default.
+
+## Model configuration
+
+Set `OPENAI_API_KEY` and `SOURCEPILOT_AI_MODEL` in the root `.env` before starting the API to use **Analyze request**, **Get clarification questions**, PDF quote extraction, supplier explanations or **Analyze Comparison**. Use a model available to your account that supports the application's structured-output and tool-calling requests. There is no default model. These actions invoke the live provider and can incur charges; live output is variable and retains the [documented quality limitations](../README.md#known-quality-and-ux-limitations).
+
+Configuration is read lazily: API startup, manual editing, deterministic comparison and normal automated checks do not require model credentials. The automated browser suite supplies its own test-only model; it is not an interactive demo mode. Keep model credentials server-side, outside version control and out of `apps/web/.env.local`. The startup command above loads the root `.env`; restart the API after changing it.
+
+Langfuse is disabled by default and is not a startup or demo prerequisite. Its existing optional installation/configuration instructions and unverified hosted-visibility limitation are in [AI observability](development/OBSERVABILITY.md).
+
+## Local PDF storage
+
+The default `DOCUMENT_STORAGE_BACKEND=local` stores original PDFs privately under `apps/api/.local-quote-documents`. Leaving `DOCUMENT_STORAGE_LOCAL_DIR` empty uses that default; set it to an absolute writable directory to override it. Storage directories are created on upload. They are not web assets and should not be committed or shared.
+
+`QUOTE_PDF_MAX_BYTES` defaults to 10,000,000 file bytes and `QUOTE_PDF_MAX_PAGES` to 15. Only text-extractable PDFs are supported; scanned/image-only files need manual entry. The existing S3-compatible adapter is available, but production storage and deployment remain M6-U6 work.
 
 ## PostgreSQL reachability
 
@@ -30,13 +47,14 @@ The API and Alembic migration commands use `DATABASE_URL`; migration commands fa
 
 ## Migrations and persistence tests
 
-From `apps/api`, after PostgreSQL is healthy:
+For initial setup, run from `apps/api` after PostgreSQL is healthy:
 
 ```text
 uv run --env-file ../../.env alembic upgrade head
 uv run --env-file ../../.env alembic current
-uv run --env-file ../../.env pytest
 ```
+
+Persistence tests are a separate check, not a setup requirement: `uv run --env-file ../../.env pytest` from `apps/api` uses the isolated test database described below.
 
 Generate future migrations only after changing persistence models, then review the generated revision before committing it:
 
@@ -57,12 +75,64 @@ run this from `apps/api`:
 uv run --env-file ../../.env python -m sourcepilot.suppliers.seed
 ```
 
-Inspect the seeded names and evidence with PostgreSQL:
+Inspect the seeded names and evidence from the repository root with PostgreSQL:
 
 ```text
 docker compose exec postgres psql -U sourcepilot -d sourcepilot -c "SELECT name, country, general_moq FROM suppliers ORDER BY name;"
 docker compose exec postgres psql -U sourcepilot -d sourcepilot -c "SELECT s.name, e.claim_key, e.source_label, e.evidence_state, e.evidence_text FROM supplier_evidence e JOIN suppliers s ON s.id = e.supplier_id ORDER BY s.name, e.claim_key, e.source_label;"
 ```
+
+## Manual demo walkthrough
+
+Complete setup and seeding above, then open `http://localhost:3000`. Use one browser session for the walkthrough. All suppliers, quotes and evidence are fictional. This is a manual live-provider walkthrough when AI actions are used; the separate [deterministic browser suite](#deterministic-browser-workflow-m5-u3) is the reproducible automated path. A useful AI answer or a suggested supplier is not guaranteed.
+
+### 1. Brief
+
+Fill **Project name** with a descriptive demo name and **What do you want to source?** with the existing [scenario](../apps/api/tests/e2e_support/scenario.json) request:
+
+> Source 2,000 custom cosmetic travel bags made from recycled polyester with a custom logo. Target unit cost below USD 5, delivery to Sydney, preferred GRS certification. Delivery timing is not decided yet.
+
+Choose **Create project**, then **Analyze request**. Review the result rather than assuming it matches the fixture. Check **Product name** (`custom cosmetic travel bags`), **Category** (`cosmetic travel bags`), **Requested quantity** (`2000`), **Destination** (`Sydney`) and **Target unit price (optional)** (`5`). Ensure recycled polyester and custom branding are **Required**, with GRS certification **Preferred**, using each requirement's **Importance** selector.
+
+Save any corrections with **Save Brief** before requesting clarification. For the missing timing, choose **Get clarification questions** when available, set **Delivery answer** to `2026-12-15` (the fixed synthetic scenario date), and **Save answers**. If analysis/clarification fails or leaves incorrect data, use the existing Brief editor; choose **Delivery target type: Date**, fill **Delivery date**, and correct/add requirements there. This fixture date demonstrates the flow, not a current delivery promise. Choose **Save Brief**, resolve any remaining readiness messages, review the saved requirements and choose **Approve Brief**.
+
+### 2. Suppliers
+
+Choose **Discover Suppliers**. The seeded cosmetic-bag scenario produces five candidates; a differently interpreted category can change the results. Review requirement findings and **Available evidence**; **Explain this supplier** requests optional AI explanation. Unknown or conflicting evidence must remain visible.
+
+On Harbor Pouch Works, Willow Stitch Studio and Moss Thread Bags, choose **Add to shortlist**, then **Review selected suppliers** and **Approve Shortlist**. If discovery returns no candidates, use **Review Brief** to check the saved category and requirements, save/reapprove if required by readiness, then discover again.
+
+### 3. Quotes
+
+Use **Upload PDF quote** on each matching supplier card. The files are in `apps/api/tests/fixtures/quote_pdfs`:
+
+| Supplier | PDF |
+| --- | --- |
+| Harbor Pouch Works | [harbor_primary.pdf](../apps/api/tests/fixtures/quote_pdfs/harbor_primary.pdf) |
+| Willow Stitch Studio | [willow_primary.pdf](../apps/api/tests/fixtures/quote_pdfs/willow_primary.pdf) |
+| Moss Thread Bags | [moss_primary.pdf](../apps/api/tests/fixtures/quote_pdfs/moss_primary.pdf) |
+
+Process, review and save one quote before moving to the next. **Save a manual draft before uploading another quote:** an explicit upload can discard unsaved edits on another card, as recorded in [M6-U4](implementation/M6-U4.md).
+
+After **NEEDS REVIEW**, inspect current values, origins, extracted values and **PDF source evidence**. All three primary PDFs quote 2,000 units in USD, but their shipping text names **Manila**, while the Brief requests **Sydney**. Preserve this mismatch; the quotes do not establish delivery to Sydney. Willow leaves preferred GRS certification unstated and Moss leaves sample lead time unstated. Keep unknowns and conflicts visible; see the [fixture guide](../apps/api/tests/fixtures/quote_pdfs/README.md) for the full corpus.
+
+Use **Edit PDF draft** and **Save draft** for corrections. An optional provenance demonstration, matching the existing browser test, changes Harbor's **Unit price** from the PDF's USD 4.60 to a hypothetical user-confirmed USD 4.50. The current origin becomes **USER CORRECTED**, while the PDF still supports 4.60; do not describe 4.50 as extracted evidence. Otherwise correct only actual extraction mistakes against the PDF. Choose **Review for confirmation**, then **Confirm Quote** for each reviewed quote. Uploading or saving alone does not confirm it.
+
+### 4. Comparison
+
+With the approved shortlist and at least two confirmed quotes, choose **Generate Comparison**. Review the factual table, requirement states, warnings and **Source details**. Three confirmed quotes show the intended primary scenario; fewer confirmed quotes leave the remaining supplier data incomplete.
+
+Choose **Analyze Comparison** to request optional tradeoff analysis. A valid result may say **No supplier suggested yet**. A failed analysis offers **Retry analysis** and does not erase the factual comparison. Neither outcome chooses a preferred supplier. If upstream inputs change, follow supplier re-evaluation guidance and use **Regenerate Comparison** before requesting current advice.
+
+### 5. Decision
+
+Review the evidence and uncertainties, choose **Preferred supplier**, optionally enter **Decision notes**, then choose **Mark as Preferred Supplier**. Reload to inspect the saved preference; **Back to projects** returns to the dashboard. This records the user's choice only: it sends no message, order or payment.
+
+### Failed PDF recovery
+
+In a separate demo project with an approved shortlist, upload [image_only.pdf](../apps/api/tests/fixtures/quote_pdfs/image_only.pdf) for Harbor. It has no extractable text and should reach **FAILED**. Choose **Enter quote manually**; for the synthetic fallback example enter **Quoted quantity** `2000`, **Unit price** `4.50` and **Original currency (three-letter code)** `USD`, leaving unstated fields blank. These are user-entered demonstration values, not facts extracted from the failed file.
+
+Choose **Save manual draft**, **Review for confirmation**, then **Confirm Quote**. Add and confirm Willow's quote (by its primary PDF or manual entry) to enable **Generate Comparison**. Save each draft before another upload. For other failures, **Retry processing** retries extraction; **Retry status check**, when shown, only rereads status and does not restart processing.
 
 ## AI foundation smoke check
 
