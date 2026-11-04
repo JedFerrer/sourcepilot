@@ -21,6 +21,63 @@ const supplier = {
 describe("SupplierReview", () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
+  it("explains successful empty discovery, links to Brief without writing, and recovers candidates", async () => {
+    let candidates = false;
+    let fail = false;
+    const fetchMock = vi.fn((path: string) => Promise.resolve(
+      fail && path.endsWith("/discover") ? jsonResponse({ error: { code: "UNAVAILABLE", message: "Try again." } }, 503) :
+        jsonResponse({ brief_revision: 1, brief_approved: true, suppliers: candidates ? [supplier] : [] }),
+    ));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    expect(await screen.findByText(/No supplier candidates to review yet/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Discover Suppliers" }));
+    expect(await screen.findByText(/No supplier candidates were found in the curated dataset/)).toBeInTheDocument();
+    const calls = fetchMock.mock.calls.length;
+    const link = screen.getByRole("link", { name: "Review Brief" });
+    expect(link).toHaveAttribute("href", "#brief-complete");
+    fireEvent.click(link);
+    expect(fetchMock).toHaveBeenCalledTimes(calls);
+    fail = true;
+    fireEvent.click(screen.getByRole("button", { name: "Discover Suppliers" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Try again.");
+    expect(screen.queryByText(/No supplier candidates were found/)).not.toBeInTheDocument();
+    fail = false;
+    candidates = true;
+    fireEvent.click(screen.getByRole("button", { name: "Discover Suppliers" }));
+    expect(await screen.findByText(supplier.name)).toBeInTheDocument();
+    expect(screen.queryByText(/No supplier candidates/)).not.toBeInTheDocument();
+  });
+
+  it.each(["refresh", "project"])("clears an empty outcome on %s and preserves Brief approval gating", async (change) => {
+    let approved = true;
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse({
+      brief_revision: approved ? 1 : 2, brief_approved: approved, suppliers: [],
+    }))));
+    const view = render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Discover Suppliers" }));
+    expect(await screen.findByText(/No supplier candidates were found/)).toBeInTheDocument();
+    approved = false;
+    view.rerender(<SupplierReview projectId={change === "project" ? "project-2" : "project-1"} refreshKey={1} />);
+    expect(await screen.findByText(/No supplier candidates to review yet/)).toBeInTheDocument();
+    expect(screen.queryByText(/No supplier candidates were found/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Discover Suppliers" })).not.toBeInTheDocument();
+    expect(screen.getByText("Approve the Brief to discover or re-evaluate suppliers.")).toBeInTheDocument();
+  });
+
+  it("does not publish a late empty discovery after a Brief refresh", async () => {
+    let resolveDiscovery: (value: Response) => void;
+    const pending = new Promise<Response>((resolve) => { resolveDiscovery = resolve; });
+    vi.stubGlobal("fetch", vi.fn((path: string) => path.endsWith("/discover") ? pending :
+      Promise.resolve(jsonResponse({ brief_revision: 1, brief_approved: true, suppliers: [] }))));
+    const view = render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Discover Suppliers" }));
+    view.rerender(<SupplierReview projectId="project-1" refreshKey={1} />);
+    await act(async () => { resolveDiscovery!(jsonResponse({ brief_revision: 1, suppliers: [] })); });
+    expect(screen.queryByText(/No supplier candidates were found/)).not.toBeInTheDocument();
+    expect(screen.getByText(/No supplier candidates to review yet/)).toBeInTheDocument();
+  });
+
   it("shows current requirement findings and evidence and saves review choices", async () => {
     const fetchMock = vi.fn((path: string, init?: RequestInit) => Promise.resolve(
       jsonResponse({ brief_revision: 1, brief_approved: true, suppliers: [

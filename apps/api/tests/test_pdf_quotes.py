@@ -1233,6 +1233,38 @@ def test_stale_boundary_retry_and_no_duplicate_schedule(
     assert api.get(f"/quotes/{quote_id}").json()["status"] == "PROCESSING"
 
 
+def test_status_reads_preserve_processing_and_authorization(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    api, _ = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    uploaded = upload(api, project_id, supplier_id, pdf_bytes()).json()
+    quote_id = uploaded["quote"]["id"]
+    document_id = UUID(uploaded["document"]["id"])
+    scheduled: list[tuple[UUID, int]] = []
+    monkeypatch.setattr("sourcepilot.main.run_pdf_quote_processing",
+                        lambda document_id, attempt: scheduled.append((document_id, attempt)))
+    before = api.get(f"/quotes/{quote_id}").json()
+    for _ in range(3):
+        assert api.get(f"/quotes/{quote_id}").json() == before
+    assert before["processing"]["attempts"] == 1
+    assert before["status"] == "PROCESSING"
+    assert scheduled == []
+    owner_cookies = dict(api.cookies)
+    api.cookies.clear()
+    assert api.post("/demo-session").status_code == 204
+    assert api.get(f"/quotes/{quote_id}").status_code == 404
+    api.cookies.clear()
+    api.cookies.update(owner_cookies)
+    assert api.get(f"/quotes/{quote_id}").json() == before
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None
+        assert document.processing_attempts == 1
+    assert scheduled == []
+
+
 def test_initial_processing_attempt_cannot_be_retried(
     storage_client: tuple[TestClient, LocalDocumentStorage],
     monkeypatch: pytest.MonkeyPatch,

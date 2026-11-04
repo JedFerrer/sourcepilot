@@ -269,15 +269,25 @@ def test_blocked_reanalysis_never_calls_model_or_creates_airun(
         assert session.scalars(select(AIRun).where(AIRun.project_id == project_id)).all() == []
 
 
+@pytest.mark.parametrize("failure", ["provider", "timeout", "invalid_output"])
 def test_ai_failure_allows_manual_edit_then_blocks_analysis(
-    client: TestClient, engine: Engine
+    client: TestClient, engine: Engine, failure: str,
 ) -> None:
     project_id = create_project(client)
-    FakeClient.outputs = [
-        ModelProviderError("temporary", retryable=True),
-        ModelProviderError("failed", retryable=True),
-    ]
-    assert client.post(f"/projects/{project_id}/brief/analyze").status_code == 503
+    before = client.get(f"/projects/{project_id}/brief").json()
+    if failure == "invalid_output":
+        FakeClient.outputs = [ModelInvocation("not json", 1, 1)] * 2
+    else:
+        error = ModelProviderError("sensitive provider details", retryable=True)
+        if failure == "timeout":
+            error.__cause__ = TimeoutError("sensitive timeout details")
+        FakeClient.outputs = [error, error]
+    response = client.post(f"/projects/{project_id}/brief/analyze")
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "BRIEF_ANALYSIS_UNAVAILABLE"
+    assert "sensitive" not in response.text
+    assert FakeClient.calls == 2
+    assert client.get(f"/projects/{project_id}/brief").json() == before
     saved = client.patch(
         f"/projects/{project_id}/brief", json={**empty_edit(), "product_name": "Manual bag"}
     )

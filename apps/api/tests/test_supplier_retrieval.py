@@ -207,3 +207,39 @@ def test_discovery_returns_empty_for_unrepresented_category(
     response = client.post(f"/projects/{project_id}/suppliers/discover")
     assert response.status_code == 200, response.text
     assert response.json()["suppliers"] == []
+
+    # Reading is navigation-safe; only incomplete edits revoke existing approval.
+    brief_path = f"/projects/{project_id}/brief"
+    before = client.get(brief_path).json()
+    assert client.get(f"/projects/{project_id}/suppliers").json()["suppliers"] == []
+    assert client.get(brief_path).json() == before
+    edit = {key: before[key] for key in (
+        "product_name", "quantity", "destination", "delivery_target", "target_unit_price", "requirements",
+    )}
+    changed = client.patch(brief_path, json={**edit, "category": "cosmetic bags",
+                                           "expected_brief_revision": before["brief_revision"]})
+    assert changed.status_code == 200, changed.text
+    revision = changed.json()["brief_revision"]
+    assert revision == before["brief_revision"] + 1
+    assert changed.json()["status"] == "APPROVED"
+    assert changed.json()["approved_at"] == before["approved_at"]
+    incomplete = client.patch(brief_path, json={**edit, "category": None,
+                                              "expected_brief_revision": revision})
+    assert incomplete.json()["status"] == "IN_PROGRESS"
+    assert client.post(f"/projects/{project_id}/suppliers/discover").status_code == 409
+    restored = client.patch(brief_path, json={**edit, "category": "cosmetic bags",
+                                            "expected_brief_revision": revision + 1})
+    assert restored.json()["status"] == "READY_FOR_REVIEW"
+    revision = restored.json()["brief_revision"]
+    assert revision == before["brief_revision"] + 3
+    assert client.post(f"{brief_path}/approve", json={
+        "expected_brief_revision": before["brief_revision"],
+    }).status_code == 409
+    assert client.post(f"{brief_path}/approve", json={"expected_brief_revision": revision}).status_code == 200
+    recovered = client.post(f"/projects/{project_id}/suppliers/discover")
+    assert recovered.status_code == 200
+    assert recovered.json()["suppliers"]
+    assert all(not item["stale"] for item in client.get(f"/projects/{project_id}/suppliers").json()["suppliers"])
+    client.cookies.clear()
+    assert client.post("/demo-session").status_code == 204
+    assert client.get(f"/projects/{project_id}/suppliers").status_code == 404

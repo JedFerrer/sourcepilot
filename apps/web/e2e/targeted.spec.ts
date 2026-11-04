@@ -34,6 +34,43 @@ test("corrected quote retains PDF provenance", async ({ page }) => {
   });
 });
 
+test("empty discovery returns to Brief and recovers through approval", async ({ page }) => {
+  const { id } = await createAndApprove(page);
+  const brief = page.getByRole("region", { name: "Sourcing Brief", exact: true });
+  const suppliers = page.getByRole("region", { name: "Suppliers", exact: true });
+  const original = await brief.getByLabel("Category", { exact: true }).inputValue();
+  await brief.getByLabel("Category", { exact: true }).fill("");
+  await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
+  await expect(suppliers).toContainText("Approve the Brief to discover or re-evaluate suppliers.");
+  await expect(suppliers).toContainText("Your sourcing requirements changed");
+  await brief.getByLabel("Category", { exact: true }).fill("industrial gloves");
+  await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
+  await brief.getByRole("button", { name: "Approve Brief", exact: true }).click();
+  await suppliers.getByRole("button", { name: "Re-discover and re-evaluate", exact: true }).click();
+  await expect(suppliers).toContainText("No supplier candidates were found in the curated dataset");
+  await expect(suppliers.getByRole("article")).toHaveCount(0);
+  const before = await readApi<Record<string, unknown>>(page, `/projects/${id}/brief`);
+  const writes: string[] = [];
+  const recordWrite = (request: import("@playwright/test").Request) => {
+    if (request.url().includes("/api/") && request.method() !== "GET") writes.push(request.method());
+  };
+  page.on("request", recordWrite);
+  await suppliers.getByRole("link", { name: "Review Brief", exact: true }).click();
+  await expect(page).toHaveURL(/#brief-complete$/);
+  expect(await readApi(page, `/projects/${id}/brief`)).toEqual(before);
+  expect(writes).toEqual([]);
+  page.off("request", recordWrite);
+  await brief.getByLabel("Category", { exact: true }).fill(original);
+  await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
+  await expect(brief).toContainText("Readiness: Approved");
+  const changed = await readApi<{ brief_revision: number }>(page, `/projects/${id}/brief`);
+  expect(changed.brief_revision).toBe(Number(before.brief_revision) + 1);
+  expect((await readApi<Record<string, unknown>>(page, `/projects/${id}/brief`)).approved_at).toBe(before.approved_at);
+  await suppliers.getByRole("button", { name: "Discover Suppliers", exact: true }).click();
+  await expect(suppliers.getByRole("article")).toHaveCount(5);
+  await expect(suppliers).not.toContainText("No supplier candidates were found");
+});
+
 test("failed PDF supports manual fallback and comparison", async ({ page }) => {
   await createAndApprove(page);
   await test.step("Unsupported scan fails and user enters a manual draft", async () => {
@@ -72,7 +109,30 @@ test("abandoned PROCESSING becomes retryable and succeeds", async ({ page }) => 
     expect(quote.status).toBe("PROCESSING");
     expect(quote.processing?.attempts).toBe(1);
     await expect(quoteCard(page, 0).getByRole("button", { name: "Retry processing", exact: true })).toBeHidden();
-    execFileSync("uv", ["run", "--no-sync", "python", "-m", "tests.e2e_support.age_attempt", id, quote.id],
+  });
+  await test.step("Simulated status-read outage recovers with GET only and no processing mutation", async () => {
+    const card = quoteCard(page, 0);
+    const statusUrl = `**/api/quotes/${quoteId}`;
+    await page.route(statusUrl, (route) => route.fulfill({ status: 503, contentType: "application/json",
+      body: JSON.stringify({ error: { code: "UNAVAILABLE", message: "Simulated status read outage" } }) }));
+    await expect(card).toContainText("We couldn't check this quote's processing status");
+    const before = await readApi<Quote>(page, `/quotes/${quoteId}`);
+    const writes: string[] = [];
+    const recordWrite = (request: import("@playwright/test").Request) => {
+      if (request.url().includes("/api/") && request.method() !== "GET") writes.push(request.method());
+    };
+    page.on("request", recordWrite);
+    await page.unroute(statusUrl);
+    const checked = page.waitForResponse((response) => response.url().endsWith(`/api/quotes/${quoteId}`)
+      && response.request().method() === "GET" && response.ok());
+    await card.getByRole("button", { name: "Retry status check", exact: true }).click();
+    await checked;
+    await expect(card.getByRole("button", { name: "Retry status check", exact: true })).toBeHidden();
+    expect(await readApi<Quote>(page, `/quotes/${quoteId}`)).toEqual(before);
+    expect(before.processing?.attempts).toBe(1);
+    expect(writes).toEqual([]);
+    page.off("request", recordWrite);
+    execFileSync("uv", ["run", "--no-sync", "python", "-m", "tests.e2e_support.age_attempt", id, quoteId],
       { cwd: "../api", stdio: "pipe", timeout: 20_000 });
   });
   await test.step("Normal poll exposes stale state; browser retries the real worker", async () => {

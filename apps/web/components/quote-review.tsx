@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
 
 type QuoteEvidence = { block_id: string; page: number; block_text: string; evidence_value: string | number | null };
@@ -73,8 +73,54 @@ function SourceCitations({ evidence }: { evidence: QuoteEvidence[] }) {
   </li>)}</ul>;
 }
 
-function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
+function ProcessingStatus({ quoteId, onStatus }: { quoteId: string; onStatus: (quote: Quote) => void }) {
+  const [failed, setFailed] = useState(false);
+  const [pending, setPending] = useState(false);
+  const retry = useRef<() => void>(() => {});
+
+  useEffect(() => {
+    let cancelled = false;
+    let sequence = 0;
+    let settledSequence = 0;
+    let retryPending = false;
+    setPending(false);
+    async function readStatus(explicit = false) {
+      if (cancelled || (explicit && retryPending)) return;
+      if (explicit) { retryPending = true; setPending(true); }
+      const request = ++sequence;
+      try {
+        const updated = await apiRequest<Quote>(`/api/quotes/${quoteId}`);
+        if (cancelled || request < settledSequence) return;
+        settledSequence = request;
+        setFailed(false);
+        onStatus(updated);
+      } catch {
+        if (!cancelled && request >= settledSequence) {
+          settledSequence = request;
+          setFailed(true);
+        }
+      } finally {
+        if (explicit) retryPending = false;
+        if (!cancelled && explicit) setPending(false);
+      }
+    }
+    retry.current = () => { void readStatus(true); };
+    const timer = window.setInterval(() => { void readStatus(); }, 2000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [quoteId, onStatus]);
+
+  return <>
+    <p role="status">Processing PDF quote…</p>
+    {failed ? <div role="alert">
+      <p>We couldn&apos;t check this quote&apos;s processing status. The last known status is shown. Try checking again.</p>
+      <button type="button" disabled={pending} onClick={() => retry.current()}>Retry status check</button>
+    </div> : null}
+  </>;
+}
+
+function ManualQuoteCard({ projectId, supplier, quote, onSaved, statusActive, onStatus }: {
   projectId: string; supplier: Supplier; quote?: Quote; onSaved: () => Promise<void>;
+  statusActive: boolean; onStatus: (quote: Quote) => void;
 }) {
   const [values, setValues] = useState<Record<string, string>>(() => draftFromQuote(quote));
   const [notes, setNotes] = useState(quote?.notes ?? "");
@@ -189,7 +235,8 @@ function ManualQuoteCard({ projectId, supplier, quote, onSaved }: {
     <h3>{supplier.name}</h3>
     <p>Status: {quote ? quote.status.replaceAll("_", " ") : "Not Added"}</p>
     {quote?.entry_type === "PDF" && quote.status === "PROCESSING" ?
-      <p role="status">Processing PDF quote…</p> : null}
+      statusActive ? <ProcessingStatus key={`${projectId}-${quote.id}`} quoteId={quote.id} onStatus={onStatus} /> :
+        <p role="status">Processing PDF quote…</p> : null}
     {quote?.entry_type === "PDF" && quote.status === "STALE_PROCESSING" ? <>
       <p role="alert">Processing was interrupted. Retry quote processing.</p>
       <button type="button" disabled={busy} onClick={() => void retryProcessing()}>
@@ -346,23 +393,11 @@ export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
     await reload(false, true);
   }
 
-  useEffect(() => {
-    const processingIds = quotes.filter((quote) => quote.entry_type === "PDF" && quote.status === "PROCESSING")
-      .map((quote) => quote.id);
-    if (!active || processingIds.length === 0) return;
-    let cancelled = false;
-    const timer = window.setInterval(() => {
-      for (const id of processingIds) {
-        void apiRequest<Quote>(`/api/quotes/${id}`).then((updated) => {
-          if (cancelled) return;
-          if (updated.status !== "PROCESSING") onQuoteChange?.();
-          setQuotes((current) => current.map((quote) =>
-            quote.id === id && quote.status === "PROCESSING" ? updated : quote));
-        }).catch(() => { /* The next poll can recover a transient read failure. */ });
-      }
-    }, 2000);
-    return () => { cancelled = true; window.clearInterval(timer); };
-  }, [active, quotes, onQuoteChange]);
+  const receivedStatus = useCallback((updated: Quote) => {
+    if (updated.status !== "PROCESSING") onQuoteChange?.();
+    setQuotes((current) => current.map((quote) =>
+      quote.id === updated.id && quote.status === "PROCESSING" ? updated : quote));
+  }, [onQuoteChange]);
 
   return <section id="quotes" aria-labelledby="quotes-title">
     <h2 id="quotes-title">Quotes</h2>
@@ -379,6 +414,7 @@ export function QuoteReview({ projectId, active, refreshKey, onQuoteChange }: {
         {suppliers.map((supplier) => <ManualQuoteCard
           key={supplier.id} projectId={projectId} supplier={supplier}
           quote={quotes.find((quote) => quote.supplier_id === supplier.id)} onSaved={savedQuote}
+          statusActive={active && !error} onStatus={receivedStatus}
         />)}
       </fieldset>
     </div>

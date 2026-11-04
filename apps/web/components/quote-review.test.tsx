@@ -18,6 +18,134 @@ function QuoteComparisonHarness() {
 describe("QuoteReview", () => {
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
 
+  it.each(["FAILED", "STALE_PROCESSING", "NEEDS_REVIEW"])("recovers failed status reads with GET only into %s, preserving another draft", async (status) => {
+    vi.useFakeTimers();
+    const quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 1, confirmed_at: null, notes: null, values: {}, processing: { attempts: 1 } };
+    const other = { ...supplier, id: "supplier-2", name: "Another supplier" };
+    let resolveRead: (value: Response) => void;
+    let reads = 0;
+    const fetchMock = vi.fn((path: string) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier, other] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      reads += 1;
+      if (reads <= 2) return Promise.resolve(jsonResponse({ error: { code: "UNAVAILABLE", message: "Unavailable" } }, 503));
+      return new Promise<Response>((resolve) => { resolveRead = resolve; });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await act(async () => { render(<QuoteReview projectId="project-1" active refreshKey={0} />); });
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Unsaved other quote" } });
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(screen.getByRole("alert")).toHaveTextContent("We couldn't check this quote's processing status");
+    expect(screen.queryByRole("button", { name: "Retry processing" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Enter quote manually" })).not.toBeInTheDocument();
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Retry status check" })); });
+    expect(reads).toBe(2);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Retry status check" })); });
+    expect(screen.getByRole("button", { name: "Retry status check" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Retry status check" }));
+    expect(reads).toBe(3); // Pending explicit retry cannot be double-submitted.
+    await act(async () => { resolveRead!(jsonResponse({ ...quote, status })); });
+    expect(screen.queryByRole("button", { name: "Retry status check" })).not.toBeInTheDocument();
+    expect(screen.getByText(`Status: ${status.replaceAll("_", " ")}`)).toBeInTheDocument();
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Unsaved other quote");
+    expect(Boolean(screen.queryByRole("button", { name: "Enter quote manually" }))).toBe(status === "FAILED");
+    for (const [, init] of fetchMock.mock.calls as unknown as [string, RequestInit | undefined][]) {
+      expect(init?.method ?? "GET").toBe("GET");
+    }
+  });
+
+  it("recovers automatically after an authorization-denied status read without bypassing the endpoint", async () => {
+    vi.useFakeTimers();
+    const quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 1, confirmed_at: null, notes: null, values: {} };
+    let reads = 0;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      expect(init?.method ?? "GET").toBe("GET");
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      expect(path).toBe("/api/quotes/pdf-1");
+      reads += 1;
+      return Promise.resolve(reads === 1 ? jsonResponse({ error: { code: "NOT_FOUND", message: "Not found" } }, 404) : jsonResponse(quote));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    await act(async () => { render(<QuoteReview projectId="project-1" active refreshKey={0} />); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(screen.getByRole("button", { name: "Retry status check" })).toBeEnabled();
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    expect(reads).toBe(2);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("Processing PDF quote…")).toBeInTheDocument();
+  });
+
+  it.each(["deactivate", "project", "remove"])("ignores late status errors after %s", async (change) => {
+    vi.useFakeTimers();
+    const quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 1, confirmed_at: null, notes: null, values: {} };
+    let rejectRead: (error: Error) => void;
+    let removed = false;
+    vi.stubGlobal("fetch", vi.fn((path: string) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse(removed ? [] : [quote]));
+      return new Promise<Response>((_, reject) => { rejectRead = reject; });
+    }));
+    let view: ReturnType<typeof render>;
+    await act(async () => { view = render(<QuoteReview projectId="project-1" active refreshKey={0} />); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    removed = change === "remove";
+    await act(async () => { view.rerender(<QuoteReview projectId={change === "project" ? "project-2" : "project-1"}
+      active={change !== "deactivate"} refreshKey={1} />); });
+    await act(async () => { rejectRead!(new Error("Old outage")); });
+    expect(screen.queryByText(/We couldn't check this quote/)).not.toBeInTheDocument();
+  });
+
+  it("does not replace a successful automatic status check with an older failed read", async () => {
+    vi.useFakeTimers();
+    const quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 1, confirmed_at: null, notes: null, values: {} };
+    let rejectOld: (error: Error) => void;
+    let reads = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      reads += 1;
+      if (reads === 1) return new Promise<Response>((_, reject) => { rejectOld = reject; });
+      return Promise.resolve(jsonResponse(quote));
+    }));
+    await act(async () => { render(<QuoteReview projectId="project-1" active refreshKey={0} />); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(4000); });
+    expect(reads).toBe(2);
+    await act(async () => { rejectOld!(new Error("Old outage")); });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByText("Processing PDF quote…")).toBeInTheDocument();
+  });
+
+  it("releases a cancelled pending retry when the status callback changes", async () => {
+    vi.useFakeTimers();
+    const quote = { id: "pdf-1", supplier_id: supplier.id, entry_type: "PDF", status: "PROCESSING",
+      revision: 1, confirmed_at: null, notes: null, values: {} };
+    let reads = 0;
+    let rejectOld: (error: Error) => void;
+    vi.stubGlobal("fetch", vi.fn((path: string) => {
+      if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
+      if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      reads += 1;
+      if (reads === 2) return new Promise<Response>((_, reject) => { rejectOld = reject; });
+      if (reads === 1) return Promise.reject(new Error("Outage"));
+      return Promise.resolve(jsonResponse(quote));
+    }));
+    let view: ReturnType<typeof render>;
+    await act(async () => { view = render(<QuoteReview projectId="project-1" active refreshKey={0} onQuoteChange={vi.fn()} />); });
+    await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
+    fireEvent.click(screen.getByRole("button", { name: "Retry status check" }));
+    expect(screen.getByRole("button", { name: "Retry status check" })).toBeDisabled();
+    await act(async () => { view.rerender(<QuoteReview projectId="project-1" active refreshKey={0} onQuoteChange={vi.fn()} />); });
+    expect(screen.getByRole("button", { name: "Retry status check" })).toBeEnabled();
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Retry status check" })); });
+    await act(async () => { rejectOld!(new Error("Cancelled outage")); });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it.each([false, true])("preserves unsaved fields and editor state across unavailable prerequisites (existing quote: %s)", async (existing) => {
     const quote = { id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW",
       revision: 1, confirmed_at: null, notes: "Saved notes", values: {} };

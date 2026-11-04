@@ -1,0 +1,236 @@
+{
+  "date": "2026-11-04",
+  "timezone": "Asia/Manila",
+  "scope": "M6-U4 Browser QA only; no Done Check or commit",
+  "independent_review": "PASS, no actionable findings, as confirmed by the user in the Browser QA request",
+  "retained_targeted_run": {
+    "bundle": "apps/web/e2e-upload/targeted/diagnostics.zip",
+    "sha256": "8f74e25ce19cc30aaeee80567d05c5265e1c13991554e8f86c082eb9f4bf8289",
+    "stats": {
+      "total": 12,
+      "expected": 12,
+      "unexpected": 0,
+      "flaky": 0,
+      "skipped": 0,
+      "ok": true
+    },
+    "workers": 1,
+    "duration_ms": 102001.222,
+    "sanitization_verified": true,
+    "tests": [
+      {
+        "title": "corrected quote retains PDF provenance",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 9592
+      },
+      {
+        "title": "empty discovery returns to Brief and recovers through approval",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 3305
+      },
+      {
+        "title": "failed PDF supports manual fallback and comparison",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 9240
+      },
+      {
+        "title": "abandoned PROCESSING becomes retryable and succeeds",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 14715
+      },
+      {
+        "title": "Brief edit routes stale suppliers through existing refresh",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 3038
+      },
+      {
+        "title": "confirmed quote edit invalidates comparison and advice",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 10384
+      },
+      {
+        "title": "another anonymous visitor cannot access this project",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 5805
+      },
+      {
+        "title": "security request rejection preserves state and manual entry",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 2843
+      },
+      {
+        "title": "expired isolated session cannot recover its old project",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 1807
+      },
+      {
+        "title": "real proxy accepts POST and PDF upload with and without Expect",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 7675
+      },
+      {
+        "title": "incomplete oversized uploads close the real socket and recover (Expect: false)",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 307
+      },
+      {
+        "title": "incomplete oversized uploads close the real socket and recover (Expect: true)",
+        "status": "passed",
+        "retry": 0,
+        "duration_ms": 351
+      }
+    ]
+  },
+  "supplemental_runs": [
+    {
+      "bundle": "apps/web/e2e-upload/m6-u4-browser-qa-setup/diagnostics.zip",
+      "sha256": "44269f9cd5368861490d6a69b0a59aaa9ada86ae8eed3f92eda3f4f82364b71c",
+      "status": "failed",
+      "retry": 0,
+      "duration_ms": 24124,
+      "title": "M6-U4 supplemental keyboard, readable recovery and draft preservation",
+      "checkpoints": [
+        {
+          "title": "Empty guidance is readable and Review Brief is tabbable and keyboard activated",
+          "passed": false
+        }
+      ],
+      "sanitization_verified": true
+    },
+    {
+      "bundle": "apps/web/e2e-upload/m6-u4-browser-qa-upload-overlap/diagnostics.zip",
+      "sha256": "9a65a7a0d8b2ef76a3a38bf8e6d87ec6394865cb1764fedc94c0dd58c196eb89",
+      "status": "failed",
+      "retry": 0,
+      "duration_ms": 33358,
+      "title": "M6-U4 supplemental keyboard, readable recovery and draft preservation",
+      "checkpoints": [
+        {
+          "title": "Empty guidance is readable and Review Brief is tabbable and keyboard activated",
+          "passed": true
+        },
+        {
+          "title": "Failed PDF feedback and manual-entry action are readable and keyboard accessible",
+          "passed": true
+        },
+        {
+          "title": "Keyboard status Retry clears simulated read outage and preserves the other unsaved manual draft",
+          "passed": false
+        }
+      ],
+      "sanitization_verified": true
+    },
+    {
+      "bundle": "apps/web/e2e-upload/m6-u4-browser-qa-notes-selector/diagnostics.zip",
+      "sha256": "ae9a11ec323ab1b2cd2fec9309fd1b34090b70c8f47079ee0c1d40a439896d21",
+      "status": "failed",
+      "retry": 0,
+      "duration_ms": 27914,
+      "title": "M6-U4 isolated status keyboard, manual recovery and navigation",
+      "checkpoints": [
+        {
+          "title": "Failed PDF feedback and manual-entry action are readable and keyboard accessible",
+          "passed": true
+        },
+        {
+          "title": "Keyboard status Retry clears simulated read outage and preserves the other unsaved manual draft",
+          "passed": false
+        }
+      ],
+      "sanitization_verified": true
+    },
+    {
+      "bundle": "apps/web/e2e-upload/m6-u4-browser-qa-pending-focus/diagnostics.zip",
+      "sha256": "013dacc056819e778720e3c5f8507fd413164200c037e2a2f4be7bbc91c6c4b9",
+      "status": "failed",
+      "retry": 0,
+      "duration_ms": 28673,
+      "title": "M6-U4 isolated status keyboard, manual recovery and navigation",
+      "checkpoints": [
+        {
+          "title": "Failed PDF feedback and manual-entry action are readable and keyboard accessible",
+          "passed": true
+        },
+        {
+          "title": "Keyboard status Retry clears simulated read outage and preserves the other unsaved manual draft",
+          "passed": true
+        },
+        {
+          "title": "Keyboard manual save preserves values and requires a separate explicit confirmation",
+          "passed": false
+        }
+      ],
+      "sanitization_verified": true
+    },
+    {
+      "bundle": "apps/web/e2e-upload/m6-u4-browser-qa/diagnostics.zip",
+      "sha256": "86b1910e573392a2400c1ed26c32f00fbe6d0b0dc5362972c2fd40d507f02bcb",
+      "status": "passed",
+      "retry": 0,
+      "duration_ms": 11998,
+      "title": "M6-U4 remaining manual confirmation keyboard and navigation",
+      "checkpoints": [
+        {
+          "title": "Failed PDF feedback and manual-entry action are readable and keyboard accessible",
+          "passed": true
+        },
+        {
+          "title": "Keyboard manual save preserves values and requires a separate explicit confirmation",
+          "passed": true
+        },
+        {
+          "title": "Keyboard navigation returns to dashboard and reopens the saved project",
+          "passed": true
+        }
+      ],
+      "sanitization_verified": true
+    }
+  ],
+  "preservation": {
+    "existing_files_checked": 59,
+    "changed_files": [],
+    "original_targeted_bundle_log_report_and_last_run_unchanged": true
+  },
+  "separate_upload_observation": {
+    "sequence": "Failed PDF -> unsaved manual fallback values -> explicit upload for another supplier -> existing save reconciliation clears unsaved values before intercepted status GET or status Retry",
+    "trace_bundle": "apps/web/e2e-upload/m6-u4-browser-qa-upload-overlap/diagnostics.zip",
+    "trace_snapshot": {
+      "call_id": "call@171",
+      "phase": "after",
+      "timestamp_ms": 57189.605,
+      "observed_values": {
+        "quantity": "",
+        "unit_price": "",
+        "currency": "",
+        "notes": ""
+      },
+      "status_warning_assertion_started_ms": 57248.351,
+      "keyboard_retry_started_ms": 59421.012
+    },
+    "source": "Existing HEAD and current ManualQuoteCard [quote] effect plus reload(false, true) in savedQuote",
+    "status_retry_checkpoint": "PASS when the separate upload setup precedes draft entry; no writes and all four draft fields remain intact",
+    "disposition": "Separate existing explicit-upload behavior, retained for human follow-up; no scope expansion or production fix"
+  },
+  "visual_evidence": [
+    "comparison-after-manual.png",
+    "empty-discovery.png",
+    "failed-pdf-manual-action.png",
+    "manual-confirmation.png",
+    "status-read-warning.png"
+  ],
+  "browser_qa": "PASS",
+  "lifecycle_status": "QA",
+  "visual_inspection": "PASS: five screenshots visually inspected; relevant text and controls readable and unclipped.",
+  "temporary_execution_files_removed": true
+}

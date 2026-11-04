@@ -171,16 +171,19 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
   const [loading, setLoading] = useState(true);
   const [reviewOpen, setReviewOpen] = useState(false);
   const requestSequence = useRef(0);
+  const [emptyDiscovery, setEmptyDiscovery] = useState<number | null>(null);
 
   const reload = useCallback(async () => {
     const request = ++requestSequence.current;
     setLoading(true);
     setError(null);
+    setEmptyDiscovery(null);
     try {
       const result = await apiRequest<SupplierList>(`/api/projects/${projectId}/suppliers`);
       if (request === requestSequence.current) {
         setLoaded({ projectId, refreshKey, version: request, data: result });
         setError(null);
+        return { version: request, data: result };
       }
     } catch (failure) {
       if (request === requestSequence.current) {
@@ -197,15 +200,25 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
   }, [reload, refreshKey]); // Reload after Brief edits or approval.
 
   async function discover() {
+    const request = ++requestSequence.current;
     setBusy(true);
     setError(null);
+    setEmptyDiscovery(null);
     try {
-      await apiRequest(`/api/projects/${projectId}/suppliers/discover`, { method: "POST" });
-      await reload();
+      const result = await apiRequest<{ brief_revision: number; suppliers: { id: string }[] }>(
+        `/api/projects/${projectId}/suppliers/discover`, { method: "POST" },
+      );
+      if (request !== requestSequence.current) return;
+      const refreshed = await reload();
+      if (!refreshed) return;
+      if (result.suppliers.length === 0 && refreshed.data.suppliers.length === 0 &&
+          result.brief_revision === refreshed.data.brief_revision) setEmptyDiscovery(refreshed.version);
       if (data?.shortlist_approved) await onStageChange?.();
       else onSuppliersChange?.();
     } catch (failure) {
-      setError(failure instanceof ApiClientError ? failure.message : "Supplier discovery failed. Try again.");
+      if (request === requestSequence.current) {
+        setError(failure instanceof ApiClientError ? failure.message : "Supplier discovery failed. Try again.");
+      }
     } finally {
       setBusy(false);
     }
@@ -289,8 +302,13 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
           <button type="button" disabled={busy} onClick={() => setReviewOpen(false)}>Continue Reviewing</button>
         </div> : null}
       </section> : null}
-      {data && data.suppliers.length === 0 && !loading ? <p>No suppliers discovered yet.</p> : null}
-      {data?.suppliers.map((supplier) => <SupplierCard key={supplier.id} projectId={projectId} supplier={supplier} dataVersion={loaded?.version ?? 0} onUpdate={update} onRefresh={reload} busy={busy} />)}
+      {data && data.suppliers.length === 0 && !loading && !error ? <div>
+        <p>{emptyDiscovery === loaded?.version ?
+          "No supplier candidates were found in the curated dataset for this Brief. Review the product category and requirements, then discover suppliers again." :
+          "No supplier candidates to review yet. Review and approve the Brief, then discover suppliers."}</p>
+        <a href="#brief-complete">Review Brief</a>
+      </div> : null}
+      {data?.suppliers.map((supplier) => <SupplierCard key={supplier.id} projectId={projectId} supplier={supplier} dataVersion={loaded?.version ?? 0} onUpdate={update} onRefresh={async () => { await reload(); }} busy={busy} />)}
     </section>
   );
 }

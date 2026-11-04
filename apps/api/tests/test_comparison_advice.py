@@ -942,6 +942,37 @@ def test_missing_comparison_and_unavailable_api(client: TestClient, monkeypatch:
     assert response.status_code == 503 and response.json()["error"]["code"] == "COMPARISON_ADVICE_UNAVAILABLE"
 
 
+@pytest.mark.parametrize("limits,expected_calls", [((2, 6), 2), ((4, 1), 2)])
+def test_limit_failure_preserves_facts_and_allows_explicit_retry(
+    client: TestClient, engine: Engine, monkeypatch: pytest.MonkeyPatch,
+    limits: tuple[int, int], expected_calls: int,
+) -> None:
+    project_id, _, _ = ready(client)
+    snapshot_path = f"/projects/{project_id}/comparison"
+    before = {path: client.get(path).json() for path in (
+        snapshot_path, f"/projects/{project_id}", f"/projects/{project_id}/quotes",
+    )}
+    snapshot_id = before[snapshot_path]["id"]
+    model = AdviceModel(actions=["tool"] * 4)
+    monkeypatch.setattr("sourcepilot.main.OpenAIResponsesClient.from_environment", lambda: model)
+    monkeypatch.setattr("sourcepilot.main.analyst_limits_from_environment", lambda: limits)
+    response = client.post(f"{snapshot_path}/advice", json={"snapshot_id": snapshot_id})
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "COMPARISON_ADVICE_UNAVAILABLE"
+    assert model.calls == expected_calls
+    assert {path: client.get(path).json() for path in before} == before
+    with Session(engine) as session:
+        run = session.scalars(select(AIRun).where(
+            AIRun.project_id == UUID(project_id),
+        ).order_by(AIRun.started_at.desc())).first()
+        assert run is not None and run.status == "FAILED_LIMIT_REACHED"
+    model = AdviceModel()
+    retried = client.post(f"{snapshot_path}/advice", json={"snapshot_id": snapshot_id})
+    assert retried.status_code == 200, retried.text
+    assert model.calls == 1
+    assert retried.json()["suggestion"]["supplier_id"] is None
+
+
 def test_membership_rejection_before_provider(client: TestClient, engine: Engine) -> None:
     project_id, supplier_ids, _ = ready(client)
     snapshot_id = UUID(client.get(f"/projects/{project_id}/comparison").json()["id"])
