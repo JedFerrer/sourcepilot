@@ -10,7 +10,7 @@ from sourcepilot.ai.structured import run_structured_operation
 from sourcepilot.persistence.database import application_session_factory
 from sourcepilot.persistence.models import DemoSession
 
-FOUNDATION_SMOKE_PROMPT_VERSION = "foundation-smoke-v1"
+FOUNDATION_SMOKE_PROMPT_VERSION = "foundation-smoke-v2"
 
 
 class FoundationSmokeResponse(BaseModel):

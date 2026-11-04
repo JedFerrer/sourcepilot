@@ -26,14 +26,18 @@ from sourcepilot.ai.analyst_tools import (
     get_supplier_snapshot,
 )
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
-from sourcepilot.ai.structured import provider_retry_delay_seconds, structured_input_hash
+from sourcepilot.ai.structured import (
+    provider_retry_delay_seconds,
+    repair_instructions,
+    structured_input_hash,
+)
 from sourcepilot.ai.supplier_explanation import MAX_MODEL_TURNS, MAX_TOOL_CALLS
 from sourcepilot.ai.tracing import RunTrace, provider_failure_outcome
 from sourcepilot.comparison.advice import AnalysisPoint, QuoteFieldReference  # noqa: F401
 from sourcepilot.persistence.models import AIRun
 from sourcepilot.quotes.domain import QUOTE_FIELD_KEYS
 
-PROMPT_VERSION = "tradeoff-analysis-v3"
+PROMPT_VERSION = "tradeoff-analysis-v4"
 INSTRUCTIONS = """Use the supplied current comparison first; do not reread comparison or supplier
 snapshots for facts already present. Retrieve evidence only for specific claims
 that need source detail, and reuse retrieved results rather than repeating lookups.
@@ -822,7 +826,7 @@ def run_comparison_analyst(
                     repair_used = True
                     step("retry", "REPAIR")
                     input_items.append({"role": "assistant", "content": invocation.output_text})
-                    instructions = f"{base_instructions}\nRepair the invalid final result: {error}"
+                    instructions = f"{base_instructions}\n{repair_instructions(error)}"
                     continue
                 air_run.status = "VALIDATION_FAILED"
                 break

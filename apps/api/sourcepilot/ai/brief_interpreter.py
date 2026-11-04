@@ -33,7 +33,7 @@ from sourcepilot.briefs.domain import (
 from sourcepilot.persistence.models import AIRun, DemoSession, Project
 from sourcepilot.projects.service import project_for_demo_session
 
-PROMPT_VERSION = "brief-interpreter-v2"
+PROMPT_VERSION = "brief-interpreter-v3"
 OPERATION = "brief_interpreter"
 INSTRUCTIONS = """Extract only facts explicitly stated in the sourcing request.
 Return the exact structured schema. Use null for any unstated core field or

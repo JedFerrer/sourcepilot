@@ -121,8 +121,8 @@ def stage_pdf_upload(
 def _cleanup_owned_key(storage: DocumentStorage, key: str) -> None:
     try:
         storage.delete(key)
-    except Exception:
-        logger.exception("PDF upload cleanup failed for owned key %s", key)
+    except Exception:  # noqa: BLE001 - cleanup must preserve the original failure
+        logger.error("PDF upload cleanup failed for owned key %s", key)
 
 
 def store_pdf_quote(
@@ -210,7 +210,7 @@ def store_pdf_quote(
         _cleanup_owned_key(storage, key)
         raise
     except Exception as error:
-        logger.exception("PDF quote commit outcome uncertain; retained key %s", key)
+        logger.error("PDF quote commit outcome uncertain; retained key %s", key)
         database_session.rollback()
         raise PdfCommitUncertainError("PDF quote commit outcome is uncertain.") from error
     return result

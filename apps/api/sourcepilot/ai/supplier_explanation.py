@@ -26,7 +26,11 @@ from sourcepilot.ai.analyst_tools import (
     get_supplier_snapshot,
 )
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
-from sourcepilot.ai.structured import provider_retry_delay_seconds, structured_input_hash
+from sourcepilot.ai.structured import (
+    provider_retry_delay_seconds,
+    repair_instructions,
+    structured_input_hash,
+)
 from sourcepilot.ai.tracing import RunTrace, provider_failure_outcome
 from sourcepilot.persistence.models import (
     AIRun,
@@ -35,7 +39,7 @@ from sourcepilot.persistence.models import (
     ProjectSupplier,
 )
 
-PROMPT_VERSION = "supplier-explanation-v2"
+PROMPT_VERSION = "supplier-explanation-v3"
 MAX_MODEL_TURNS = 4
 MAX_TOOL_CALLS = 6
 MAX_MODEL_TURNS_ENV = "SOURCEPILOT_ANALYST_MAX_MODEL_TURNS"
@@ -482,7 +486,7 @@ def explain_supplier(
                 if not repair_used:
                     repair_used = True
                     step("retry", "REPAIR")
-                    instructions = f"{INSTRUCTIONS}\nRepair the invalid final result: {error}"
+                    instructions = f"{INSTRUCTIONS}\n{repair_instructions(error)}"
                     continue
                 air_run.status = "VALIDATION_FAILED"
                 break

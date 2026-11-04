@@ -166,7 +166,7 @@ def test_interpreter_returns_extraction_and_air_run_without_persisting_brief(
         assert air_run.status == "COMPLETED"
         assert air_run.attempts == 1
         assert air_run.project_id == owned.id
-        assert air_run.prompt_version == "brief-interpreter-v2"
+        assert air_run.prompt_version == "brief-interpreter-v3"
         assert air_run.input_tokens == 20
         assert session.get(Brief, owned.id) is None
         assert client.calls[0]["input_text"] == owned.original_request
@@ -308,7 +308,7 @@ def test_semantic_guidance_reaches_structured_operation(
         assert result.requirements[0].expected_value.model_dump() == value
         assert result.quantity == 2000  # MOQ is not the requested quantity.
         assert run.status == "COMPLETED" and run.validation_status == "VALID"
-        assert run.prompt_version == "brief-interpreter-v2"
+        assert run.prompt_version == "brief-interpreter-v3"
         assert run.attempts == len(client.calls) == 1
         assert client.calls[0]["input_text"] == request
         assert client.calls[0]["instructions"] == INSTRUCTIONS
@@ -323,7 +323,7 @@ def test_v2_prompt_covers_semantic_boundaries() -> None:
     from sourcepilot.ai.brief_interpreter import INSTRUCTIONS, PROMPT_VERSION
 
     # Prompt delivery/contract coverage cannot establish live model compliance.
-    assert PROMPT_VERSION == "brief-interpreter-v2"
+    assert PROMPT_VERSION == "brief-interpreter-v3"
     for guidance in (
         "leave importance null when it is unstated", "means REQUIRED", "means PREFERRED",
         "Retain the stated product name and category", "positive decimal string",
@@ -356,7 +356,7 @@ def test_nullable_period_and_price_structured_operation(
         assert result.model_dump(mode="json") == draft
         assert run.status == "COMPLETED" and run.validation_status == "VALID"
         assert run.attempts == 1 and len(client.calls) == 1
-        assert run.prompt_version == "brief-interpreter-v2"
+        assert run.prompt_version == "brief-interpreter-v3"
         assert run.input_hash == structured_input_hash(
             instructions=INSTRUCTIONS, input_text=owned.original_request,
         )

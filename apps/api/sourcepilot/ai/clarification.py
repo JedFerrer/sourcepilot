@@ -20,7 +20,7 @@ if TYPE_CHECKING:
     from sourcepilot.briefs.schemas import BriefResponse
     from sourcepilot.persistence.models import AIRun, DemoSession
 
-PROMPT_VERSION = "clarification-v1"
+PROMPT_VERSION = "clarification-v2"
 OPERATION = "clarification_generator"
 INSTRUCTIONS = """Phrase one short clarification question for each unresolved readiness field supplied.
 Return only the structured schema. Use the current Brief as context, without asking

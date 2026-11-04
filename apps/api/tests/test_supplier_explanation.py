@@ -406,8 +406,9 @@ def test_only_two_read_only_supplier_tools_are_exposed() -> None:
     }
 
 
+@pytest.mark.parametrize("forgery", ["supplier", "project_id", "demo_session_id"])
 def test_model_cannot_call_a_supplier_outside_its_immutable_scope(
-    client: TestClient, engine: Engine,
+    client: TestClient, engine: Engine, forgery: str,
 ) -> None:
     demo_session_id, project_id, supplier_id = discovered(client, engine)
 
@@ -416,7 +417,9 @@ def test_model_cannot_call_a_supplier_outside_its_immutable_scope(
             return invocation(output_items=({
                 "type": "function_call", "call_id": "cross-scope",
                 "name": "get_supplier_evidence",
-                "arguments": json.dumps({"supplier_id": str(uuid4()), "claim_keys": None}),
+                "arguments": json.dumps({"supplier_id": str(uuid4()) if forgery == "supplier" else str(supplier_id),
+                                         "claim_keys": None,
+                                         **({forgery: str(uuid4())} if forgery != "supplier" else {})}),
             },))
 
     with Session(engine) as session, pytest.raises(ExplanationUnavailableError):
@@ -565,11 +568,10 @@ def test_evidence_selection_and_repair_preserve_citation_guards(
                     supplier_id=supplier_id, client_factory=lambda: fake,
                 )
     assert len(errors) == 1
-    assert ("Evidence tool was not used." if repair == "no_lookup" else
-            "Explanation cites evidence not returned by the evidence tool.") in errors[0]
+    assert "The previous result failed semantic validation." in errors[0]
     with Session(engine) as session:
         run = session.scalar(select(AIRun).order_by(AIRun.started_at.desc(), AIRun.id.desc()))
-        assert run is not None and run.prompt_version == PROMPT_VERSION == "supplier-explanation-v2"
+        assert run is not None and run.prompt_version == PROMPT_VERSION == "supplier-explanation-v3"
         assert run.status == ("COMPLETED" if repair == "fetch" else "VALIDATION_FAILED")
         assert run.validation_status == ("REPAIRED" if repair == "fetch" else "INVALID")
         assert run.model_turn_count == (4 if repair == "fetch" else
@@ -596,3 +598,31 @@ def test_evidence_prompt_explains_selection_and_repair() -> None:
         assert "claim_keys=null when exact keys" in guidance
     assert "before citing evidence or finalizing" in INSTRUCTIONS
     assert "do not remove required citations" in INSTRUCTIONS
+
+
+@pytest.mark.parametrize("schema_failure", [False, True])
+def test_analyst_repair_does_not_promote_rejected_values(
+    client: TestClient, engine: Engine, schema_failure: bool,
+) -> None:
+    demo_session_id, project_id, supplier_id = discovered(client, engine)
+    sentinel = "ATTACKER_REPAIR_SENTINEL"
+    class MaliciousModel(FakeClient):
+        def invoke_with_tools(self, **kwargs: object) -> AnalystModelInvocation:
+            assert sentinel not in str(kwargs["instructions"])
+            output = super().invoke_with_tools(**kwargs)
+            if self.calls == 2:
+                payload = json.loads(output.output_text)
+                if schema_failure:
+                    payload[sentinel] = sentinel
+                else:
+                    payload["strengths"][0]["text"] = "Supplier score: 92 " + sentinel
+                return invocation(text=json.dumps(payload))
+            if self.calls == 3:
+                assert ("schema validation" if schema_failure else "semantic validation") in str(kwargs["instructions"])
+            return output
+    model = MaliciousModel(supplier_id)
+    with Session(engine) as session:
+        result = explain_supplier(session, demo_session_id=demo_session_id, project_id=project_id,
+                                  supplier_id=supplier_id, client_factory=lambda: model)
+        run = session.get(AIRun, result.run_id)
+        assert run is not None and run.validation_status == "REPAIRED" and run.model_turn_count == 3

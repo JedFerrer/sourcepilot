@@ -25,6 +25,21 @@ VALID = "VALID"
 REPAIRED = "REPAIRED"
 INVALID = "INVALID"
 
+SCHEMA_REPAIR_INSTRUCTIONS = (
+    "The previous result failed schema validation. Return a complete result matching "
+    "the required JSON schema and the application instructions."
+)
+SEMANTIC_REPAIR_INSTRUCTIONS = (
+    "The previous result failed semantic validation. Recheck the supplied evidence, "
+    "allowed references and application constraints, then return a complete corrected result."
+)
+
+
+def repair_instructions(error: ValueError) -> str:
+    """Select application-authored feedback without exposing rejected model values."""
+    return SCHEMA_REPAIR_INSTRUCTIONS if isinstance(error, ValidationError) else SEMANTIC_REPAIR_INSTRUCTIONS
+
+
 ResultModel = TypeVar("ResultModel", bound=BaseModel)
 
 
@@ -116,10 +131,7 @@ def run_structured_operation(
                 if not schema_repair_used:
                     schema_repair_used = True
                     trace.step("retry", "REPAIR")
-                    if isinstance(error, ValidationError):
-                        current_instructions = f"{instructions}\nRepair the JSON schema failure: {error.errors()}"
-                    else:
-                        current_instructions = f"{instructions}\nRepair the structured output failure: {error}"
+                    current_instructions = f"{instructions}\n{repair_instructions(error)}"
                     continue
                 air_run.status = VALIDATION_FAILED
                 break

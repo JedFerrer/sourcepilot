@@ -365,3 +365,18 @@ def test_launcher_never_resets_when_safety_cannot_be_established(
     with pytest.raises(RuntimeError, match=str(failure)):
         main()
     reset.assert_not_called()
+
+
+
+def test_expiry_helper_refuses_unvalidated_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    from uuid import uuid4
+
+    from tests.e2e_support.expire_session import expire_session
+
+    guard = Mock(side_effect=RuntimeError("isolated database required"))
+    connect = Mock()
+    monkeypatch.setattr("tests.e2e_support.expire_session.safe_database_url", guard)
+    monkeypatch.setattr("tests.e2e_support.expire_session.create_engine", connect)
+    with pytest.raises(RuntimeError, match="isolated database required"):
+        expire_session(uuid4())
+    connect.assert_not_called()

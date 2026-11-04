@@ -74,7 +74,7 @@ The following command is a manual, opt-in live check. It requires a valid API ke
 uv run --env-file ../../.env python -m sourcepilot.ai.smoke --demo-session-id <demo-session-uuid>
 ```
 
-The smoke request uses `foundation-smoke-v1` and sends `store=false` to the Responses API. Do not run it in automated checks.
+The smoke request uses `foundation-smoke-v2` and sends `store=false` to the Responses API. Do not run it in automated checks.
 
 ## Checks
 
@@ -163,3 +163,21 @@ uv run ruff check .
 uv run pyright
 uv run --env-file ../../.env pytest
 ```
+
+
+## Public-demo security prerequisites
+
+`API_MAX_REQUEST_BYTES` is a positive integer, defaulting to 1,000,000 bytes.
+The existing middleware rejects oversized non-upload HTTP bodies before parsing,
+including streamed bodies without a trustworthy Content-Length, with HTTP 413 and
+`REQUEST_TOO_LARGE`. PDF uploads retain `QUOTE_PDF_MAX_BYTES` plus 65,536 bytes
+of multipart overhead and the existing `UPLOAD_TOO_LARGE` contract. File and page
+limits still apply independently.
+
+HTTPS with `DEMO_SESSION_COOKIE_SECURE=true`, same-site frontend/API routing and
+private document storage are deployment prerequisites. Hosting-level abuse controls
+and deployment configuration remain deferred to M6-U6. Per-request body limits do
+not bound repeated anonymous sessions, aggregate storage or repeated paid model calls.
+The E2E expiry helper exists only under `tests/e2e_support`, uses the existing isolated
+database guard, and requires a designated single-project fixture; there is no HTTP
+expiry endpoint. Automated targeted checks do not constitute independent Browser QA.

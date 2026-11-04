@@ -217,8 +217,8 @@ def process_pdf_quote(
                 logger.warning("Could not finalize interrupted quote AI run for document %s", document_id)
         try:
             _finish_failure(session_factory, document_id, attempt, "PROCESSING_FAILED")
-        except Exception:
-            logger.exception("Could not persist failed PDF quote processing for document %s", document_id)
+        except Exception:  # noqa: BLE001 - background failure persistence must not escape
+            logger.error("Could not persist failed PDF quote processing for document %s", document_id)
 
 
 def _finish_interrupted_ai_run(

@@ -425,7 +425,7 @@ def test_api_preconditions_do_not_call_provider(client: TestClient, engine: Engi
 
 
 def test_n4_tradeoff_prompt_guidance() -> None:
-    assert PROMPT_VERSION == "tradeoff-analysis-v3"
+    assert PROMPT_VERSION == "tradeoff-analysis-v4"
     for guidance in (
         "Use the supplied current comparison first", "do not reread",
         "specific claims", "reuse retrieved results", "four model turns",

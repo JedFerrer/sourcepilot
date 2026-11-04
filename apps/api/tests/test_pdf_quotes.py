@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import logging
 import subprocess
 import sys
 from collections.abc import Iterator
@@ -955,21 +956,23 @@ def test_partial_write_and_unlink_failure_records_safe_identifiers(
 
 def test_cleanup_failure_is_recorded_without_erasing_original_error(
     storage_client: tuple[TestClient, LocalDocumentStorage], monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
+    monkeypatch.setattr(logging.getLogger("sourcepilot.documents.service"), "disabled", False)
     api, storage = storage_client
     project_id, supplier_id, _ = setup_shortlist(api)
-    log = Mock()
-    monkeypatch.setattr("sourcepilot.documents.service.logger", log)
     def failing_put(key: str, source: Path) -> None:
-        raise OSError("write failed")
+        raise OSError("SECRET_WRITE_SENTINEL")
     def failing_delete(key: str) -> None:
-        raise OSError("cleanup failed")
+        raise OSError("SECRET_CLEANUP_SENTINEL") from ValueError("SECRET_CHAIN_SENTINEL")
     monkeypatch.setattr(storage, "put", failing_put)
     monkeypatch.setattr(storage, "delete", failing_delete)
     response = upload(api, project_id, supplier_id, pdf_bytes())
     assert response.status_code == 503
     assert api.get(f"/projects/{project_id}/quotes").json() == []
-    assert "PDF upload cleanup failed" in log.exception.call_args.args[0]
+    assert "PDF upload cleanup failed for owned key quote-pdfs/" in caplog.text
+    assert "SECRET_" not in caplog.text + response.text
+    assert all(record.exc_info is None for record in caplog.records)
 
 
 def test_confirmed_database_rollback_removes_owned_object(
@@ -999,19 +1002,18 @@ def test_confirmed_database_rollback_removes_owned_object(
 
 def test_uncertain_commit_preserves_object_and_reports_it(
     storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture,
 ) -> None:
+    monkeypatch.setattr(logging.getLogger("sourcepilot.documents.service"), "disabled", False)
     api, storage = storage_client
     project_id, supplier_id, _ = setup_shortlist(api)
     source = tmp_path / "quote.pdf"
     source.write_bytes(pdf_bytes())
-    log = Mock()
-    monkeypatch.setattr("sourcepilot.documents.service.logger", log)
     with Session(engine) as database_session:
         project = database_session.get(Project, UUID(project_id))
         assert project is not None
         def uncertain_commit() -> None:
-            raise ConnectionError("connection dropped")
+            raise ConnectionError("SECRET_DATABASE_SENTINEL") from ValueError("SECRET_SQL_PARAMETERS")
         monkeypatch.setattr(database_session, "commit", uncertain_commit)
         with pytest.raises(PdfCommitUncertainError):
             store_pdf_quote(
@@ -1020,7 +1022,9 @@ def test_uncertain_commit_preserves_object_and_reports_it(
                 page_count=1, storage=storage,
             )
     assert len(list(storage.root.rglob("*.pdf"))) == 1
-    assert "commit outcome uncertain" in log.exception.call_args.args[0]
+    assert "commit outcome uncertain; retained key quote-pdfs/" in caplog.text
+    assert "SECRET_" not in caplog.text
+    assert all(record.exc_info is None for record in caplog.records)
 
 
 @pytest.mark.parametrize("same_pdf", [True, False], ids=["identical", "different"])
@@ -1542,3 +1546,137 @@ def test_concurrent_failed_replacement_schedules_one_new_document(
         documents = session.scalars(select(QuoteDocument)).all()
         assert len(documents) == 2
         assert [document.id for document in documents if document.is_active] == [new_id]
+
+
+@pytest.mark.parametrize("path,limit,code", [
+    ("/projects", 8, "REQUEST_TOO_LARGE"),
+    ("/projects/x/quotes/upload", 65_540, "UPLOAD_TOO_LARGE"),
+    ("/projects/x/quotes/upload/", 65_540, "UPLOAD_TOO_LARGE"),
+])
+@pytest.mark.parametrize("case", ["exact", "over", "declared", "understated", "disconnect"])
+def test_http_body_boundary_and_replay(
+    monkeypatch: pytest.MonkeyPatch, path: str, limit: int, code: str, case: str,
+) -> None:
+    monkeypatch.setenv("API_MAX_REQUEST_BYTES", "8")
+    monkeypatch.setenv("QUOTE_PDF_MAX_BYTES", "4")
+    received = []
+    sent = []
+    reads = 0
+    headers = []
+    if case == "declared":
+        headers = [(b"content-length", str(limit + 1).encode())]
+    elif case == "understated":
+        headers = [(b"content-length", b"1")]
+    messages = iter([
+        {"type": "http.request", "body": b"x" * (limit - 1), "more_body": True},
+        {"type": "http.disconnect"} if case == "disconnect" else
+        {"type": "http.request", "body": b"x" if case == "exact" else b"xx", "more_body": False},
+    ])
+    async def receive():
+        nonlocal reads
+        reads += 1
+        return next(messages)
+    async def send(message):
+        sent.append(message)
+    async def inner(scope, replay, send):
+        received.append(await replay())
+        received.append(await replay())
+    asyncio.run(UploadBodyLimitMiddleware(inner)(
+        {"type": "http", "method": "POST", "path": path, "headers": headers}, receive, send,
+    ))
+    if case == "exact":
+        assert received == [{"type": "http.request", "body": b"x" * limit, "more_body": False},
+                            {"type": "http.disconnect"}]
+        assert sent == []
+    else:
+        assert received == []
+        if case == "disconnect":
+            assert sent == []
+        else:
+            assert sent[0]["status"] == 413
+            assert json.loads(sent[1]["body"])["error"]["code"] == code
+    if case == "declared":
+        assert reads == 0
+
+
+@pytest.mark.parametrize("key", ["../other.pdf", "/absolute.pdf", "quote-pdfs/../bad.pdf",
+                                  "quote-pdfs/" + "a" * 31 + "X.pdf"])
+@pytest.mark.parametrize("operation", ["put", "read_to", "delete"])
+def test_invalid_storage_keys_never_touch_storage(tmp_path: Path, key: str, operation: str) -> None:
+    remote = Mock()
+    source = tmp_path / "source.pdf"
+    source.write_bytes(b"%PDF-original")
+    for storage in (LocalDocumentStorage(tmp_path / "objects"), S3DocumentStorage("bucket", client=remote)):
+        with pytest.raises(ValueError, match="Invalid document storage key"):
+            if operation == "put":
+                storage.put(key, source)
+            elif operation == "read_to":
+                storage.read_to(key, tmp_path / "destination.pdf", max_bytes=100)
+            else:
+                storage.delete(key)
+    assert remote.mock_calls == []
+    assert not (tmp_path / "objects").exists()
+    assert not (tmp_path / "destination.pdf").exists()
+
+
+def test_failure_persistence_logs_only_document_identifier(
+    storage_client: tuple[TestClient, LocalDocumentStorage], engine: Engine,
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture,
+) -> None:
+    monkeypatch.setattr(logging.getLogger("sourcepilot.documents.processing"), "disabled", False)
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    response = upload(api, project_id, supplier_id, (FIXTURE_PDFS / "image_only.pdf").read_bytes())
+    document_id = UUID(response.json()["document"]["id"])
+    def fail_persistence(*args: object) -> None:
+        raise RuntimeError("SECRET_DATABASE_SENTINEL") from ValueError("SECRET_SQL_PARAMETERS")
+    monkeypatch.setattr("sourcepilot.documents.processing._finish_failure", fail_persistence)
+    process_pdf_quote(document_id, 1, session_factory=sessionmaker(bind=engine, expire_on_commit=False),
+                      storage=storage, settings=document_settings_from_environment(),
+                      client_factory=lambda: pytest.fail("Image-only PDF must not call a model"))
+    assert f"Could not persist failed PDF quote processing for document {document_id}" in caplog.text
+    assert "SECRET_" not in caplog.text
+    assert all(record.exc_info is None for record in caplog.records)
+    with Session(engine) as session:
+        document = session.get(QuoteDocument, document_id)
+        assert document is not None and document.processing_status == "PROCESSING"
+        assert storage.root.joinpath(document.storage_key).exists()
+
+
+@pytest.mark.parametrize("mime", ["text/plain", "application/octet-stream", "application/pdf"])
+def test_pdf_bytes_not_mime_or_filename_control_storage(
+    storage_client: tuple[TestClient, LocalDocumentStorage], mime: str,
+) -> None:
+    api, storage = storage_client
+    project_id, supplier_id, _ = setup_shortlist(api)
+    original = (FIXTURE_PDFS / "harbor_primary.pdf").read_bytes()
+    response = api.post(f"/projects/{project_id}/quotes/upload", data={"supplier_id": supplier_id},
+                        files={"file": ("../../hostile.pdf", original, mime)})
+    assert response.status_code == 201, response.text
+    files = list(storage.root.rglob("*.pdf"))
+    assert len(files) == 1 and files[0].read_bytes() == original
+    assert files[0].name != "hostile.pdf"
+
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "not-a-number", "1.5"])
+def test_api_request_limit_requires_positive_integer(monkeypatch: pytest.MonkeyPatch, value: str) -> None:
+    monkeypatch.setenv("API_MAX_REQUEST_BYTES", value)
+    async def never(*args):
+        pytest.fail("Invalid configuration must fail before receiving or dispatching")
+    with pytest.raises(RuntimeError, match="API_MAX_REQUEST_BYTES"):
+        asyncio.run(UploadBodyLimitMiddleware(never)(
+            {"type": "http", "method": "PATCH", "path": "/projects/x", "headers": []}, never, never))
+
+
+def test_body_limit_passes_non_http_scopes_unchanged() -> None:
+    seen = []
+    async def receive():
+        return {"type": "lifespan.startup"}
+    async def send(message):
+        seen.append(message)
+    async def inner(scope, original_receive, original_send):
+        assert original_receive is receive and original_send is send
+        await original_send(await original_receive())
+    asyncio.run(UploadBodyLimitMiddleware(inner)({"type": "lifespan"}, receive, send))
+    assert seen == [{"type": "lifespan.startup"}]

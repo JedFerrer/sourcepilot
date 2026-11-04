@@ -22,7 +22,7 @@ from sourcepilot.comparison.advice import SuggestedSupplierResult, validate_sugg
 from sourcepilot.persistence.models import ProjectSupplier
 
 CONTRACT_VERSION = "comparison-advice-v1"
-PROMPT_VERSION = "comparison-advice-v3"
+PROMPT_VERSION = "comparison-advice-v4"
 INSTRUCTIONS = """Use the supplied current comparison first; do not reread comparison or supplier
 snapshots for facts already present. Retrieve evidence only for specific claims
 that need source detail, and reuse retrieved results rather than repeating lookups.
