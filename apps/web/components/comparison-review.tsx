@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WorkflowSummary, workflowReasons } from "../lib/workflow";
 import { ApiClientError, apiRequest } from "../lib/api";
+import { analysisBackendMs, analysisBrowserMs } from "../lib/analysis-timeouts";
 
 type Evidence = {
   id: string; value: string | number | null; role: "supporting" | "provenance";
@@ -262,7 +263,12 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, work
   const [adviceOutdated, setAdviceOutdated] = useState(false);
   const adviceSequence = useRef(0);
   const advicePresent = useRef(false);
-  const adviceRef = useRef<Advice | null>(null);
+  // Request ownership survives read-only freshness checks, including failed reads.
+  const adviceBinding = useRef<string | null>(null);
+  const advicePending = useRef(false);
+  const adviceAbort = useRef<AbortController | null>(null);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [retryWaiting, setRetryWaiting] = useState(false);
   const displaySequence = useRef(0);
   const mutationSequence = useRef(0);
   const currentProjectId = useRef(projectId);
@@ -270,36 +276,48 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, work
   const active = useRef(false);
 
   const invalidateAdvice = useCallback(() => {
+    adviceAbort.current?.abort();
+    adviceAbort.current = null;
+    if (retryTimer.current) clearTimeout(retryTimer.current);
+    retryTimer.current = null;
+    setRetryWaiting(false);
     adviceSequence.current += 1;
     if (advicePresent.current) setAdviceOutdated(true);
     advicePresent.current = false;
-    adviceRef.current = null;
+    adviceBinding.current = null;
+    advicePending.current = false;
     setAdvice(null);
     setAdviceBusy(false);
     setAdviceError(null);
   }, []);
 
-  const reload = useCallback(async (preserveAdvice = false) => {
-    const prior = preserveAdvice ? adviceRef.current : null;
-    invalidateAdvice();
+  const reload = useCallback(async (signal?: AbortSignal) => {
     const request = ++displaySequence.current;
+    const parent = signal ?? (advicePending.current ? adviceAbort.current?.signal : undefined);
+    const read = new AbortController();
+    const abort = () => read.abort(parent?.reason);
+    if (parent?.aborted) abort();
+    else parent?.addEventListener("abort", abort, { once: true });
+    const readTimer = setTimeout(() => read.abort(new DOMException("Verification deadline", "TimeoutError")), 15_000);
     setLoading(true);
     setError(null);
     try {
-      const latest = await apiRequest<Comparison>(`/api/projects/${projectId}/comparison`);
+      const latest = await apiRequest<Comparison>(`/api/projects/${projectId}/comparison`, { signal: read.signal });
       if (!latest.comparison_payload?.suppliers || !latest.comparison_payload?.brief) throw new Error("Invalid comparison response");
       if (request === displaySequence.current) {
         setComparison(latest);
-        if (prior && prior.snapshot_id === latest.id && !latest.stale) {
-          setAdvice(prior);
-          adviceRef.current = prior;
-          advicePresent.current = true;
-          setAdviceOutdated(false);
+        if (adviceBinding.current && (adviceBinding.current !== latest.id || latest.stale)) {
+          invalidateAdvice();
+          setAdviceError("The comparison changed. Review the current comparison before analyzing again.");
         }
         onSnapshotChange?.(true);
       }
     } catch (failure) {
       if (request === displaySequence.current) {
+        if (failure instanceof ApiClientError && failure.status === 404 && failure.code === "COMPARISON_NOT_FOUND" && adviceBinding.current) {
+          invalidateAdvice();
+          setAdviceError("The comparison is no longer available. Generate it before analyzing again.");
+        }
         setComparison(null);
         onSnapshotChange?.(false);
         if (!(failure instanceof ApiClientError && failure.status === 404 && failure.code === "COMPARISON_NOT_FOUND")) {
@@ -307,6 +325,8 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, work
         }
       }
     } finally {
+      clearTimeout(readTimer);
+      parent?.removeEventListener("abort", abort);
       if (request === displaySequence.current) setLoading(false);
     }
   }, [projectId, onSnapshotChange, invalidateAdvice]);
@@ -320,60 +340,84 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, work
   useEffect(() => {
     active.current = true;
     currentProjectId.current = projectId;
+    invalidateAdvice();
+    setAdviceOutdated(false);
+    return () => {
+      active.current = false;
+      displaySequence.current += 1;
+      adviceSequence.current += 1;
+      adviceAbort.current?.abort();
+      if (retryTimer.current) clearTimeout(retryTimer.current);
+    };
+  }, [projectId, invalidateAdvice]);
+
+  useEffect(() => {
     setGenerationError(null);
     void reload();
-    return () => { active.current = false; displaySequence.current += 1; adviceSequence.current += 1; };
+    return () => { displaySequence.current += 1; };
   }, [reload, refreshKey, projectId]);
 
   useEffect(() => {
-    const onFocus = () => { void reload(true); };
+    const onFocus = () => { void reload(); };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
   }, [reload]);
 
   async function analyze() {
-    if (!comparison || comparison.stale || loading || busy) return;
+    if (!comparison || comparison.stale || loading || busy || advicePending.current || retryWaiting) return;
     const bound = comparison.id;
     const request = ++adviceSequence.current;
     const current = () => active.current && request === adviceSequence.current && projectId === currentProjectId.current;
     setAdvice(null);
     advicePresent.current = false;
-    adviceRef.current = null;
+    adviceBinding.current = bound;
+    advicePending.current = true;
+    const started = performance.now();
+    const controller = new AbortController();
+    adviceAbort.current = controller;
+    const waitTimer = setTimeout(() => controller.abort(new DOMException("Analysis deadline", "TimeoutError")), analysisBrowserMs);
     setAdviceBusy(true);
     setAdviceError(null);
     try {
       const result = await apiRequest<Advice>(`/api/projects/${projectId}/comparison/advice`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ snapshot_id: bound }),
+        signal: controller.signal,
       });
       if (!current()) return;
-      let latest: Comparison;
-      try {
-        latest = await apiRequest<Comparison>(`/api/projects/${projectId}/comparison`);
-      } catch (failure) {
-        if (failure instanceof ApiClientError && failure.code === "COMPARISON_NOT_FOUND") {
-          throw new ApiClientError("The comparison changed. Regenerate it and analyze again.", "COMPARISON_STALE", 409);
-        }
-        throw failure;
-      }
-      if (!current()) return;
-      setComparison(latest);
-      if (latest.stale || latest.id !== bound || result.snapshot_id !== bound) {
+      if (result.snapshot_id !== bound) {
         throw new ApiClientError("The comparison changed. Regenerate it and analyze again.", "COMPARISON_STALE", 409);
       }
       setAdvice(result);
-      adviceRef.current = result;
       advicePresent.current = true;
       setAdviceOutdated(false);
+      // All reads share reload's sequence. Never let an older focus read restore
+      // current presentation after a newer post-result verification.
+      await reload(controller.signal);
     } catch (failure) {
       if (!current()) return;
       setAdvice(null);
       setAdviceError(failure instanceof ApiClientError ? failure.message : "Analysis could not be verified. Try again.");
+      if (failure instanceof ApiClientError && ["NETWORK_ERROR", "INVALID_RESPONSE", "ANALYSIS_CONNECTION_LOST"].includes(failure.code)) {
+        const remaining = Math.max(0, analysisBackendMs - (performance.now() - started));
+        if (remaining > 0) {
+          setAdviceError("The connection was interrupted. Analysis may still be finishing. Please wait before retrying.");
+          setRetryWaiting(true);
+          retryTimer.current = setTimeout(() => {
+            if (current()) setRetryWaiting(false);
+            retryTimer.current = null;
+          }, remaining);
+        }
+      }
       if (failure instanceof ApiClientError && failure.code === "COMPARISON_STALE") {
+        displaySequence.current += 1;
+        setLoading(false);
+        setError(null);
         setAdviceOutdated(true);
         setComparison((previous) => previous ? { ...previous, stale: true } : previous);
       }
     } finally {
-      if (current()) setAdviceBusy(false);
+      clearTimeout(waitTimer);
+      if (current()) { advicePending.current = false; setAdviceBusy(false); }
     }
   }
 
@@ -414,15 +458,16 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, work
     <h2 id="comparison-title">Comparison</h2>
     {workflow?.stage_prerequisites.COMPARISON ? <p role="status">{workflowReasons[workflow.stage_prerequisites.COMPARISON]}</p> : null}
     {loading ? <p role="status">Loading comparison…</p> : null}
+    {(loading || error) && adviceBusy ? <p role="status">Analysis is pending while we verify the comparison.</p> : null}
     {error ? <div className="form-error" role="alert"><p>{error}</p><button type="button" onClick={() => void reload()}>Retry comparison</button></div> : null}
     {generationError ? <p className="form-error" role="alert">{generationError}</p> : null}
+    {!loading && !error && adviceError ? <p className="form-error" role="alert">{adviceError}</p> : null}
     {!loading && !comparison && !error ? <p>No comparison has been generated. Generate one when the current shortlist has at least two confirmed quotes.</p> : null}
     {!loading && comparison ? <>
       {comparison.stale ? <div className="comparison-stale" role="status"><strong>Comparison outdated</strong><p>Inputs have changed. These are previous facts. Regenerate after the current Brief and shortlist are approved.</p></div> : <p role="status">Comparison is current.</p>}
       <ComparisonTable comparison={comparison} />
       {adviceOutdated ? <p role="status">Previous analysis is outdated. Analyze the current comparison again.</p> : null}
-      {adviceError ? <p className="form-error" role="alert">{adviceError}</p> : null}
-      <button type="button" disabled={adviceBusy || busy || comparison.stale} onClick={() => void analyze()}>
+      <button type="button" disabled={adviceBusy || retryWaiting || busy || comparison.stale} onClick={() => void analyze()}>
         {adviceBusy ? "Analyzing…" : adviceError ? "Retry analysis" : "Analyze Comparison"}
       </button>
       {advice && advice.snapshot_id === comparison.id && !comparison.stale ? <ComparisonAdviceView advice={advice} comparison={comparison} /> : null}

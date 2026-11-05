@@ -6,6 +6,7 @@ The provider is replaced at the existing client seam; tools and runtime are real
 
 from __future__ import annotations
 
+import asyncio
 import json
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
@@ -15,8 +16,10 @@ from unittest.mock import Mock
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import Session
+from sqlalchemy.pool import NullPool
 
 from sourcepilot.ai import eval_baseline as baseline
 from sourcepilot.ai import eval_live
@@ -25,11 +28,88 @@ from sourcepilot.ai.comparison_advice_eval import scenario_snapshot
 from sourcepilot.ai.eval_scoring import check_failed, score_output
 from sourcepilot.ai.tradeoff_analysis import TradeoffNotReadyError
 from sourcepilot.ai.tradeoff_analysis_eval import fixture_snapshot
+from sourcepilot.comparison.deadline import ComparisonDeadline, current_deadline
+from sourcepilot.comparison.execution import comparison_cli_lifecycle
+from sourcepilot.persistence.base import Base
 from sourcepilot.persistence.models import AIRun, DemoSession, Project
 from tests.database_test_support import (
     create_test_engine,
     persistence_test_database_url_from_environment,
 )
+
+
+@pytest.fixture(autouse=True)
+def isolated_comparison_adapters(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Run adapter setup and analysis in one async, rollback-owned transaction.
+
+    Adapter tests exercise real authorization/tools, not the HTTP connection
+    boundary (covered by comparison API/recovery tests). A synchronous outer
+    transaction cannot publish its savepoints to a request-owned connection.
+    Keep that production boundary unchanged and give this test's whole adapter
+    invocation one async connection, including its fixture creation.
+    """
+    original = eval_live.run_case
+
+    def run_case(session: Session, category: str, *args: Any, **kwargs: Any) -> Any:
+        if category not in {"comparison", "suggestion"}:
+            return original(session, category, *args, **kwargs)
+
+        async def isolated() -> Any:
+            engine = create_async_engine(
+                persistence_test_database_url_from_environment(), poolclass=NullPool,
+            )
+            try:
+                async with engine.connect() as connection:
+                    transaction = await connection.begin()
+                    try:
+                        async with AsyncSession(
+                            bind=connection, expire_on_commit=False,
+                            join_transaction_mode="create_savepoint",
+                        ) as owned:
+                            deadline = ComparisonDeadline()
+                            token = current_deadline.set(deadline)
+                            try:
+                                def invoke(scoped: Session) -> Any:
+                                    actual, run = original(scoped, category, *args, **kwargs)
+                                    if run is not None:
+                                        # Classification reads ordered steps after this
+                                        # isolated fixture has closed and rolled back.
+                                        scoped.refresh(run, ["supplier_explanation_steps"])
+                                    return actual, run
+
+                                async with asyncio.timeout(deadline.remaining()):
+                                    return await owned.run_sync(invoke)
+                            finally:
+                                current_deadline.reset(token)
+                    finally:
+                        await transaction.rollback()
+            finally:
+                await engine.dispose()
+
+        with comparison_cli_lifecycle() as runner:
+            return runner.run(isolated())
+
+    monkeypatch.setattr(eval_live, "run_case", run_case)
+
+
+@pytest.mark.parametrize("category", ["comparison", "suggestion"])
+def test_comparison_adapter_rolls_back_fixtures_and_trace(
+    session: Session, category: str,
+) -> None:
+    def counts() -> dict[str, int | None]:
+        return {
+            table.name: session.scalar(select(func.count()).select_from(table))
+            for table in Base.metadata.sorted_tables
+        }
+
+    before = counts()
+    case = baseline.load_scope([category])[category][0]
+    client = FixtureClient(category, case)
+    actual, run = eval_live.run_case(session, category, case, lambda: client)
+    assert actual is not None and run is not None and run.status == "COMPLETED"
+    assert counts() == before
+    # The returned trace is detached; neither its row nor fixture rows leaked.
+    assert session.get(AIRun, run.id) is None
 
 
 @pytest.fixture
@@ -326,10 +406,14 @@ def test_stale_comparison_rejected_before_provider(session: Session) -> None:
     )
     factory = Mock(side_effect=AssertionError("must not construct provider"))
     before = session.scalars(select(AIRun.id)).all()
+    projects_before = session.scalars(select(Project.id)).all()
+    owners_before = session.scalars(select(DemoSession.id)).all()
     with pytest.raises(TradeoffNotReadyError, match="Regenerate"):
         eval_live.run_case(session, "comparison", case, factory)
     factory.assert_not_called()
     assert session.scalars(select(AIRun.id)).all() == before
+    assert session.scalars(select(Project.id)).all() == projects_before
+    assert session.scalars(select(DemoSession.id)).all() == owners_before
 
 
 def test_existing_project_and_decision_unmodified(session: Session) -> None:

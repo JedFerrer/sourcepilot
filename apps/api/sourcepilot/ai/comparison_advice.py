@@ -19,10 +19,12 @@ from sourcepilot.ai.tradeoff_analysis import (
     validate_analysis,
 )
 from sourcepilot.comparison.advice import SuggestedSupplierResult, validate_suggestion
+from sourcepilot.comparison.execution import bounded_comparison
+from sourcepilot.comparison.validation import ComparisonRejection, RejectionCode
 from sourcepilot.persistence.models import ProjectSupplier
 
 CONTRACT_VERSION = "comparison-advice-v1"
-PROMPT_VERSION = "comparison-advice-v4"
+PROMPT_VERSION = "comparison-advice-v5"
 INSTRUCTIONS = """Use the supplied current comparison first; do not reread comparison or supplier
 snapshots for facts already present. Retrieve evidence only for specific claims
 that need source detail, and reuse retrieved results rather than repeating lookups.
@@ -114,8 +116,12 @@ class ComparisonAdviceResponse(ComparisonAdvice):
 def validate_advice(advice: ComparisonAdvice, snapshot: ComparisonSnapshotResult) -> None:
     validate_analysis(advice.analysis, snapshot)
     if snapshot.comparison_payload is None:
-        raise ValueError("Current comparison payload is missing.")
-    validate_suggestion(advice.suggestion, cast(dict[str, Any], snapshot.comparison_payload))
+        raise ComparisonRejection(RejectionCode.SNAPSHOT_MISSING, "Current comparison payload is missing.")
+    try:
+        validate_suggestion(advice.suggestion, cast(dict[str, Any], snapshot.comparison_payload))
+    except ComparisonRejection as error:
+        error.phase = "suggestion"
+        raise
 
 
 def check_advice_scope(session: Session, project_id: UUID, expected_id: UUID,
@@ -134,6 +140,7 @@ def check_advice_scope(session: Session, project_id: UUID, expected_id: UUID,
         raise TradeoffNotReadyError("COMPARISON_STALE", "The shortlist changed. Regenerate and retry.")
 
 
+@bounded_comparison
 def analyze_comparison_advice(
     session: Session, *, demo_session_id: UUID, project_id: UUID, snapshot_id: UUID,
     client_factory: Callable[[], StructuredModelClient],

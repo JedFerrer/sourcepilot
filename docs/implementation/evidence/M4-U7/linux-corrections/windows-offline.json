@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\api\\.venv\\Scripts\\python.exe",
+    "-m",
+    "sourcepilot.ai.eval_baseline",
+    "--mode",
+    "offline",
+    "--output",
+    "../../docs/implementation/evidence/M4-U7/linux-corrections/windows-offline"
+  ],
+  "exit_code": 0,
+  "seconds": 12.95299999999952,
+  "platform": "Windows-10-10.0.26200-SP0"
+}

@@ -1,0 +1,1254 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=qa.config.ts"
+    ],
+    "configFile": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.config.ts",
+    "rootDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa",
+        "testIgnore": [],
+        "testMatch": [
+          "qa.spec.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "qa.spec.ts",
+      "file": "qa.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "native focus pending success, repeated focus and keyboard retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 24478,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:41:3",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:41:3"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   if(!page.isClosed()) {\n  20 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n> 21 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n     |                ^\n  22 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n  23 |   }\n  24 | });\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 789
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 704
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 246
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1143
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:50:29.064Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-su-1c830-ed-focus-and-keyboard-retry\\test-failed-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-su-1c830-ed-focus-and-keyboard-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-su-1c830-ed-focus-and-keyboard-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-4a4abeb323fc0815a96e",
+          "file": "qa.spec.ts",
+          "line": 37,
+          "column": 49
+        },
+        {
+          "title": "native focus pending failure, repeated focus and keyboard retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 24739,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:41:3",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:41:3"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   if(!page.isClosed()) {\n  20 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n> 21 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n     |                ^\n  22 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n  23 |   }\n  24 | });\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 674
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 656
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 365
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1191
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:50:54.737Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-fa-4816c-ed-focus-and-keyboard-retry\\test-failed-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-fa-4816c-ed-focus-and-keyboard-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-fa-4816c-ed-focus-and-keyboard-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-7a90552ae0fce07b6532",
+          "file": "qa.spec.ts",
+          "line": 37,
+          "column": 49
+        },
+        {
+          "title": "failed freshness hides advice and GET-only recovery retains success",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 25183,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:56:3",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:56:3"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   if(!page.isClosed()) {\n  20 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n> 21 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n     |                ^\n  22 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n  23 |   }\n  24 | });\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 595
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 617
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 384
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1088
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:51:20.713Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-failed-freshness-hides--11992-ly-recovery-retains-success\\test-failed-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-failed-freshness-hides--11992-ly-recovery-retains-success\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-failed-freshness-hides--11992-ly-recovery-retains-success\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-cf5055f637133ff3098a",
+          "file": "qa.spec.ts",
+          "line": 53,
+          "column": 5
+        },
+        {
+          "title": "competing focus and post-result reads cannot restore stale advice",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 23934,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:65:3",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | async function nativeFocus(p:Page){\n  27 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n> 28 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n     |                                                              ^\n  29 |   await p.bringToFront();await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(true);await other.close();\n  30 |   const events=await p.evaluate(()=>(window as any).__focus);\n  31 |   expect(events.some((e:any)=>e.type==='blur'&&e.trusted)).toBe(true);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:65:3"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   if(!page.isClosed()) {\n  20 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n> 21 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n     |                ^\n  22 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n  23 |   }\n  24 | });\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 520
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 585
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 269
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1098
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:51:47.476Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-competing-focus-and-pos-5b50b-cannot-restore-stale-advice\\test-failed-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-competing-focus-and-pos-5b50b-cannot-restore-stale-advice\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-competing-focus-and-pos-5b50b-cannot-restore-stale-advice\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-57c2bb5bcf9ec22e5357",
+          "file": "qa.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "quote invalidation and replacement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 14023,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 612
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 631
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 360
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1483
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:52:12.617Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-4e695f544738425cb378",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "brief invalidation and replacement",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 27426,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\nExpected: enabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote') with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\nExpected: enabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote') with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\u001b[22m\n\n    at approveShortlist (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:101:67)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:74:111",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 67,
+                      "line": 101
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:101\n\n   99 |   await section.getByRole(\"button\", { name: \"Approve Shortlist\", exact: true }).click();\n  100 |   await expect(section).toContainText(\"Shortlist approved\");\n> 101 |   await expect(quoteCard(page, 0).getByLabel(\"Upload PDF quote\")).toBeEnabled();\n      |                                                                   ^\n  102 | }\n  103 |\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 67,
+                        "line": 101
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\nExpected: enabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote') with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\u001b[22m\n\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:101\n\n   99 |   await section.getByRole(\"button\", { name: \"Approve Shortlist\", exact: true }).click();\n  100 |   await expect(section).toContainText(\"Shortlist approved\");\n> 101 |   await expect(quoteCard(page, 0).getByLabel(\"Upload PDF quote\")).toBeEnabled();\n      |                                                                   ^\n  102 | }\n  103 |\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n    at approveShortlist (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:101:67)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:74:111"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 547
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 678
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 257
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1238
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:52:26.944Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-brief-invalidation-and-replacement\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-brief-invalidation-and-replacement\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 67,
+                    "line": 101
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fafbf490ce076c6b7c29",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "shortlist invalidation and replacement",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 26699,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\nExpected: enabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote') with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\nExpected: enabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote') with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\u001b[22m\n\n    at approveShortlist (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:101:67)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:75:27",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 67,
+                      "line": 101
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:101\n\n   99 |   await section.getByRole(\"button\", { name: \"Approve Shortlist\", exact: true }).click();\n  100 |   await expect(section).toContainText(\"Shortlist approved\");\n> 101 |   await expect(quoteCard(page, 0).getByLabel(\"Upload PDF quote\")).toBeEnabled();\n      |                                                                   ^\n  102 | }\n  103 |\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 67,
+                        "line": 101
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeEnabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\nExpected: enabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeEnabled\" getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote') with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Quotes', exact: true }).getByRole('article').filter({ has: getByRole('heading', { name: 'Harbor Pouch Works', exact: true }) }).getByLabel('Upload PDF quote')\u001b[22m\n\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:101\n\n   99 |   await section.getByRole(\"button\", { name: \"Approve Shortlist\", exact: true }).click();\n  100 |   await expect(section).toContainText(\"Shortlist approved\");\n> 101 |   await expect(quoteCard(page, 0).getByLabel(\"Upload PDF quote\")).toBeEnabled();\n      |                                                                   ^\n  102 | }\n  103 |\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n    at approveShortlist (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:101:67)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:75:27"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 469
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 600
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 258
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1059
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:52:55.299Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-shortlist-invalidation-and-replacement\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-shortlist-invalidation-and-replacement\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 67,
+                    "line": 101
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-a0d93d93e842ac74a109",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "regeneration invalidation and replacement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12973,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 589
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 622
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 262
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1092
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:53:23.214Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-287b00b87180e3bc01db",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "project switch A to B to A rejects late result",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 34472,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:86:65",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | });\n  27 | async function setup(p:Page){const project=await createAndApprove(p);for(const i of [0,1]){await quoteCard(p,i).getByLabel('Upload PDF quote').setInputFiles(require('node:path').resolve(__dirname, '../../../../../apps/api/tests/fixtures/quote_pdfs', ['harbor_primary.pdf','willow_primary.pdf'][i]));await expect(quoteCard(p,i)).toContainText('Status: NEEDS REVIEW');await confirm(p,i);}await comparison(p);return project.id;}\n> 28 | async function nativeFocus(p:Page){\n     |                                    ^\n  29 |   const cdp=await p.context().newCDPSession(p);await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:false});\n  30 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n  31 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | });\n  27 | async function setup(p:Page){const project=await createAndApprove(p);for(const i of [0,1]){await quoteCard(p,i).getByLabel('Upload PDF quote').setInputFiles(require('node:path').resolve(__dirname, '../../../../../apps/api/tests/fixtures/quote_pdfs', ['harbor_primary.pdf','willow_primary.pdf'][i]));await expect(quoteCard(p,i)).toContainText('Status: NEEDS REVIEW');await confirm(p,i);}await comparison(p);return project.id;}\n> 28 | async function nativeFocus(p:Page){\n     |                                    ^\n  29 |   const cdp=await p.context().newCDPSession(p);await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:false});\n  30 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n  31 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:86:65"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   writeFileSync(info.outputPath('sanitized-network.json'),JSON.stringify({counts,sequence:requests},null,2));\n  20 |   if(!page.isClosed()) {\n> 21 |     await page.bringToFront();\n     |                ^\n  22 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n  23 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n  24 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 487
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 601
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 266
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1052
+                    },
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 365
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 634
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 219
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1068
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:53:36.448Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-project-switch-A-to-B-to-A-rejects-late-result\\test-failed-2.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-project-switch-A-to-B-to-A-rejects-late-result\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-project-switch-A-to-B-to-A-rejects-late-result\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-c63ce749a1b38a6a30ff",
+          "file": "qa.spec.ts",
+          "line": 80,
+          "column": 5
+        },
+        {
+          "title": "backend deadline envelope permits explicit retry only",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 23979,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:91:176",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | });\n  27 | async function setup(p:Page){const project=await createAndApprove(p);for(const i of [0,1]){await quoteCard(p,i).getByLabel('Upload PDF quote').setInputFiles(require('node:path').resolve(__dirname, '../../../../../apps/api/tests/fixtures/quote_pdfs', ['harbor_primary.pdf','willow_primary.pdf'][i]));await expect(quoteCard(p,i)).toContainText('Status: NEEDS REVIEW');await confirm(p,i);}await comparison(p);return project.id;}\n> 28 | async function nativeFocus(p:Page){\n     |                                    ^\n  29 |   const cdp=await p.context().newCDPSession(p);await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:false});\n  30 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n  31 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | });\n  27 | async function setup(p:Page){const project=await createAndApprove(p);for(const i of [0,1]){await quoteCard(p,i).getByLabel('Upload PDF quote').setInputFiles(require('node:path').resolve(__dirname, '../../../../../apps/api/tests/fixtures/quote_pdfs', ['harbor_primary.pdf','willow_primary.pdf'][i]));await expect(quoteCard(p,i)).toContainText('Status: NEEDS REVIEW');await confirm(p,i);}await comparison(p);return project.id;}\n> 28 | async function nativeFocus(p:Page){\n     |                                    ^\n  29 |   const cdp=await p.context().newCDPSession(p);await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:false});\n  30 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n  31 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:91:176"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   writeFileSync(info.outputPath('sanitized-network.json'),JSON.stringify({counts,sequence:requests},null,2));\n  20 |   if(!page.isClosed()) {\n> 21 |     await page.bringToFront();\n     |                ^\n  22 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n  23 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n  24 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 604
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 623
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 241
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1053
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:54:11.781Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-backend-deadline-envelope-permits-explicit-retry-only\\test-failed-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-backend-deadline-envelope-permits-explicit-retry-only\\test-failed-2.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-backend-deadline-envelope-permits-explicit-retry-only\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-5c1c5f359196d3091059",
+          "file": "qa.spec.ts",
+          "line": 88,
+          "column": 5
+        },
+        {
+          "title": "proxy disconnect envelope cooldown and no automatic retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 24201,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:98:177",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 62,
+                      "line": 28
+                    },
+                    "snippet": "  26 | });\n  27 | async function setup(p:Page){const project=await createAndApprove(p);for(const i of [0,1]){await quoteCard(p,i).getByLabel('Upload PDF quote').setInputFiles(require('node:path').resolve(__dirname, '../../../../../apps/api/tests/fixtures/quote_pdfs', ['harbor_primary.pdf','willow_primary.pdf'][i]));await expect(quoteCard(p,i)).toContainText('Status: NEEDS REVIEW');await confirm(p,i);}await comparison(p);return project.id;}\n> 28 | async function nativeFocus(p:Page){\n     |                                    ^\n  29 |   const cdp=await p.context().newCDPSession(p);await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:false});\n  30 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n  31 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 62,
+                        "line": 28
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32mfalse\u001b[39m\nReceived: \u001b[31mtrue\u001b[39m\n\nCall Log:\n- Timeout 15000ms exceeded while waiting on the predicate\n\n  26 | });\n  27 | async function setup(p:Page){const project=await createAndApprove(p);for(const i of [0,1]){await quoteCard(p,i).getByLabel('Upload PDF quote').setInputFiles(require('node:path').resolve(__dirname, '../../../../../apps/api/tests/fixtures/quote_pdfs', ['harbor_primary.pdf','willow_primary.pdf'][i]));await expect(quoteCard(p,i)).toContainText('Status: NEEDS REVIEW');await confirm(p,i);}await comparison(p);return project.id;}\n> 28 | async function nativeFocus(p:Page){\n     |                                    ^\n  29 |   const cdp=await p.context().newCDPSession(p);await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:false});\n  30 |   const other=await p.context().newPage();await other.goto('about:blank');await other.bringToFront();\n  31 |   await expect.poll(()=>p.evaluate(()=>document.hasFocus())).toBe(false);\n    at nativeFocus (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:28:62)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:98:177"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 16,
+                        "line": 21
+                      },
+                      "message": "Error: page.screenshot: Protocol error (Page.captureScreenshot): Unable to capture screenshot\nCall log:\n\u001b[2m  - taking page screenshot\u001b[22m\n\u001b[2m  - waiting for fonts to load...\u001b[22m\n\u001b[2m  - fonts loaded\u001b[22m\n\n\n  19 |   writeFileSync(info.outputPath('sanitized-network.json'),JSON.stringify({counts,sequence:requests},null,2));\n  20 |   if(!page.isClosed()) {\n> 21 |     await page.bringToFront();\n     |                ^\n  22 |     writeFileSync(info.outputPath('focus.json'),JSON.stringify(await page.evaluate(()=>(window as any).__focus),null,2));\n  23 |     await page.screenshot({path:info.outputPath('final.png'),fullPage:true});\n  24 |     writeFileSync(info.outputPath('visible-text.txt'),await page.locator('body').innerText());\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:21:16"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 602
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 600
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 361
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1001
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:54:36.855Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\test-failed-2.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 62,
+                    "line": 28
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-f896ee3a6dfdeb609e24",
+          "file": "qa.spec.ts",
+          "line": 94,
+          "column": 5
+        },
+        {
+          "title": "null-success disclosures sources facts and preference",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 9,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 26809,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison analysis', exact: true })\nExpected substring: \u001b[32m\"Confirmed\"\u001b[39m\nReceived string:    \u001b[31m\"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:b5ad7fe3-0cd9-4088-b5c9-b09ff8a01b6bUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · 89bac0e4-c999-43c2-80cf-650f32a4f104Harbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:ad503096-a50e-4df9-a011-b0fa89e8e47eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · f6b67c78-52ca-4a25-80f1-3efffbb69101Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:d99d667d-5d8c-4bed-8e22-e9d1087b1956Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · 8b1cbddd-ce62-4959-b831-79c3bd9b689fHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:fd7ba201-3724-461d-9f75-91b05994411eProduction Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · b648cabe-24ef-4215-a511-471ebd01734dImportant unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8fdd266b-5bcd-4de3-917e-e269046d0343Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · 462cc3e3-532c-4ad7-822a-8184fc793d76compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c3ab1614-4fba-462f-ba1a-8ce5b0687c52Compliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:b997978d-1b7a-4dee-a1cf-eb8a6bf5b0c9Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:131df399-80ff-410b-b378-eec1c50a4bc0Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:87eb5218-78ac-40e2-9fcc-3ba30c571f63Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:81a5c822-42f9-4e68-a863-a3c53bd130c0Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:874669ef-ab01-43fd-9e23-b2d0b874a980Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:98419261-4c37-4b65-a64e-91ab94832bc9Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:9bcd9251-af61-4505-b5a5-cd181291a410Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:5a6d476d-93a5-4f30-a2bc-76c6ca2b7462Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:80b46e31-bbc1-4834-aec3-fbd517f94727Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:b37d2955-3046-4d4a-8894-92a5979c1f73Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:a5c89c5a-31d9-46e1-ac7c-885af3e685c1Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:65679344-f10c-4779-b19c-14b7d118a484Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:97f5a895-64e0-49c5-a2b7-7e61a9f68f03Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:7763b0cc-eba3-4932-91b0-0b52b4ba2717Warranty current origin: Ai ExtractedNo supplier suggested yetThis advice supports your review. You remain responsible for the supplier decision.UncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[39m\nTimeout: 15000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('region', { name: 'Comparison analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison analysis', exact: true })\u001b[22m\n\u001b[2m    33 × locator resolved to <section aria-label=\"Comparison analysis\">…</section>\u001b[22m\n\u001b[2m       - unexpected value \"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:b5ad7fe3-0cd9-4088-b5c9-b09ff8a01b6bUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · 89bac0e4-c999-43c2-80cf-650f32a4f104Harbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:ad503096-a50e-4df9-a011-b0fa89e8e47eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · f6b67c78-52ca-4a25-80f1-3efffbb69101Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:d99d667d-5d8c-4bed-8e22-e9d1087b1956Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · 8b1cbddd-ce62-4959-b831-79c3bd9b689fHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:fd7ba201-3724-461d-9f75-91b05994411eProduction Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · b648cabe-24ef-4215-a511-471ebd01734dImportant unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8fdd266b-5bcd-4de3-917e-e269046d0343Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · 462cc3e3-532c-4ad7-822a-8184fc793d76compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c3ab1614-4fba-462f-ba1a-8ce5b0687c52Compliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:b997978d-1b7a-4dee-a1cf-eb8a6bf5b0c9Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:131df399-80ff-410b-b378-eec1c50a4bc0Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:87eb5218-78ac-40e2-9fcc-3ba30c571f63Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:81a5c822-42f9-4e68-a863-a3c53bd130c0Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:874669ef-ab01-43fd-9e23-b2d0b874a980Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:98419261-4c37-4b65-a64e-91ab94832bc9Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:9bcd9251-af61-4505-b5a5-cd181291a410Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:5a6d476d-93a5-4f30-a2bc-76c6ca2b7462Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:80b46e31-bbc1-4834-aec3-fbd517f94727Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:b37d2955-3046-4d4a-8894-92a5979c1f73Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:a5c89c5a-31d9-46e1-ac7c-885af3e685c1Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:65679344-f10c-4779-b19c-14b7d118a484Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:97f5a895-64e0-49c5-a2b7-7e61a9f68f03Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:7763b0cc-eba3-4932-91b0-0b52b4ba2717Warranty current origin: Ai ExtractedNo supplier suggested yetThis advice supports your review. You remain responsible for the supplier decision.UncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison analysis', exact: true })\nExpected substring: \u001b[32m\"Confirmed\"\u001b[39m\nReceived string:    \u001b[31m\"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:b5ad7fe3-0cd9-4088-b5c9-b09ff8a01b6bUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · 89bac0e4-c999-43c2-80cf-650f32a4f104Harbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:ad503096-a50e-4df9-a011-b0fa89e8e47eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · f6b67c78-52ca-4a25-80f1-3efffbb69101Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:d99d667d-5d8c-4bed-8e22-e9d1087b1956Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · 8b1cbddd-ce62-4959-b831-79c3bd9b689fHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:fd7ba201-3724-461d-9f75-91b05994411eProduction Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · b648cabe-24ef-4215-a511-471ebd01734dImportant unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8fdd266b-5bcd-4de3-917e-e269046d0343Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · 462cc3e3-532c-4ad7-822a-8184fc793d76compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c3ab1614-4fba-462f-ba1a-8ce5b0687c52Compliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:b997978d-1b7a-4dee-a1cf-eb8a6bf5b0c9Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:131df399-80ff-410b-b378-eec1c50a4bc0Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:87eb5218-78ac-40e2-9fcc-3ba30c571f63Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:81a5c822-42f9-4e68-a863-a3c53bd130c0Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:874669ef-ab01-43fd-9e23-b2d0b874a980Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:98419261-4c37-4b65-a64e-91ab94832bc9Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:9bcd9251-af61-4505-b5a5-cd181291a410Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:5a6d476d-93a5-4f30-a2bc-76c6ca2b7462Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:80b46e31-bbc1-4834-aec3-fbd517f94727Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:b37d2955-3046-4d4a-8894-92a5979c1f73Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:a5c89c5a-31d9-46e1-ac7c-885af3e685c1Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:65679344-f10c-4779-b19c-14b7d118a484Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:97f5a895-64e0-49c5-a2b7-7e61a9f68f03Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:7763b0cc-eba3-4932-91b0-0b52b4ba2717Warranty current origin: Ai ExtractedNo supplier suggested yetThis advice supports your review. You remain responsible for the supplier decision.UncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[39m\nTimeout: 15000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('region', { name: 'Comparison analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison analysis', exact: true })\u001b[22m\n\u001b[2m    33 × locator resolved to <section aria-label=\"Comparison analysis\">…</section>\u001b[22m\n\u001b[2m       - unexpected value \"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:b5ad7fe3-0cd9-4088-b5c9-b09ff8a01b6bUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · 89bac0e4-c999-43c2-80cf-650f32a4f104Harbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:ad503096-a50e-4df9-a011-b0fa89e8e47eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · f6b67c78-52ca-4a25-80f1-3efffbb69101Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:d99d667d-5d8c-4bed-8e22-e9d1087b1956Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · 8b1cbddd-ce62-4959-b831-79c3bd9b689fHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:fd7ba201-3724-461d-9f75-91b05994411eProduction Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · b648cabe-24ef-4215-a511-471ebd01734dImportant unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8fdd266b-5bcd-4de3-917e-e269046d0343Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · 462cc3e3-532c-4ad7-822a-8184fc793d76compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c3ab1614-4fba-462f-ba1a-8ce5b0687c52Compliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:b997978d-1b7a-4dee-a1cf-eb8a6bf5b0c9Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:131df399-80ff-410b-b378-eec1c50a4bc0Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:87eb5218-78ac-40e2-9fcc-3ba30c571f63Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:81a5c822-42f9-4e68-a863-a3c53bd130c0Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:874669ef-ab01-43fd-9e23-b2d0b874a980Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:98419261-4c37-4b65-a64e-91ab94832bc9Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:9bcd9251-af61-4505-b5a5-cd181291a410Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:5a6d476d-93a5-4f30-a2bc-76c6ca2b7462Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:80b46e31-bbc1-4834-aec3-fbd517f94727Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:b37d2955-3046-4d4a-8894-92a5979c1f73Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:a5c89c5a-31d9-46e1-ac7c-885af3e685c1Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:65679344-f10c-4779-b19c-14b7d118a484Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:97f5a895-64e0-49c5-a2b7-7e61a9f68f03Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:7763b0cc-eba3-4932-91b0-0b52b4ba2717Warranty current origin: Ai ExtractedNo supplier suggested yetThis advice supports your review. You remain responsible for the supplier decision.UncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[22m\n\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:106:106",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 106,
+                      "line": 106
+                    },
+                    "snippet": "  104 |   await page.request.post('http://127.0.0.1:18001/__qa/control',{data:'normal'});await button(page,'Retry analysis').click();await expect(output(page)).toBeVisible();expect(posts).toBe(2);await invariant(page,id,before);\n  105 | });\n> 106 | test('real backend deadline through actual proxy and explicit recovery',async({page})=>{\n      |                                                                                         ^\n  107 |   test.setTimeout(240000);\n  108 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n  109 |   page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/comparison/advice'))posts++;});"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 106,
+                        "line": 106
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison analysis', exact: true })\nExpected substring: \u001b[32m\"Confirmed\"\u001b[39m\nReceived string:    \u001b[31m\"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:b5ad7fe3-0cd9-4088-b5c9-b09ff8a01b6bUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · 89bac0e4-c999-43c2-80cf-650f32a4f104Harbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:ad503096-a50e-4df9-a011-b0fa89e8e47eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · f6b67c78-52ca-4a25-80f1-3efffbb69101Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:d99d667d-5d8c-4bed-8e22-e9d1087b1956Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · 8b1cbddd-ce62-4959-b831-79c3bd9b689fHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:fd7ba201-3724-461d-9f75-91b05994411eProduction Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · b648cabe-24ef-4215-a511-471ebd01734dImportant unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8fdd266b-5bcd-4de3-917e-e269046d0343Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · 462cc3e3-532c-4ad7-822a-8184fc793d76compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c3ab1614-4fba-462f-ba1a-8ce5b0687c52Compliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:b997978d-1b7a-4dee-a1cf-eb8a6bf5b0c9Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:131df399-80ff-410b-b378-eec1c50a4bc0Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:87eb5218-78ac-40e2-9fcc-3ba30c571f63Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:81a5c822-42f9-4e68-a863-a3c53bd130c0Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:874669ef-ab01-43fd-9e23-b2d0b874a980Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:98419261-4c37-4b65-a64e-91ab94832bc9Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:9bcd9251-af61-4505-b5a5-cd181291a410Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:5a6d476d-93a5-4f30-a2bc-76c6ca2b7462Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:80b46e31-bbc1-4834-aec3-fbd517f94727Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:b37d2955-3046-4d4a-8894-92a5979c1f73Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:a5c89c5a-31d9-46e1-ac7c-885af3e685c1Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:65679344-f10c-4779-b19c-14b7d118a484Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:97f5a895-64e0-49c5-a2b7-7e61a9f68f03Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:7763b0cc-eba3-4932-91b0-0b52b4ba2717Warranty current origin: Ai ExtractedNo supplier suggested yetThis advice supports your review. You remain responsible for the supplier decision.UncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[39m\nTimeout: 15000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('region', { name: 'Comparison analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison analysis', exact: true })\u001b[22m\n\u001b[2m    33 × locator resolved to <section aria-label=\"Comparison analysis\">…</section>\u001b[22m\n\u001b[2m       - unexpected value \"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:b5ad7fe3-0cd9-4088-b5c9-b09ff8a01b6bUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · 89bac0e4-c999-43c2-80cf-650f32a4f104Harbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:ad503096-a50e-4df9-a011-b0fa89e8e47eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · f6b67c78-52ca-4a25-80f1-3efffbb69101Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:d99d667d-5d8c-4bed-8e22-e9d1087b1956Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · 8b1cbddd-ce62-4959-b831-79c3bd9b689fHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:fd7ba201-3724-461d-9f75-91b05994411eProduction Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · b648cabe-24ef-4215-a511-471ebd01734dImportant unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8fdd266b-5bcd-4de3-917e-e269046d0343Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · 462cc3e3-532c-4ad7-822a-8184fc793d76compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c3ab1614-4fba-462f-ba1a-8ce5b0687c52Compliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:b997978d-1b7a-4dee-a1cf-eb8a6bf5b0c9Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:131df399-80ff-410b-b378-eec1c50a4bc0Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:87eb5218-78ac-40e2-9fcc-3ba30c571f63Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:81a5c822-42f9-4e68-a863-a3c53bd130c0Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:874669ef-ab01-43fd-9e23-b2d0b874a980Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:98419261-4c37-4b65-a64e-91ab94832bc9Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:9bcd9251-af61-4505-b5a5-cd181291a410Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:5a6d476d-93a5-4f30-a2bc-76c6ca2b7462Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:80b46e31-bbc1-4834-aec3-fbd517f94727Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:b37d2955-3046-4d4a-8894-92a5979c1f73Packaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:a5c89c5a-31d9-46e1-ac7c-885af3e685c1Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:65679344-f10c-4779-b19c-14b7d118a484Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:97f5a895-64e0-49c5-a2b7-7e61a9f68f03Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:7763b0cc-eba3-4932-91b0-0b52b4ba2717Warranty current origin: Ai ExtractedNo supplier suggested yetThis advice supports your review. You remain responsible for the supplier decision.UncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[22m\n\n\n  104 |   await page.request.post('http://127.0.0.1:18001/__qa/control',{data:'normal'});await button(page,'Retry analysis').click();await expect(output(page)).toBeVisible();expect(posts).toBe(2);await invariant(page,id,before);\n  105 | });\n> 106 | test('real backend deadline through actual proxy and explicit recovery',async({page})=>{\n      |                                                                                         ^\n  107 |   test.setTimeout(240000);\n  108 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n  109 |   page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/comparison/advice'))posts++;});\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:106:106"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 527
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 611
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 375
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1212
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:55:02.285Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-null-success-disclosures-sources-facts-and-preference\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-null-success-disclosures-sources-facts-and-preference\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 106,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-f976304ae05ebf8463d8",
+          "file": "qa.spec.ts",
+          "line": 102,
+          "column": 42
+        },
+        {
+          "title": "suggestion disclosures sources facts and preference",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 10,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 26795,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison analysis', exact: true })\nExpected substring: \u001b[32m\"Confirmed\"\u001b[39m\nReceived string:    \u001b[31m\"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cHarbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:095854d6-b3ec-4046-b48f-f4638fc5169eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · 470b7719-4fff-4a8e-9edf-1746e7d3e263Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:20eb7403-9918-41f9-9c2e-f997922d0882Production Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · 7405238f-686a-4120-9463-f47d325b06d0Important unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8c8e7a82-34d0-4cbc-ad47-496ed60527c0Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · c67d70cf-5e37-47db-a23b-cf888798c138compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c01ab3c4-a8a1-4269-890a-52c64fccc91aCompliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:0eb38922-441e-4cd9-8601-0fadf542e667Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:5b2864c0-c8b8-4485-889c-ba542b5a7130Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:0863810d-633d-4df5-9ff4-1505e88247cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:36b59763-70ad-43fd-ab7f-7fe7ccdaa904Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:180372cb-e710-4a3f-817d-f53a2a7bc879Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:878535a6-2548-4c98-badf-72aa06d9cfa2Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:181602ac-f926-4025-bb7e-8f4c33898ba4Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:8b91503e-f4e1-4660-9bf1-8bacee83f7e8Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:5448ef90-cf8f-49c7-bade-7138fd899399Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:1fa6713d-066a-4192-85e6-3bae4c24e1cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:15894829-f1f2-4923-a376-d1d5dee509bfSpecial Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:9625782f-332f-4971-a382-e6d00d40ae7cSupplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:35b00571-db99-4ad6-87a7-054010921299Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:990fec76-3a04-462b-97a0-cb32a28df45fWarranty current origin: Ai ExtractedSuggested Supplier to Investigate FirstWillow Stitch StudioThis advice supports your review. You remain responsible for the supplier decision.Supporting reasonsWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cTradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dUncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[39m\nTimeout: 15000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('region', { name: 'Comparison analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison analysis', exact: true })\u001b[22m\n\u001b[2m    33 × locator resolved to <section aria-label=\"Comparison analysis\">…</section>\u001b[22m\n\u001b[2m       - unexpected value \"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cHarbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:095854d6-b3ec-4046-b48f-f4638fc5169eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · 470b7719-4fff-4a8e-9edf-1746e7d3e263Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:20eb7403-9918-41f9-9c2e-f997922d0882Production Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · 7405238f-686a-4120-9463-f47d325b06d0Important unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8c8e7a82-34d0-4cbc-ad47-496ed60527c0Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · c67d70cf-5e37-47db-a23b-cf888798c138compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c01ab3c4-a8a1-4269-890a-52c64fccc91aCompliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:0eb38922-441e-4cd9-8601-0fadf542e667Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:5b2864c0-c8b8-4485-889c-ba542b5a7130Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:0863810d-633d-4df5-9ff4-1505e88247cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:36b59763-70ad-43fd-ab7f-7fe7ccdaa904Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:180372cb-e710-4a3f-817d-f53a2a7bc879Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:878535a6-2548-4c98-badf-72aa06d9cfa2Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:181602ac-f926-4025-bb7e-8f4c33898ba4Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:8b91503e-f4e1-4660-9bf1-8bacee83f7e8Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:5448ef90-cf8f-49c7-bade-7138fd899399Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:1fa6713d-066a-4192-85e6-3bae4c24e1cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:15894829-f1f2-4923-a376-d1d5dee509bfSpecial Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:9625782f-332f-4971-a382-e6d00d40ae7cSupplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:35b00571-db99-4ad6-87a7-054010921299Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:990fec76-3a04-462b-97a0-cb32a28df45fWarranty current origin: Ai ExtractedSuggested Supplier to Investigate FirstWillow Stitch StudioThis advice supports your review. You remain responsible for the supplier decision.Supporting reasonsWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cTradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dUncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison analysis', exact: true })\nExpected substring: \u001b[32m\"Confirmed\"\u001b[39m\nReceived string:    \u001b[31m\"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cHarbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:095854d6-b3ec-4046-b48f-f4638fc5169eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · 470b7719-4fff-4a8e-9edf-1746e7d3e263Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:20eb7403-9918-41f9-9c2e-f997922d0882Production Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · 7405238f-686a-4120-9463-f47d325b06d0Important unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8c8e7a82-34d0-4cbc-ad47-496ed60527c0Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · c67d70cf-5e37-47db-a23b-cf888798c138compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c01ab3c4-a8a1-4269-890a-52c64fccc91aCompliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:0eb38922-441e-4cd9-8601-0fadf542e667Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:5b2864c0-c8b8-4485-889c-ba542b5a7130Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:0863810d-633d-4df5-9ff4-1505e88247cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:36b59763-70ad-43fd-ab7f-7fe7ccdaa904Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:180372cb-e710-4a3f-817d-f53a2a7bc879Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:878535a6-2548-4c98-badf-72aa06d9cfa2Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:181602ac-f926-4025-bb7e-8f4c33898ba4Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:8b91503e-f4e1-4660-9bf1-8bacee83f7e8Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:5448ef90-cf8f-49c7-bade-7138fd899399Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:1fa6713d-066a-4192-85e6-3bae4c24e1cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:15894829-f1f2-4923-a376-d1d5dee509bfSpecial Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:9625782f-332f-4971-a382-e6d00d40ae7cSupplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:35b00571-db99-4ad6-87a7-054010921299Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:990fec76-3a04-462b-97a0-cb32a28df45fWarranty current origin: Ai ExtractedSuggested Supplier to Investigate FirstWillow Stitch StudioThis advice supports your review. You remain responsible for the supplier decision.Supporting reasonsWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cTradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dUncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[39m\nTimeout: 15000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('region', { name: 'Comparison analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison analysis', exact: true })\u001b[22m\n\u001b[2m    33 × locator resolved to <section aria-label=\"Comparison analysis\">…</section>\u001b[22m\n\u001b[2m       - unexpected value \"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cHarbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:095854d6-b3ec-4046-b48f-f4638fc5169eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · 470b7719-4fff-4a8e-9edf-1746e7d3e263Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:20eb7403-9918-41f9-9c2e-f997922d0882Production Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · 7405238f-686a-4120-9463-f47d325b06d0Important unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8c8e7a82-34d0-4cbc-ad47-496ed60527c0Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · c67d70cf-5e37-47db-a23b-cf888798c138compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c01ab3c4-a8a1-4269-890a-52c64fccc91aCompliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:0eb38922-441e-4cd9-8601-0fadf542e667Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:5b2864c0-c8b8-4485-889c-ba542b5a7130Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:0863810d-633d-4df5-9ff4-1505e88247cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:36b59763-70ad-43fd-ab7f-7fe7ccdaa904Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:180372cb-e710-4a3f-817d-f53a2a7bc879Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:878535a6-2548-4c98-badf-72aa06d9cfa2Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:181602ac-f926-4025-bb7e-8f4c33898ba4Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:8b91503e-f4e1-4660-9bf1-8bacee83f7e8Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:5448ef90-cf8f-49c7-bade-7138fd899399Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:1fa6713d-066a-4192-85e6-3bae4c24e1cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:15894829-f1f2-4923-a376-d1d5dee509bfSpecial Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:9625782f-332f-4971-a382-e6d00d40ae7cSupplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:35b00571-db99-4ad6-87a7-054010921299Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:990fec76-3a04-462b-97a0-cb32a28df45fWarranty current origin: Ai ExtractedSuggested Supplier to Investigate FirstWillow Stitch StudioThis advice supports your review. You remain responsible for the supplier decision.Supporting reasonsWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cTradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dUncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[22m\n\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:106:106",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 106,
+                      "line": 106
+                    },
+                    "snippet": "  104 |   await page.request.post('http://127.0.0.1:18001/__qa/control',{data:'normal'});await button(page,'Retry analysis').click();await expect(output(page)).toBeVisible();expect(posts).toBe(2);await invariant(page,id,before);\n  105 | });\n> 106 | test('real backend deadline through actual proxy and explicit recovery',async({page})=>{\n      |                                                                                         ^\n  107 |   test.setTimeout(240000);\n  108 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n  109 |   page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/comparison/advice'))posts++;});"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 106,
+                        "line": 106
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison analysis', exact: true })\nExpected substring: \u001b[32m\"Confirmed\"\u001b[39m\nReceived string:    \u001b[31m\"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cHarbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:095854d6-b3ec-4046-b48f-f4638fc5169eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · 470b7719-4fff-4a8e-9edf-1746e7d3e263Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:20eb7403-9918-41f9-9c2e-f997922d0882Production Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · 7405238f-686a-4120-9463-f47d325b06d0Important unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8c8e7a82-34d0-4cbc-ad47-496ed60527c0Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · c67d70cf-5e37-47db-a23b-cf888798c138compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c01ab3c4-a8a1-4269-890a-52c64fccc91aCompliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:0eb38922-441e-4cd9-8601-0fadf542e667Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:5b2864c0-c8b8-4485-889c-ba542b5a7130Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:0863810d-633d-4df5-9ff4-1505e88247cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:36b59763-70ad-43fd-ab7f-7fe7ccdaa904Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:180372cb-e710-4a3f-817d-f53a2a7bc879Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:878535a6-2548-4c98-badf-72aa06d9cfa2Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:181602ac-f926-4025-bb7e-8f4c33898ba4Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:8b91503e-f4e1-4660-9bf1-8bacee83f7e8Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:5448ef90-cf8f-49c7-bade-7138fd899399Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:1fa6713d-066a-4192-85e6-3bae4c24e1cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:15894829-f1f2-4923-a376-d1d5dee509bfSpecial Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:9625782f-332f-4971-a382-e6d00d40ae7cSupplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:35b00571-db99-4ad6-87a7-054010921299Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:990fec76-3a04-462b-97a0-cb32a28df45fWarranty current origin: Ai ExtractedSuggested Supplier to Investigate FirstWillow Stitch StudioThis advice supports your review. You remain responsible for the supplier decision.Supporting reasonsWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cTradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dUncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[39m\nTimeout: 15000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('region', { name: 'Comparison analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison analysis', exact: true })\u001b[22m\n\u001b[2m    33 × locator resolved to <section aria-label=\"Comparison analysis\">…</section>\u001b[22m\n\u001b[2m       - unexpected value \"Tradeoff analysisSupplier summariesWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cHarbor Pouch Works quotes 4.60 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:095854d6-b3ec-4046-b48f-f4638fc5169eUnit Price current origin: Ai ExtractedOriginal extracted value: 4.60Supporting PDF evidence: page 1, block 5; extracted 4.60 · 470b7719-4fff-4a8e-9edf-1746e7d3e263Key tradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dHarbor Pouch Works: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:20eb7403-9918-41f9-9c2e-f997922d0882Production Lead Time current origin: Ai ExtractedOriginal extracted value: 32 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 32 days after sample approval · 7405238f-686a-4120-9463-f47d325b06d0Important unknownsThe requirement state is UNKNOWN.Willow Stitch Studio: Certification — Unknowncertifications is unknown.Source detailsCertifications source: quote-value:8c8e7a82-34d0-4cbc-ad47-496ed60527c0Certifications current origin: Ai ExtractedSupporting PDF evidence: page 1, block 13; extracted Unknown · c67d70cf-5e37-47db-a23b-cf888798c138compliance notes is unknown.Source detailsCompliance Notes source: quote-value:c01ab3c4-a8a1-4269-890a-52c64fccc91aCompliance Notes current origin: Ai Extracteddelivery date is unknown.exclusions is unknown.Source detailsExclusions source: quote-value:0eb38922-441e-4cd9-8601-0fadf542e667Exclusions current origin: Ai Extractedincoterm is unknown.Source detailsIncoterm source: quote-value:5b2864c0-c8b8-4485-889c-ba542b5a7130Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:0863810d-633d-4df5-9ff4-1505e88247cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:36b59763-70ad-43fd-ab7f-7fe7ccdaa904Special Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:180372cb-e710-4a3f-817d-f53a2a7bc879Supplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:878535a6-2548-4c98-badf-72aa06d9cfa2Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:181602ac-f926-4025-bb7e-8f4c33898ba4Warranty current origin: Ai Extractedcompliance notes is unknown.Source detailsCompliance Notes source: quote-value:8b91503e-f4e1-4660-9bf1-8bacee83f7e8Compliance Notes current origin: Ai Extracteddelivery date is unknown.incoterm is unknown.Source detailsIncoterm source: quote-value:5448ef90-cf8f-49c7-bade-7138fd899399Incoterm current origin: Ai Extractedpackaging cost is unknown.Source detailsPackaging Cost source: quote-value:1fa6713d-066a-4192-85e6-3bae4c24e1cbPackaging Cost current origin: Ai Extractedspecial conditions is unknown.Source detailsSpecial Conditions source: quote-value:15894829-f1f2-4923-a376-d1d5dee509bfSpecial Conditions current origin: Ai Extractedsupplier notes is unknown.Source detailsSupplier Notes source: quote-value:9625782f-332f-4971-a382-e6d00d40ae7cSupplier Notes current origin: Ai Extractedtotal lead time is unknown.Source detailsTotal Lead Time source: quote-value:35b00571-db99-4ad6-87a7-054010921299Total Lead Time current origin: Ai Extractedwarranty is unknown.Source detailsWarranty source: quote-value:990fec76-3a04-462b-97a0-cb32a28df45fWarranty current origin: Ai ExtractedSuggested Supplier to Investigate FirstWillow Stitch StudioThis advice supports your review. You remain responsible for the supplier decision.Supporting reasonsWillow Stitch Studio quotes 4.20 USD per unit. Review its requirement findings.Source detailsUnit Price source: quote-value:23af2851-2c31-4ba8-85b3-8fb3eac5089dUnit Price current origin: Ai ExtractedOriginal extracted value: 4.20Supporting PDF evidence: page 1, block 5; extracted 4.20 · bad8fb85-ee67-471f-85d6-b4a1b5ef5d5cTradeoffsWillow Stitch Studio: compare the stated production lead time with the other quotations.Source detailsProduction Lead Time source: quote-value:2590ccd8-1ae6-4013-86b5-c152d8f28ad1Production Lead Time current origin: Ai ExtractedOriginal extracted value: 40 days after sample approvalSupporting PDF evidence: page 1, block 10; extracted 40 days after sample approval · b7711769-31f0-40cd-8b19-ecfb6a30e43dUncertaintiesReview the documented gaps before choosing a preferred supplier. No single supplier is suggested by this deterministic fixture.\"\u001b[22m\n\n\n  104 |   await page.request.post('http://127.0.0.1:18001/__qa/control',{data:'normal'});await button(page,'Retry analysis').click();await expect(output(page)).toBeVisible();expect(posts).toBe(2);await invariant(page,id,before);\n  105 | });\n> 106 | test('real backend deadline through actual proxy and explicit recovery',async({page})=>{\n      |                                                                                         ^\n  107 |   test.setTimeout(240000);\n  108 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n  109 |   page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/comparison/advice'))posts++;});\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:106:106"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 558
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 585
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 267
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1225
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:55:30.163Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-suggestion-disclosures-sources-facts-and-preference\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-suggestion-disclosures-sources-facts-and-preference\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 106,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fc3e462494bfb04596c2",
+          "file": "qa.spec.ts",
+          "line": 102,
+          "column": 42
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T15:50:18.587Z",
+    "duration": 339383.056,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 11,
+    "flaky": 0
+  }
+}

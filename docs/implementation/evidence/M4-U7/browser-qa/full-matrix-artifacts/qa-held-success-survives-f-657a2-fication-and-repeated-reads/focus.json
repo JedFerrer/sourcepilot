@@ -1,0 +1,22 @@
+[
+  {
+    "type": "blur",
+    "trusted": true,
+    "focused": false
+  },
+  {
+    "type": "focus",
+    "trusted": true,
+    "focused": true
+  },
+  {
+    "type": "blur",
+    "trusted": true,
+    "focused": false
+  },
+  {
+    "type": "focus",
+    "trusted": true,
+    "focused": true
+  }
+]

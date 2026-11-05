@@ -1,0 +1,139 @@
+M4-U7 Linux verification corrections — 2026-11-04
+Status: required automated verification passed on the final source.
+Independent review, Browser QA and Done Check remain pending; the exact historical
+transport-delay trigger remains unproven (see the diagnostic limitation below).
+
+Scope and design
+The approved cooperative-deadline/application-lifecycle design is unchanged.
+No production connection ownership, authorization, validator predicate, timeout,
+retry, repair, admission, cleanup, or business-write rule was changed. No paid AI
+call, new infrastructure, dependency change, protected specification edit or commit.
+The only production-module correction is eval report compatibility with the new
+bounded diagnostic trace steps; it does not change runtime decisions or validation.
+
+Mapping the five historically reported failures
+1–3. tests/test_eval_live.py::test_all_valid_adapters_use_real_runtime_and_scoped_tools
+     [comparison-meaningful-tradeoff], [comparison-required-failure],
+     [comparison-unknown-and-conflict]
+The synchronous test fixture's outer transaction owns the connection. A Session
+commit only releases its create_savepoint savepoint; it does not publish those
+rows. The approved comparison entry point correctly opens a separately owned
+connection, which cannot see the fixtures. Real authorization therefore returns
+NOT_ALLOWED, surfaced as COMPARISON_NOT_FOUND. This is a fixture/caller-boundary
+mismatch, not evidence of a committed-data HTTP production defect.
+Correction: the test-local adapter wrapper creates the comparison/suggestion
+fixtures and invokes the real adapter/runtime/tools on one owned async connection
+inside an external transaction. A savepoint-bound AsyncSession permits normal
+runtime commits while the outer transaction always rolls back. Trace relationships
+needed by classification are loaded before closure. Other adapters retain their
+original fixture. Production code is not taught to see uncommitted test rows.
+New checks verify all table row counts remain unchanged after successful comparison
+and suggestion runs, no AIRun escapes rollback, and stale rejection leaves no
+owner/project/run rows. Existing real scope/authorization and HTTP recovery tests
+remain intact. These adapter tests do not claim to test the HTTP connection
+boundary; the API/deadline/recovery suites do that separately.
+
+4. tests/test_comparison_transport.py::test_sdk_attempt_cancels_transport_and_never_retries[headers]
+The historical traceback locates exhaustion after client construction, before
+transport entry, followed by incomplete cleanup. The test mixed a 0.9-second
+work allowance with SDK/client fixture construction. Its fake SDK factory also
+discarded the application's HTTP client and created a second untracked client.
+Two natural Linux suite-order attempts each passed all 1,459 cases through the
+header test. The second retained the full collected suite and stopped explicitly
+after header teardown; neither is a full-suite pass. Measured HTTP construction
+was about 0.24/0.05 ms and SDK construction about 0.15 ms in that second attempt.
+A controlled one-second constructor delay reproduced the pre-header deadline
+failure with the original test. This experiment intentionally fails and is not a
+regression pass. The exact historical host-delay trigger remains unproven. The
+recorded GC observations do not establish a causal link to that historical stall.
+Admission exhaustion is not the cause of this direct _invoke_comparison test:
+it does not acquire an admission owner. No production resource leak or persistent
+test-order mutation was established. The discarded test client is a confirmed
+fixture ownership flaw, not proof of the historical delay's cause.
+Correction: prepare one in-process SDK/HTTP fixture before starting this transport
+test's unchanged clock, and have both factories return that same owned client.
+Preserve the 1-second total, 50-ms attempt, 100-ms cleanup allowance, exactly-one-
+request assertion, exact cancellation phase, closed-client assertions and no
+surviving async tasks. A separate construction-expiry regression verifies that
+request-time construction still consumes the original budget and prevents any
+transport request after expiry. Production construction remains inside its budget.
+
+5. tests/test_eval_baseline.py::test_runner_reuses_parsed_context_for_extraction_scoring_and_measurements
+The live-mode runner validates settings before entering the mocked adapter. The
+test supplied a synthetic model but no credential, so it depended on an external
+OPENAI_API_KEY. It now sets a clearly nonfunctional credential locally. The real
+missing-credential guard and provider.assert_not_called() assertion are unchanged.
+
+Additional failure uncovered after transaction visibility was corrected
+The real invalid-output adapter case reached classification for the first time
+in this verification. A validation_schema step appended after validation INVALID
+was mistaken for the terminal event, changing QUALITY_FINDING into RUNTIME_ERROR.
+classify_live now skips validation_phase/validation_schema metadata as it already
+skips run/usage metadata. Attribution still requires captured output with the
+matching contract name that actually fails schema validation. Six focused cases
+cover both comparison operations, missing capture and tool-failure precedence;
+the existing real-runtime classification/injected-error cases remain assertions.
+No semantic rejection is automatically relabelled as a model-quality finding.
+
+Final verification
+Source hashes and Linux runtime/dependency versions: final-source-manifest.json.
+All 246 source/configuration hashes were confirmed unchanged after verification;
+Windows read the same source. source-confirmation.json also confirms that the
+preceding Linux evidence artifacts remain byte-for-byte unchanged. The historical
+transport test is retained as transport-before-correction.py.txt, checked against
+its original manifest hash b2de3ae6b735162809676f2b08fbc0d9fb14b8343eea9bc70d5623a65cf13fbe.
+Locked environment: existing WSL Ubuntu 26.04, Python 3.11.15, asyncio Selector
+loop, existing PostgreSQL test service/database, unchanged uv.lock. uv 0.11.28
+and local WSL differ from hosted CI's uv 0.12.1/ubuntu-latest; this is local Linux
+evidence, not a hosted CI or macOS certification. Node 22.14.0 was used for Pyright.
+Optional observability packages
+are installed from the unchanged lock. Only database settings were read from
+local configuration; OpenAI/Langfuse environment credentials were removed, and
+pytest's provider-blocking fixture remained enabled.
+- Linux targeted: 430 passed, 202.90 seconds; linux-targeted-final.txt/json.
+- Linux complete backend with --maxfail=0: 3,677 passed, zero skipped/failed,
+  2,027.38 seconds; linux-backend-final.txt/json. The suite completed in full.
+- Linux Ruff: passed. Linux Pyright: 0 errors, 0 warnings.
+- Linux final-source offline baseline: COMPLETED 90/90, exit 0;
+  linux-offline-final/results.json and summary.md.
+- Windows final targeted backend: 430 passed, 175.97 seconds;
+  windows-targeted-final.txt/json. Runtime/source: windows-runtime-manifest.json.
+- Windows deterministic launcher/artifact safety: 68 passed (no browser launch).
+- Windows Ruff: passed. Windows Pyright: 0 errors, 0 warnings.
+- Windows frontend regressions: 77 passed; frontend lint/typecheck/build passed.
+  No frontend source changed in this correction.
+
+Historical/intermediate results are not final verification
+The preceding linux-verification directory is preserved unchanged: its five-failure
+cutoff, 1,848 passes, one skip and earlier focused/offline results remain historical.
+The old 1,734-test Windows result is also historical. In this correction, the first
+two DB diagnostic attempts overlapped and were stopped; neither is used as evidence.
+The first async adapter fixture run exposed unloaded trace relationships after
+closure (four failures); the next exposed the classifier compatibility issue (one
+failure). Those failed intermediate runs are retained, not relabelled as passes.
+One new test initially used the unversioned advice schema name and failed until
+corrected to the actual ComparisonAdviceV1 contract name. An initial Windows
+Pyright invocation selected the wrong interpreter; explicit interpreter checks
+passed. An initial restricted uv command could not persist its interpreter cache;
+subsequent verification used the existing interpreter directly. A restricted
+Windows lifecycle launch stalled without test output; normal
+host execution passed 16/16. One controlled-probe launch used the wrong path and
+did not run tests; the corrected experiment intentionally reproduced the failure.
+Existing Starlette/AnyIO deprecation warnings are not new functional failures.
+Only the Final verification results above are claimed as final-source verification.
+The retained diagnostic scripts ran against the pre-correction transport test;
+they are experiment records, not substitutes for the final pytest regressions.
+verification_runner.py and source_manifest.py are retained copies of the temporary
+launchers named in command records, with their repository-root lookup adjusted for
+the evidence directory. Commands ran from apps/api. No temporary launchers remain.
+
+Remaining limits and gates
+Independent review of these corrections is pending. The exact natural trigger of
+the historical transport construction delay remains unproven despite two broad
+suite-order attempts and a controlled reproduction of its failure mechanism.
+No hard-real-time claim, guaranteed OS-helper termination, remote cancellation,
+bounded process shutdown, or browser receipt guarantee is restored.
+Browser QA and Done Check remain pending. The original unknown validation rejection
+for AIRun e790ea26-b0cb-4b93-9b9a-4c8d0a2de0d5, historical live-quality failures and
+pending human quality reviews remain unresolved. Offline fixture success does not
+clear them. No paid calls or commit occurred.

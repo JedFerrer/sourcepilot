@@ -1,0 +1,10 @@
+{
+  "command": [
+    "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\api\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pyright"
+  ],
+  "exit_code": 1,
+  "seconds": 28.0,
+  "platform": "Windows-10-10.0.26200-SP0"
+}

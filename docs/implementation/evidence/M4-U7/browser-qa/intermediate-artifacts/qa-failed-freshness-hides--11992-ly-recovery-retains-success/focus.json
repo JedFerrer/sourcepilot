@@ -1,0 +1,12 @@
+[
+  {
+    "type": "blur",
+    "trusted": true,
+    "focused": false
+  },
+  {
+    "type": "focus",
+    "trusted": true,
+    "focused": true
+  }
+]

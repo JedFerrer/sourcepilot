@@ -1,0 +1,1217 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=qa.config.ts"
+    ],
+    "configFile": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.config.ts",
+    "rootDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa",
+        "testIgnore": [],
+        "testMatch": [
+          "qa.spec.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "qa.spec.ts",
+      "file": "qa.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "native focus pending success, repeated focus and keyboard retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3588,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:38:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:38:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 772
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 657
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 249
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1008
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:04.624Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-su-1c830-ed-focus-and-keyboard-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-su-1c830-ed-focus-and-keyboard-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-4a4abeb323fc0815a96e",
+          "file": "qa.spec.ts",
+          "line": 37,
+          "column": 49
+        },
+        {
+          "title": "native focus pending failure, repeated focus and keyboard retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3223,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:38:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:38:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 495
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 607
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 231
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1087
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:09.818Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-fa-4816c-ed-focus-and-keyboard-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-native-focus-pending-fa-4816c-ed-focus-and-keyboard-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-7a90552ae0fce07b6532",
+          "file": "qa.spec.ts",
+          "line": 37,
+          "column": 49
+        },
+        {
+          "title": "failed freshness hides advice and GET-only recovery retains success",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3446,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:54:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:54:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 608
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 683
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 237
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1058
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:14.213Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-failed-freshness-hides--11992-ly-recovery-retains-success\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-failed-freshness-hides--11992-ly-recovery-retains-success\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-cf5055f637133ff3098a",
+          "file": "qa.spec.ts",
+          "line": 53,
+          "column": 5
+        },
+        {
+          "title": "competing focus and post-result reads cannot restore stale advice",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3484,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:61:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:61:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 556
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 650
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 337
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1140
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:18.932Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-competing-focus-and-pos-5b50b-cannot-restore-stale-advice\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-competing-focus-and-pos-5b50b-cannot-restore-stale-advice\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-57c2bb5bcf9ec22e5357",
+          "file": "qa.spec.ts",
+          "line": 60,
+          "column": 5
+        },
+        {
+          "title": "quote invalidation and replacement",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3824,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 582
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 868
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 315
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1206
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:23.531Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-quote-invalidation-and-replacement\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-quote-invalidation-and-replacement\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-4e695f544738425cb378",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "brief invalidation and replacement",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 5,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3224,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 605
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 564
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 245
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 988
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:28.605Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-brief-invalidation-and-replacement\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-brief-invalidation-and-replacement\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fafbf490ce076c6b7c29",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "shortlist invalidation and replacement",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 6,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3571,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 535
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 597
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 264
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1285
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:33.010Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-shortlist-invalidation-and-replacement\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-shortlist-invalidation-and-replacement\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-a0d93d93e842ac74a109",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "regeneration invalidation and replacement",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 7,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3363,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:69:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 511
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 627
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 244
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1127
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:37.813Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-regeneration-invalidation-and-replacement\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-regeneration-invalidation-and-replacement\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-287b00b87180e3bc01db",
+          "file": "qa.spec.ts",
+          "line": 68,
+          "column": 71
+        },
+        {
+          "title": "project switch A to B to A rejects late result",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 8,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3608,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:81:11",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:81:11"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 562
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 668
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 349
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1202
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:42.495Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-project-switch-A-to-B-to-A-rejects-late-result\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-project-switch-A-to-B-to-A-rejects-late-result\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-c63ce749a1b38a6a30ff",
+          "file": "qa.spec.ts",
+          "line": 80,
+          "column": 5
+        },
+        {
+          "title": "backend deadline envelope permits explicit retry only",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 9,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3356,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:89:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:89:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 582
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 597
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 253
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 981
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:47.357Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-backend-deadline-envelope-permits-explicit-retry-only\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-backend-deadline-envelope-permits-explicit-retry-only\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-5c1c5f359196d3091059",
+          "file": "qa.spec.ts",
+          "line": 88,
+          "column": 5
+        },
+        {
+          "title": "proxy disconnect envelope cooldown and no automatic retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 10,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3362,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:95:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:95:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 543
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 580
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 253
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1106
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:51.904Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-f896ee3a6dfdeb609e24",
+          "file": "qa.spec.ts",
+          "line": 94,
+          "column": 5
+        },
+        {
+          "title": "null-success disclosures sources facts and preference",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 11,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3369,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:103:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:103:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 574
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 643
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 241
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1082
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:49:56.561Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-null-success-disclosures-sources-facts-and-preference\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-null-success-disclosures-sources-facts-and-preference\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-f976304ae05ebf8463d8",
+          "file": "qa.spec.ts",
+          "line": 102,
+          "column": 42
+        },
+        {
+          "title": "suggestion disclosures sources facts and preference",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 3427,
+                  "error": {
+                    "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'",
+                    "stack": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:103:12",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                      "column": 3,
+                      "line": 106
+                    },
+                    "snippet": "\u001b[90m   at \u001b[39m..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                        "column": 3,
+                        "line": 106
+                      },
+                      "message": "Error: ENOENT: no such file or directory, stat 'C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\api\\tests\\fixtures\\quote_pdfs\\harbor_primary.pdf'\n\n   at ..\\..\\..\\..\\..\\apps\\web\\e2e\\helpers.ts:106\n\n  104 | export async function upload(page: Page, index: number, filename = pdfNames[index], abandoned = false): Promise<void> {\n  105 |   const card = quoteCard(page, index);\n> 106 |   await card.getByLabel(\"Upload PDF quote\").setInputFiles(abandoned ? {\n      |   ^\n  107 |     name: \"e2e-abandoned-harbor.pdf\", mimeType: \"application/pdf\",\n  108 |     buffer: readFileSync(path.join(pdfDirectory, filename)),\n  109 |   } : path.join(pdfDirectory, filename));\n    at upload (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts:106:3)\n    at setup (C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:25:92)\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:103:12"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 533
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 591
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 344
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1077
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:50:01.106Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-suggestion-disclosures-sources-facts-and-preference\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-suggestion-disclosures-sources-facts-and-preference\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\e2e\\helpers.ts",
+                    "column": 3,
+                    "line": 106
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fc3e462494bfb04596c2",
+          "file": "qa.spec.ts",
+          "line": 102,
+          "column": 42
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T15:48:53.651Z",
+    "duration": 72247.446,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 13,
+    "flaky": 0
+  }
+}

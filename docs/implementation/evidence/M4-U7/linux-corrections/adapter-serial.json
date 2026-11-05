@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/bin/python",
+    "-m",
+    "pytest",
+    "tests/test_eval_live.py",
+    "tests/test_eval_baseline.py",
+    "-q",
+    "--maxfail=0"
+  ],
+  "exit_code": 1,
+  "seconds": 79.71142680599951,
+  "platform": "Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-with-glibc2.43"
+}

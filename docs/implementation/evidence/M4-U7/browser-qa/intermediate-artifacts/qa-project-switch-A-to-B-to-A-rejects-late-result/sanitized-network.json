@@ -1,0 +1,742 @@
+{
+  "counts": {
+    "POST /api/demo-session": 8,
+    "GET /api/projects": 4,
+    "POST /api/projects": 2,
+    "GET /api/projects/:id": 37,
+    "GET /api/projects/:id/brief": 4,
+    "GET /api/projects/:id/suppliers": 50,
+    "GET /api/projects/:id/comparison": 27,
+    "POST /api/projects/:id/brief/analyze": 2,
+    "POST /api/projects/:id/brief/clarifications": 2,
+    "PATCH /api/projects/:id/brief": 4,
+    "POST /api/projects/:id/brief/approve": 2,
+    "POST /api/projects/:id/suppliers/discover": 2,
+    "PATCH /api/projects/:id/suppliers/:id": 6,
+    "POST /api/projects/:id/shortlist/approve": 2,
+    "GET /api/projects/:id/quotes": 12,
+    "POST /api/projects/:id/quotes/upload": 4,
+    "GET /api/quotes/:id": 4,
+    "POST /api/quotes/:id/confirm": 4,
+    "POST /api/projects/:id/comparison/generate": 2,
+    "POST /api/projects/:id/comparison/advice": 1
+  },
+  "sequence": [
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/brief/analyze"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/brief/clarifications"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/brief/approve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/suppliers/discover"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/suppliers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/suppliers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/suppliers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/shortlist/approve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/quotes/upload"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quotes/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quotes/:id/confirm"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/quotes/upload"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quotes/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quotes/:id/confirm"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/comparison/generate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/brief/analyze"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/brief/clarifications"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/brief/approve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/suppliers/discover"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/suppliers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/suppliers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/projects/:id/suppliers/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/shortlist/approve"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/quotes/upload"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quotes/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quotes/:id/confirm"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/quotes/upload"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/quotes/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/quotes/:id/confirm"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/comparison/generate"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "POST",
+      "path": "/api/projects/:id/comparison/advice"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects"
+    },
+    {
+      "method": "POST",
+      "path": "/api/demo-session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/brief"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/quotes"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/suppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id"
+    },
+    {
+      "method": "GET",
+      "path": "/api/projects/:id/comparison"
+    }
+  ]
+}

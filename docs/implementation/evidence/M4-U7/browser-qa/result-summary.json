@@ -1,0 +1,18 @@
+{
+  "scenarios": [
+    {
+      "scenario": "suggestion disclosures sources facts and preference",
+      "status": "PASS",
+      "duration_ms": 11657,
+      "attempts": 1
+    }
+  ],
+  "stats": {
+    "startTime": "2026-11-04T16:11:42.809Z",
+    "duration": 22514.345,
+    "expected": 1,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

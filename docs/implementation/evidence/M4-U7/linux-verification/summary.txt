@@ -1,0 +1,64 @@
+M4-U7 Linux verification — 2026-11-04
+Disposition: EXECUTED; ACCEPTANCE BLOCKED by failed/incomplete required backend checks.
+
+Source and environment
+- Base commit: 0851b3ee80b5fa45a3582c6dc6b4ebc388d17518, plus the uncommitted final working tree.
+- manifest.json records SHA-256 for 246 source/configuration files, including the lockfile, and confirms they did not change during the checks.
+- Existing WSL2 Ubuntu 26.04, x86_64, Linux 6.6.87.1; Python 3.11.15.
+- Existing uv 0.11.28; unchanged apps/api/uv.lock, installed with uv sync --dev --locked --python 3.11.
+- psycopg/psycopg-binary 3.3.6; libpq 18.6 (180006), satisfying the 17+ startup requirement; OpenAI SDK 2.54.0; SQLAlchemy 2.0.54; Uvicorn 0.53.0.
+- Node 22.14.0 supplied for Pyright, matching CI's Node major version.
+- Existing source-pilot-postgres-1 service, PostgreSQL 16.15; existing sourcepilot_test database with repository reset/isolation guards. No new database or service.
+- Only DATABASE_URL and TEST_DATABASE_URL were loaded from ignored local configuration. OpenAI and Langfuse environment keys were removed. Pytest provider-blocking fixtures remained enabled. The one credential diagnostic used a synthetic nonfunctional key and a mocked provider with assert_not_called.
+- This is local Ubuntu runtime evidence, not a GitHub Actions run. git remote -v returned no remotes; the existing CI workflow only triggers on push/pull_request. No commit or workflow changes were made. Hosted CI uses ubuntu-latest and uv 0.12.1; this difference is explicit, not concealed.
+
+Results (commands run from apps/api, with UV_PROJECT_ENVIRONMENT pointing to the isolated Linux venv)
+1. uv run --no-sync pytest tests/test_comparison_deadline.py tests/test_comparison_lifecycle.py tests/test_comparison_recovery.py tests/test_comparison_diagnostics.py tests/test_comparison_transport.py -q --maxfail=3
+   PASS: 93 passed, 1 existing Starlette/AnyIO deprecation warning, 130.42 seconds. focused.txt.
+   Covers credential-free preparation, configured Selector loop/factory, actual helper futures, admission/rejection/recovery, cancellation/shutdown, independent cleanup/forced local release, Analyst query/flush/commit/rollback recovery, stale/timeout precedence, late rejection and terminal trace behavior.
+2. uv run --no-sync ruff check .
+   PASS. ruff.txt.
+3. uv run --no-sync pyright
+   Initial environment failure: no Node executable; nodeenv selected prerelease 27.0.0-alpha.0.0.0 and failed parsing it. pyright.txt.
+   Installed Node 22.14.0 into isolated verification cache using the already-locked nodeenv, then reran unchanged Pyright with that bin directory on PATH.
+   PASS: 0 errors, 0 warnings, 0 informations. node-setup.txt and pyright-node22.txt. No dependency or source edits.
+4. uv run --no-sync pytest -q --maxfail=5
+   FAIL/INCOMPLETE: 5 failed, 1848 passed, 1 skipped, 1 warning, 1077.11 seconds. backend.txt.
+   Stopped at the explicit five-failure limit; this is not a completed full-suite pass. Independent collection found 3668 cases. Untested remainder is an acceptance gap.
+5. uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode offline --output .eval-results/m4-u7-linux-final-offline
+   PASS: COMPLETED 90/90, exit 0. offline.txt. Fixture execution, not live-quality approval.
+6. uv sync --dev --extra observability --locked --python 3.11
+   PASS; then uv run --no-sync pytest tests/test_ai_tracing.py -q
+   PASS: 12 passed, 1 existing warning, 2.75 seconds. observability-install.txt and optional-tracing.txt. This separately covers the optional dependency absent/skipped in the base suite; no network export.
+
+Blocking findings and focused proposals (not implemented)
+P2 — Comparison adapter transaction ownership is incompatible with existing isolated adapter tests.
+- Three real-runtime comparison cases fail NOT_ALLOWED -> COMPARISON_NOT_FOUND before model invocation.
+- tests/test_eval_live.py:38 creates fixtures within a connection-owned outer transaction and create_savepoint Session. comparison/execution.py:63 creates a new engine/session from its URL, losing visibility of those uncommitted fixture rows; internal session.commit() only releases the test savepoint.
+- Reproduced in isolation: pytest tests/test_eval_live.py -k 'comparison or suggestion' --maxfail=3 -q => same three failures (58 deselected), 4.27 seconds. adapter-isolated.txt.
+- Proposal: explicitly reconcile the adapter's transaction ownership with the application-owned async comparison lifecycle. Arrange fixtures and comparison execution in the same owned async connection/transaction, retaining outer rollback isolation and real bounded execution. Do not bypass ownership checks, globally commit rollback-isolated fixtures, or remove these regression cases. Rerun comparison/suggestion adapter coverage and the complete backend suite after a reviewed correction.
+- This demonstrates a supported test/caller integration regression; it does not establish that committed-data HTTP analysis fails.
+
+P2 — Transport verification is not stable across the broader run.
+- test_sdk_attempt_cancels_transport_and_never_retries[headers] passed in the focused run, failed in the broad run, and the three-test transport suite passed again in isolation (2.15 seconds).
+- Broad traceback shows the 0.9-second work budget already exhausted at client.py:217, before provider invocation; final cleanup then reports ComparisonDeadlineError at line 230 instead of the expected ModelProviderError caused by attempt TimeoutError.
+- Production late-work rejection operated; the test did not reach its intended stalled-header assertion. Exact cause of the earlier client-construction delay remains unconfirmed.
+- Proposal: instrument/reproduce startup/client construction and the preceding test sequence using no provider, establish whether cold work or test-state/resource leakage remains, and correct that cause. Retain the existing budget and assertions; do not raise thresholds, accept either exception, or count the isolated pass as resolution.
+
+P2 — Mocked baseline test depends on an external credential being present.
+- tests/test_eval_baseline.py:48 patches the provider but supplies only SOURCEPILOT_AI_MODEL. eval_baseline.py:842 still calls ai_settings_from_environment(), which requires OPENAI_API_KEY.
+- Isolated no-key run fails; the same test with OPENAI_API_KEY=synthetic-not-a-real-key passes and asserts provider.assert_not_called(). baseline-no-key.txt, baseline-synthetic-key.txt.
+- Proposal: make this test self-contained by supplying a synthetic key or mocking the settings boundary locally, preserving the production missing-credential guard and provider-not-called assertion. Do not supply real credentials to CI. This is not established as an amendment-created production defect, but currently blocks the required credential-free suite.
+
+Evidence and remaining gates
+- manifest.json contains base dependency versions, hashes, exact primary commands, exits and durations. diagnostics.json records isolated reproductions, Node/Pyright retry, and final optional dependency versions.
+- The earlier 1734-test Windows run remains HISTORICAL and is not final-source Linux verification. The 93-test Linux pass does not erase failures in the broader run.
+- Original P1 request-owned shutdown and P2 skipped cleanup were resolved by the preceding independent review under the approved cooperative contract. These results do not restore the withdrawn hard-real-time guarantee.
+- Linux environment availability is no longer the obstacle; passing required verification is. No macOS or hosted-CI certification is claimed.
+- Formal Browser QA and Done Check remain pending. Unknown incident rejection for AIRun e790ea26-b0cb-4b93-9b9a-4c8d0a2de0d5, historical live-quality failures and pending human reviews remain unresolved.
+- No product/test fixes, infrastructure, paid AI calls, commits or acceptance-threshold changes.
+
+Setup diagnostics retained honestly
+- Initial restricted WSL/Docker inspection was denied; approved access to the existing environment succeeded.
+- The first virtualenv under /tmp was unavailable in a later WSL invocation; it was recreated in persistent user cache before tests ran.
+- One gateway probe and one PATH setup command failed shell quoting; localhost connectivity and the explicit Linux-only PATH succeeded. Neither failed command ran tests.

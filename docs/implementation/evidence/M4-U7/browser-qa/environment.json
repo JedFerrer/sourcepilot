@@ -1,0 +1,15 @@
+{
+  "proxy_timeout_seconds": 190,
+  "command": "node docs/implementation/evidence/M4-U7/browser-qa/run.mjs",
+  "browser_timeout_seconds": 195,
+  "native_focus": "Playwright focus emulation disabled through CDP; real tab switches require trusted blur/focus and document.hasFocus transitions",
+  "test_database": "sourcepilot_e2e",
+  "platform": "Windows",
+  "browser": "Installed Google Chrome",
+  "playwright": "1.63.0",
+  "source_manifest": "source-identity.json",
+  "backend_timeout_seconds": 180,
+  "provider_calls": 0,
+  "headless": false,
+  "version": "157.0.8103.38"
+}

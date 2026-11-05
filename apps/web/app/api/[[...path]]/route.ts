@@ -1,3 +1,5 @@
+import { analysisProxyMs } from "../../../lib/analysis-timeouts";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
@@ -12,8 +14,10 @@ function endToEndHeaders(source: Headers): Headers {
 }
 
 async function forward(request: Request): Promise<Response> {
+  const incoming = new URL(request.url);
+  const analysis = request.method === "POST" && /^\/api\/projects\/[^/]+\/comparison\/(advice|analysis)$/.test(incoming.pathname);
+  const deadline = analysis ? AbortSignal.timeout(analysisProxyMs) : undefined;
   try {
-    const incoming = new URL(request.url);
     const upstream = new URL(process.env.API_ORIGIN ?? "http://localhost:8000");
     // Assign a pathname, never resolve a user-supplied URL against the backend origin.
     upstream.pathname = upstream.pathname.replace(/\/$/, "") + incoming.pathname.slice(4);
@@ -31,7 +35,7 @@ async function forward(request: Request): Promise<Response> {
       duplex: "half",
       cache: "no-store",
       redirect: "manual",
-      signal: request.signal,
+      signal: deadline ? AbortSignal.any([request.signal, deadline]) : request.signal,
     };
     const response = await fetch(upstream, options);
     const responseHeaders = endToEndHeaders(response.headers);
@@ -43,13 +47,23 @@ async function forward(request: Request): Promise<Response> {
       responseHeaders.delete("content-encoding");
       responseHeaders.delete("content-length");
     }
-    return new Response(response.body, {
+    // Analysis is one JSON result, not a stream. Include body consumption in the
+    // proxy deadline so a stalled body still gets a structured error envelope.
+    const body = analysis ? await response.arrayBuffer() : response.body;
+    return new Response(body, {
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
     });
   } catch {
     console.error("API proxy request failed.");
+    if (analysis) {
+      return Response.json({ error: {
+        code: deadline?.aborted ? "ANALYSIS_WAIT_TIMEOUT" : "ANALYSIS_CONNECTION_LOST",
+        message: deadline?.aborted ? "Analysis took too long. Please retry."
+          : "The connection was interrupted. Analysis may still be finishing. Please wait before retrying.",
+      } }, { status: deadline?.aborted ? 504 : 502 });
+    }
     return new Response("Internal Server Error", { status: 500 });
   }
 }

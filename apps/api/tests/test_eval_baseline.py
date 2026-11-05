@@ -50,6 +50,7 @@ def test_runner_reuses_parsed_context_for_extraction_scoring_and_measurements(
 ) -> None:
     from sourcepilot.ai.quote_extraction_eval import document_blocks
 
+    monkeypatch.setenv("OPENAI_API_KEY", "synthetic-not-a-functional-credential")
     monkeypatch.setenv("SOURCEPILOT_AI_MODEL", "synthetic-test-model")
     engine = Mock()
     monkeypatch.setattr(baseline, "preflight_database", lambda: engine)
@@ -75,6 +76,30 @@ def test_runner_reuses_parsed_context_for_extraction_scoring_and_measurements(
     assert result["measurements"]["quote_extraction"]["field_accuracy"]["measured_case_count"] == 9
     provider.assert_not_called()
     engine.dispose.assert_called_once()
+
+
+@pytest.mark.parametrize("operation,schema_name", [
+    ("tradeoff_analysis", "TradeoffAnalysis"), ("comparison_advice", "ComparisonAdviceV1"),
+])
+@pytest.mark.parametrize("terminal,captured,expected", [
+    ("validation", True, "QUALITY_FINDING"),
+    ("validation", False, "RUNTIME_ERROR"),
+    ("tool", True, "RUNTIME_ERROR"),
+])
+def test_validation_diagnostics_preserve_failure_attribution(
+    operation: str, schema_name: str, terminal: str, captured: bool, expected: str,
+) -> None:
+    steps = [
+        SimpleNamespace(sequence=1, kind="validation_phase", outcome="INVALID", name="schema_repair"),
+        SimpleNamespace(sequence=2, kind=terminal, outcome="INVALID", name="SCHEMA_INVALID"),
+        SimpleNamespace(sequence=3, kind="validation_schema", outcome="INVALID", name="schema_type_missing"),
+        SimpleNamespace(sequence=4, kind="usage", outcome="COMPLETE", name="input_tokens"),
+        SimpleNamespace(sequence=5, kind="run", outcome="VALIDATION_FAILED", name=None),
+    ]
+    run = SimpleNamespace(operation=operation, status="VALIDATION_FAILED",
+                          validation_status="INVALID", supplier_explanation_steps=steps)
+    responses = [{"schema_name": schema_name, "output_text": "{}"}] if captured else None
+    assert baseline.classify_live(None, run, responses) == expected  # type: ignore[arg-type]
 
 
 def test_retained_harbor_rescore_preserves_historical_evidence_and_named_counts(tmp_path: Path) -> None:

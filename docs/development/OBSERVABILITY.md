@@ -1,5 +1,9 @@
 # AI observability
 
+Comparison execution records allowlisted validation reason codes and phase labels for initial and repaired finals. Schema diagnostics include only known field/category labels; rejected output, quote content, exception messages, arbitrary schema keys and credentials are never diagnostic payloads. Unexpected validation errors remain `UNKNOWN_REJECTION`. These labels improve diagnosis without changing acceptance predicates or proving the historical rejection is fixed.
+
+Comparison deadline expiry records `TIMED_OUT` / `ComparisonDeadlineError` when terminal persistence is available. Preparation can expire before an AIRun exists; database outage, exhausted cleanup or process death can prevent terminal persistence. The amended total is cooperative and includes independent cleanup attempts and attempted response handoff, not guaranteed helper termination or response delivery. Safe fixed warnings report incomplete provider/session/engine cleanup, transaction recovery, terminal persistence or shutdown; they contain no exception text or model output. Unconfirmed release retains comparison admission capacity. A trace COMMITTED/COMPLETED state cannot certify browser receipt, and a remotely accepted trace commit can finish after local cancellation. External cancellation propagates and records FAILED / INTERRUPTED only when bookkeeping can complete. No detached analysis job or crash-recovery mechanism is introduced. Historical live baseline failures and pending human quality reviews remain unresolved; offline passing results are not live-quality approval.
+
 SourcePilot owns its AI run records in PostgreSQL. Langfuse is an optional view of sanitized execution metadata; it neither owns workflow state nor decides whether an operation succeeds. No tracing service is needed for the five-stage workflow or normal tests.
 
 ## Local records

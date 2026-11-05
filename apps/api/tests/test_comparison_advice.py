@@ -1086,7 +1086,7 @@ def test_n4_advice_prompt_and_contract_version() -> None:
     from sourcepilot.ai.comparison_advice import CONTRACT_VERSION
 
     assert CONTRACT_VERSION == "comparison-advice-v1"
-    assert PROMPT_VERSION == "comparison-advice-v4"
+    assert PROMPT_VERSION == "comparison-advice-v5"
     for guidance in (
         "Use the supplied current comparison first", "do not reread",
         "specific claims", "reuse retrieved results", "four model turns",

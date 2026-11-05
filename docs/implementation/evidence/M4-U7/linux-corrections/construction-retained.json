@@ -1,0 +1,1138 @@
+[
+  {
+    "kind": "client",
+    "seconds": 0.00023876399973232765,
+    "verify": "SSLContext",
+    "transport": "NoneType"
+  },
+  {
+    "kind": "client",
+    "seconds": 5.015699935029261e-05,
+    "verify": "NoneType",
+    "transport": "MockTransport"
+  },
+  {
+    "kind": "sdk",
+    "seconds": 0.00014832800115982536
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.478808628,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.479533395,
+    "generation": 0,
+    "collected": 438,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.479709337,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.479744756,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.479971586,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.48006094,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.480221482,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.480254416,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.480397063,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.480434636,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.480575469,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.480609345,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.480767763,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.480798963,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.48097754,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.481010574,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.481219731,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.481251573,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.481442063,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.482483004,
+    "generation": 1,
+    "collected": 451,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.491850518,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.492110604,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.49224219,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.49227835,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.492406098,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.492443801,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.492640193,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.492685511,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.492873927,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.49291171,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.493082923,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.493120706,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.497506601,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.497662434,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.497780273,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.497811664,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.4979901,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.498020099,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.498279883,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.498311705,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.498657026,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.498692084,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.498887113,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.499888832,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.505239774,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.505329207,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.505437498,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.505468077,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.505589493,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.505616014,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.505712251,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.505739013,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.505823357,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.505851712,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.505985161,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.506011222,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.506151424,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.506176202,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.506392724,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.506423103,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.506581932,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.5066171,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.516706667,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.516867038,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.516949479,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.516974387,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.51706848,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.518056849,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.518205157,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.51823203,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.518313758,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.518341102,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.51843304,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.51845869,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.51853094,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.518557652,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.518725027,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.518759264,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.518924545,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.518951868,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.519151445,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.519178278,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.519338789,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.519365351,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.519531574,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.519558556,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.519727595,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.519755679,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.519909338,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.519935468,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.520130437,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.520625769,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.520795589,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.520821489,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.520983905,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.521010426,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.521179875,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.521205355,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.521364053,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.521389593,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.521585403,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.521613868,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.521791704,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.521819768,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.522012663,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.522039315,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.540590356,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.540663178,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.540730378,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.540757862,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.542310865,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.542367264,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.54535101,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.545407539,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.545501762,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8705.546191866,
+    "generation": 1,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8705.546313603,
+    "generation": 2,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.001441736,
+    "generation": 2,
+    "collected": 54968,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.001626665,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.001664028,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.001847855,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.001883354,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.002115134,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.002161374,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.00574889,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.005806943,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.009467213,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.009563349,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.009743419,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.009778788,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.00993978,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.009974127,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.010169296,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.010207761,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.010426255,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.010460231,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.010690609,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.01072737,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "start",
+    "time": 8706.03008004,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  },
+  {
+    "kind": "gc",
+    "phase": "stop",
+    "time": 8706.030181207,
+    "generation": 0,
+    "collected": 0,
+    "uncollectable": 0
+  }
+]

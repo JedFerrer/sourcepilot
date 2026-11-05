@@ -414,8 +414,11 @@ def classify_live(
         terminal = None
         if analyst:
             steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
-            # Usage availability is terminal metadata, not the cause of the outcome.
-            terminal = next((step for step in reversed(steps) if step.kind not in {"run", "usage"}), None)
+            # Usage and bounded validation diagnostics describe the terminal
+            # event; they must not replace it when attributing the outcome.
+            terminal = next((step for step in reversed(steps) if step.kind not in {
+                "run", "usage", "validation_phase", "validation_schema",
+            }), None)
         if run.status == "FAILED_LIMIT_REACHED":
             model_caused = analyst and terminal is not None and (
                 (terminal.kind, terminal.outcome, terminal.name) == ("limit", "REACHED", "model_turns")
@@ -975,12 +978,17 @@ def execute(mode: str, categories: list[str], output: Path) -> tuple[dict[str, A
 
 
 def main() -> None:
+    from contextlib import nullcontext
+
+    from sourcepilot.comparison.execution import comparison_cli_lifecycle
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=("offline", "live"), required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--categories", nargs="+", choices=CATEGORIES, default=list(CATEGORIES))
     args = parser.parse_args()
-    report, code = execute(args.mode, args.categories, args.output)
+    with comparison_cli_lifecycle() if args.mode == "live" else nullcontext():
+        report, code = execute(args.mode, args.categories, args.output)
     print(
         f"{report['status']}: {report['executed_case_count']}/{report['expected_case_count']} cases; exit {code}"
     )

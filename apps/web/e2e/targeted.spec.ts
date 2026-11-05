@@ -5,6 +5,50 @@ import { connect, type Socket } from "node:net";
 import path from "node:path";
 import { advice, approveShortlist, comparison, confirm, createAndApprove, pdfDirectory, quoteCard, readApi, upload, type Project, type Quote } from "./helpers";
 
+for (const outcome of ["success", "failure"] as const) {
+  test(`pending comparison ${outcome} survives returning to the tab`, async ({ page, context }) => {
+    const { id } = await createAndApprove(page);
+    for (const index of [0, 1]) { await upload(page, index); await confirm(page, index); }
+    await comparison(page);
+    const before = await readApi(page, `/projects/${id}/comparison`);
+    let release!: () => void;
+    const pending = new Promise<void>((resolve) => { release = resolve; });
+    let posts = 0;
+    await page.route(`**/api/projects/${id}/comparison/advice`, async (route) => {
+      posts += 1;
+      // Existing E2E server uses only deterministic model doubles. Hold delivery
+      // across focus to exercise the real browser lifecycle without a paid run.
+      const response = outcome === "success" ? await route.fetch() : null;
+      await pending;
+      if (response) await route.fulfill({ response });
+      else await route.fulfill({ status: 503, contentType: "application/json", body: JSON.stringify({
+        error: { code: "COMPARISON_ADVICE_UNAVAILABLE", message: "Analysis could not be validated. Please retry." },
+      }) });
+    });
+    const section = page.getByRole("region", { name: "Comparison", exact: true });
+    await section.getByRole("button", { name: "Analyze Comparison", exact: true }).click();
+    await expect(section.getByRole("button", { name: "Analyzing…", exact: true })).toBeDisabled();
+    const other = await context.newPage();
+    await other.goto("about:blank");
+    await other.bringToFront();
+    await page.bringToFront();
+    // Chromium headless may not emit native window focus consistently; dispatch
+    // the same focus event as a deterministic lifecycle assertion as well.
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await expect(section.getByRole("button", { name: "Analyzing…", exact: true })).toBeDisabled();
+    release();
+    if (outcome === "success") {
+      await expect(section.getByRole("region", { name: "Comparison analysis", exact: true })).toBeVisible();
+    } else {
+      await expect(section.getByRole("alert")).toContainText("could not be validated");
+      await expect(section.getByRole("button", { name: "Retry analysis", exact: true })).toBeEnabled();
+    }
+    expect(posts).toBe(1);
+    expect(await readApi(page, `/projects/${id}/comparison`)).toEqual(before);
+    await other.close();
+  });
+}
+
 test("corrected quote retains PDF provenance", async ({ page }) => {
   const { id } = await createAndApprove(page);
   await test.step("Correct extracted price and retain original evidence", async () => {
@@ -188,7 +232,7 @@ test("confirmed quote edit invalidates comparison and advice", async ({ page }) 
     const section = page.getByRole("region", { name: "Comparison", exact: true });
     await expect(section).toContainText("Comparison outdated");
     await expect(section.getByRole("region", { name: "Comparison analysis", exact: true })).toBeHidden();
-    await expect(section.getByRole("button", { name: "Analyze Comparison", exact: true })).toBeDisabled();
+    await expect(section.getByRole("button", { name: "Retry analysis", exact: true })).toBeDisabled();
     await expect(section.getByRole("button", { name: "Regenerate Comparison", exact: true })).toBeEnabled();
     await comparison(page, true);
     await expect(section).toContainText("USD 4.65");

@@ -1,0 +1,449 @@
+........................................................................ [ 22%]
+....FF.FF............................................................... [ 45%]
+........................................................................ [ 67%]
+........................................................................ [ 90%]
+..............................                                           [100%]
+=================================== FAILURES ===================================
+_ test_actual_runtime_termination_classification[comparison-invalid-QUALITY_FINDING] _
+
+session = <sqlalchemy.orm.session.Session object at 0x70ac36bf2490>
+category = 'comparison', behavior = 'invalid', expected = 'QUALITY_FINDING'
+
+    @pytest.mark.parametrize(
+        "category,behavior,expected",
+        [
+            ("brief", "invalid", "QUALITY_FINDING"),
+            ("brief", "provider", "PROVIDER_ERROR"),
+            ("comparison", "invalid", "QUALITY_FINDING"),
+            ("comparison", "limit", "QUALITY_FINDING"),
+            ("comparison", "provider", "PROVIDER_ERROR"),
+            ("comparison", "cross_scope", "RUNTIME_ERROR"),
+        ],
+    )
+    def test_actual_runtime_termination_classification(
+        session: Session, category: str, behavior: str, expected: str
+    ) -> None:
+        case = baseline.load_scope([category])[category][0]
+        client = FixtureClient(category, case, behavior=behavior)
+        responses: list[dict[str, Any]] = []
+        actual, run = eval_live.run_case(
+            session, category, case, lambda: baseline.CapturingClient(client, responses)
+        )
+>       assert baseline.classify_live(actual, run, responses) == expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_eval_live.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sourcepilot/ai/eval_baseline.py:416: in classify_live
+    steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:569: in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1096: in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1131: in _fire_loader_callables
+    return self.callable_(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sqlalchemy.orm.strategies.LazyLoader object at 0x70ac382adfc0>
+state = <sqlalchemy.orm.state.InstanceState object at 0x70ac38041eb0>
+passive = symbol('PASSIVE_OFF'), loadopt = None, extra_criteria = ()
+extra_options = (), alternate_effective_path = None
+execution_options = immutabledict({})
+
+    def _load_for_state(
+        self,
+        state,
+        passive,
+        loadopt=None,
+        extra_criteria=(),
+        extra_options=(),
+        alternate_effective_path=None,
+        execution_options=util.EMPTY_DICT,
+    ):
+        if not state.key and (
+            (
+                not self.parent_property.load_on_pending
+                and not state._load_pending
+            )
+            or not state.session_id
+        ):
+            return LoaderCallableStatus.ATTR_EMPTY
+    
+        pending = not state.key
+        primary_key_identity = None
+    
+        use_get = self.use_get and (not loadopt or not loadopt._extra_criteria)
+    
+        if (not passive & PassiveFlag.SQL_OK and not use_get) or (
+            not passive & attributes.NON_PERSISTENT_OK and pending
+        ):
+            return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+        if (
+            # we were given lazy="raise"
+            self._raise_always
+            # the no_raise history-related flag was not passed
+            and not passive & PassiveFlag.NO_RAISE
+            and (
+                # if we are use_get and related_object_ok is disabled,
+                # which means we are at most looking in the identity map
+                # for history purposes or otherwise returning
+                # PASSIVE_NO_RESULT, don't raise.  This is also a
+                # history-related flag
+                not use_get
+                or passive & PassiveFlag.RELATED_OBJECT_OK
+            )
+        ):
+            self._invoke_raise_load(state, passive, "raise")
+    
+        session = _state_session(state)
+        if not session:
+            if passive & PassiveFlag.NO_RAISE:
+                return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+>           raise orm_exc.DetachedInstanceError(
+                "Parent instance %s is not bound to a Session; "
+                "lazy load operation of attribute '%s' cannot proceed"
+                % (orm_util.state_str(state), self.key)
+            )
+E           sqlalchemy.orm.exc.DetachedInstanceError: Parent instance <AIRun at 0x70ac36f92b50> is not bound to a Session; lazy load operation of attribute 'supplier_explanation_steps' cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/strategies.py:929: DetachedInstanceError
+_ test_actual_runtime_termination_classification[comparison-limit-QUALITY_FINDING] _
+
+session = <sqlalchemy.orm.session.Session object at 0x70ac353d4f10>
+category = 'comparison', behavior = 'limit', expected = 'QUALITY_FINDING'
+
+    @pytest.mark.parametrize(
+        "category,behavior,expected",
+        [
+            ("brief", "invalid", "QUALITY_FINDING"),
+            ("brief", "provider", "PROVIDER_ERROR"),
+            ("comparison", "invalid", "QUALITY_FINDING"),
+            ("comparison", "limit", "QUALITY_FINDING"),
+            ("comparison", "provider", "PROVIDER_ERROR"),
+            ("comparison", "cross_scope", "RUNTIME_ERROR"),
+        ],
+    )
+    def test_actual_runtime_termination_classification(
+        session: Session, category: str, behavior: str, expected: str
+    ) -> None:
+        case = baseline.load_scope([category])[category][0]
+        client = FixtureClient(category, case, behavior=behavior)
+        responses: list[dict[str, Any]] = []
+        actual, run = eval_live.run_case(
+            session, category, case, lambda: baseline.CapturingClient(client, responses)
+        )
+>       assert baseline.classify_live(actual, run, responses) == expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_eval_live.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sourcepilot/ai/eval_baseline.py:416: in classify_live
+    steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:569: in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1096: in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1131: in _fire_loader_callables
+    return self.callable_(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sqlalchemy.orm.strategies.LazyLoader object at 0x70ac382adfc0>
+state = <sqlalchemy.orm.state.InstanceState object at 0x70ac346dcd70>
+passive = symbol('PASSIVE_OFF'), loadopt = None, extra_criteria = ()
+extra_options = (), alternate_effective_path = None
+execution_options = immutabledict({})
+
+    def _load_for_state(
+        self,
+        state,
+        passive,
+        loadopt=None,
+        extra_criteria=(),
+        extra_options=(),
+        alternate_effective_path=None,
+        execution_options=util.EMPTY_DICT,
+    ):
+        if not state.key and (
+            (
+                not self.parent_property.load_on_pending
+                and not state._load_pending
+            )
+            or not state.session_id
+        ):
+            return LoaderCallableStatus.ATTR_EMPTY
+    
+        pending = not state.key
+        primary_key_identity = None
+    
+        use_get = self.use_get and (not loadopt or not loadopt._extra_criteria)
+    
+        if (not passive & PassiveFlag.SQL_OK and not use_get) or (
+            not passive & attributes.NON_PERSISTENT_OK and pending
+        ):
+            return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+        if (
+            # we were given lazy="raise"
+            self._raise_always
+            # the no_raise history-related flag was not passed
+            and not passive & PassiveFlag.NO_RAISE
+            and (
+                # if we are use_get and related_object_ok is disabled,
+                # which means we are at most looking in the identity map
+                # for history purposes or otherwise returning
+                # PASSIVE_NO_RESULT, don't raise.  This is also a
+                # history-related flag
+                not use_get
+                or passive & PassiveFlag.RELATED_OBJECT_OK
+            )
+        ):
+            self._invoke_raise_load(state, passive, "raise")
+    
+        session = _state_session(state)
+        if not session:
+            if passive & PassiveFlag.NO_RAISE:
+                return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+>           raise orm_exc.DetachedInstanceError(
+                "Parent instance %s is not bound to a Session; "
+                "lazy load operation of attribute '%s' cannot proceed"
+                % (orm_util.state_str(state), self.key)
+            )
+E           sqlalchemy.orm.exc.DetachedInstanceError: Parent instance <AIRun at 0x70ac3460c050> is not bound to a Session; lazy load operation of attribute 'supplier_explanation_steps' cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/strategies.py:929: DetachedInstanceError
+_ test_actual_runtime_termination_classification[comparison-cross_scope-RUNTIME_ERROR] _
+
+session = <sqlalchemy.orm.session.Session object at 0x70ac35bb5050>
+category = 'comparison', behavior = 'cross_scope', expected = 'RUNTIME_ERROR'
+
+    @pytest.mark.parametrize(
+        "category,behavior,expected",
+        [
+            ("brief", "invalid", "QUALITY_FINDING"),
+            ("brief", "provider", "PROVIDER_ERROR"),
+            ("comparison", "invalid", "QUALITY_FINDING"),
+            ("comparison", "limit", "QUALITY_FINDING"),
+            ("comparison", "provider", "PROVIDER_ERROR"),
+            ("comparison", "cross_scope", "RUNTIME_ERROR"),
+        ],
+    )
+    def test_actual_runtime_termination_classification(
+        session: Session, category: str, behavior: str, expected: str
+    ) -> None:
+        case = baseline.load_scope([category])[category][0]
+        client = FixtureClient(category, case, behavior=behavior)
+        responses: list[dict[str, Any]] = []
+        actual, run = eval_live.run_case(
+            session, category, case, lambda: baseline.CapturingClient(client, responses)
+        )
+>       assert baseline.classify_live(actual, run, responses) == expected
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_eval_live.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sourcepilot/ai/eval_baseline.py:416: in classify_live
+    steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:569: in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1096: in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1131: in _fire_loader_callables
+    return self.callable_(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sqlalchemy.orm.strategies.LazyLoader object at 0x70ac382adfc0>
+state = <sqlalchemy.orm.state.InstanceState object at 0x70ac357a5970>
+passive = symbol('PASSIVE_OFF'), loadopt = None, extra_criteria = ()
+extra_options = (), alternate_effective_path = None
+execution_options = immutabledict({})
+
+    def _load_for_state(
+        self,
+        state,
+        passive,
+        loadopt=None,
+        extra_criteria=(),
+        extra_options=(),
+        alternate_effective_path=None,
+        execution_options=util.EMPTY_DICT,
+    ):
+        if not state.key and (
+            (
+                not self.parent_property.load_on_pending
+                and not state._load_pending
+            )
+            or not state.session_id
+        ):
+            return LoaderCallableStatus.ATTR_EMPTY
+    
+        pending = not state.key
+        primary_key_identity = None
+    
+        use_get = self.use_get and (not loadopt or not loadopt._extra_criteria)
+    
+        if (not passive & PassiveFlag.SQL_OK and not use_get) or (
+            not passive & attributes.NON_PERSISTENT_OK and pending
+        ):
+            return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+        if (
+            # we were given lazy="raise"
+            self._raise_always
+            # the no_raise history-related flag was not passed
+            and not passive & PassiveFlag.NO_RAISE
+            and (
+                # if we are use_get and related_object_ok is disabled,
+                # which means we are at most looking in the identity map
+                # for history purposes or otherwise returning
+                # PASSIVE_NO_RESULT, don't raise.  This is also a
+                # history-related flag
+                not use_get
+                or passive & PassiveFlag.RELATED_OBJECT_OK
+            )
+        ):
+            self._invoke_raise_load(state, passive, "raise")
+    
+        session = _state_session(state)
+        if not session:
+            if passive & PassiveFlag.NO_RAISE:
+                return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+>           raise orm_exc.DetachedInstanceError(
+                "Parent instance %s is not bound to a Session; "
+                "lazy load operation of attribute '%s' cannot proceed"
+                % (orm_util.state_str(state), self.key)
+            )
+E           sqlalchemy.orm.exc.DetachedInstanceError: Parent instance <AIRun at 0x70ac357ea1d0> is not bound to a Session; lazy load operation of attribute 'supplier_explanation_steps' cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/strategies.py:929: DetachedInstanceError
+______________ test_injected_tool_value_error_is_execution_error _______________
+
+session = <sqlalchemy.orm.session.Session object at 0x70ac34757390>
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x70ac36b3ac50>
+
+    def test_injected_tool_value_error_is_execution_error(
+        session: Session, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        from sourcepilot.ai import tradeoff_analysis
+    
+        case = baseline.load_scope(["comparison"])["comparison"][0]
+        client = FixtureClient("comparison", case)
+    
+        def broken_tool(*_args: Any, **_kwargs: Any) -> Any:
+            raise ValueError("injected tool integration failure")
+    
+        monkeypatch.setattr(tradeoff_analysis, "_tool_output", broken_tool)
+        actual, run = eval_live.run_case(session, "comparison", case, lambda: client)
+        assert actual is None and run is not None
+        assert run.status == "VALIDATION_FAILED" and run.validation_status == "INVALID"
+>       assert baseline.classify_live(actual, run) == "RUNTIME_ERROR"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_eval_live.py:344: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+sourcepilot/ai/eval_baseline.py:416: in classify_live
+    steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:569: in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1096: in get
+    value = self._fire_loader_callables(state, key, passive)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/attributes.py:1131: in _fire_loader_callables
+    return self.callable_(state, passive)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <sqlalchemy.orm.strategies.LazyLoader object at 0x70ac382adfc0>
+state = <sqlalchemy.orm.state.InstanceState object at 0x70ac346df590>
+passive = symbol('PASSIVE_OFF'), loadopt = None, extra_criteria = ()
+extra_options = (), alternate_effective_path = None
+execution_options = immutabledict({})
+
+    def _load_for_state(
+        self,
+        state,
+        passive,
+        loadopt=None,
+        extra_criteria=(),
+        extra_options=(),
+        alternate_effective_path=None,
+        execution_options=util.EMPTY_DICT,
+    ):
+        if not state.key and (
+            (
+                not self.parent_property.load_on_pending
+                and not state._load_pending
+            )
+            or not state.session_id
+        ):
+            return LoaderCallableStatus.ATTR_EMPTY
+    
+        pending = not state.key
+        primary_key_identity = None
+    
+        use_get = self.use_get and (not loadopt or not loadopt._extra_criteria)
+    
+        if (not passive & PassiveFlag.SQL_OK and not use_get) or (
+            not passive & attributes.NON_PERSISTENT_OK and pending
+        ):
+            return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+        if (
+            # we were given lazy="raise"
+            self._raise_always
+            # the no_raise history-related flag was not passed
+            and not passive & PassiveFlag.NO_RAISE
+            and (
+                # if we are use_get and related_object_ok is disabled,
+                # which means we are at most looking in the identity map
+                # for history purposes or otherwise returning
+                # PASSIVE_NO_RESULT, don't raise.  This is also a
+                # history-related flag
+                not use_get
+                or passive & PassiveFlag.RELATED_OBJECT_OK
+            )
+        ):
+            self._invoke_raise_load(state, passive, "raise")
+    
+        session = _state_session(state)
+        if not session:
+            if passive & PassiveFlag.NO_RAISE:
+                return LoaderCallableStatus.PASSIVE_NO_RESULT
+    
+>           raise orm_exc.DetachedInstanceError(
+                "Parent instance %s is not bound to a Session; "
+                "lazy load operation of attribute '%s' cannot proceed"
+                % (orm_util.state_str(state), self.key)
+            )
+E           sqlalchemy.orm.exc.DetachedInstanceError: Parent instance <AIRun at 0x70ac34791cd0> is not bound to a Session; lazy load operation of attribute 'supplier_explanation_steps' cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+
+/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/sqlalchemy/orm/strategies.py:929: DetachedInstanceError
+=============================== warnings summary ===============================
+../../../../../../../../../home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/starlette/testclient.py:53
+  /home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_eval_live.py::test_actual_runtime_termination_classification[comparison-invalid-QUALITY_FINDING]
+FAILED tests/test_eval_live.py::test_actual_runtime_termination_classification[comparison-limit-QUALITY_FINDING]
+FAILED tests/test_eval_live.py::test_actual_runtime_termination_classification[comparison-cross_scope-RUNTIME_ERROR]
+FAILED tests/test_eval_live.py::test_injected_tool_value_error_is_execution_error
+4 failed, 314 passed, 1 warning in 76.58s (0:01:16)

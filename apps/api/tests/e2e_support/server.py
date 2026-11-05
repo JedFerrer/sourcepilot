@@ -49,7 +49,8 @@ def main() -> None:
     os.environ["DOCUMENT_STORAGE_LOCAL_DIR"] = directory
     with patch("sourcepilot.main.run_pdf_quote_processing", schedule):
         try:
-            uvicorn.run(app, host="127.0.0.1", port=18000)
+            uvicorn.run(app, host="127.0.0.1", port=18000,
+                        loop="sourcepilot.comparison.lifecycle:comparison_loop")
         finally:
             application_engine().dispose()
 

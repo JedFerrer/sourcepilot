@@ -5,6 +5,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from sourcepilot.comparison.validation import ComparisonRejection, RejectionCode
+
 
 class QuoteFieldReference(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -56,33 +58,33 @@ def validate_suggestion(
               if result["requirement_id"] is not None}
     if suggestion.supplier_id is not None:
         if suggestion.supplier_id not in suppliers:
-            raise ValueError("Suggested supplier is outside the comparison.")
+            raise ComparisonRejection(RejectionCode.SUPPLIER_REFERENCE, "Suggested supplier is outside the comparison.")
         if not suggestion.supporting_reasons:
-            raise ValueError("A suggestion requires supporting reasons.")
+            raise ComparisonRejection(RejectionCode.SUGGESTION_REASONS, "A suggestion requires supporting reasons.")
     elif not suggestion.uncertainties:
-        raise ValueError("No suggestion requires an explanation.")
+        raise ComparisonRejection(RejectionCode.NULL_EXPLANATION, "No suggestion requires an explanation.")
     points = suggestion.supporting_reasons + suggestion.tradeoffs + suggestion.uncertainties
     cited: set[UUID] = set()
     for point in points:
         if not point.text.strip() or not point.supplier_ids or not set(point.supplier_ids) <= suppliers.keys():
-            raise ValueError("Suggestion point references an unpermitted supplier or empty text.")
+            raise ComparisonRejection(RejectionCode.SUPPLIER_REFERENCE, "Suggestion point references an unpermitted supplier or empty text.")
         if not set(point.requirement_ids) <= requirements.keys():
-            raise ValueError("Suggestion references an unknown requirement.")
+            raise ComparisonRejection(RejectionCode.REQUIREMENT_REFERENCE, "Suggestion references an unknown requirement.")
         if any((supplier_id, requirement_id) not in states
                for supplier_id in point.supplier_ids for requirement_id in point.requirement_ids):
-            raise ValueError("Requirement is outside a referenced supplier.")
+            raise ComparisonRejection(RejectionCode.REQUIREMENT_REFERENCE, "Requirement is outside a referenced supplier.")
         if not {(ref.quote_id, ref.field_key) for ref in point.quote_fields} <= fields:
-            raise ValueError("Suggestion references an unknown quote field.")
+            raise ComparisonRejection(RejectionCode.QUOTE_REFERENCE, "Suggestion references an unknown quote field.")
         if any(quote_owners[ref.quote_id] not in point.supplier_ids for ref in point.quote_fields):
-            raise ValueError("Quote field belongs to a different supplier.")
+            raise ComparisonRejection(RejectionCode.QUOTE_OWNER_MISMATCH, "Quote field belongs to a different supplier.")
         if any(evidence_owners.get(evidence_id) not in point.supplier_ids
                for evidence_id in point.evidence_ids):
-            raise ValueError("Suggestion references unknown or misowned evidence.")
+            raise ComparisonRejection(RejectionCode.EVIDENCE_OWNER_MISMATCH, "Suggestion references unknown or misowned evidence.")
         cited.update(point.evidence_ids)
     if not set(suggestion.evidence_ids) <= evidence_owners.keys():
-        raise ValueError("Suggestion references unknown evidence.")
+        raise ComparisonRejection(RejectionCode.UNKNOWN_EVIDENCE, "Suggestion references unknown evidence.")
     if not cited <= set(suggestion.evidence_ids):
-        raise ValueError("Suggestion evidence list omits point citations.")
+        raise ComparisonRejection(RejectionCode.SUGGESTION_EVIDENCE, "Suggestion evidence list omits point citations.")
     selected = suggestion.supplier_id
     if selected is None:
         return
@@ -92,13 +94,13 @@ def validate_suggestion(
                 if supplier_id == selected and requirements[requirement_id]["importance"] == "REQUIRED"}
     for point in suggestion.supporting_reasons:
         if selected not in point.supplier_ids:
-            raise ValueError("Supporting reason must reference the suggested supplier.")
+            raise ComparisonRejection(RejectionCode.SUGGESTION_REASONS, "Supporting reason must reference the suggested supplier.")
         if any(required.get(requirement_id) in {"DOES_NOT_MEET", "UNKNOWN", "CONFLICT"}
                for requirement_id in point.requirement_ids):
-            raise ValueError("Supporting reason contradicts a required finding.")
+            raise ComparisonRejection(RejectionCode.SUGGESTION_CONTRADICTION, "Supporting reason contradicts a required finding.")
     for section, expected in ((suggestion.tradeoffs, {"DOES_NOT_MEET"}),
                               (suggestion.uncertainties, {"UNKNOWN", "CONFLICT"})):
         covered = {requirement_id for point in section if selected in point.supplier_ids
                    for requirement_id in point.requirement_ids}
         if not {key for key, state in required.items() if state in expected} <= covered:
-            raise ValueError("Suggestion omits a required failure or uncertainty.")
+            raise ComparisonRejection(RejectionCode.SUGGESTION_COVERAGE, "Suggestion omits a required failure or uncertainty.")

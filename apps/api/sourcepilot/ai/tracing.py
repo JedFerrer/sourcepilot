@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 from sqlalchemy.orm import Session
 
+from sourcepilot.comparison.validation import SCHEMA_LABELS, RejectionCode
 from sourcepilot.persistence.models import AIRun, SupplierExplanationRunStep
 
 logger = logging.getLogger(__name__)
@@ -30,14 +31,18 @@ OUTCOMES = frozenset({
     "FAILED_LIMIT_REACHED", "PROVIDER_ERROR", "TIMEOUT", "FINAL", "TOOL_CALLS",
     "SUCCESS", "INVALID", "VALID", "REPAIRED", "PROVIDER", "REPAIR", "REACHED",
     "CHANGED", "CURRENT", "LIMIT_REACHED", "NOT_FOUND", "NOT_ALLOWED", "OUT_OF_SCOPE",
-    "COMPLETE", "PARTIAL", "UNAVAILABLE", "ERROR",
+    "COMPLETE", "PARTIAL", "UNAVAILABLE", "ERROR", "TIMED_OUT",
 })
 ERRORS = frozenset({
     "ModelProviderError", "ValidationError", "ValueError", "TimeoutError",
     "SCOPE_CHANGED", "STALE_COMPARISON", "COMPARISON_STALE", "StalePdfAttemptError",
     "NOT_FOUND", "NOT_ALLOWED", "OUT_OF_SCOPE", "LIMIT_REACHED", "INVALID_ARGUMENTS", "INTERRUPTED",
 })
-NAMES = TOOLS | {"model_turns", "tool_calls", "input_tokens", "output_tokens"}
+ERRORS = ERRORS | {"ComparisonDeadlineError"} | frozenset(code.value for code in RejectionCode)
+NAMES = TOOLS | SCHEMA_LABELS | {"model_turns", "tool_calls", "input_tokens", "output_tokens"} | frozenset(
+    code.value for code in RejectionCode
+) | frozenset(f"{phase}_{attempt}" for phase in ("analysis", "suggestion", "schema", "unknown")
+              for attempt in ("initial", "repair"))
 
 
 def safe_label(value: str | None, allowed: frozenset[str]) -> str | None:

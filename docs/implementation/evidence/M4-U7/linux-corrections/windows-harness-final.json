@@ -1,0 +1,14 @@
+{
+  "command": [
+    "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\api\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/test_e2e_support.py",
+    "tests/test_e2e_artifacts.py",
+    "-q",
+    "--maxfail=0"
+  ],
+  "exit_code": 0,
+  "seconds": 11.156999999999243,
+  "platform": "Windows-10-10.0.26200-SP0"
+}

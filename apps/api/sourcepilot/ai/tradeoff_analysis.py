@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import logging
 import re
 import time
 from collections.abc import Callable
@@ -12,6 +14,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 from sqlalchemy.orm import Session
+from sqlalchemy.util import await_only
 
 from sourcepilot.ai.analyst_tools import (
     AnalystToolContext,
@@ -28,16 +31,28 @@ from sourcepilot.ai.analyst_tools import (
 from sourcepilot.ai.client import ModelProviderError, StructuredModelClient
 from sourcepilot.ai.structured import (
     provider_retry_delay_seconds,
-    repair_instructions,
     structured_input_hash,
 )
 from sourcepilot.ai.supplier_explanation import MAX_MODEL_TURNS, MAX_TOOL_CALLS
 from sourcepilot.ai.tracing import RunTrace, provider_failure_outcome
 from sourcepilot.comparison.advice import AnalysisPoint, QuoteFieldReference  # noqa: F401
+from sourcepilot.comparison.deadline import (
+    ComparisonDeadlineError,
+    check_deadline,
+    current_deadline,
+)
+from sourcepilot.comparison.execution import bounded_comparison
+from sourcepilot.comparison.validation import (
+    ComparisonRejection,
+    RejectionCode,
+    comparison_repair_feedback,
+    rejection_code,
+    schema_issue_labels,
+)
 from sourcepilot.persistence.models import AIRun
 from sourcepilot.quotes.domain import QUOTE_FIELD_KEYS
 
-PROMPT_VERSION = "tradeoff-analysis-v4"
+PROMPT_VERSION = "tradeoff-analysis-v5"
 INSTRUCTIONS = """Use the supplied current comparison first; do not reread comparison or supplier
 snapshots for facts already present. Retrieve evidence only for specific claims
 that need source detail, and reuse retrieved results rather than repeating lookups.
@@ -201,11 +216,11 @@ def _validate_state_assertions(
         if (token.casefold() not in supplier_labels
                 and (token.startswith(("(", "[", "{")) or token.endswith((")", "]", "}")))):
             if not (token.startswith("(") and token.endswith(")")):
-                raise ValueError("Requirement-state assertion has unsupported supplier syntax.")
+                raise ComparisonRejection(RejectionCode.STATE_SYNTAX, "Requirement-state assertion has unsupported supplier syntax.")
             token = token[1:-1].strip()
         matches = supplier_labels.get(token.casefold(), set())
         if len(matches) != 1:
-            raise ValueError("Requirement-state assertion has ambiguous supplier references.")
+            raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has ambiguous supplier references.")
         return next(iter(matches))
 
     # Protect only explicit lists and exact snapshot names while delimiting
@@ -303,7 +318,7 @@ def _validate_state_assertions(
     for index, (start, stop) in enumerate(pairwise(edges)):
         if index and breaks[index - 1].group() in {".", "!", "?"}:
             if pending_targets:
-                raise ValueError("Requirement-state assertion has unresolved targets.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has unresolved targets.")
             owners, requirement_context = [], []
         end = breaks[index].start() if index < len(breaks) else stop
         assertion = point.text[start:end].strip()
@@ -322,16 +337,16 @@ def _validate_state_assertions(
                     and not residual(rest) and len(heading_labels) == 1):
                 if pending_targets:
                     if pending_targets != heading_labels and not pending_coordination:
-                        raise ValueError("Requirement heading replaces unresolved targets.")
+                        raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement heading replaces unresolved targets.")
                     pending_targets = list(dict.fromkeys([*pending_targets, *heading_labels]))
                 requirement_context = heading_labels
                 if heading_labels[0] not in point.requirement_ids:
-                    raise ValueError("Requirement-state assertion lacks its requirement reference.")
+                    raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion lacks its requirement reference.")
                 assertion = assertion[first_subject.start():]
 
         local_owners, body = local_subject(assertion)
         if pending_targets and owners and local_owners and set(local_owners) != set(owners):
-            raise ValueError("Requirement list changes supplier before its predicate.")
+            raise ComparisonRejection(RejectionCode.STATE_SYNTAX, "Requirement list changes supplier before its predicate.")
         # A narrowly recognized relation suppresses only its relational conflicts
         # occurrence. Embedded/adjacent explicit states still undergo validation.
         relation = re.search(
@@ -349,7 +364,7 @@ def _validate_state_assertions(
         labels, field_labels, rest = local_targets(body)
         if not claims:
             if relation and residual(rest, quote_only=quote_only):
-                raise ValueError("Requirement-state assertion has an unsupported topic or supplier.")
+                raise ComparisonRejection(RejectionCode.STATE_SYNTAX, "Requirement-state assertion has an unsupported topic or supplier.")
             # Predicate-less references in a list must not be thrown away as
             # unrelated prose ("A, Acme and B meet ...", or a possessive topic
             # list). Detect these slots independently of snapshot resolution.
@@ -372,28 +387,28 @@ def _validate_state_assertions(
             if not relation and not heading_only and state_pattern.search(following) and (
                 reference_fragment or not non_state_clause
             ):
-                raise ValueError("Requirement-state assertion has ambiguous references.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has ambiguous references.")
             # Complete nominal targets wait for their predicate. Numeric field
             # prose and unrelated clauses cannot dispose of unresolved targets.
             if heading_only and not relation:
                 if labels[0] not in point.requirement_ids:
-                    raise ValueError("Requirement-state assertion lacks its requirement reference.")
+                    raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion lacks its requirement reference.")
                 # A nominal target is unresolved until a predicate consumes it.
                 # Only list coordination can add another target; a new heading
                 # or unrelated clause cannot silently replace a pending target.
                 if pending_targets and not pending_coordination:
-                    raise ValueError("Requirement heading replaces unresolved targets.")
+                    raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement heading replaces unresolved targets.")
                 pending_targets = list(dict.fromkeys([*pending_targets, *labels]))
                 pending_coordination = bool(index < len(breaks)
                                             and breaks[index].group().casefold() in {"and", ","})
                 owners = local_owners or (owners if pending_coordination else [])
             else:
                 if pending_targets:
-                    raise ValueError("Requirement-state assertion has unresolved targets.")
+                    raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has unresolved targets.")
                 owners, requirement_context = [], []
             continue
         if len(claims) != 1:
-            raise ValueError("Requirement-state assertion has ambiguous predicates.")
+            raise ComparisonRejection(RejectionCode.STATE_SYNTAX, "Requirement-state assertion has ambiguous predicates.")
         claim = claims[0]
         # Remove precisely one predicate, then require coverage on BOTH sides,
         # even when an explicit known subject or requirement was resolved.
@@ -401,22 +416,22 @@ def _validate_state_assertions(
         _, _, rest = local_targets(target_text)
         if (re.search(requirement_pattern, body, re.IGNORECASE) and not labels
                 and not (quote_only and field_labels)):
-            raise ValueError("Requirement-state assertion lacks its requirement reference.")
+            raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion lacks its requirement reference.")
         if residual(rest, quote_only=quote_only):
             if quote_only and len(field_labels) > 1:
-                raise ValueError("Quote-field state assertion has ambiguous references.")
-            raise ValueError("Requirement-state assertion has an unsupported topic or supplier.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Quote-field state assertion has ambiguous references.")
+            raise ComparisonRejection(RejectionCode.STATE_SYNTAX, "Requirement-state assertion has an unsupported topic or supplier.")
         if labels and field_labels and not quote_only and any(
             field_kinds.get(field) not in {requirements[item].get("kind") for item in labels}
             for field in field_labels
         ):
-            raise ValueError("Requirement-state assertion has ambiguous references.")
+            raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has ambiguous references.")
         implicit_owner = bool(re.match(r"(?:its|it)\b", body.strip(), re.IGNORECASE))
         bound_owners = local_owners or owners
         if not bound_owners and not implicit_owner and len(point.supplier_ids) == 1:
             bound_owners = list(point.supplier_ids)
         if not bound_owners:
-            raise ValueError("Requirement-state assertion has ambiguous references.")
+            raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has ambiguous references.")
         # Explicit targets never fall back to context, even if absent from the
         # snapshot. Their words were already required to be completely consumed.
         explicit_target = bool(labels or field_labels)
@@ -429,11 +444,11 @@ def _validate_state_assertions(
         shared_targets = bool(pending_targets)
         if pending_targets:
             if labels and labels != pending_targets and not pending_coordination:
-                raise ValueError("Requirement heading replaces unresolved targets.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement heading replaces unresolved targets.")
             # Every explicit member must resolve independently before collecting
             # the shared predicate. A broad/ambiguous final label is not a list.
             if field_labels and not labels or len(labels) > 1:
-                raise ValueError("Requirement-state assertion has ambiguous references.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has ambiguous references.")
             labels = list(dict.fromkeys([*pending_targets, *labels]))
             pending_targets = []
         allowed = ASSERTION_ALLOWED_STATES[claim.lastgroup or ""]
@@ -448,36 +463,35 @@ def _validate_state_assertions(
             )
             if (len(field_labels) > 1 and not shared_fields
                     or any(owner not in point.supplier_ids for owner in bound_owners)):
-                raise ValueError("Quote-field state assertion has ambiguous references.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Quote-field state assertion has ambiguous references.")
             for owner in bound_owners:
                 for field_label in field_labels or {None}:
                     candidates = {(ref.quote_id, ref.field_key) for ref in point.quote_fields
                                   if quote_owner[ref.quote_id] == owner
                                   and (field_label is None or ref.field_key == field_label)}
                     if len(candidates) != 1:
-                        raise ValueError("Quote-field state assertion lacks an unambiguous field.")
+                        raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Quote-field state assertion lacks an unambiguous field.")
                     field_state = {"missing": "UNKNOWN", "conflicting": "CONFLICT",
                                    "known": "KNOWN"}.get(completeness.get(
                                        next(iter(candidates)), ""))
                     if field_state not in allowed:
-                        raise ValueError(
-                            "Quote-field state assertion contradicts deterministic state.")
+                        raise ComparisonRejection(RejectionCode.STATE_CONTRADICTION, "Quote-field state assertion contradicts deterministic state.")
             owners, requirement_context = bound_owners, []
             continue
         if not labels:
-            raise ValueError("Requirement-state assertion lacks its requirement reference.")
+            raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion lacks its requirement reference.")
         if (len(labels) != 1 and not shared_targets
                 and (explicit_target or labels != requirement_context)
                 or any(owner not in point.supplier_ids for owner in bound_owners)):
-            raise ValueError("Requirement-state assertion has ambiguous references.")
+            raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has ambiguous references.")
         for requirement_id in labels:
             if requirement_id not in point.requirement_ids:
-                raise ValueError("Requirement-state assertion lacks its requirement reference.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion lacks its requirement reference.")
             if any(states.get((owner, requirement_id)) not in allowed for owner in bound_owners):
-                raise ValueError("Requirement-state assertion contradicts deterministic state.")
+                raise ComparisonRejection(RejectionCode.STATE_CONTRADICTION, "Requirement-state assertion contradicts deterministic state.")
         owners, requirement_context = bound_owners, labels
     if pending_targets:
-        raise ValueError("Requirement-state assertion has unresolved targets.")
+        raise ComparisonRejection(RejectionCode.STATE_REFERENCE, "Requirement-state assertion has unresolved targets.")
 
 
 class TradeoffAnalysis(BaseModel):
@@ -549,7 +563,7 @@ def validate_analysis(analysis: TradeoffAnalysis, snapshot: ComparisonSnapshotRe
     """Check hard references and bounded explicit deterministic state assertions."""
     payload = snapshot.comparison_payload
     if payload is None:
-        raise ValueError("Current comparison payload is missing.")
+        raise ComparisonRejection(RejectionCode.SNAPSHOT_MISSING, "Current comparison payload is missing.")
     data = cast(dict[str, Any], payload)
     suppliers = data["suppliers"]
     allowed_suppliers = {UUID(item["supplier_id"]) for item in suppliers}
@@ -589,23 +603,23 @@ def validate_analysis(analysis: TradeoffAnalysis, snapshot: ComparisonSnapshotRe
     for points in sections:
         for point in points:
             if not point.supplier_ids or not set(point.supplier_ids) <= allowed_suppliers:
-                raise ValueError("Analysis references an unpermitted supplier.")
+                raise ComparisonRejection(RejectionCode.SUPPLIER_REFERENCE, "Analysis references an unpermitted supplier.")
             if not set(point.requirement_ids) <= requirements.keys():
-                raise ValueError("Analysis references an unknown requirement.")
+                raise ComparisonRejection(RejectionCode.REQUIREMENT_REFERENCE, "Analysis references an unknown requirement.")
             if not {(ref.quote_id, ref.field_key) for ref in point.quote_fields} <= quote_fields:
-                raise ValueError("Analysis references an unknown quote field.")
+                raise ComparisonRejection(RejectionCode.QUOTE_REFERENCE, "Analysis references an unknown quote field.")
             if any(quote_owner[ref.quote_id] not in point.supplier_ids for ref in point.quote_fields):
-                raise ValueError("Quote field belongs to a different supplier.")
+                raise ComparisonRejection(RejectionCode.QUOTE_OWNER_MISMATCH, "Quote field belongs to a different supplier.")
             if not set(point.evidence_ids) <= evidence:
-                raise ValueError("Analysis references unknown evidence.")
+                raise ComparisonRejection(RejectionCode.UNKNOWN_EVIDENCE, "Analysis references unknown evidence.")
             if any(evidence_owner[evidence_id] not in point.supplier_ids
                    for evidence_id in point.evidence_ids):
-                raise ValueError("Evidence belongs to a different supplier.")
+                raise ComparisonRejection(RejectionCode.EVIDENCE_OWNER_MISMATCH, "Evidence belongs to a different supplier.")
             if any((supplier_id, requirement_id) not in states
                    for supplier_id in point.supplier_ids for requirement_id in point.requirement_ids):
-                raise ValueError("Requirement is outside a referenced supplier.")
+                raise ComparisonRejection(RejectionCode.REQUIREMENT_REFERENCE, "Requirement is outside a referenced supplier.")
             if SCORE_PATTERN.search(point.text):
-                raise ValueError("Numeric supplier score is prohibited.")
+                raise ComparisonRejection(RejectionCode.PROHIBITED_SCORE, "Numeric supplier score is prohibited.")
             _validate_state_assertions(point, suppliers, requirements, states,
                                        quote_owner, completeness)
     for section, state in (
@@ -614,21 +628,21 @@ def validate_analysis(analysis: TradeoffAnalysis, snapshot: ComparisonSnapshotRe
     ):
         for point in section:
             if not point.requirement_ids and not point.quote_fields:
-                raise ValueError(f"{state} point has no deterministic reference.")
+                raise ComparisonRejection(RejectionCode.STATE_REFERENCE, f"{state} point has no deterministic reference.")
             if any(
                 states.get((supplier_id, requirement_id)) != state
                 for supplier_id in point.supplier_ids for requirement_id in point.requirement_ids
             ):
-                raise ValueError(f"{state} point contradicts deterministic state.")
+                raise ComparisonRejection(RejectionCode.STATE_CONTRADICTION, f"{state} point contradicts deterministic state.")
             expected_completeness = "missing" if state == "UNKNOWN" else "conflicting"
             if any(completeness.get((ref.quote_id, ref.field_key)) != expected_completeness
                    for ref in point.quote_fields):
-                raise ValueError(f"{state} point contradicts comparison completeness.")
+                raise ComparisonRejection(RejectionCode.STATE_CONTRADICTION, f"{state} point contradicts comparison completeness.")
         required = {key for key, value in states.items() if value == state}
         covered = {(supplier_id, requirement_id) for point in section
                    for supplier_id in point.supplier_ids for requirement_id in point.requirement_ids}
         if not required <= covered:
-            raise ValueError(f"Analysis omits {state} findings.")
+            raise ComparisonRejection((RejectionCode.MISSING_UNKNOWN if state == "UNKNOWN" else RejectionCode.MISSING_CONFLICT), f"Analysis omits {state} findings.")
     required_failures = {
         key for key, value in states.items()
         if value == "DOES_NOT_MEET" and requirements[key[1]]["importance"] == "REQUIRED"
@@ -640,7 +654,7 @@ def validate_analysis(analysis: TradeoffAnalysis, snapshot: ComparisonSnapshotRe
         for requirement_id in point.requirement_ids
     }
     if not required_failures <= covered_findings:
-        raise ValueError("Analysis omits required failures.")
+        raise ComparisonRejection(RejectionCode.MISSING_REQUIRED_FAILURE, "Analysis omits required failures.")
 
 
 def _tool_output(
@@ -684,6 +698,7 @@ def _tool_output(
 ResultT = TypeVar("ResultT", bound=BaseModel)
 
 
+@bounded_comparison
 def analyze_tradeoffs(
     session: Session, *, demo_session_id: UUID, project_id: UUID,
     client_factory: Callable[[], StructuredModelClient],
@@ -711,11 +726,13 @@ def run_comparison_analyst(
     sleep: Callable[[float], None] = time.sleep,
 ) -> tuple[UUID, UUID, ResultT]:
     """Shared bounded loop with task-specific contract, validation and scope checks."""
+    check_deadline()
     if max_model_turns <= 0 or max_tool_calls <= 0:
         raise ValueError("Analyst limits must be positive.")
     snapshot = _current_snapshot(session, demo_session_id=demo_session_id, project_id=project_id)
     if check_snapshot is not None:
         check_snapshot(snapshot)
+    check_deadline()
     supplier_ids, quote_ids = _snapshot_ids(snapshot)
     runtime = AnalystToolRuntime(AnalystToolContext(
         demo_session_id=demo_session_id, project_id=project_id,
@@ -734,6 +751,7 @@ def run_comparison_analyst(
                "brief_revision": snapshot.brief_revision,
                "quote_revision_snapshot": snapshot.quote_revision_snapshot,
                "comparison_payload": snapshot.comparison_payload}
+    check_deadline()
     input_items: list[dict[str, Any]] = [
         {"role": "user", "content": json.dumps(initial, sort_keys=True)}
     ]
@@ -756,8 +774,41 @@ def run_comparison_analyst(
 
     step = trace.step
 
+    def recover_transaction() -> None:
+        # Failed flush/commit expires ORM state. Save only already-loaded safe
+        # counters, then rollback before any refresh/freshness/terminal query.
+        counters = {key: air_run.__dict__.get(key) for key in (
+            "attempts", "model_turn_count", "tool_call_count", "input_tokens", "output_tokens",
+        )}
+        try:
+            session.rollback()
+        except Exception:  # noqa: BLE001 - discard failed connection before recovery
+            session.invalidate()
+            session.add(air_run)
+        session.refresh(air_run)
+        for key, value in counters.items():
+            if value is not None:
+                setattr(air_run, key, value)
+
+    def mark_timeout() -> None:
+        deadline = current_deadline.get()
+        if deadline is not None:
+            deadline.begin_cleanup()
+        recover_transaction()
+        air_run.status = "TIMED_OUT"
+        air_run.error_type = "ComparisonDeadlineError"
+
+    def deadline_cancelled() -> bool:
+        deadline = current_deadline.get()
+        return deadline is not None and (
+            (deadline.work_timeout is not None and deadline.work_timeout.expired())
+            or (deadline.total_timeout is not None and deadline.total_timeout.expired())
+            or deadline.clock() >= deadline.started + deadline.settings.total - deadline.settings.cleanup
+        )
+
     try:
         while result is None:
+            check_deadline()
             if turns >= max_model_turns:
                 air_run.status = "FAILED_LIMIT_REACHED"
                 step("limit", "REACHED", "model_turns")
@@ -772,13 +823,20 @@ def run_comparison_analyst(
                     instructions=instructions, input_items=input_items, tools=TOOLS,
                     schema_name=result_type.__name__, schema=result_type.model_json_schema(),
                 )
+                check_deadline()
             except ModelProviderError as error:
                 step("model", provider_failure_outcome(error))
                 air_run.error_type = type(error).__name__
                 if error.retryable and not provider_retry_used:
                     provider_retry_used = True
                     step("retry", "PROVIDER")
-                    sleep(provider_retry_delay_seconds(turns))
+                    delay = provider_retry_delay_seconds(turns)
+                    check_deadline()
+                    if current_deadline.get() is not None and sleep is time.sleep:
+                        await_only(asyncio.sleep(delay))
+                    else:
+                        sleep(delay)
+                    check_deadline()
                     continue
                 air_run.status = "PROVIDER_FAILED"
                 break
@@ -788,6 +846,7 @@ def run_comparison_analyst(
             if calls:
                 input_items.extend(invocation.output_items)
                 for call in calls:
+                    check_deadline()
                     name, call_id = call.get("name"), call.get("call_id")
                     trace.begin("tool", name if isinstance(name, str) else None)
                     try:
@@ -795,6 +854,7 @@ def run_comparison_analyst(
                             raise TypeError("Invalid tool call.")
                         arguments = json.loads(call.get("arguments", ""))
                         output = _tool_output(session, runtime, name, arguments)
+                        check_deadline()
                         air_run.tool_call_count = runtime.successful_call_count
                         step("tool", "SUCCESS", name)
                         input_items.append({"type": "function_call_output", "call_id": call_id,
@@ -818,15 +878,23 @@ def run_comparison_analyst(
             try:
                 parsed = result_type.model_validate_json(invocation.output_text)
                 validate(parsed, snapshot)
+                check_deadline()
             except (ValidationError, ValueError) as error:
                 air_run.validation_status = "INVALID"
-                air_run.error_type = type(error).__name__
-                step("validation", "INVALID")
+                code = rejection_code(error)
+                air_run.error_type = code.value
+                phase = (error.phase if isinstance(error, ComparisonRejection)
+                         and error.phase in {"analysis", "suggestion"} else "schema"
+                         if isinstance(error, ValidationError) else "unknown")
+                step("validation_phase", "INVALID", f"{phase}_{'repair' if repair_used else 'initial'}")
+                step("validation", "INVALID", code.value)
+                for label in schema_issue_labels(error):
+                    step("validation_schema", "INVALID", label)
                 if not repair_used:
                     repair_used = True
                     step("retry", "REPAIR")
                     input_items.append({"role": "assistant", "content": invocation.output_text})
-                    instructions = f"{base_instructions}\n{repair_instructions(error)}"
+                    instructions = f"{base_instructions}\n{comparison_repair_feedback(error)}"
                     continue
                 air_run.status = "VALIDATION_FAILED"
                 break
@@ -836,37 +904,95 @@ def run_comparison_analyst(
                 check_snapshot(snapshot)
                 step("scope", "CURRENT")
             result = parsed
+            check_deadline()
+            step("validation", "VALID")
             air_run.status = "COMPLETED"
             air_run.validation_status = "REPAIRED" if repair_used else "VALID"
             air_run.error_type = None
-            step("validation", "VALID")
         if result is None:
             _current_snapshot(session, demo_session_id=demo_session_id,
                               project_id=project_id, expected=snapshot)
             if check_snapshot is not None:
                 check_snapshot(snapshot)
+        check_deadline()
+    except asyncio.CancelledError as error:
+        own_timeout = deadline_cancelled()
+        mark_timeout()
+        if not own_timeout:
+            air_run.status = "FAILED"
+            air_run.error_type = "INTERRUPTED"
+            raise
+        raise ComparisonDeadlineError("Comparison analysis deadline exceeded.") from error
+    except ComparisonDeadlineError:
+        mark_timeout()
+        raise
     except TradeoffNotReadyError as error:
+        try:
+            check_deadline()
+        except ComparisonDeadlineError:
+            mark_timeout()
+            raise
         air_run.status = "FAILED"
         air_run.error_type = error.code
         step("scope", "CHANGED")
         raise
     except Exception as error:
+        if getattr(getattr(error, "orig", None), "sqlstate", None) in {"57014", "55P03"}:
+            mark_timeout()
+            raise ComparisonDeadlineError("Comparison database wait exceeded its budget.") from error
         try:
+            recover_transaction()
+            check_deadline()
             _current_snapshot(session, demo_session_id=demo_session_id,
                               project_id=project_id, expected=snapshot)
             if check_snapshot is not None:
                 check_snapshot(snapshot)
         except TradeoffNotReadyError as stale_error:
+            try:
+                check_deadline()
+            except ComparisonDeadlineError:
+                mark_timeout()
+                raise
             air_run.status = "FAILED"
             air_run.error_type = stale_error.code
             step("scope", "CHANGED")
             raise stale_error from error
+        except asyncio.CancelledError as timeout:
+            own_timeout = deadline_cancelled()
+            mark_timeout()
+            if not own_timeout:
+                air_run.status = "FAILED"
+                air_run.error_type = "INTERRUPTED"
+                raise
+            raise ComparisonDeadlineError("Comparison verification deadline exceeded.") from timeout
+        except ComparisonDeadlineError:
+            mark_timeout()
+            raise
+        except Exception:  # noqa: BLE001 - never expose database recovery details
+            # Database recovery itself failed. Never query a broken transaction
+            # again or expose database/exception content to the API.
+            logging.getLogger(__name__).warning("Comparison transaction recovery incomplete.")
+            raise TradeoffUnavailableError("Comparison recovery is unavailable.") from error
         air_run.status = "FAILED"
         air_run.error_type = type(error).__name__
-        raise
+        raise TradeoffUnavailableError("Comparison analysis is unavailable.") from error
     finally:
+        deadline = current_deadline.get()
+        if deadline is not None:
+            deadline.begin_cleanup()
         air_run.tool_call_count = runtime.successful_call_count
-        trace.finish()
+        try:
+            check_deadline()
+            trace.finish()
+        except asyncio.CancelledError:
+            if not deadline_cancelled():
+                raise
+            raise ComparisonDeadlineError("Comparison terminal bookkeeping deadline exceeded.") from None
+        except ComparisonDeadlineError:
+            raise ComparisonDeadlineError("Comparison terminal bookkeeping deadline exceeded.")
+        except Exception:  # noqa: BLE001 - terminal persistence failure must be safe
+            logging.getLogger(__name__).warning("Comparison terminal trace persistence unconfirmed.")
+            raise TradeoffUnavailableError("Comparison terminal recording is unavailable.") from None
     if result is None:
         raise TradeoffUnavailableError("Tradeoff analysis is unavailable. Please retry.")
     assert snapshot.snapshot_id is not None

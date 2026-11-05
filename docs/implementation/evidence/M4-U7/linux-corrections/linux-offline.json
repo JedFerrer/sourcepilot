@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/bin/python",
+    "-m",
+    "sourcepilot.ai.eval_baseline",
+    "--mode",
+    "offline",
+    "--output",
+    "../../docs/implementation/evidence/M4-U7/linux-corrections/linux-offline"
+  ],
+  "exit_code": 0,
+  "seconds": 10.56729878599981,
+  "platform": "Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-with-glibc2.43"
+}

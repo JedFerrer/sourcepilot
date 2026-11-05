@@ -56,7 +56,9 @@ def main() -> None:
                    is case["expected_grounded"] for case in cases)
     print(f"Scorer controls: {controls}/{len(cases)} matched expectations")
     client = OpenAIResponsesClient.from_environment()
-    with application_session_factory()() as session:
+    from sourcepilot.comparison.execution import comparison_cli_lifecycle
+
+    with comparison_cli_lifecycle(), application_session_factory()() as session:
         project = session.get(Project, args.project_id)
         if project is None:
             raise RuntimeError("The supplied project does not exist.")

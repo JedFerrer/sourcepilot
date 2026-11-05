@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__ test_runner_reuses_parsed_context_for_extraction_scoring_and_measurements ___
+
+tmp_path = PosixPath('/tmp/pytest-of-jedferrer/pytest-0/test_runner_reuses_parsed_cont0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7eb943f0c050>
+
+>   ???
+E   assert (2 == 2 and False)
+
+C:\Users\ferre\OneDrive\Documents\source-pilot\apps\api\tests\test_eval_baseline.py:73: AssertionError
+=============================== warnings summary ===============================
+../../../../../../../../../home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/starlette/testclient.py:53
+  /home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/lib/python3.11/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_eval_baseline.py::test_runner_reuses_parsed_context_for_extraction_scoring_and_measurements
+1 failed, 1 warning in 8.68s

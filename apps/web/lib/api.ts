@@ -52,6 +52,13 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   try {
     response = await fetch(path, { ...init, credentials: "same-origin" });
   } catch {
+    if (init?.signal?.aborted) {
+      throw new ApiClientError(
+        init.signal.reason?.name === "TimeoutError"
+          ? "Analysis took too long. Please retry." : "The request was cancelled.",
+        init.signal.reason?.name === "TimeoutError" ? "ANALYSIS_WAIT_TIMEOUT" : "REQUEST_CANCELLED",
+      );
+    }
     throw new ApiClientError("We could not reach SourcePilot. Please try again.", "NETWORK_ERROR");
   }
 
@@ -63,6 +70,10 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   try {
     payload = await response.json();
   } catch {
+    if (init?.signal?.aborted) {
+      throw new ApiClientError("Analysis took too long. Please retry.",
+        init.signal.reason?.name === "TimeoutError" ? "ANALYSIS_WAIT_TIMEOUT" : "REQUEST_CANCELLED");
+    }
     throw new ApiClientError("We received an unexpected response. Please try again.", "INVALID_RESPONSE", response.status);
   }
 

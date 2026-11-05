@@ -1,0 +1,32 @@
+{
+  "final_targeted_passed": 93,
+  "duration_seconds": 124.99,
+  "warnings": "Existing Starlette/AnyIO deprecation",
+  "prior_broad_passed": 1734,
+  "prior_broad_note": "Earlier in this implementation turn; final focused corrections covered by 93-test run",
+  "frontend_focused_passed": 56,
+  "offline_completed": 90,
+  "offline_expected": 90,
+  "ruff": "passed",
+  "pyright": "0 errors, 0 warnings",
+  "git_diff_check": "passed",
+  "both_review_findings": "OPEN pending independent re-review",
+  "browser_qa": "PENDING",
+  "done_check": "PENDING",
+  "portability": "Windows tested; Linux/macOS runtime unverified",
+  "paid_ai_calls": 0,
+  "commit_created": false,
+  "source_sha256": {
+    "apps/api/sourcepilot/comparison/lifecycle.py": "F43CA4E011373984E0767B9C2E58AEC24FC4E7CCE97DB3B0F78B9F7DAF83F1C5",
+    "apps/api/sourcepilot/comparison/execution.py": "B051B647939D890E29FE46E8B2E5A5027D6F15B290C2478BA4D75A3A2B4D6BF2",
+    "apps/api/sourcepilot/comparison/deadline.py": "98CCB4847580789D58C8129154117907119FADAF860D72BF58BB4164861F4086",
+    "apps/api/sourcepilot/ai/client.py": "7D783871ECDD93B6826D458EC3A9942BD36B3E6E166CA2A2BFC1549126ED4411",
+    "apps/api/sourcepilot/ai/tradeoff_analysis.py": "492B1355748BB7A20AAF2C3A47A7BBC22EF3BEAF217717EF7BD563C02564FF9B",
+    "apps/api/sourcepilot/main.py": "BF996980B8EF17436111588B468F0C0211C0D38680F6FD223F621848A878ADCB",
+    "apps/api/tests/test_comparison_lifecycle.py": "066FC9731B8EACC06CAEF64D123CFC211FDAC864C04ABDFC8546A2FF78CA3063",
+    "apps/api/tests/test_comparison_recovery.py": "0605EC59289BC8062F48550AB516D9D6A55FC171CE1701B09E6B3C4C1F28C164",
+    "apps/api/tests/test_comparison_transport.py": "B2DE3AE6B735162809676F2B08FBC0D9FB14B8343EEA9BC70D5623A65CF13FBE",
+    "apps/api/tests/test_comparison_diagnostics.py": "F5D76C272502C49F624D5829D35C8A08A97196F971C71DCFB75A187BAB9C2FD9",
+    "apps/api/tests/test_comparison_deadline.py": "E77D2071645F5B839364F4129D27476D63D5F655EC2CBE113BB2529663D419D7"
+  }
+}

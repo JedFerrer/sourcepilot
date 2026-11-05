@@ -709,7 +709,9 @@ describe("Comparison advice", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
     await screen.findByRole("alert");
     expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
-    if (outcome !== "failure") expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
+    if (outcome === "stale") expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
+    if (outcome === "replacement") expect(screen.getByRole("button", { name: "Retry analysis" })).toBeEnabled();
+    if (outcome === "missing") expect(screen.queryByRole("button", { name: "Retry analysis" })).not.toBeInTheDocument();
   });
 
   it("handles a stale API failure as regeneration-required", async () => {
@@ -723,15 +725,14 @@ describe("Comparison advice", () => {
     expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
   });
 
-  it.each(["refresh", "project", "regenerate", "unmount"])("discards late advice after %s", async (change) => {
+  it.each(["project", "regenerate", "unmount"])("discards late advice after %s", async (change) => {
     let finish: ((response: Response) => void) | undefined;
     vi.stubGlobal("fetch", vi.fn((path: string) => path.endsWith("/advice")
       ? new Promise<Response>((resolve) => { finish = resolve; }) : Promise.resolve(jsonResponse(snapshot()))));
     const view = render(<ComparisonReview projectId="project-1" refreshKey={0} />);
     fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
     await screen.findByRole("button", { name: "Analyzing…" });
-    if (change === "refresh") view.rerender(<ComparisonReview projectId="project-1" refreshKey={1} />);
-    else if (change === "project") view.rerender(<ComparisonReview projectId="project-2" refreshKey={0} />);
+    if (change === "project") view.rerender(<ComparisonReview projectId="project-2" refreshKey={0} />);
     else if (change === "regenerate") fireEvent.click(screen.getByRole("button", { name: "Regenerate Comparison" }));
     else view.unmount();
     await act(async () => { finish?.(jsonResponse(adviceResponse())); });
@@ -761,6 +762,149 @@ describe("Comparison advice", () => {
     await screen.findByRole("region", { name: "Comparison analysis" });
     expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
     expect(screen.queryByText(/Previous analysis is outdated/)).not.toBeInTheDocument();
+  });
+
+  it.each(["focus", "refresh"])("preserves pending success and prevents duplicate POSTs across %s", async (change) => {
+    let finish: ((response: Response) => void) | undefined;
+    const fetchMock = vi.fn((path: string) => path.endsWith("/advice")
+      ? new Promise<Response>((resolve) => { finish = resolve; }) : Promise.resolve(jsonResponse(snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    if (change === "focus") fireEvent(window, new Event("focus"));
+    else view.rerender(<ComparisonReview projectId="project-1" refreshKey={1} />);
+    const pending = await screen.findByRole("button", { name: "Analyzing…" });
+    expect(pending).toBeDisabled();
+    fireEvent.click(pending);
+    await act(async () => { finish?.(jsonResponse(adviceResponse())); });
+    expect(await screen.findByRole("region", { name: "Comparison analysis" })).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+  });
+
+  it.each(["before", "during", "after"])("retains a pending failure arriving %s focus verification", async (when) => {
+    let finish: ((response: Response) => void) | undefined;
+    let verify: ((response: Response) => void) | undefined;
+    let reads = 0;
+    const fetchMock = vi.fn((path: string) => path.endsWith("/advice")
+      ? new Promise<Response>((resolve) => { finish = resolve; })
+      : ++reads === 2 ? new Promise<Response>((resolve) => { verify = resolve; })
+        : Promise.resolve(jsonResponse(snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    const fail = async () => { await act(async () => { finish?.(jsonResponse({ error: {
+      code: "COMPARISON_ADVICE_UNAVAILABLE", message: "Analysis validation failed. Please retry.",
+    } }, 503)); }); };
+    if (when === "before") await fail();
+    fireEvent(window, new Event("focus"));
+    if (when === "during") await fail();
+    await act(async () => { verify?.(jsonResponse(snapshot())); });
+    if (when === "after") await fail();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Analysis validation failed.");
+    fireEvent(window, new Event("focus"));
+    expect(await screen.findByRole("button", { name: "Retry analysis" })).toBeEnabled();
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+  });
+
+  it("holds success after failed verification and restores it with a GET-only retry", async () => {
+    let reads = 0;
+    const fetchMock = vi.fn((path: string) => Promise.resolve(path.endsWith("/advice") ? jsonResponse(adviceResponse())
+      : ++reads === 2 ? jsonResponse({ error: { code: "SERVER_ERROR", message: "Cannot verify freshness." } }, 500)
+        : jsonResponse(snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Cannot verify freshness.");
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry comparison" }));
+    expect(await screen.findByRole("region", { name: "Comparison analysis" })).toBeInTheDocument();
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+  });
+
+  it("does not resurrect success when an old focus read finishes after a stale final verification", async () => {
+    let reads = 0;
+    let finish: ((response: Response) => void) | undefined;
+    let oldFocus: ((response: Response) => void) | undefined;
+    vi.stubGlobal("fetch", vi.fn((path: string) => path.endsWith("/advice")
+      ? new Promise<Response>((resolve) => { finish = resolve; })
+      : ++reads === 2 ? new Promise<Response>((resolve) => { oldFocus = resolve; })
+        : Promise.resolve(jsonResponse(snapshot(reads > 2)))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    fireEvent(window, new Event("focus"));
+    await act(async () => { finish?.(jsonResponse(adviceResponse())); });
+    await screen.findByText("Comparison outdated");
+    await act(async () => { oldFocus?.(jsonResponse(snapshot())); });
+    expect(screen.getByText("Comparison outdated")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
+  });
+
+  it("ignores an old analysis after A to B to A navigation", async () => {
+    let finish: ((response: Response) => void) | undefined;
+    vi.stubGlobal("fetch", vi.fn((path: string) => path.endsWith("/advice")
+      ? new Promise<Response>((resolve) => { finish = resolve; }) : Promise.resolve(jsonResponse(snapshot()))));
+    const view = render(<ComparisonReview projectId="a" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    view.rerender(<ComparisonReview projectId="b" refreshKey={0} />);
+    await screen.findByRole("button", { name: "Analyze Comparison" });
+    view.rerender(<ComparisonReview projectId="a" refreshKey={0} />);
+    await screen.findByRole("button", { name: "Analyze Comparison" });
+    await act(async () => { finish?.(jsonResponse(adviceResponse())); });
+    expect(screen.queryByRole("region", { name: "Comparison analysis" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Analyze Comparison" })).toBeEnabled();
+  });
+
+  it("waits out an ambiguous connection loss without automatically resubmitting", async () => {
+    const fetchMock = vi.fn((path: string) => path.endsWith("/advice")
+      ? Promise.reject(new Error("connection lost")) : Promise.resolve(jsonResponse(snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    const analyze = await screen.findByRole("button", { name: "Analyze Comparison" });
+    vi.useFakeTimers();
+    try {
+      await act(async () => { fireEvent.click(analyze); });
+      expect(screen.getByRole("alert")).toHaveTextContent("may still be finishing");
+      expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
+      await act(async () => { fireEvent(window, new Event("focus")); });
+      expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
+      await act(async () => { await vi.advanceTimersByTimeAsync(180_000); });
+      expect(screen.getByRole("button", { name: "Retry analysis" })).toBeEnabled();
+      expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("aborts an overlong browser wait and displays an explicit retry without another POST", async () => {
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => path.endsWith("/advice")
+      ? new Promise<Response>((_, reject) => init?.signal?.addEventListener("abort", () => reject(init.signal?.reason)))
+      : Promise.resolve(jsonResponse(snapshot())));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    const analyze = await screen.findByRole("button", { name: "Analyze Comparison" });
+    vi.useFakeTimers();
+    try {
+      fireEvent.click(analyze);
+      await act(async () => { await vi.advanceTimersByTimeAsync(195_000); });
+      expect(screen.getByRole("alert")).toHaveTextContent("Analysis took too long");
+      expect(screen.getByRole("button", { name: "Retry analysis" })).toBeEnabled();
+      expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("does not let an older focus read overwrite a backend stale failure", async () => {
+    let finish: ((response: Response) => void) | undefined;
+    let verify: ((response: Response) => void) | undefined;
+    let reads = 0;
+    vi.stubGlobal("fetch", vi.fn((path: string) => path.endsWith("/advice")
+      ? new Promise<Response>((resolve) => { finish = resolve; })
+      : ++reads > 1 ? new Promise<Response>((resolve) => { verify = resolve; })
+        : Promise.resolve(jsonResponse(snapshot()))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    fireEvent(window, new Event("focus"));
+    await act(async () => { finish?.(jsonResponse({ error: { code: "COMPARISON_STALE", message: "Inputs changed." } }, 409)); });
+    await act(async () => { verify?.(jsonResponse(snapshot())); });
+    expect(screen.getByText("Comparison outdated")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Retry analysis" })).toBeDisabled();
   });
 
   it("shows outdated state after a quote refresh and requires fresh analysis", async () => {

@@ -22,7 +22,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from sourcepilot.ai.client import OpenAIResponsesClient
+from sourcepilot.ai.client import OpenAIResponsesClient, prepare_comparison_transport
 from sourcepilot.ai.comparison_advice import (
     ComparisonAdviceRequest,
     ComparisonAdviceResponse,
@@ -67,6 +67,9 @@ from sourcepilot.briefs.workflow import (
     edit_brief,
     project_requirements,
 )
+from sourcepilot.comparison.deadline import ComparisonDeadlineError
+from sourcepilot.comparison.execution import run_async_comparison
+from sourcepilot.comparison.lifecycle import ComparisonLifecycle, ComparisonLifecycleMiddleware
 from sourcepilot.comparison.schemas import ComparisonResponse
 from sourcepilot.comparison.service import (
     ComparisonNotReadyError,
@@ -143,14 +146,20 @@ from sourcepilot.suppliers.service import (
 
 @asynccontextmanager
 async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    prepare_comparison_transport()
+    runtime = ComparisonLifecycle()
+    application.state.comparison_lifecycle = runtime
     try:
         yield
     finally:
+        await runtime.shutdown()
+        application.state.comparison_lifecycle = None
         await run_in_threadpool(shutdown_tracing)
 
 
 app = FastAPI(title="SourcePilot API", lifespan=lifespan)
 app.add_middleware(UploadBodyLimitMiddleware)
+app.add_middleware(ComparisonLifecycleMiddleware)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)
@@ -338,53 +347,67 @@ def read_comparison_endpoint(
 
 
 @app.post("/projects/{project_id}/comparison/analysis", response_model=TradeoffAnalysisResponse)
-def analyze_comparison_endpoint(
+async def analyze_comparison_endpoint(
     project_id: UUID, request: Request,
     database_session: Annotated[Session, Depends(get_database_session)],
 ) -> TradeoffAnalysisResponse | JSONResponse:
-    demo_session, project = owned_project_or_404(database_session, request, project_id)
+    def execute(database_session: Session) -> TradeoffAnalysisResponse | JSONResponse:
+        demo_session, project = owned_project_or_404(database_session, request, project_id)
+        try:
+            max_model_turns, max_tool_calls = analyst_limits_from_environment()
+            result = analyze_tradeoffs(
+                database_session, demo_session_id=demo_session.id, project_id=project.id,
+                client_factory=OpenAIResponsesClient.from_environment,
+                max_model_turns=max_model_turns, max_tool_calls=max_tool_calls,
+            )
+            commit_or_rollback(database_session)
+        except TradeoffNotReadyError as error:
+            database_session.rollback()
+            return error_response(404 if error.code == "COMPARISON_NOT_FOUND" else 409,
+                                  code=error.code, message=str(error))
+        except TradeoffUnavailableError:
+            database_session.rollback()
+            return error_response(503, code="TRADEOFF_ANALYSIS_UNAVAILABLE",
+                                  message="We could not analyze this comparison. Please retry.")
+        return result
+
     try:
-        max_model_turns, max_tool_calls = analyst_limits_from_environment()
-        result = analyze_tradeoffs(
-            database_session, demo_session_id=demo_session.id, project_id=project.id,
-            client_factory=OpenAIResponsesClient.from_environment,
-            max_model_turns=max_model_turns, max_tool_calls=max_tool_calls,
-        )
-        commit_or_rollback(database_session)
-    except TradeoffNotReadyError as error:
-        database_session.rollback()
-        return error_response(404 if error.code == "COMPARISON_NOT_FOUND" else 409,
-                              code=error.code, message=str(error))
-    except TradeoffUnavailableError:
-        database_session.rollback()
-        return error_response(503, code="TRADEOFF_ANALYSIS_UNAVAILABLE",
-                              message="We could not analyze this comparison. Please retry.")
-    return result
+        return await run_async_comparison(database_session, execute)
+    except ComparisonDeadlineError:
+        return error_response(504, code="COMPARISON_ANALYSIS_TIMEOUT",
+                              message="Analysis took too long. Please retry.")
 
 
 @app.post("/projects/{project_id}/comparison/advice", response_model=ComparisonAdviceResponse)
-def advise_comparison_endpoint(
+async def advise_comparison_endpoint(
     project_id: UUID, body: ComparisonAdviceRequest, request: Request,
     database_session: Annotated[Session, Depends(get_database_session)],
 ) -> ComparisonAdviceResponse | JSONResponse:
-    demo_session, project = owned_project_or_404(database_session, request, project_id)
+    def execute(database_session: Session) -> ComparisonAdviceResponse | JSONResponse:
+        demo_session, project = owned_project_or_404(database_session, request, project_id)
+        try:
+            max_model_turns, max_tool_calls = analyst_limits_from_environment()
+            result = analyze_comparison_advice(
+                database_session, demo_session_id=demo_session.id, project_id=project.id,
+                snapshot_id=body.snapshot_id, client_factory=OpenAIResponsesClient.from_environment,
+                max_model_turns=max_model_turns, max_tool_calls=max_tool_calls,
+            )
+            commit_or_rollback(database_session)
+            return result
+        except TradeoffNotReadyError as error:
+            database_session.rollback()
+            return error_response(404 if error.code == "COMPARISON_NOT_FOUND" else 409,
+                                  code=error.code, message=str(error))
+        except TradeoffUnavailableError:
+            database_session.rollback()
+            return error_response(503, code="COMPARISON_ADVICE_UNAVAILABLE",
+                                  message="We could not analyze this comparison. Please retry.")
+
     try:
-        max_model_turns, max_tool_calls = analyst_limits_from_environment()
-        result = analyze_comparison_advice(
-            database_session, demo_session_id=demo_session.id, project_id=project.id,
-            snapshot_id=body.snapshot_id, client_factory=OpenAIResponsesClient.from_environment,
-            max_model_turns=max_model_turns, max_tool_calls=max_tool_calls,
-        )
-        commit_or_rollback(database_session)
-        return result
-    except TradeoffNotReadyError as error:
-        database_session.rollback()
-        return error_response(404 if error.code == "COMPARISON_NOT_FOUND" else 409,
-                              code=error.code, message=str(error))
-    except TradeoffUnavailableError:
-        database_session.rollback()
-        return error_response(503, code="COMPARISON_ADVICE_UNAVAILABLE",
-                              message="We could not analyze this comparison. Please retry.")
+        return await run_async_comparison(database_session, execute)
+    except ComparisonDeadlineError:
+        return error_response(504, code="COMPARISON_ANALYSIS_TIMEOUT",
+                              message="Analysis took too long. Please retry.")
 
 
 def owned_quote_or_404(

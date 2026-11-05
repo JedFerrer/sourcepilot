@@ -1,0 +1,128 @@
+[
+  {
+    "scenario_directory": "qa-backend-deadline-envelope-permits-explicit-retry-only",
+    "analysis_posts": 2,
+    "comparison_gets": 14,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-brief-invalidation-and-replacement",
+    "analysis_posts": 2,
+    "comparison_gets": 16,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  },
+  {
+    "scenario_directory": "qa-competing-focus-and-pos-5b50b-cannot-restore-stale-advice",
+    "analysis_posts": 1,
+    "comparison_gets": 14,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-existing-human-preference-survives-advice-and-failures",
+    "analysis_posts": 2,
+    "comparison_gets": 14,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-failed-freshness-hides--11992-ly-recovery-retains-success",
+    "analysis_posts": 1,
+    "comparison_gets": 15,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-held-failure-survives-f-b6760-fication-and-repeated-reads",
+    "analysis_posts": 1,
+    "comparison_gets": 15,
+    "trusted_blurs": 2,
+    "trusted_focuses": 2
+  },
+  {
+    "scenario_directory": "qa-held-success-survives-f-657a2-fication-and-repeated-reads",
+    "analysis_posts": 1,
+    "comparison_gets": 16,
+    "trusted_blurs": 2,
+    "trusted_focuses": 2
+  },
+  {
+    "scenario_directory": "qa-native-focus-pending-fa-4816c-ed-focus-and-keyboard-retry",
+    "analysis_posts": 2,
+    "comparison_gets": 17,
+    "trusted_blurs": 4,
+    "trusted_focuses": 4
+  },
+  {
+    "scenario_directory": "qa-native-focus-pending-su-1c830-ed-focus-and-keyboard-retry",
+    "analysis_posts": 1,
+    "comparison_gets": 17,
+    "trusted_blurs": 4,
+    "trusted_focuses": 4
+  },
+  {
+    "scenario_directory": "qa-null-success-disclosures-sources-facts-and-preference",
+    "analysis_posts": 1,
+    "comparison_gets": 13,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  },
+  {
+    "scenario_directory": "qa-project-switch-A-to-B-to-A-rejects-late-result",
+    "analysis_posts": 1,
+    "comparison_gets": 27,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry",
+    "analysis_posts": 2,
+    "comparison_gets": 14,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-quote-invalidation-and-replacement",
+    "analysis_posts": 2,
+    "comparison_gets": 15,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  },
+  {
+    "scenario_directory": "qa-real-backend-deadline-t-78a38-proxy-and-explicit-recovery",
+    "analysis_posts": 2,
+    "comparison_gets": 13,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  },
+  {
+    "scenario_directory": "qa-regeneration-invalidation-and-replacement",
+    "analysis_posts": 2,
+    "comparison_gets": 14,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  },
+  {
+    "scenario_directory": "qa-regeneration-while-analysis-pending-rejects-late-success",
+    "analysis_posts": 2,
+    "comparison_gets": 15,
+    "trusted_blurs": 1,
+    "trusted_focuses": 1
+  },
+  {
+    "scenario_directory": "qa-shortlist-invalidation-and-replacement",
+    "analysis_posts": 2,
+    "comparison_gets": 16,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  },
+  {
+    "scenario_directory": "qa-suggestion-disclosures-sources-facts-and-preference",
+    "analysis_posts": 1,
+    "comparison_gets": 13,
+    "trusted_blurs": 0,
+    "trusted_focuses": 0
+  }
+]

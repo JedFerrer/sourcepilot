@@ -1,0 +1,979 @@
+{
+  "config": {
+    "argv": [
+      "C:\\Program Files\\nodejs\\node.exe",
+      "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\web\\node_modules\\@playwright\\test\\cli.js",
+      "test",
+      "--config=qa.config.ts"
+    ],
+    "configFile": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.config.ts",
+    "rootDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa/artifacts",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "C:/Users/ferre/OneDrive/Documents/source-pilot/docs/implementation/evidence/M4-U7/browser-qa",
+        "testIgnore": [],
+        "testMatch": [
+          "qa.spec.ts"
+        ],
+        "timeout": 120000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "results.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "qa.spec.ts",
+      "file": "qa.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "native focus pending success, repeated focus and keyboard retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12430,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 783
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 744
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 394
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1176
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:56:46.626Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-4a4abeb323fc0815a96e",
+          "file": "qa.spec.ts",
+          "line": 40,
+          "column": 49
+        },
+        {
+          "title": "native focus pending failure, repeated focus and keyboard retry",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12503,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 495
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 569
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 307
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 956
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:56:59.314Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-7a90552ae0fce07b6532",
+          "file": "qa.spec.ts",
+          "line": 40,
+          "column": 49
+        },
+        {
+          "title": "failed freshness hides advice and GET-only recovery retains success",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12190,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 474
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 749
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 260
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 930
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:57:11.835Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-cf5055f637133ff3098a",
+          "file": "qa.spec.ts",
+          "line": 56,
+          "column": 5
+        },
+        {
+          "title": "competing focus and post-result reads cannot restore stale advice",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11564,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 469
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 881
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 361
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1104
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:57:24.051Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-57c2bb5bcf9ec22e5357",
+          "file": "qa.spec.ts",
+          "line": 63,
+          "column": 5
+        },
+        {
+          "title": "quote invalidation and replacement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13307,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 533
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 600
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 329
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 987
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:57:35.641Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-4e695f544738425cb378",
+          "file": "qa.spec.ts",
+          "line": 71,
+          "column": 71
+        },
+        {
+          "title": "brief invalidation and replacement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13389,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 487
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 655
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 311
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 900
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:57:48.971Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fafbf490ce076c6b7c29",
+          "file": "qa.spec.ts",
+          "line": 71,
+          "column": 71
+        },
+        {
+          "title": "shortlist invalidation and replacement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12970,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 401
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 615
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 233
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1058
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:58:02.384Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-a0d93d93e842ac74a109",
+          "file": "qa.spec.ts",
+          "line": 71,
+          "column": 71
+        },
+        {
+          "title": "regeneration invalidation and replacement",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 13386,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 595
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 606
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 243
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1086
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:58:15.375Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-287b00b87180e3bc01db",
+          "file": "qa.spec.ts",
+          "line": 71,
+          "column": 71
+        },
+        {
+          "title": "project switch A to B to A rejects late result",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 20517,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 486
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 646
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 247
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 940
+                    },
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 483
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 677
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 230
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1048
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:58:28.780Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-c63ce749a1b38a6a30ff",
+          "file": "qa.spec.ts",
+          "line": 83,
+          "column": 5
+        },
+        {
+          "title": "backend deadline envelope permits explicit retry only",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11320,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 457
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 563
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 251
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1005
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:58:49.320Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-5c1c5f359196d3091059",
+          "file": "qa.spec.ts",
+          "line": 91,
+          "column": 5
+        },
+        {
+          "title": "proxy disconnect envelope cooldown and no automatic retry",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 25318,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true })\nExpected: disabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeDisabled\" getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true })\u001b[22m\n",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true })\nExpected: disabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeDisabled\" getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true })\u001b[22m\n\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:103:84",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 84,
+                      "line": 103
+                    },
+                    "snippet": "  101 |   await analyze(page);if(change==='quote')await expect(region(page).getByRole('table')).toContainText('USD 4.65');\n  102 |   expect((await readApi<any>(page,`/projects/${id}`)).preferred_supplier_id).toBeNull();\n> 103 | });\n      |    ^\n  104 | test('project switch A to B to A rejects late result',async({page})=>{\n  105 |   const b=await setup(page);const a=await setup(page),g=gate();let posts=0;\n  106 |   await page.route(`**/api/projects/${a}/comparison/advice`,async r=>{posts++;const response=await r.fetch();await g.promise;try{await r.fulfill({response});}catch{/* Browser aborted the old navigation-owned request. */}});"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 84,
+                        "line": 103
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true })\nExpected: disabled\nTimeout: 15000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeDisabled\" getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true }) with timeout 15000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('region', { name: 'Comparison', exact: true }).getByRole('button', { name: 'Retry analysis', exact: true })\u001b[22m\n\n\n  101 |   await analyze(page);if(change==='quote')await expect(region(page).getByRole('table')).toContainText('USD 4.65');\n  102 |   expect((await readApi<any>(page,`/projects/${id}`)).preferred_supplier_id).toBeNull();\n> 103 | });\n      |    ^\n  104 | test('project switch A to B to A rejects late result',async({page})=>{\n  105 |   const b=await setup(page);const a=await setup(page),g=gate();let posts=0;\n  106 |   await page.route(`**/api/projects/${a}/comparison/advice`,async r=>{posts++;const response=await r.fetch();await g.promise;try{await r.fulfill({response});}catch{/* Browser aborted the old navigation-owned request. */}});\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:103:84"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 529
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 588
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 247
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 982
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:59:00.660Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-proxy-disconnect-envelope-cooldown-and-no-automatic-retry\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 84,
+                    "line": 103
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-f896ee3a6dfdeb609e24",
+          "file": "qa.spec.ts",
+          "line": 97,
+          "column": 5
+        },
+        {
+          "title": "real backend deadline through actual proxy and explicit recovery",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 240000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 1,
+                  "parallelIndex": 0,
+                  "status": "failed",
+                  "duration": 11165,
+                  "error": {
+                    "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m504\u001b[39m\nReceived: \u001b[31m200\u001b[39m",
+                    "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m504\u001b[39m\nReceived: \u001b[31m200\u001b[39m\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:113:58",
+                    "location": {
+                      "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                      "column": 58,
+                      "line": 113
+                    },
+                    "snippet": "  111 | });\n  112 | test('backend deadline envelope permits explicit retry only',async({page})=>{\n> 113 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n      |                                                          ^\n  114 |   await page.route(`**/api/projects/${id}/comparison/advice`,r=>{posts++;return r.fulfill({status:504,json:{error:{code:'COMPARISON_ANALYSIS_TIMEOUT',message:'Analysis took too long. Please retry.'}}});});\n  115 |   await button(page,'Analyze Comparison').click();await expect(region(page)).toContainText('Analysis took too long');await expect(button(page,'Retry analysis')).toBeEnabled();await nativeFocus(page);expect(posts).toBe(1);\n  116 |   await page.unroute(`**/api/projects/${id}/comparison/advice`);await button(page,'Retry analysis').click();await expect(output(page)).toBeVisible();await invariant(page,id,before);"
+                  },
+                  "errors": [
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 58,
+                        "line": 113
+                      },
+                      "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m\n\nExpected: \u001b[32m504\u001b[39m\nReceived: \u001b[31m200\u001b[39m\n\n  111 | });\n  112 | test('backend deadline envelope permits explicit retry only',async({page})=>{\n> 113 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n      |                                                          ^\n  114 |   await page.route(`**/api/projects/${id}/comparison/advice`,r=>{posts++;return r.fulfill({status:504,json:{error:{code:'COMPARISON_ANALYSIS_TIMEOUT',message:'Analysis took too long. Please retry.'}}});});\n  115 |   await button(page,'Analyze Comparison').click();await expect(region(page)).toContainText('Analysis took too long');await expect(button(page,'Retry analysis')).toBeEnabled();await nativeFocus(page);expect(posts).toBe(1);\n  116 |   await page.unroute(`**/api/projects/${id}/comparison/advice`);await button(page,'Retry analysis').click();await expect(output(page)).toBeVisible();await invariant(page,id,before);\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:113:58"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 479
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 608
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 257
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 943
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:59:26.795Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-real-backend-deadline-t-78a38-proxy-and-explicit-recovery\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-real-backend-deadline-t-78a38-proxy-and-explicit-recovery\\error-context.md"
+                    }
+                  ],
+                  "errorLocation": {
+                    "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                    "column": 58,
+                    "line": 113
+                  }
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fb421208f889fff09fef",
+          "file": "qa.spec.ts",
+          "line": 106,
+          "column": 5
+        },
+        {
+          "title": "existing human preference survives advice and failures",
+          "ok": false,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "timedOut",
+                  "duration": 121001,
+                  "error": {
+                    "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m",
+                    "stack": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                  },
+                  "errors": [
+                    {
+                      "message": "\u001b[31mTest timeout of 120000ms exceeded.\u001b[39m"
+                    },
+                    {
+                      "location": {
+                        "file": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts",
+                        "column": 57,
+                        "line": 121
+                      },
+                      "message": "Error: locator.selectOption: Test timeout of 120000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('region', { name: 'Decision', exact: true }).getByLabel('Preferred supplier', { exact: true })\u001b[22m\n\n\n  119 |   const id=await setup(page),before=await readApi(page,`/projects/${id}/comparison`);let posts=0;\n  120 |   await page.clock.install();\n> 121 |   page.on('request',r=>{if(r.method()==='POST'&&r.url().endsWith('/comparison/advice'))posts++;});\n      |                                                         ^\n  122 |   await page.request.post('http://127.0.0.1:18001/__qa/control',{data:'disconnect'});\n  123 |   await button(page,'Analyze Comparison').click();await expect(region(page)).toContainText('may still be finishing');await expect(button(page,'Retry analysis')).toBeDisabled();await button(page,'Retry analysis').scrollIntoViewIfNeeded();await page.screenshot({path:test.info().outputPath('disconnect-cooldown.png')});await nativeFocus(page);expect(posts).toBe(1);\n  124 |   await expect(button(page,'Retry analysis')).toBeDisabled();\n    at C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\qa.spec.ts:121:57"
+                    }
+                  ],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 467
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 556
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 251
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1006
+                    }
+                  ],
+                  "startTime": "2026-11-04T15:59:39.050Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-existing-human-preference-survives-advice-and-failures\\test-failed-1.png"
+                    },
+                    {
+                      "name": "error-context",
+                      "contentType": "text/markdown",
+                      "path": "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\docs\\implementation\\evidence\\M4-U7\\browser-qa\\artifacts\\qa-existing-human-preference-survives-advice-and-failures\\error-context.md"
+                    }
+                  ]
+                }
+              ],
+              "status": "unexpected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-b68f3fef40a99764f1df",
+          "file": "qa.spec.ts",
+          "line": 119,
+          "column": 5
+        },
+        {
+          "title": "null-success disclosures sources facts and preference",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11351,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 481
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 588
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 241
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 1044
+                    }
+                  ],
+                  "startTime": "2026-11-04T16:01:41.064Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-f976304ae05ebf8463d8",
+          "file": "qa.spec.ts",
+          "line": 127,
+          "column": 42
+        },
+        {
+          "title": "suggestion disclosures sources facts and preference",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 3,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11378,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "steps": [
+                    {
+                      "title": "Anonymous session and project creation",
+                      "duration": 473
+                    },
+                    {
+                      "title": "Analyze request and clarify missing delivery timing",
+                      "duration": 758
+                    },
+                    {
+                      "title": "Review importance and explicitly approve Brief",
+                      "duration": 244
+                    },
+                    {
+                      "title": "Discover suppliers and approve shortlist of three",
+                      "duration": 955
+                    }
+                  ],
+                  "startTime": "2026-11-04T16:01:52.650Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "3dc73adc681a7f066ffc-fc3e462494bfb04596c2",
+          "file": "qa.spec.ts",
+          "line": 127,
+          "column": 42
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T15:56:36.277Z",
+    "duration": 328747.37299999996,
+    "expected": 12,
+    "skipped": 0,
+    "unexpected": 3,
+    "flaky": 0
+  }
+}

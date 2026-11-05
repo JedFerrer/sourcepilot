@@ -1,0 +1,13 @@
+{
+  "command": [
+    "C:\\Users\\ferre\\OneDrive\\Documents\\source-pilot\\apps\\api\\.venv\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests/test_comparison_lifecycle.py",
+    "-q",
+    "--maxfail=0"
+  ],
+  "exit_code": 0,
+  "seconds": 6.061999999999898,
+  "platform": "Windows-10-10.0.26200-SP0"
+}

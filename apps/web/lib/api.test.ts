@@ -44,4 +44,16 @@ describe("apiRequest", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     await expect(apiRequest("/api/projects")).rejects.toMatchObject({ code: "NETWORK_ERROR" });
   });
+
+  it.each(["TimeoutError", "AbortError"])("classifies %s during headers and body reads", async (reason) => {
+    const controller = new AbortController();
+    controller.abort(new DOMException("private-sentinel", reason));
+    for (const phase of ["headers", "body"]) {
+      vi.stubGlobal("fetch", phase === "headers" ? vi.fn().mockRejectedValue(controller.signal.reason)
+        : vi.fn().mockResolvedValue({ json: () => Promise.reject(controller.signal.reason) }));
+      await expect(apiRequest("/api/projects/id/comparison/advice", { signal: controller.signal })).rejects.toMatchObject({
+        code: reason === "TimeoutError" ? "ANALYSIS_WAIT_TIMEOUT" : "REQUEST_CANCELLED",
+      });
+    }
+  });
 });

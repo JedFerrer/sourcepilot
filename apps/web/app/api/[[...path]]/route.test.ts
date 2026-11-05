@@ -5,6 +5,35 @@ import { GET, HEAD, OPTIONS, PATCH, POST } from "./route";
 describe("same-site streaming API proxy", () => {
   afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 
+  it("returns a safe analysis envelope for an interrupted connection without retry", async () => {
+    const fetchMock = vi.fn().mockRejectedValue(new Error("private-sentinel"));
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const response = await POST(new Request("https://app.test/api/projects/p/comparison/advice", { method: "POST" }));
+    expect(response.status).toBe(502);
+    expect(await response.json()).toMatchObject({ error: { code: "ANALYSIS_CONNECTION_LOST" } });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["headers", "body"])("bounds analysis %s consumption with a JSON timeout", async (phase) => {
+    const controller = new AbortController();
+    vi.spyOn(AbortSignal, "timeout").mockReturnValue(controller.signal);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const waitForAbort = () => new Promise<never>((_, reject) => {
+      controller.signal.addEventListener("abort", () => reject(controller.signal.reason), { once: true });
+    });
+    vi.stubGlobal("fetch", vi.fn(() => phase === "headers" ? waitForAbort() : Promise.resolve({
+      headers: new Headers(), status: 200, statusText: "OK", arrayBuffer: waitForAbort,
+    })));
+    const request = POST(new Request("https://app.test/api/projects/p/comparison/advice", { method: "POST" }));
+    await Promise.resolve();
+    controller.abort(new DOMException("deadline", "TimeoutError"));
+    const response = await request;
+    expect(response.status).toBe(504);
+    expect(await response.json()).toMatchObject({ error: { code: "ANALYSIS_WAIT_TIMEOUT" } });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
   it("forwards normal requests and queries only to the configured backend", async () => {
     vi.stubEnv("API_ORIGIN", "http://backend.test/base");
     const call = vi.fn().mockResolvedValue(new Response('{"status":"ok"}', {

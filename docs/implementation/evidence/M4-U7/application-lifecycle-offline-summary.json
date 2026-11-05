@@ -1,0 +1,19 @@
+{
+  "mode": "offline",
+  "status": "COMPLETED",
+  "complete": true,
+  "executed_case_count": 90,
+  "expected_case_count": 90,
+  "exit_code": 0,
+  "completed_at": "2026-11-04T20:45:36.27574+08:00",
+  "categories": [
+    "brief",
+    "clarification",
+    "supplier_explanation",
+    "quote_extraction",
+    "comparison",
+    "suggestion"
+  ],
+  "interpretation": "Provider-free fixture execution only. Unknown incident rejection, historical live-quality failures and pending human quality reviews remain unresolved.",
+  "report_sha256": "AF06586F82310C70F704B67FE00F357F41BD59DB1E7C74C73A7590B8E35FE5DF"
+}

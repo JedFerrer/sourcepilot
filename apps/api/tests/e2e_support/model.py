@@ -183,4 +183,5 @@ def install_model_boundary() -> None:
     from unittest.mock import patch
 
     patch("sourcepilot.ai.client.OpenAI", BlockedOpenAI).start()
+    patch("sourcepilot.ai.client.AsyncOpenAI", BlockedOpenAI).start()
     patch("sourcepilot.ai.client.OpenAIResponsesClient.from_environment", DeterministicModel).start()
