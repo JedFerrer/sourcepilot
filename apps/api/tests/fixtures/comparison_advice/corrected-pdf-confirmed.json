@@ -1,0 +1,335 @@
+{
+  "id": "ecc83186-5ad3-43d1-a31f-819cc1eceb8c",
+  "project_id": "e7acbc10-205c-412f-a055-be1ae5e9991a",
+  "supplier_id": "fdc24cfa-7350-5ce4-b8d2-249085cd36da",
+  "entry_type": "PDF",
+  "status": "CONFIRMED",
+  "revision": 0,
+  "confirmed_at": "2026-11-06T11:42:42.328025Z",
+  "notes": "Synthetic user adjustment: unit price changed from 4.22 to 4.50 for acceptance testing. The PDF supports 4.22, not 4.50. Currency remains unresolved.",
+  "values": {
+    "certifications": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "compliance_notes": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "currency": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": "The same quotation states USD on page 1 and EUR on page 2; both pages belong to the same quotation and neither supersedes the other.",
+      "review_state": "CONFLICT",
+      "evidence": [
+        {
+          "block_id": "p1-b7",
+          "page": 1,
+          "block_text": "Unit price: USD 4.22",
+          "evidence_value": "USD"
+        },
+        {
+          "block_id": "p2-b7",
+          "page": 2,
+          "block_text": "Unit price: EUR 4.22",
+          "evidence_value": "EUR"
+        }
+      ],
+      "conflicting_values": [
+        {
+          "value": "USD",
+          "evidence": [
+            {
+              "block_id": "p1-b7",
+              "page": 1,
+              "block_text": "Unit price: USD 4.22",
+              "evidence_value": "USD"
+            }
+          ]
+        },
+        {
+          "value": "EUR",
+          "evidence": [
+            {
+              "block_id": "p2-b7",
+              "page": 2,
+              "block_text": "Unit price: EUR 4.22",
+              "evidence_value": "EUR"
+            }
+          ]
+        }
+      ]
+    },
+    "exclusions": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "incoterm": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "moq": {
+      "current_value": 1000,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": 1000,
+      "uncertainty": null,
+      "review_state": "KNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b8",
+          "page": 1,
+          "block_text": "Minimum order quantity: 1,000 units",
+          "evidence_value": 1000
+        },
+        {
+          "block_id": "p2-b8",
+          "page": 2,
+          "block_text": "Minimum order quantity: 1,000 units",
+          "evidence_value": 1000
+        }
+      ],
+      "conflicting_values": []
+    },
+    "packaging_cost": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "payment_terms": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "production_lead_time": {
+      "current_value": "32 days after sample approval",
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": "32 days after sample approval",
+      "uncertainty": null,
+      "review_state": "KNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b9",
+          "page": 1,
+          "block_text": "Production lead time: 32 days after sample approval",
+          "evidence_value": "32 days after sample approval"
+        },
+        {
+          "block_id": "p2-b9",
+          "page": 2,
+          "block_text": "Production lead time: 32 days after sample approval",
+          "evidence_value": "32 days after sample approval"
+        }
+      ],
+      "conflicting_values": []
+    },
+    "quote_validity": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "quoted_quantity": {
+      "current_value": 2000,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": 2000,
+      "uncertainty": null,
+      "review_state": "KNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b6",
+          "page": 1,
+          "block_text": "Quoted quantity: 2,000 units",
+          "evidence_value": 2000
+        },
+        {
+          "block_id": "p2-b6",
+          "page": 2,
+          "block_text": "Quoted quantity: 2,000 units",
+          "evidence_value": 2000
+        }
+      ],
+      "conflicting_values": []
+    },
+    "sample_cost": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "sample_lead_time": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "shipping_cost": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": "Shipping cost is stated as not stated.",
+      "review_state": "UNKNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b10",
+          "page": 1,
+          "block_text": "Shipping cost, total lead time and delivery commitment: not stated.",
+          "evidence_value": null
+        },
+        {
+          "block_id": "p2-b10",
+          "page": 2,
+          "block_text": "Shipping cost, total lead time and delivery commitment: not stated.",
+          "evidence_value": null
+        }
+      ],
+      "conflicting_values": []
+    },
+    "shipping_time": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "special_conditions": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "supplier_notes": {
+      "current_value": "Synthetic demo quote - not a real supplier offer.",
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": "Synthetic demo quote - not a real supplier offer.",
+      "uncertainty": null,
+      "review_state": "KNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b2",
+          "page": 1,
+          "block_text": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+          "evidence_value": "Synthetic demo quote - not a real supplier offer."
+        },
+        {
+          "block_id": "p2-b2",
+          "page": 2,
+          "block_text": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+          "evidence_value": "Synthetic demo quote - not a real supplier offer."
+        }
+      ],
+      "conflicting_values": []
+    },
+    "tooling_cost": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    },
+    "total_lead_time": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": "Total lead time is stated as not stated.",
+      "review_state": "UNKNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b10",
+          "page": 1,
+          "block_text": "Shipping cost, total lead time and delivery commitment: not stated.",
+          "evidence_value": null
+        },
+        {
+          "block_id": "p2-b10",
+          "page": 2,
+          "block_text": "Shipping cost, total lead time and delivery commitment: not stated.",
+          "evidence_value": null
+        }
+      ],
+      "conflicting_values": []
+    },
+    "unit_price": {
+      "current_value": "4.50",
+      "current_origin": "USER_CORRECTED",
+      "ai_extracted_value": "4.22",
+      "uncertainty": null,
+      "review_state": "KNOWN",
+      "evidence": [
+        {
+          "block_id": "p1-b7",
+          "page": 1,
+          "block_text": "Unit price: USD 4.22",
+          "evidence_value": "4.22"
+        },
+        {
+          "block_id": "p2-b7",
+          "page": 2,
+          "block_text": "Unit price: EUR 4.22",
+          "evidence_value": "4.22"
+        }
+      ],
+      "conflicting_values": []
+    },
+    "warranty": {
+      "current_value": null,
+      "current_origin": "AI_EXTRACTED",
+      "ai_extracted_value": null,
+      "uncertainty": null,
+      "review_state": "UNKNOWN",
+      "evidence": [],
+      "conflicting_values": []
+    }
+  },
+  "processing": {
+    "status": "CONFIRMED",
+    "attempts": 1,
+    "started_at": "2026-11-06T11:42:14.488879Z",
+    "completed_at": "2026-11-06T11:42:42.171387Z",
+    "failure": null
+  }
+}

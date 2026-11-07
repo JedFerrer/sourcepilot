@@ -1,0 +1,3142 @@
+{
+  "snapshot": {
+    "availability": "CURRENT",
+    "snapshot_id": "2602f679-4a77-4234-83be-2ed78005484e",
+    "brief_revision": 2,
+    "quote_revision_snapshot": {
+      "ab260b2a-cd49-58f6-8d8d-e474a7e737c6": {
+        "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+        "revision": 0,
+        "facts_fingerprint": "83431af82ba18ab5db66e4431bf13b5fa1c22c9e0f86506fc8fcd22cd43a99d2"
+      },
+      "b6ffa3a1-2510-5376-92cb-aaaef846ca5a": {
+        "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+        "revision": 0,
+        "facts_fingerprint": "f88f9b438c3d9c4fa90844482c0e9cb27ce11c78c0c4dc2e87db75c739168495"
+      },
+      "fdc24cfa-7350-5ce4-b8d2-249085cd36da": {
+        "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+        "revision": 0,
+        "facts_fingerprint": "8592dcf9ad5a49101e833c288f687e5970dde22603565c01a816dc824e9f3804"
+      }
+    },
+    "generated_at": "2026-11-05T07:28:48.776471Z",
+    "stale": false,
+    "comparison_payload": {
+      "brief": {
+        "quantity": 2000,
+        "requirements": [
+          {
+            "id": "333e92c5-ba9b-49da-afe7-f82750fc9d0c",
+            "kind": "CAPABILITY",
+            "notes": null,
+            "importance": "INFORMATIONAL",
+            "expected_value": {
+              "value": false,
+              "capability_key": "CUSTOM_BRANDING"
+            }
+          },
+          {
+            "id": "7951561e-ee55-4132-8fd8-68a66e147d79",
+            "kind": "MATERIAL",
+            "notes": null,
+            "importance": "REQUIRED",
+            "expected_value": {
+              "value": "recycled polyester"
+            }
+          },
+          {
+            "id": "ba2e8303-190f-4b24-86e3-39789f59b8dc",
+            "kind": "INFORMATIONAL",
+            "notes": null,
+            "importance": "INFORMATIONAL",
+            "expected_value": {
+              "text": "20 x 15 x 6 cm",
+              "subject": "DIMENSIONS"
+            }
+          },
+          {
+            "id": "f6fce07e-3e11-4939-bb0c-0994f90e6e33",
+            "kind": "CERTIFICATION",
+            "notes": null,
+            "importance": "PREFERRED",
+            "expected_value": {
+              "value": "grs"
+            }
+          }
+        ],
+        "delivery_target": {
+          "kind": "PERIOD",
+          "label": "within 60 days",
+          "end_date": null,
+          "start_date": null
+        },
+        "target_unit_price": null
+      },
+      "suppliers": [
+        {
+          "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+          "evaluation": {
+            "results": [
+              {
+                "kind": "CAPABILITY",
+                "status": "UNKNOWN",
+                "evidence_ids": [],
+                "selected_fact": null,
+                "requirement_id": "333e92c5-ba9b-49da-afe7-f82750fc9d0c",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "MATERIAL",
+                "status": "MEETS",
+                "evidence_ids": [
+                  "2e0d1fd9-7065-5866-964a-92114c0d9126"
+                ],
+                "selected_fact": null,
+                "requirement_id": "7951561e-ee55-4132-8fd8-68a66e147d79",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "CERTIFICATION",
+                "status": "UNKNOWN",
+                "evidence_ids": [],
+                "selected_fact": null,
+                "requirement_id": "f6fce07e-3e11-4939-bb0c-0994f90e6e33",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "MOQ",
+                "status": "MEETS",
+                "evidence_ids": [],
+                "selected_fact": {
+                  "value": 800,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "moq",
+                  "source_reference": "quote-value:4fde6437-91c6-4cb0-87d3-627361f29e07",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                },
+                "requirement_id": null,
+                "conflicting_facts": []
+              }
+            ],
+            "warnings": [],
+            "informational_requirement_ids": [
+              "ba2e8303-190f-4b24-86e3-39789f59b8dc"
+            ]
+          },
+          "supplier_id": "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+          "completeness": [
+            {
+              "state": "missing",
+              "field_key": "certifications",
+              "source_references": [
+                "quote-value:aef88390-644a-499f-9dad-42b211872823"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "compliance_notes",
+              "source_references": [
+                "quote-value:7019a36e-3f60-4994-8d05-3a14140c0308"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "currency",
+              "source_references": [
+                "quote-value:3cb32b76-4db3-4c83-afbc-bb705956037c"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "delivery_date",
+              "source_references": []
+            },
+            {
+              "state": "missing",
+              "field_key": "exclusions",
+              "source_references": [
+                "quote-value:99ceaf0a-6c5d-4f3f-abc4-5dbb88687d81"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "incoterm",
+              "source_references": [
+                "quote-value:6531bf59-dc00-4c29-8397-c8493bc9691c"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "moq",
+              "source_references": [
+                "quote-value:4fde6437-91c6-4cb0-87d3-627361f29e07",
+                "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:moq"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "packaging_cost",
+              "source_references": [
+                "quote-value:54e34e3c-0c2b-4426-af9b-7009599a8546"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "payment_terms",
+              "source_references": [
+                "quote-value:ea616722-7212-40ba-b640-e06749d23554"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "production_lead_time",
+              "source_references": [
+                "quote-value:d8ec100c-7bd8-44cc-ac44-fce4ff94295c",
+                "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:production_lead_time"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "quote_validity",
+              "source_references": [
+                "quote-value:b4a5bf64-71d7-42ae-9793-b455c79e9122"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "quoted_quantity",
+              "source_references": [
+                "quote-value:3c739950-1436-43e3-8f05-5ff16c3cc584"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "sample_cost",
+              "source_references": [
+                "quote-value:5af903fb-6938-4a1e-a8ed-fbbe6e07f5fd"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "sample_lead_time",
+              "source_references": [
+                "quote-value:93542f78-882d-410b-8b8c-8b375c9fcf9b"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "shipping_cost",
+              "source_references": [
+                "quote-value:2d9d3bd2-0b24-47da-a3c4-f11fb054afcc"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "shipping_time",
+              "source_references": [
+                "quote-value:4f3ec364-906d-479e-a1a4-e0a36c6e526a"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "special_conditions",
+              "source_references": [
+                "quote-value:a41f19a7-9aca-4744-9e9c-970d72179e00"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "supplier_notes",
+              "source_references": [
+                "quote-value:586b0633-6609-4a49-8b23-2d6349ea359e"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "tooling_cost",
+              "source_references": [
+                "quote-value:b8868fba-31b0-4690-8173-4cdc8c76d5a0"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "total_lead_time",
+              "source_references": [
+                "quote-value:eab895e8-54b7-4978-aa23-619b312eb854"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "unit_price",
+              "source_references": [
+                "quote-value:7a5e1e38-33c7-4809-8371-5c665a7349cc"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "warranty",
+              "source_references": [
+                "quote-value:cce394e4-c06d-4404-bac0-3b799c4e5155"
+              ]
+            }
+          ],
+          "quote_fields": [
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "certifications",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:aef88390-644a-499f-9dad-42b211872823",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "compliance_notes",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:7019a36e-3f60-4994-8d05-3a14140c0308",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "currency",
+              "uncertainty": null,
+              "current_value": "USD",
+              "source_reference": "quote-value:3cb32b76-4db3-4c83-afbc-bb705956037c",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "exclusions",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:99ceaf0a-6c5d-4f3f-abc4-5dbb88687d81",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "incoterm",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:6531bf59-dc00-4c29-8397-c8493bc9691c",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "moq",
+              "uncertainty": null,
+              "current_value": 800,
+              "source_reference": "quote-value:4fde6437-91c6-4cb0-87d3-627361f29e07",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "packaging_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:54e34e3c-0c2b-4426-af9b-7009599a8546",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "payment_terms",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:ea616722-7212-40ba-b640-e06749d23554",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "production_lead_time",
+              "uncertainty": null,
+              "current_value": "37 days",
+              "source_reference": "quote-value:d8ec100c-7bd8-44cc-ac44-fce4ff94295c",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "quote_validity",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:b4a5bf64-71d7-42ae-9793-b455c79e9122",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "quoted_quantity",
+              "uncertainty": null,
+              "current_value": 2000,
+              "source_reference": "quote-value:3c739950-1436-43e3-8f05-5ff16c3cc584",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "sample_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:5af903fb-6938-4a1e-a8ed-fbbe6e07f5fd",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "sample_lead_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:93542f78-882d-410b-8b8c-8b375c9fcf9b",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "shipping_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:2d9d3bd2-0b24-47da-a3c4-f11fb054afcc",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "shipping_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:4f3ec364-906d-479e-a1a4-e0a36c6e526a",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "special_conditions",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:a41f19a7-9aca-4744-9e9c-970d72179e00",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "supplier_notes",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:586b0633-6609-4a49-8b23-2d6349ea359e",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "tooling_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:b8868fba-31b0-4690-8173-4cdc8c76d5a0",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "total_lead_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:eab895e8-54b7-4978-aa23-619b312eb854",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "unit_price",
+              "uncertainty": null,
+              "current_value": "4.45",
+              "source_reference": "quote-value:7a5e1e38-33c7-4809-8371-5c665a7349cc",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "warranty",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:cce394e4-c06d-4404-bac0-3b799c4e5155",
+              "ai_extracted_value": null
+            }
+          ],
+          "supplier_name": "Moss Thread Bags",
+          "quote_revision": 0,
+          "resolved_facts": {
+            "moq": {
+              "status": "SELECTED",
+              "selected": {
+                "value": 800,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:4fde6437-91c6-4cb0-87d3-627361f29e07",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [
+                {
+                  "value": 800,
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "moq",
+                  "source_reference": "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:moq",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": 800,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "moq",
+                  "source_reference": "quote-value:4fde6437-91c6-4cb0-87d3-627361f29e07",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            },
+            "unit_price": {
+              "status": "SELECTED",
+              "selected": {
+                "value": {
+                  "amount": "4.45",
+                  "currency": "USD"
+                },
+                "context": "PROJECT_QUOTE",
+                "field_key": "unit_price",
+                "source_reference": "quote-value:7a5e1e38-33c7-4809-8371-5c665a7349cc",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "quote-value:7a5e1e38-33c7-4809-8371-5c665a7349cc",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "quote-value:3cb32b76-4db3-4c83-afbc-bb705956037c",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": [
+                  "quote-value:3cb32b76-4db3-4c83-afbc-bb705956037c"
+                ]
+              },
+              "general_facts": [],
+              "project_facts": [
+                {
+                  "value": {
+                    "amount": "4.45",
+                    "currency": "USD"
+                  },
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "unit_price",
+                  "source_reference": "quote-value:7a5e1e38-33c7-4809-8371-5c665a7349cc",
+                  "component_attributions": [
+                    {
+                      "field_key": "unit_price",
+                      "source_reference": "quote-value:7a5e1e38-33c7-4809-8371-5c665a7349cc",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    },
+                    {
+                      "field_key": "currency",
+                      "source_reference": "quote-value:3cb32b76-4db3-4c83-afbc-bb705956037c",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    }
+                  ],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": [
+                    "quote-value:3cb32b76-4db3-4c83-afbc-bb705956037c"
+                  ]
+                }
+              ]
+            },
+            "delivery_date": {
+              "status": "UNAVAILABLE",
+              "selected": null,
+              "general_facts": [],
+              "project_facts": []
+            },
+            "quoted_quantity": {
+              "status": "SELECTED",
+              "selected": {
+                "value": 2000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "quoted_quantity",
+                "source_reference": "quote-value:3c739950-1436-43e3-8f05-5ff16c3cc584",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [],
+              "project_facts": [
+                {
+                  "value": 2000,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "quoted_quantity",
+                  "source_reference": "quote-value:3c739950-1436-43e3-8f05-5ff16c3cc584",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            },
+            "production_lead_time": {
+              "status": "SELECTED",
+              "selected": {
+                "value": "37 days",
+                "context": "PROJECT_QUOTE",
+                "field_key": "production_lead_time",
+                "source_reference": "quote-value:d8ec100c-7bd8-44cc-ac44-fce4ff94295c",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [
+                {
+                  "value": 37,
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "production_lead_time",
+                  "source_reference": "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:production_lead_time",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": "37 days",
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "production_lead_time",
+                  "source_reference": "quote-value:d8ec100c-7bd8-44cc-ac44-fce4ff94295c",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            }
+          },
+          "supplier_facts": {
+            "country": "Philippines",
+            "evidence": [
+              {
+                "id": "2e0d1fd9-7065-5866-964a-92114c0d9126",
+                "claim_key": "material:recycled polyester",
+                "source_type": "CAPABILITY_RECORD",
+                "source_label": "Synthetic material sheet",
+                "evidence_text": "Material sheet lists recycled polyester.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              },
+              {
+                "id": "c601c88b-f35d-5092-8949-2430f2cb8e41",
+                "claim_key": "category:cosmetic travel bag",
+                "source_type": "CATALOG",
+                "source_label": "Synthetic product catalog",
+                "evidence_text": "Catalog lists cosmetic travel pouches.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              }
+            ],
+            "description": "Fictional small-run pouch producer with unverified certification status.",
+            "general_moq": 800,
+            "capabilities": [
+              [
+                "CUSTOM_BRANDING",
+                "true"
+              ],
+              [
+                "MATERIAL",
+                "recycled polyester"
+              ],
+              [
+                "PRODUCT_CATEGORY",
+                "cosmetic travel bag"
+              ]
+            ],
+            "general_lead_time_days": 37,
+            "indicative_price_amount": null,
+            "indicative_price_currency": null
+          }
+        },
+        {
+          "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+          "evaluation": {
+            "results": [
+              {
+                "kind": "CAPABILITY",
+                "status": "UNKNOWN",
+                "evidence_ids": [],
+                "selected_fact": null,
+                "requirement_id": "333e92c5-ba9b-49da-afe7-f82750fc9d0c",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "MATERIAL",
+                "status": "UNKNOWN",
+                "evidence_ids": [],
+                "selected_fact": null,
+                "requirement_id": "7951561e-ee55-4132-8fd8-68a66e147d79",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "CERTIFICATION",
+                "status": "CONFLICT",
+                "evidence_ids": [
+                  "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+                  "4d2de0c9-5783-5478-ab80-eca25fe29677"
+                ],
+                "selected_fact": null,
+                "requirement_id": "f6fce07e-3e11-4939-bb0c-0994f90e6e33",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "MOQ",
+                "status": "MEETS",
+                "evidence_ids": [],
+                "selected_fact": {
+                  "value": 1500,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "moq",
+                  "source_reference": "quote-value:7f37bf4c-8096-430e-b0af-98541944eb02",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                },
+                "requirement_id": null,
+                "conflicting_facts": []
+              }
+            ],
+            "warnings": [],
+            "informational_requirement_ids": [
+              "ba2e8303-190f-4b24-86e3-39789f59b8dc"
+            ]
+          },
+          "supplier_id": "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+          "completeness": [
+            {
+              "state": "missing",
+              "field_key": "certifications",
+              "source_references": [
+                "quote-value:53e49d14-92dd-454a-b447-7418e716afba"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "compliance_notes",
+              "source_references": [
+                "quote-value:6ad80213-7b2a-4f9f-b517-ccc4027e2316"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "currency",
+              "source_references": [
+                "quote-value:9dd71d3f-72bd-4a25-861c-02b66103d40f"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "delivery_date",
+              "source_references": []
+            },
+            {
+              "state": "missing",
+              "field_key": "exclusions",
+              "source_references": [
+                "quote-value:f73eb0cd-f7cc-4653-862d-15a9939eeb63"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "incoterm",
+              "source_references": [
+                "quote-value:33e2b906-9c95-40ec-ad98-507de00b93a9"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "moq",
+              "source_references": [
+                "quote-value:7f37bf4c-8096-430e-b0af-98541944eb02",
+                "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:moq"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "packaging_cost",
+              "source_references": [
+                "quote-value:60408d08-d36c-4446-be72-3e5752850b49"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "payment_terms",
+              "source_references": [
+                "quote-value:f5ca892a-bf68-4a20-9d16-ed3ea9bc6b02"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "production_lead_time",
+              "source_references": [
+                "quote-value:169be126-22d1-4c36-8635-d76edef87e75",
+                "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:production_lead_time"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "quote_validity",
+              "source_references": [
+                "quote-value:e4047c8d-be6b-4e2c-b94e-3a7529d7c1cc"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "quoted_quantity",
+              "source_references": [
+                "quote-value:3c4cb0f5-906f-4ed5-b9f0-ed85ebcac393"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "sample_cost",
+              "source_references": [
+                "quote-value:8fa56140-79de-42af-9864-63975ffa0a18"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "sample_lead_time",
+              "source_references": [
+                "quote-value:de4122e3-e81e-42ee-bf50-43dff8b0e6be"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "shipping_cost",
+              "source_references": [
+                "quote-value:fc0788ec-5b55-46a3-af69-baed16697568"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "shipping_time",
+              "source_references": [
+                "quote-value:0296a82e-1e3a-4ae3-b8b9-ffa3cb775593"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "special_conditions",
+              "source_references": [
+                "quote-value:dd122dee-7447-4155-a6b0-d8e9b2fed632"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "supplier_notes",
+              "source_references": [
+                "quote-value:84a279b2-e68a-4b0c-bf33-7a24a881686b"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "tooling_cost",
+              "source_references": [
+                "quote-value:8f30a71a-c627-41cf-b65e-ceb336e30186"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "total_lead_time",
+              "source_references": [
+                "quote-value:6e0632ba-2cfb-44b2-a5d3-ba6272b7f672"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "unit_price",
+              "source_references": [
+                "quote-value:985a54c4-c9db-4ec0-b25e-2ced9f54b9d7",
+                "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "warranty",
+              "source_references": [
+                "quote-value:12a04555-e401-4572-9cbe-fe454d37b9fd"
+              ]
+            }
+          ],
+          "quote_fields": [
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "certifications",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:53e49d14-92dd-454a-b447-7418e716afba",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "compliance_notes",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:6ad80213-7b2a-4f9f-b517-ccc4027e2316",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "currency",
+              "uncertainty": null,
+              "current_value": "USD",
+              "source_reference": "quote-value:9dd71d3f-72bd-4a25-861c-02b66103d40f",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "exclusions",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:f73eb0cd-f7cc-4653-862d-15a9939eeb63",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "incoterm",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:33e2b906-9c95-40ec-ad98-507de00b93a9",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "moq",
+              "uncertainty": null,
+              "current_value": 1500,
+              "source_reference": "quote-value:7f37bf4c-8096-430e-b0af-98541944eb02",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "packaging_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:60408d08-d36c-4446-be72-3e5752850b49",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "payment_terms",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:f5ca892a-bf68-4a20-9d16-ed3ea9bc6b02",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "production_lead_time",
+              "uncertainty": null,
+              "current_value": "45 days",
+              "source_reference": "quote-value:169be126-22d1-4c36-8635-d76edef87e75",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "quote_validity",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:e4047c8d-be6b-4e2c-b94e-3a7529d7c1cc",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "quoted_quantity",
+              "uncertainty": null,
+              "current_value": 2000,
+              "source_reference": "quote-value:3c4cb0f5-906f-4ed5-b9f0-ed85ebcac393",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "sample_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:8fa56140-79de-42af-9864-63975ffa0a18",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "sample_lead_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:de4122e3-e81e-42ee-bf50-43dff8b0e6be",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "shipping_cost",
+              "uncertainty": null,
+              "current_value": "800",
+              "source_reference": "quote-value:fc0788ec-5b55-46a3-af69-baed16697568",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "shipping_time",
+              "uncertainty": null,
+              "current_value": "12 days",
+              "source_reference": "quote-value:0296a82e-1e3a-4ae3-b8b9-ffa3cb775593",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "special_conditions",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:dd122dee-7447-4155-a6b0-d8e9b2fed632",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "supplier_notes",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:84a279b2-e68a-4b0c-bf33-7a24a881686b",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "tooling_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:8f30a71a-c627-41cf-b65e-ceb336e30186",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "total_lead_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:6e0632ba-2cfb-44b2-a5d3-ba6272b7f672",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "unit_price",
+              "uncertainty": null,
+              "current_value": "4.10",
+              "source_reference": "quote-value:985a54c4-c9db-4ec0-b25e-2ced9f54b9d7",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "warranty",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:12a04555-e401-4572-9cbe-fe454d37b9fd",
+              "ai_extracted_value": null
+            }
+          ],
+          "supplier_name": "Sunrise Textile Lab",
+          "quote_revision": 0,
+          "resolved_facts": {
+            "moq": {
+              "status": "SELECTED",
+              "selected": {
+                "value": 1500,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:7f37bf4c-8096-430e-b0af-98541944eb02",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [
+                {
+                  "value": 1500,
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "moq",
+                  "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:moq",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": 1500,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "moq",
+                  "source_reference": "quote-value:7f37bf4c-8096-430e-b0af-98541944eb02",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            },
+            "unit_price": {
+              "status": "SELECTED",
+              "selected": {
+                "value": {
+                  "amount": "4.10",
+                  "currency": "USD"
+                },
+                "context": "PROJECT_QUOTE",
+                "field_key": "unit_price",
+                "source_reference": "quote-value:985a54c4-c9db-4ec0-b25e-2ced9f54b9d7",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "quote-value:985a54c4-c9db-4ec0-b25e-2ced9f54b9d7",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "quote-value:9dd71d3f-72bd-4a25-861c-02b66103d40f",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": [
+                  "quote-value:9dd71d3f-72bd-4a25-861c-02b66103d40f"
+                ]
+              },
+              "general_facts": [
+                {
+                  "value": {
+                    "amount": "4.1000",
+                    "currency": "USD"
+                  },
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "unit_price",
+                  "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price",
+                  "component_attributions": [
+                    {
+                      "field_key": "unit_price",
+                      "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    },
+                    {
+                      "field_key": "currency",
+                      "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    }
+                  ],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": {
+                    "amount": "4.10",
+                    "currency": "USD"
+                  },
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "unit_price",
+                  "source_reference": "quote-value:985a54c4-c9db-4ec0-b25e-2ced9f54b9d7",
+                  "component_attributions": [
+                    {
+                      "field_key": "unit_price",
+                      "source_reference": "quote-value:985a54c4-c9db-4ec0-b25e-2ced9f54b9d7",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    },
+                    {
+                      "field_key": "currency",
+                      "source_reference": "quote-value:9dd71d3f-72bd-4a25-861c-02b66103d40f",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    }
+                  ],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": [
+                    "quote-value:9dd71d3f-72bd-4a25-861c-02b66103d40f"
+                  ]
+                }
+              ]
+            },
+            "delivery_date": {
+              "status": "UNAVAILABLE",
+              "selected": null,
+              "general_facts": [],
+              "project_facts": []
+            },
+            "quoted_quantity": {
+              "status": "SELECTED",
+              "selected": {
+                "value": 2000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "quoted_quantity",
+                "source_reference": "quote-value:3c4cb0f5-906f-4ed5-b9f0-ed85ebcac393",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [],
+              "project_facts": [
+                {
+                  "value": 2000,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "quoted_quantity",
+                  "source_reference": "quote-value:3c4cb0f5-906f-4ed5-b9f0-ed85ebcac393",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            },
+            "production_lead_time": {
+              "status": "SELECTED",
+              "selected": {
+                "value": "45 days",
+                "context": "PROJECT_QUOTE",
+                "field_key": "production_lead_time",
+                "source_reference": "quote-value:169be126-22d1-4c36-8635-d76edef87e75",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [
+                {
+                  "value": 45,
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "production_lead_time",
+                  "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:production_lead_time",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": "45 days",
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "production_lead_time",
+                  "source_reference": "quote-value:169be126-22d1-4c36-8635-d76edef87e75",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            }
+          },
+          "supplier_facts": {
+            "country": "India",
+            "evidence": [
+              {
+                "id": "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+                "claim_key": "certification:grs:current",
+                "source_type": "CERTIFICATION_RECORD",
+                "source_label": "Synthetic certification register B",
+                "evidence_text": "Current register B marks the same GRS certification inactive.",
+                "evidence_state": "CONTRADICTS",
+                "source_reference": null
+              },
+              {
+                "id": "4d2de0c9-5783-5478-ab80-eca25fe29677",
+                "claim_key": "certification:grs:current",
+                "source_type": "CERTIFICATION_RECORD",
+                "source_label": "Synthetic certification register A",
+                "evidence_text": "Current register A marks GRS certification active.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              },
+              {
+                "id": "fbecae24-ea0d-521b-9a95-fce59c586be9",
+                "claim_key": "category:cosmetic travel bag",
+                "source_type": "CATALOG",
+                "source_label": "Synthetic product catalog",
+                "evidence_text": "Catalog lists cosmetic travel bags.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              }
+            ],
+            "description": "Fictional bag producer with conflicting current certification records.",
+            "general_moq": 1500,
+            "capabilities": [
+              [
+                "CERTIFICATION",
+                "grs"
+              ],
+              [
+                "CUSTOM_BRANDING",
+                "true"
+              ],
+              [
+                "MATERIAL",
+                "recycled polyester"
+              ],
+              [
+                "PRODUCT_CATEGORY",
+                "cosmetic travel bag"
+              ]
+            ],
+            "general_lead_time_days": 45,
+            "indicative_price_amount": "4.1000",
+            "indicative_price_currency": "USD"
+          }
+        },
+        {
+          "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+          "evaluation": {
+            "results": [
+              {
+                "kind": "CAPABILITY",
+                "status": "DOES_NOT_MEET",
+                "evidence_ids": [
+                  "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+                ],
+                "selected_fact": null,
+                "requirement_id": "333e92c5-ba9b-49da-afe7-f82750fc9d0c",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "MATERIAL",
+                "status": "MEETS",
+                "evidence_ids": [
+                  "1574c829-2b7b-500d-96ac-153811a6a8da"
+                ],
+                "selected_fact": null,
+                "requirement_id": "7951561e-ee55-4132-8fd8-68a66e147d79",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "CERTIFICATION",
+                "status": "MEETS",
+                "evidence_ids": [
+                  "8643eee8-edd2-5de6-8b53-f4b5435de096"
+                ],
+                "selected_fact": null,
+                "requirement_id": "f6fce07e-3e11-4939-bb0c-0994f90e6e33",
+                "conflicting_facts": []
+              },
+              {
+                "kind": "MOQ",
+                "status": "MEETS",
+                "evidence_ids": [],
+                "selected_fact": {
+                  "value": 1000,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "moq",
+                  "source_reference": "quote-value:a9bb806a-4627-4639-9c69-31448fed95d1",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                },
+                "requirement_id": null,
+                "conflicting_facts": []
+              }
+            ],
+            "warnings": [],
+            "informational_requirement_ids": [
+              "ba2e8303-190f-4b24-86e3-39789f59b8dc"
+            ]
+          },
+          "supplier_id": "fdc24cfa-7350-5ce4-b8d2-249085cd36da",
+          "completeness": [
+            {
+              "state": "missing",
+              "field_key": "certifications",
+              "source_references": [
+                "quote-value:9da630ae-90e1-415c-8252-53a079fafe59"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "compliance_notes",
+              "source_references": [
+                "quote-value:894557f1-2dfa-4768-9ac5-aefc67732315"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "currency",
+              "source_references": [
+                "quote-value:5508e72e-1d0c-4de4-a4a1-259721f0c9b1"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "delivery_date",
+              "source_references": []
+            },
+            {
+              "state": "missing",
+              "field_key": "exclusions",
+              "source_references": [
+                "quote-value:6ba3f755-aecc-488d-9ef6-9b90e9ef9fe3"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "incoterm",
+              "source_references": [
+                "quote-value:4d32927b-9706-4fa1-b98d-62f51adca487"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "moq",
+              "source_references": [
+                "quote-value:a9bb806a-4627-4639-9c69-31448fed95d1",
+                "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:moq"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "packaging_cost",
+              "source_references": [
+                "quote-value:49006338-9e2d-4b45-a02e-13cee4ac4585"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "payment_terms",
+              "source_references": [
+                "quote-value:8ce472fe-ee9b-4082-b627-79f37f3697d2"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "production_lead_time",
+              "source_references": [
+                "quote-value:32d366b4-a47d-4bb0-99f0-1e22934e75fb",
+                "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:production_lead_time"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "quote_validity",
+              "source_references": [
+                "quote-value:16b55a12-cab5-4d2f-854f-05de76f76b52"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "quoted_quantity",
+              "source_references": [
+                "quote-value:e04a0b7c-bea4-4f74-b131-299f02a3a9a9"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "sample_cost",
+              "source_references": [
+                "quote-value:304cc572-af5c-4ed5-a844-a16daea7e5a4"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "sample_lead_time",
+              "source_references": [
+                "quote-value:5ab11d1d-023a-4f65-89bc-24527e9c8907"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "shipping_cost",
+              "source_references": [
+                "quote-value:c475c772-6d38-4b4c-85a5-10099ae85ca2"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "shipping_time",
+              "source_references": [
+                "quote-value:bec2facb-f962-4636-8d9e-82eb3cffd198"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "special_conditions",
+              "source_references": [
+                "quote-value:f1de81ec-fcf5-49e9-8906-865841a539b1"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "supplier_notes",
+              "source_references": [
+                "quote-value:d94881fe-8692-4105-b7c5-952c90faf0b3"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "tooling_cost",
+              "source_references": [
+                "quote-value:49e88dd4-489e-42d8-b83e-0c098165bbdb"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "total_lead_time",
+              "source_references": [
+                "quote-value:ef775c85-e31e-4b8d-b424-f699047b30c5"
+              ]
+            },
+            {
+              "state": "known",
+              "field_key": "unit_price",
+              "source_references": [
+                "quote-value:d33dc90e-9ce1-41a4-a218-abdf2438894b",
+                "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price"
+              ]
+            },
+            {
+              "state": "missing",
+              "field_key": "warranty",
+              "source_references": [
+                "quote-value:938a2077-325b-4121-b178-459f413566d9"
+              ]
+            }
+          ],
+          "quote_fields": [
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "certifications",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:9da630ae-90e1-415c-8252-53a079fafe59",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "compliance_notes",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:894557f1-2dfa-4768-9ac5-aefc67732315",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "currency",
+              "uncertainty": null,
+              "current_value": "USD",
+              "source_reference": "quote-value:5508e72e-1d0c-4de4-a4a1-259721f0c9b1",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "exclusions",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:6ba3f755-aecc-488d-9ef6-9b90e9ef9fe3",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "incoterm",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:4d32927b-9706-4fa1-b98d-62f51adca487",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "moq",
+              "uncertainty": null,
+              "current_value": 1000,
+              "source_reference": "quote-value:a9bb806a-4627-4639-9c69-31448fed95d1",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "packaging_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:49006338-9e2d-4b45-a02e-13cee4ac4585",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "payment_terms",
+              "uncertainty": null,
+              "current_value": "30% deposit, 70% before shipment",
+              "source_reference": "quote-value:8ce472fe-ee9b-4082-b627-79f37f3697d2",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "production_lead_time",
+              "uncertainty": null,
+              "current_value": "32 days",
+              "source_reference": "quote-value:32d366b4-a47d-4bb0-99f0-1e22934e75fb",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "quote_validity",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:16b55a12-cab5-4d2f-854f-05de76f76b52",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "quoted_quantity",
+              "uncertainty": null,
+              "current_value": 2000,
+              "source_reference": "quote-value:e04a0b7c-bea4-4f74-b131-299f02a3a9a9",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "sample_cost",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:304cc572-af5c-4ed5-a844-a16daea7e5a4",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "sample_lead_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:5ab11d1d-023a-4f65-89bc-24527e9c8907",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "shipping_cost",
+              "uncertainty": null,
+              "current_value": "600",
+              "source_reference": "quote-value:c475c772-6d38-4b4c-85a5-10099ae85ca2",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "shipping_time",
+              "uncertainty": null,
+              "current_value": "10 days",
+              "source_reference": "quote-value:bec2facb-f962-4636-8d9e-82eb3cffd198",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "special_conditions",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:f1de81ec-fcf5-49e9-8906-865841a539b1",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "supplier_notes",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:d94881fe-8692-4105-b7c5-952c90faf0b3",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "tooling_cost",
+              "uncertainty": null,
+              "current_value": "0",
+              "source_reference": "quote-value:49e88dd4-489e-42d8-b83e-0c098165bbdb",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "total_lead_time",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:ef775c85-e31e-4b8d-b424-f699047b30c5",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "unit_price",
+              "uncertainty": null,
+              "current_value": "4.60",
+              "source_reference": "quote-value:d33dc90e-9ce1-41a4-a218-abdf2438894b",
+              "ai_extracted_value": null
+            },
+            {
+              "origin": "USER_ENTERED",
+              "evidence": [],
+              "field_key": "warranty",
+              "uncertainty": null,
+              "current_value": null,
+              "source_reference": "quote-value:938a2077-325b-4121-b178-459f413566d9",
+              "ai_extracted_value": null
+            }
+          ],
+          "supplier_name": "Harbor Pouch Works",
+          "quote_revision": 0,
+          "resolved_facts": {
+            "moq": {
+              "status": "SELECTED",
+              "selected": {
+                "value": 1000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:a9bb806a-4627-4639-9c69-31448fed95d1",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [
+                {
+                  "value": 1000,
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "moq",
+                  "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:moq",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [
+                    "e070ff18-3a61-57b3-9d3c-55d3a5f97847"
+                  ],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": 1000,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "moq",
+                  "source_reference": "quote-value:a9bb806a-4627-4639-9c69-31448fed95d1",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            },
+            "unit_price": {
+              "status": "SELECTED",
+              "selected": {
+                "value": {
+                  "amount": "4.60",
+                  "currency": "USD"
+                },
+                "context": "PROJECT_QUOTE",
+                "field_key": "unit_price",
+                "source_reference": "quote-value:d33dc90e-9ce1-41a4-a218-abdf2438894b",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "quote-value:d33dc90e-9ce1-41a4-a218-abdf2438894b",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "quote-value:5508e72e-1d0c-4de4-a4a1-259721f0c9b1",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": [
+                  "quote-value:5508e72e-1d0c-4de4-a4a1-259721f0c9b1"
+                ]
+              },
+              "general_facts": [
+                {
+                  "value": {
+                    "amount": "4.6000",
+                    "currency": "USD"
+                  },
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "unit_price",
+                  "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price",
+                  "component_attributions": [
+                    {
+                      "field_key": "unit_price",
+                      "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    },
+                    {
+                      "field_key": "currency",
+                      "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    }
+                  ],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": {
+                    "amount": "4.60",
+                    "currency": "USD"
+                  },
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "unit_price",
+                  "source_reference": "quote-value:d33dc90e-9ce1-41a4-a218-abdf2438894b",
+                  "component_attributions": [
+                    {
+                      "field_key": "unit_price",
+                      "source_reference": "quote-value:d33dc90e-9ce1-41a4-a218-abdf2438894b",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    },
+                    {
+                      "field_key": "currency",
+                      "source_reference": "quote-value:5508e72e-1d0c-4de4-a4a1-259721f0c9b1",
+                      "provenance_evidence_ids": [],
+                      "supporting_evidence_ids": []
+                    }
+                  ],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": [
+                    "quote-value:5508e72e-1d0c-4de4-a4a1-259721f0c9b1"
+                  ]
+                }
+              ]
+            },
+            "delivery_date": {
+              "status": "UNAVAILABLE",
+              "selected": null,
+              "general_facts": [],
+              "project_facts": []
+            },
+            "quoted_quantity": {
+              "status": "SELECTED",
+              "selected": {
+                "value": 2000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "quoted_quantity",
+                "source_reference": "quote-value:e04a0b7c-bea4-4f74-b131-299f02a3a9a9",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [],
+              "project_facts": [
+                {
+                  "value": 2000,
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "quoted_quantity",
+                  "source_reference": "quote-value:e04a0b7c-bea4-4f74-b131-299f02a3a9a9",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            },
+            "production_lead_time": {
+              "status": "SELECTED",
+              "selected": {
+                "value": "32 days",
+                "context": "PROJECT_QUOTE",
+                "field_key": "production_lead_time",
+                "source_reference": "quote-value:32d366b4-a47d-4bb0-99f0-1e22934e75fb",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "general_facts": [
+                {
+                  "value": 32,
+                  "context": "GENERAL_SUPPLIER",
+                  "field_key": "production_lead_time",
+                  "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:production_lead_time",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ],
+              "project_facts": [
+                {
+                  "value": "32 days",
+                  "context": "PROJECT_QUOTE",
+                  "field_key": "production_lead_time",
+                  "source_reference": "quote-value:32d366b4-a47d-4bb0-99f0-1e22934e75fb",
+                  "component_attributions": [],
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": [],
+                  "has_same_context_conflict": false,
+                  "related_source_references": []
+                }
+              ]
+            }
+          },
+          "supplier_facts": {
+            "country": "Vietnam",
+            "evidence": [
+              {
+                "id": "1574c829-2b7b-500d-96ac-153811a6a8da",
+                "claim_key": "material:recycled polyester",
+                "source_type": "CAPABILITY_RECORD",
+                "source_label": "Synthetic material sheet",
+                "evidence_text": "Material sheet lists recycled polyester bag production.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              },
+              {
+                "id": "1ae6cffb-e0a6-52e7-b62b-51243f502e69",
+                "claim_key": "category:cosmetic travel bag",
+                "source_type": "CATALOG",
+                "source_label": "Synthetic product catalog",
+                "evidence_text": "Catalog lists custom cosmetic travel bags.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              },
+              {
+                "id": "8643eee8-edd2-5de6-8b53-f4b5435de096",
+                "claim_key": "certification:grs:current",
+                "source_type": "CERTIFICATION_RECORD",
+                "source_label": "Synthetic current GRS record",
+                "evidence_text": "Record states current GRS certification for this fictional supplier.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              },
+              {
+                "id": "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253",
+                "claim_key": "capability:custom branding",
+                "source_type": "CAPABILITY_RECORD",
+                "source_label": "Synthetic branding sheet",
+                "evidence_text": "Branding sheet offers custom screen printed logos.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              },
+              {
+                "id": "e070ff18-3a61-57b3-9d3c-55d3a5f97847",
+                "claim_key": "moq:general",
+                "source_type": "CATALOG",
+                "source_label": "Synthetic catalog terms",
+                "evidence_text": "General minimum order is 1,000 units.",
+                "evidence_state": "SUPPORTS",
+                "source_reference": null
+              }
+            ],
+            "description": "Fictional maker of custom cosmetic travel bags and small textile accessories.",
+            "general_moq": 1000,
+            "capabilities": [
+              [
+                "BRANDING_METHOD",
+                "screen print"
+              ],
+              [
+                "CERTIFICATION",
+                "grs"
+              ],
+              [
+                "CUSTOM_BRANDING",
+                "true"
+              ],
+              [
+                "MATERIAL",
+                "recycled polyester"
+              ],
+              [
+                "PRODUCT_CATEGORY",
+                "cosmetic travel bag"
+              ]
+            ],
+            "general_lead_time_days": 32,
+            "indicative_price_amount": "4.6000",
+            "indicative_price_currency": "USD"
+          }
+        }
+      ]
+    }
+  },
+  "initial": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Moss Thread Bags material is MEETS.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "2e0d1fd9-7065-5866-964a-92114c0d9126"
+          ]
+        },
+        {
+          "text": "Moss Thread Bags quoted quantity is 2,000 and production lead time is 37 days; its project quote MOQ is 800. The current unit price is USD 4.45, but the supplied comparison includes no source evidence verifying that price.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "currency"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab material is UNKNOWN.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab quoted quantity is 2,000 and production lead time is 45 days; its project quote MOQ is 1,500. The current unit price is USD 4.10, but the supplied comparison includes no source evidence verifying that price. Shipping is listed at USD 800.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "shipping_cost"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Harbor Pouch Works material is MEETS.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1574c829-2b7b-500d-96ac-153811a6a8da"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works GRS certification is MEETS.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "8643eee8-edd2-5de6-8b53-f4b5435de096"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works quoted quantity is 2,000 and production lead time is 32 days; its project quote MOQ is 1,000. The current unit price is USD 4.60, but the supplied comparison includes no source evidence verifying that price. Shipping is listed at USD 600.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "shipping_cost"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [
+        {
+          "text": "Sunrise Textile Lab GRS certification is CONFLICT.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+            "4d2de0c9-5783-5478-ab80-eca25fe29677"
+          ]
+        },
+        {
+          "text": "Moss Thread Bags certification is preferred but unresolved; Sunrise Textile Lab has an unresolved required material finding and conflicting GRS records. Harbor Pouch Works meets the required material and preferred GRS certification findings, but does not meet the informational custom-branding requirement.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79",
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33",
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "2e0d1fd9-7065-5866-964a-92114c0d9126",
+            "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+            "4d2de0c9-5783-5478-ab80-eca25fe29677",
+            "1574c829-2b7b-500d-96ac-153811a6a8da",
+            "8643eee8-edd2-5de6-8b53-f4b5435de096",
+            "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+          ]
+        },
+        {
+          "text": "The project quotes are all for 2,000 units and list USD unit prices of 4.45 for Moss Thread Bags, 4.10 for Sunrise Textile Lab, and 4.60 for Harbor Pouch Works. These current values are comparable as listed, but the comparison supplies no source evidence verifying them; shipping charges also differ or are missing, so the unit prices do not establish equivalent delivered costs.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "shipping_cost"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "shipping_cost"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "shipping_cost"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Production lead times are listed as 37 days for Moss Thread Bags, 45 days for Sunrise Textile Lab, and 32 days for Harbor Pouch Works. Total lead time and delivery date are unavailable for all three, so the 60-day delivery target cannot be confirmed from production lead time alone.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "important_unknowns": [
+        {
+          "text": "Moss Thread Bags requirement is UNKNOWN.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Moss Thread Bags GRS certification is UNKNOWN.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Moss Thread Bags total lead time is UNKNOWN. Moss Thread Bags delivery date is UNKNOWN. Moss Thread Bags incoterm is UNKNOWN. Moss Thread Bags quote validity is UNKNOWN.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "incoterm"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "quote_validity"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab certification is UNKNOWN.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab total lead time is UNKNOWN. Sunrise Textile Lab delivery date is UNKNOWN. Sunrise Textile Lab incoterm is UNKNOWN. Sunrise Textile Lab quote validity is UNKNOWN.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "incoterm"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "quote_validity"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Harbor Pouch Works total lead time is UNKNOWN. Harbor Pouch Works delivery date is UNKNOWN. Harbor Pouch Works incoterm is UNKNOWN. Harbor Pouch Works quote validity is UNKNOWN.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "incoterm"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quote_validity"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "Sunrise Textile Lab GRS certification is CONFLICT.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+            "4d2de0c9-5783-5478-ab80-eca25fe29677"
+          ]
+        },
+        {
+          "text": "The two current GRS records for Sunrise Textile Lab disagree: one marks the certification inactive and the other marks it active.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+            "4d2de0c9-5783-5478-ab80-eca25fe29677"
+          ]
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "fdc24cfa-7350-5ce4-b8d2-249085cd36da",
+      "supporting_reasons": [
+        {
+          "text": "Harbor Pouch Works meets the required recycled polyester material and preferred GRS certification findings.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79",
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1574c829-2b7b-500d-96ac-153811a6a8da",
+            "8643eee8-edd2-5de6-8b53-f4b5435de096"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works quotes 2,000 units with a project MOQ of 1,000 and a listed production lead time of 32 days. The listed USD 4.60 unit price is a current quote value, but the comparison supplies no source evidence verifying it.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [
+        {
+          "text": "Harbor Pouch Works requirement is DOES_NOT_MEET.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works does not meet the informational custom-branding requirement. The listed shipping cost is USD 600; total lead time, delivery date, incoterm, and quote validity remain unavailable, so the 60-day delivery target is not confirmed.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "shipping_cost"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "incoterm"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quote_validity"
+            }
+          ],
+          "evidence_ids": [
+            "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+          ]
+        }
+      ],
+      "uncertainties": [],
+      "evidence_ids": [
+        "1574c829-2b7b-500d-96ac-153811a6a8da",
+        "8643eee8-edd2-5de6-8b53-f4b5435de096",
+        "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+      ]
+    }
+  },
+  "repair": {
+    "analysis": {
+      "supplier_summaries": [
+        {
+          "text": "Moss Thread Bags material is MEETS.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "2e0d1fd9-7065-5866-964a-92114c0d9126"
+          ]
+        },
+        {
+          "text": "Moss Thread Bags quoted quantity is 2,000, production lead time is 37 days, and project quote MOQ is 800. Current listed unit price is USD 4.45; the comparison supplies no source evidence verifying that price.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "currency"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab material is UNKNOWN.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab quoted quantity is 2,000, production lead time is 45 days, and project quote MOQ is 1,500. Current listed unit price is USD 4.10, but the comparison supplies no source evidence verifying that price. Shipping is listed at USD 800.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "shipping_cost"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Harbor Pouch Works material is MEETS.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1574c829-2b7b-500d-96ac-153811a6a8da"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works GRS certification is MEETS.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "8643eee8-edd2-5de6-8b53-f4b5435de096"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works quoted quantity is 2,000, production lead time is 32 days, and project quote MOQ is 1,000. Current listed unit price is USD 4.60, but the comparison supplies no source evidence verifying that price. Shipping is listed at USD 600.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "shipping_cost"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "key_tradeoffs": [
+        {
+          "text": "The project quotes are all for 2,000 units and list unit prices in USD: Moss Thread Bags at 4.45, Sunrise Textile Lab at 4.10, and Harbor Pouch Works at 4.60. These are current listed values, not independently verified by source evidence in the comparison. Shipping costs are missing for Moss Thread Bags and are listed at USD 800 for Sunrise Textile Lab and USD 600 for Harbor Pouch Works; the unit prices therefore do not establish equivalent delivered costs.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "shipping_cost"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "shipping_cost"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "shipping_cost"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Production lead times are listed as 37 days for Moss Thread Bags, 45 days for Sunrise Textile Lab, and 32 days for Harbor Pouch Works. Total lead time and delivery date are unavailable for all three; production lead time alone does not confirm the brief's 60-day delivery target.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "911185f4-d8a8-4f30-99e7-f826189c1763",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "b2d8727c-1b4b-428f-a8a1-695519c02762",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Moss Thread Bags has an unresolved required material finding and unresolved preferred certification finding. Sunrise Textile Lab has an unresolved required material finding and conflicting current GRS records. Harbor Pouch Works meets the required material and preferred GRS findings, but does not meet the informational custom-branding requirement.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79",
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33",
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "2e0d1fd9-7065-5866-964a-92114c0d9126",
+            "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+            "4d2de0c9-5783-5478-ab80-eca25fe29677",
+            "1574c829-2b7b-500d-96ac-153811a6a8da",
+            "8643eee8-edd2-5de6-8b53-f4b5435de096",
+            "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+          ]
+        }
+      ],
+      "important_unknowns": [
+        {
+          "text": "Moss Thread Bags requirement is UNKNOWN.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Moss Thread Bags GRS certification is UNKNOWN.",
+          "supplier_ids": [
+            "ab260b2a-cd49-58f6-8d8d-e474a7e737c6"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Sunrise Textile Lab requirement is UNKNOWN.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": []
+        },
+        {
+          "text": "Harbor Pouch Works total lead time is UNKNOWN. Harbor Pouch Works delivery date is UNKNOWN. Harbor Pouch Works incoterm is UNKNOWN. Harbor Pouch Works quote validity is UNKNOWN.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "incoterm"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quote_validity"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "important_conflicts": [
+        {
+          "text": "Sunrise Textile Lab GRS certification is CONFLICT.",
+          "supplier_ids": [
+            "b6ffa3a1-2510-5376-92cb-aaaef846ca5a"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+            "4d2de0c9-5783-5478-ab80-eca25fe29677"
+          ]
+        }
+      ]
+    },
+    "suggestion": {
+      "supplier_id": "fdc24cfa-7350-5ce4-b8d2-249085cd36da",
+      "supporting_reasons": [
+        {
+          "text": "Harbor Pouch Works material is MEETS.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "7951561e-ee55-4132-8fd8-68a66e147d79"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "1574c829-2b7b-500d-96ac-153811a6a8da"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works GRS certification is MEETS.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "f6fce07e-3e11-4939-bb0c-0994f90e6e33"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "8643eee8-edd2-5de6-8b53-f4b5435de096"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works quotes 2,000 units with a project MOQ of 1,000 and a listed production lead time of 32 days. The current listed unit price is USD 4.60, but the comparison supplies no source evidence verifying that price.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quoted_quantity"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "moq"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "unit_price"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "tradeoffs": [
+        {
+          "text": "Harbor Pouch Works requirement is DOES_NOT_MEET.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [],
+          "evidence_ids": [
+            "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+          ]
+        },
+        {
+          "text": "Harbor Pouch Works does not meet the informational custom-branding requirement. Harbor Pouch Works shipping cost is USD 600. Production lead time alone does not establish whether the 60-day delivery target will be met.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [
+            "333e92c5-ba9b-49da-afe7-f82750fc9d0c"
+          ],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "shipping_cost"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "currency"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "production_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            }
+          ],
+          "evidence_ids": [
+            "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+          ]
+        }
+      ],
+      "uncertainties": [
+        {
+          "text": "Harbor Pouch Works total lead time is UNKNOWN. Harbor Pouch Works delivery date is UNKNOWN.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "total_lead_time"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "delivery_date"
+            }
+          ],
+          "evidence_ids": []
+        },
+        {
+          "text": "Harbor Pouch Works incoterm is UNKNOWN. Harbor Pouch Works quote validity is UNKNOWN.",
+          "supplier_ids": [
+            "fdc24cfa-7350-5ce4-b8d2-249085cd36da"
+          ],
+          "requirement_ids": [],
+          "quote_fields": [
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "incoterm"
+            },
+            {
+              "quote_id": "72f1d281-ceee-45a6-b601-cef8fc875363",
+              "field_key": "quote_validity"
+            }
+          ],
+          "evidence_ids": []
+        }
+      ],
+      "evidence_ids": [
+        "1574c829-2b7b-500d-96ac-153811a6a8da",
+        "8643eee8-edd2-5de6-8b53-f4b5435de096",
+        "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+      ]
+    }
+  }
+}

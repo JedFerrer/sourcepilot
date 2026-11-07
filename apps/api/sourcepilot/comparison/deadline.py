@@ -10,9 +10,41 @@ from collections.abc import Callable
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 
+TIMEOUT_ORIGINS = frozenset({
+    "SDK_CONNECT", "SDK_READ", "SDK_WRITE", "SDK_POOL", "SDK_UNKNOWN", "APP_ATTEMPT",
+    "APP_WORK_BUDGET", "APP_TOTAL_BUDGET", "APP_CLEANUP_BUDGET", "UNKNOWN", "NOT_APPLICABLE",
+})
+TRANSPORT_PHASES = frozenset({
+    "CONNECT_TCP", "START_TLS", "SEND_REQUEST_HEADERS", "SEND_REQUEST_BODY",
+    "RECEIVE_RESPONSE_HEADERS", "RECEIVE_RESPONSE_BODY", "UNKNOWN",
+})
+TRANSPORT_STATES = frozenset({"STARTED", "COMPLETE", "FAILED", "UNKNOWN"})
+
+
+@dataclass(frozen=True)
+class TimeoutDiagnostics:
+    """Last observed operation/state, never timing or root-cause proof."""
+
+    timeout_origin: str = "UNKNOWN"
+    transport_phase: str = "UNKNOWN"
+    transport_phase_state: str = "UNKNOWN"
+
+    def __post_init__(self) -> None:
+        for name, allowed in (
+            ("timeout_origin", TIMEOUT_ORIGINS), ("transport_phase", TRANSPORT_PHASES),
+            ("transport_phase_state", TRANSPORT_STATES),
+        ):
+            value = getattr(self, name)
+            if type(value) is not str or value not in allowed:
+                object.__setattr__(self, name, "UNKNOWN")
+
 
 class ComparisonDeadlineError(TimeoutError):
     """The comparison's work or terminal bookkeeping budget was exhausted."""
+
+    def __init__(self, message: str, *, diagnostics: TimeoutDiagnostics | None = None) -> None:
+        super().__init__(message)
+        self.timeout_diagnostics = diagnostics or TimeoutDiagnostics()
 
 
 @dataclass(frozen=True)
@@ -60,8 +92,30 @@ class ComparisonDeadline:
             end = min(end, self.cleanup_end)
         remaining = end - self.clock()
         if remaining <= 0:
-            raise ComparisonDeadlineError("Comparison analysis deadline exceeded.")
+            raise ComparisonDeadlineError(
+                "Comparison analysis deadline exceeded.",
+                diagnostics=TimeoutDiagnostics(self.timeout_origin()),
+            )
         return remaining
+
+    def timeout_origin(self) -> str:
+        # Observation only: do not reschedule, consume or extend any budget.
+        try:
+            now = self.clock()
+            if now >= self.started + self.settings.total:
+                return "APP_TOTAL_BUDGET"
+            if self.cleaning_up:
+                if ((self.cleanup_end is not None and now >= self.cleanup_end)
+                        or (self.total_timeout is not None and self.total_timeout.expired())):
+                    return "APP_CLEANUP_BUDGET"
+            elif ((self.work_timeout is not None and self.work_timeout.expired())
+                  or now >= self.started + self.settings.total - self.settings.cleanup):
+                return "APP_WORK_BUDGET"
+            if self.total_timeout is not None and self.total_timeout.expired():
+                return "APP_TOTAL_BUDGET"
+        except Exception:  # noqa: BLE001, S110 - observation cannot change execution
+            pass
+        return "UNKNOWN"
 
     def check(self) -> None:
         self.remaining()

@@ -60,10 +60,14 @@ function AdvicePoints({ title, points, comparison }: { title: string; points: An
       const fields = [...fieldKeys];
       const results = supplier.evaluation.results.filter((result) => result.requirement_id && point.requirement_ids.includes(result.requirement_id));
       return <div key={supplier.supplier_id}>
-        {results.map((result) => <div key={result.requirement_id}>
-          <p>{supplier.supplier_name}: {label(result.kind)} — {label(result.status)}</p>
-          <SourceDetails supplier={supplier} fact={result.selected_fact} evidenceIds={result.evidence_ids} />
-        </div>)}
+        {results.map((result) => {
+          const requirement = comparison.comparison_payload.brief.requirements.find((item) => item.id === result.requirement_id);
+          return <div key={result.requirement_id}>
+            <p>{supplier.supplier_name}: {label(result.kind)} — {label(result.status)}</p>
+            {requirement && <p><span className="comparison-importance">{label(requirement.importance ?? "informational")}</span>{" · Expected: "}{display(requirement.expected_value)}</p>}
+            <SourceDetails supplier={supplier} fact={result.selected_fact} evidenceIds={result.evidence_ids} />
+          </div>;
+        })}
         {fields.map((fieldKey) => <SourceDetails key={fieldKey} supplier={supplier} fieldKey={fieldKey} evidenceIds={point.evidence_ids} />)}
         {!fields.length ? <SourceDetails supplier={supplier} evidenceIds={point.evidence_ids} /> : null}
       </div>;
@@ -184,6 +188,11 @@ function SourceDetails({ supplier, fact, resolution, fieldKey, evidenceIds = [],
     {selectedQuoteFields.map((selectedQuoteField) => <div key={selectedQuoteField.source_reference}>
       <p>{label(selectedQuoteField.field_key)} source: {selectedQuoteField.source_reference}</p>
       <p>{label(selectedQuoteField.field_key)} current origin: {label(selectedQuoteField.origin)}</p>
+      {selectedQuoteField.origin === "USER_CORRECTED" ? <>
+        <p>Current user-corrected value: {display(selectedQuoteField.current_value)}</p>
+        {selectedQuoteField.field_key === "unit_price" && supplier.completeness.some((item) => item.field_key === "currency" && item.state === "conflicting")
+          ? <p>Currency conflict remains unresolved; no currency is assigned to this amount.</p> : null}
+      </> : null}
       {selectedQuoteField.origin === "USER_CORRECTED" ? <p>User-corrected value is current. Original PDF extraction below is provenance only; it does not verify the correction.</p> : null}
       {selectedQuoteField.ai_extracted_value != null ? <p>Original extracted value: {display(selectedQuoteField.ai_extracted_value)}</p> : null}
       {selectedQuoteField.evidence.map((item) => <p key={item.id}>

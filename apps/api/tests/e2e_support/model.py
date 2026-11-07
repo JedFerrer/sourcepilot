@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from sourcepilot.ai.advice_selection import ComparisonSelectionV1
 from sourcepilot.ai.brief_interpreter import ExtractedBrief
 from sourcepilot.ai.clarification import ClarificationSet
 from sourcepilot.ai.client import AnalystModelInvocation, ModelInvocation
@@ -20,7 +21,7 @@ API = SUPPORT.parents[1]
 PDFS = API / "tests" / "fixtures" / "quote_pdfs"
 SCHEMAS = {model.__name__: model for model in (
     ExtractedBrief, ClarificationSet, QuoteExtraction, ModelSupplierExplanation,
-    ComparisonAdvice, TradeoffAnalysis,
+    ComparisonAdvice, TradeoffAnalysis, ComparisonSelectionV1,
 )}
 
 
@@ -38,7 +39,25 @@ def point(text: str, supplier: dict[str, Any], requirements: list[str] | None = 
             "quote_fields": [{"quote_id": supplier["quote_id"], "field_key": field}] if field else []}
 
 
-def comparison_output(payload: dict[str, Any]) -> dict[str, Any]:
+def comparison_selection(initial: dict[str, Any], *, suggest: bool = False) -> dict[str, Any]:
+    """Choose supplied facts at the private model boundary, never public prose."""
+    supplier = initial["comparison_payload"]["suppliers"][0]
+    eligible = [f"R:{supplier['supplier_id']}:{r['requirement_id']}"
+                for r in supplier["evaluation"]["results"]
+                if r["requirement_id"] is not None and r["status"] == "MEETS"]
+    eligible.extend(f"Q:{supplier['quote_id']}:{field['field_key']}"
+                    for field in supplier["quote_fields"]
+                    if field.get("completeness", {}).get("state") == "known")
+    fact_id = eligible[0] if eligible else next(iter(initial["fact_catalogue"]))
+    selected = suggest and bool(eligible)
+    return {"version": "comparison-selection-v1", "snapshot_id": initial["snapshot_id"],
+            "highlights": [fact_id], "tradeoffs": [], "verification_actions": [],
+            "suggestion": {"supplier_id": supplier["supplier_id"] if selected else None,
+                           "reason_fact_ids": [fact_id] if selected else [],
+                           "no_suggestion_reason": None if selected else "NO_CLEAR_PREFERENCE"}}
+
+
+def comparison_output(payload: dict[str, Any], *, suggest: bool = False) -> dict[str, Any]:
     """Reference real facts without inventing supplier fitness or an overall score."""
     analysis: dict[str, Any] = {"supplier_summaries": [], "key_tradeoffs": [],
                                 "important_unknowns": [], "important_conflicts": []}
@@ -62,15 +81,34 @@ def comparison_output(payload: dict[str, Any]) -> dict[str, Any]:
             section = "important_unknowns" if finding["status"] == "UNKNOWN" else "important_conflicts"
             analysis[section].append(point(
                 f"The requirement state is {finding['status']}.", supplier, [finding["requirement_id"]]))
-        for missing in supplier["completeness"]:
+        for field in supplier["quote_fields"]:
+            missing = field.get("completeness")
+            if missing is None:
+                continue
             if missing["state"] not in {"missing", "conflicting"}:
                 continue
             section = "important_unknowns" if missing["state"] == "missing" else "important_conflicts"
-            label = missing["field_key"].replace("_", " ")
+            label = field["field_key"].replace("_", " ")
             analysis[section].append(point(
                 f"{label} is {'unknown' if missing['state'] == 'missing' else 'conflicting'}.",
-                supplier, field=missing["field_key"]))
+                supplier, field=field["field_key"]))
     advisory = SCENARIO["advisory"]
+    if suggest:
+        selected = payload["suppliers"][0]
+        tradeoffs, uncertainties = [], []
+        for finding in selected["evaluation"]["results"]:
+            if finding["requirement_id"] is None or finding["status"] == "MEETS":
+                continue
+            item = point(f"The requirement state is {finding['status']}.", selected,
+                         [finding["requirement_id"]])
+            (tradeoffs if finding["status"] == "DOES_NOT_MEET" else uncertainties).append(item)
+        uncertainties.append(point("Review the documented gaps before choosing a preferred supplier.", selected))
+        return {"analysis": analysis, "suggestion": {
+            "supplier_id": selected["supplier_id"],
+            "supporting_reasons": [point("Confirmed quote facts support further investigation.", selected,
+                                         field="unit_price")],
+            "tradeoffs": tradeoffs, "uncertainties": uncertainties, "evidence_ids": [],
+        }}
     return {"analysis": analysis, "suggestion": {
         "supplier_id": advisory["supplier_id"], "supporting_reasons": advisory["supporting_reasons"],
         "tradeoffs": advisory["tradeoffs"], "evidence_ids": [],
@@ -133,7 +171,8 @@ class DeterministicModel:
     def invoke_with_tools(self, *, instructions: str, input_items: list[dict[str, Any]],
                           tools: list[dict[str, Any]], schema_name: str,
                           schema: dict[str, Any]) -> AnalystModelInvocation:
-        check_schema(schema_name, schema, {"ModelSupplierExplanation", ComparisonAdvice.__name__, "TradeoffAnalysis"})
+        check_schema(schema_name, schema, {"ModelSupplierExplanation", ComparisonAdvice.__name__,
+                                         "TradeoffAnalysis", "ComparisonSelectionV1"})
         initial = json.loads(input_items[0]["content"])
         supplier_task = schema_name == "ModelSupplierExplanation"
         if supplier_task:
@@ -167,7 +206,8 @@ class DeterministicModel:
                 raise AssertionError("E2E analyst requires a current matching snapshot.")
             if results[1]["quote_id"] != initial["comparison_payload"]["suppliers"][0]["quote_id"]:
                 raise AssertionError("Unexpected E2E quote evidence owner.")
-            output = comparison_output(snapshot["comparison_payload"])
+            output = (comparison_selection(initial) if schema_name == "ComparisonSelectionV1"
+                      else comparison_output(snapshot["comparison_payload"]))
             if schema_name == "TradeoffAnalysis":
                 output = output["analysis"]
         SCHEMAS[schema_name].model_validate(output)

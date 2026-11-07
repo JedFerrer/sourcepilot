@@ -19,6 +19,7 @@ from sqlalchemy.pool import NullPool
 from sourcepilot.comparison.deadline import (
     ComparisonDeadline,
     ComparisonDeadlineError,
+    TimeoutDiagnostics,
     current_deadline,
 )
 from sourcepilot.comparison.lifecycle import ComparisonLifecycle, comparison_loop, current_owner
@@ -31,7 +32,8 @@ _cli_runtime: ContextVar[ComparisonLifecycle | None] = ContextVar("comparison_cl
 
 
 async def cleanup_attempt(name: str, resource: object, action: Callable[[], Awaitable[object]],
-                          deadline: ComparisonDeadline, fraction: float = 0.15) -> bool:
+                          deadline: ComparisonDeadline, fraction: float = 0.15,
+                          on_timeout: Callable[[], None] | None = None) -> bool:
     """Independent cooperative attempt; retain ownership on unconfirmed release."""
     owner = current_owner.get()
     key = f"{name}:{id(resource)}"
@@ -40,8 +42,9 @@ async def cleanup_attempt(name: str, resource: object, action: Callable[[], Awai
     seconds = max(0, min(deadline.settings.cleanup * fraction,
                          deadline.started + deadline.settings.total - deadline.clock()))
     complete = False
+    cleanup_timeout: asyncio.Timeout | None = None
     try:
-        async with asyncio.timeout(seconds):
+        async with asyncio.timeout(seconds) as cleanup_timeout:
             await action()
         complete = seconds > 0 and deadline.clock() < deadline.started + deadline.settings.total
     except asyncio.CancelledError:
@@ -51,6 +54,13 @@ async def cleanup_attempt(name: str, resource: object, action: Callable[[], Awai
                        or deadline.clock() >= deadline.started + deadline.settings.total)
         if owner is not None and task is not None and task.cancelling() and not own_timeout:
             owner.cancelled_during_cleanup = True
+    except TimeoutError:
+        if cleanup_timeout is not None and cleanup_timeout.expired() and on_timeout is not None:
+            try:
+                on_timeout()
+            except Exception:  # noqa: BLE001, S110 - optional observation cannot change cleanup
+                pass
+        complete = False
     except Exception:  # noqa: BLE001 - independent cleanup, safe log below
         complete = False
     if complete and owner is not None:
@@ -96,7 +106,10 @@ async def run_async_comparison(session: Session, operation: Callable[[Session], 
                 deadline.remaining(total=True)
                 return result
     except TimeoutError as error:
-        raise ComparisonDeadlineError("Comparison analysis deadline exceeded.") from error
+        diagnostics = (error.timeout_diagnostics if isinstance(error, ComparisonDeadlineError)
+                       else TimeoutDiagnostics(deadline.timeout_origin()))
+        raise ComparisonDeadlineError("Comparison analysis deadline exceeded.",
+                                      diagnostics=diagnostics) from error
     except DBAPIError as error:
         if getattr(error.orig, "sqlstate", None) in {"57014", "55P03"}:
             raise ComparisonDeadlineError("Comparison database wait exceeded its budget.") from error

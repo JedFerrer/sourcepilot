@@ -14,6 +14,13 @@ from urllib.parse import urlsplit
 
 from sqlalchemy.orm import Session
 
+from sourcepilot.ai.client import PROVIDER_CATEGORIES, PROVIDER_CODES, PROVIDER_STATUSES
+from sourcepilot.comparison.deadline import (
+    TIMEOUT_ORIGINS,
+    TRANSPORT_PHASES,
+    TRANSPORT_STATES,
+    TimeoutDiagnostics,
+)
 from sourcepilot.comparison.validation import SCHEMA_LABELS, RejectionCode
 from sourcepilot.persistence.models import AIRun, SupplierExplanationRunStep
 
@@ -33,6 +40,7 @@ OUTCOMES = frozenset({
     "CHANGED", "CURRENT", "LIMIT_REACHED", "NOT_FOUND", "NOT_ALLOWED", "OUT_OF_SCOPE",
     "COMPLETE", "PARTIAL", "UNAVAILABLE", "ERROR", "TIMED_OUT",
 })
+OUTCOMES = OUTCOMES | {"DIAGNOSTIC"}
 ERRORS = frozenset({
     "ModelProviderError", "ValidationError", "ValueError", "TimeoutError",
     "SCOPE_CHANGED", "STALE_COMPARISON", "COMPARISON_STALE", "StalePdfAttemptError",
@@ -43,6 +51,8 @@ NAMES = TOOLS | SCHEMA_LABELS | {"model_turns", "tool_calls", "input_tokens", "o
     code.value for code in RejectionCode
 ) | frozenset(f"{phase}_{attempt}" for phase in ("analysis", "suggestion", "schema", "unknown")
               for attempt in ("initial", "repair"))
+NAMES = NAMES | PROVIDER_CATEGORIES | PROVIDER_STATUSES | PROVIDER_CODES
+NAMES = NAMES | TIMEOUT_ORIGINS | TRANSPORT_PHASES | TRANSPORT_STATES
 
 
 def safe_label(value: str | None, allowed: frozenset[str]) -> str | None:
@@ -237,7 +247,9 @@ class RunObservations:
             else:
                 observation = self.root.start_observation(
                     name=kind if kind in {"model", "tool", "retry", "validation", "scope",
-                                         "limit", "run", "usage"} else "OTHER",
+                                         "limit", "run", "usage", "provider_category",
+                                         "provider_status", "provider_code", "timeout_origin",
+                                         "transport_phase", "transport_phase_state"} else "OTHER",
                     as_type="span", metadata={
                         "sourcepilot": True, "outcome": safe_outcome,
                         "name": safe_label(name, NAMES), "sequence": sequence,
@@ -284,6 +296,7 @@ class RunTrace:
         self.started = time.monotonic()
         self.sequence = 0
         self.active_kind: str | None = None
+        self.pending_diagnostics: list[tuple[str, str, str | None]] = []
         self.reported = {"input_tokens": 0, "output_tokens": 0}
         self.tracer = tracer
         self.observations = RunObservations(run, {
@@ -293,15 +306,31 @@ class RunTrace:
         })
 
     def step(self, kind: str, outcome: str, name: str | None = None) -> None:
-        self.sequence += 1
-        self.session.add(SupplierExplanationRunStep(
-            air_run_id=self.run.id, sequence=self.sequence, kind=kind, outcome=outcome,
-            name=safe_label(name, NAMES),
-        ))
+        events, self.pending_diagnostics = self.pending_diagnostics, []
+        events.append((kind, outcome, safe_label(name, NAMES)))
+        for event_kind, event_outcome, event_name in events:
+            self.sequence += 1
+            self.session.add(SupplierExplanationRunStep(
+                air_run_id=self.run.id, sequence=self.sequence, kind=event_kind,
+                outcome=event_outcome, name=event_name,
+            ))
         self.session.commit()
         if kind == self.active_kind:
             self.active_kind = None
-        self.observations.step(kind, outcome, name, self.sequence)
+        for offset, (event_kind, event_outcome, event_name) in enumerate(events):
+            self.observations.step(event_kind, event_outcome, event_name,
+                                   self.sequence - len(events) + offset + 1)
+
+    def timeout_diagnostics(self, diagnostics: TimeoutDiagnostics) -> None:
+        # Join the next existing commit; no additional I/O or budget for observation.
+        try:
+            safe = TimeoutDiagnostics(diagnostics.timeout_origin, diagnostics.transport_phase,
+                                      diagnostics.transport_phase_state)
+            self.pending_diagnostics.extend((kind, "DIAGNOSTIC", getattr(safe, kind)) for kind in (
+                "timeout_origin", "transport_phase", "transport_phase_state",
+            ))
+        except Exception:  # noqa: BLE001, S110 - optional observation cannot replace the failure
+            pass
 
     def begin(self, kind: str, name: str | None = None) -> None:
         self.active_kind = kind
@@ -324,6 +353,8 @@ class RunTrace:
         events: list[tuple[str, str, str | None]] = []
         if self.active_kind is not None:
             events.append((self.active_kind, "ERROR", None))
+        events.extend(self.pending_diagnostics)
+        self.pending_diagnostics = []
         for key, reported in self.reported.items():
             outcome = "UNAVAILABLE" if reported == 0 else (
                 "COMPLETE" if reported == self.run.attempts else "PARTIAL"

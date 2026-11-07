@@ -1,5 +1,6 @@
 """Recover failures through the real Analyst, freshness check and terminal trace."""
 import asyncio
+import logging
 import threading
 import time
 from uuid import UUID, uuid4
@@ -255,6 +256,9 @@ def test_failed_terminal_persistence_is_unconfirmed_and_cannot_return_advice(
 ):
     from sourcepilot.ai.tracing import RunTrace
 
+    # Migration fixture fileConfig disables loggers created by earlier cases.
+    monkeypatch.setattr(logging.getLogger("sourcepilot.ai.tradeoff_analysis"), "disabled", False)
+    caplog.set_level("WARNING", logger="sourcepilot.ai.tradeoff_analysis")
     project, _, _ = ready(client)
     path = f"/projects/{project}/comparison"
     before = client.get(path).json()

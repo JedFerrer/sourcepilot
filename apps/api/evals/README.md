@@ -47,7 +47,7 @@ make it incomplete. Only runs selecting all six categories qualify as full basel
 Negative controls test scorer sensitivity offline and are never prompts asking the
 live model to produce deliberately bad answers. Live controls remain labelled as
 offline-only checks, separate from provider-produced results.
-The separate ten-example human-review set is not part of the 90 automated case
+The separate fifteen-example human-review set is not part of the 90 automated case
 denominator. Automated case completion leaves its review status pending.
 
 ## Status and exits
@@ -217,6 +217,18 @@ general versus quoted lead-time paraphrases. Its review criteria and automation
 limits are recorded per example. Human review is **pending**; example criteria are
 not review outcomes. Preserve actual outputs and signals during triage. No judge-model
 dependency is used.
+
+The currency-grounding follow-up adds five factual-review regressions: the exact
+observed v7 shipping-currency contradiction, known quote currency with scalar
+shipping/tooling amounts, missing currency, conflicting currency, and known
+currency without PDF verification. Context and review criteria are retained per
+case. The observed answer was structurally VALID but factually contradicted by
+the saved USD currency; that historical finding remains open. The other examples
+are curated contract-compatible responses, not live model outputs. Field-specific
+evidence omitting sibling currency is distinct from currency missing in the full
+snapshot. All five remain PENDING/null in offline reports under existing review
+conventions; the 90 automated cases and scoring are unchanged. Provider-free
+success proves neither live prompt adherence nor narrative factual correctness.
 
 ## Source provenance and retained evidence
 

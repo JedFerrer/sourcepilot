@@ -8,12 +8,13 @@ import logging
 import threading
 from datetime import UTC, datetime
 from types import SimpleNamespace
-from typing import Any
+from typing import Any, cast
 from uuid import uuid4
 
 import pytest
 
 from sourcepilot.ai import tracing
+from sourcepilot.ai.client import ProviderDiagnostics, comparison_provider_diagnostics
 from sourcepilot.persistence.models import AIRun
 
 
@@ -214,3 +215,75 @@ def test_shutdown_does_not_wait_indefinitely(monkeypatch: pytest.MonkeyPatch) ->
         assert entered.is_set() and not released.is_set()
     finally:
         released.set()
+
+
+@pytest.mark.parametrize("export", ["disabled", "enabled", "broken"])
+@pytest.mark.parametrize("known", [True, False])
+def test_provider_diagnostics_persist_and_export_only_allowlisted_labels(monkeypatch, caplog, export, known):
+    import httpx
+    from openai import APIStatusError
+
+    calls = []
+    rows = []
+    request = httpx.Request("POST", "https://fixture.invalid/private-url",
+                           headers={"Authorization": "private-credential"}, content="private-quote")
+    error = APIStatusError("private-message", response=httpx.Response(
+        401, request=request, headers={"x-request-id": "private-header"}),
+        body={"code": "invalid_api_key" if known else "private-code", "message": "private-body"})
+    diagnostics = comparison_provider_diagnostics(error)
+    assert diagnostics == ProviderDiagnostics("AUTHENTICATION", "401", "invalid_api_key" if known else "UNKNOWN")
+    if export == "enabled":
+        monkeypatch.setattr(tracing, "langfuse_client", lambda: Observation(calls))
+    elif export == "broken":
+        class BrokenObservation(Observation):
+            def start_observation(self, **kwargs):
+                raise RuntimeError("private-export-message")
+        monkeypatch.setattr(tracing, "langfuse_client", lambda: BrokenObservation(calls))
+    session = SimpleNamespace(add=rows.append, commit=lambda: None)
+    run = run_record()
+    run.operation = "comparison_advice"
+    trace = tracing.RunTrace(session, run)  # type: ignore[arg-type]
+    for name in ("category", "status", "code"):
+        trace.step(f"provider_{name}", "DIAGNOSTIC", getattr(diagnostics, name))
+    assert [(row.sequence, row.kind, row.outcome, row.name) for row in rows] == [
+        (1, "provider_category", "DIAGNOSTIC", "AUTHENTICATION"),
+        (2, "provider_status", "DIAGNOSTIC", "401"),
+        (3, "provider_code", "DIAGNOSTIC", "invalid_api_key" if known else "UNKNOWN"),
+    ]
+    if export == "enabled":
+        assert [(call["name"], call["metadata"]["name"]) for call in calls[2:]] == [
+            (row.kind, row.name) for row in rows]
+    payload = json.dumps(calls) + json.dumps([(r.kind, r.outcome, r.name) for r in rows]) + caplog.text
+    assert "private-" not in payload
+
+
+@pytest.mark.parametrize("broken", [False, True])
+@pytest.mark.parametrize("known", [False, True])
+def test_timeout_metadata_joins_existing_commit_with_safe_export(monkeypatch, caplog, broken, known):
+    from sourcepilot.comparison.deadline import TimeoutDiagnostics
+    from tests.test_comparison_transport import HostileDiagnostic
+    calls, rows, commits = [], [], []
+    class Export(Observation):
+        def start_observation(self, **kwargs):
+            if broken:
+                raise RuntimeError("private-export")
+            return super().start_observation(**kwargs)
+    monkeypatch.setattr(tracing, "langfuse_client", lambda: Export(calls))
+    session = SimpleNamespace(add=rows.append, commit=lambda: commits.append(True))
+    trace = tracing.RunTrace(cast(Any, session), run_record())
+    diagnostic = (TimeoutDiagnostics("SDK_READ", "RECEIVE_RESPONSE_BODY", "FAILED") if known else
+                  TimeoutDiagnostics(*[cast(Any, HostileDiagnostic()) for _ in range(3)]))
+    trace.timeout_diagnostics(diagnostic)
+    assert not rows and not commits
+    trace.step("retry", "PROVIDER")
+    assert len(commits) == 1
+    assert [(row.sequence, row.kind, row.name) for row in rows] == [
+        (1, "timeout_origin", "SDK_READ" if known else "UNKNOWN"),
+        (2, "transport_phase", "RECEIVE_RESPONSE_BODY" if known else "UNKNOWN"),
+        (3, "transport_phase_state", "FAILED" if known else "UNKNOWN"),
+        (4, "retry", None),
+    ]
+    if not broken:
+        assert [(call["name"], call["metadata"]["name"]) for call in calls[2:]] == [
+            (row.kind, row.name) for row in rows]
+    assert "private-" not in json.dumps(calls) + caplog.text

@@ -86,8 +86,37 @@ REPAIR_FEEDBACK: dict[RejectionCode, str] = {
     RejectionCode.UNKNOWN_EVIDENCE: "Copy evidence IDs from supplied or retrieved evidence only.",
     RejectionCode.EVIDENCE_OWNER_MISMATCH: "Match evidence ownership to the referenced suppliers.",
     RejectionCode.PROHIBITED_SCORE: "Remove numeric supplier scores and ratings; preserve quote facts.",
-    RejectionCode.STATE_SYNTAX: "Use one explicit supplier, requirement kind and state per sentence.",
-    RejectionCode.STATE_REFERENCE: "Bind each state assertion to unambiguous matching references.",
+    RejectionCode.STATE_SYNTAX: (
+        'Use canonical standalone sentences: "Supplier A certification is MEETS." '
+        'Substitute exact supplied names, requirement labels and states, with matching '
+        'supplier_ids and requirement_ids. For repeated kinds, value-based disambiguation '
+        'supports only nonempty string expected_value.value values that uniquely identify '
+        'the requirement, e.g. "Supplier A GOTS certification is MEETS." For unsupported '
+        'repeated-kind values, including numeric limits and boolean values, use '
+        '"Supplier A requirement is MEETS." with the exact supplier name, supplied state, '
+        'and exactly one matching requirement ID in requirement_ids. Do not insert the '
+        'value into this state sentence or cite multiple requirement IDs. Preserve a '
+        'readable requirement description in a separate cited point with the same supplier '
+        'and single requirement ID, e.g. "Supplier A production lead time limit: 40 days." '
+        'or "Supplier A requested custom branding: false." Substitute supplied values only; '
+        'these descriptions must not contain another state assertion. For quote-only states use '
+        '"Supplier C shipping cost is UNKNOWN." with matching quote_id/field_key in '
+        'quote_fields, no invented requirement_ids, and the supplied completeness state. '
+        'Do not add wrappers, explanatory prefixes/suffixes or extra modifiers. Preserve '
+        'explanations, disclosures and provenance in separate cited points, retaining '
+        'required evidence and ownership. Examples do not assign states or supplier roles.'
+    ),
+    RejectionCode.STATE_REFERENCE: (
+        'Bind each state assertion to unambiguous matching references. For repeated kinds, '
+        'value-based disambiguation supports only nonempty string expected_value.value '
+        'values that uniquely identify the requirement. For unsupported repeated-kind '
+        'values, including numeric limits and boolean values, use '
+        '"Supplier A requirement is MEETS." with the exact supplier name, supplied state, '
+        'and exactly one matching requirement ID in requirement_ids. Preserve a readable '
+        'requirement description in a separate cited point with the same supplier and '
+        'single requirement ID, without another state assertion. Substitute supplied '
+        'values only; do not insert them into the state sentence or cite multiple IDs.'
+    ),
     RejectionCode.STATE_CONTRADICTION: "Match each asserted state to supplied deterministic facts.",
     RejectionCode.MISSING_UNKNOWN: "Disclose every deterministic UNKNOWN requirement in important_unknowns.",
     RejectionCode.MISSING_CONFLICT: "Disclose every deterministic CONFLICT requirement in important_conflicts.",

@@ -110,12 +110,14 @@ CATEGORY_SOURCES = {
     "comparison": [
         *ANALYST_SOURCES,
         "ai/tradeoff_analysis_eval.py", "ai/tradeoff_analysis.py",
-        "ai/comparison_advice_eval.py", "ai/comparison_advice.py",
+        "ai/comparison_advice_eval.py", "ai/comparison_advice.py", "ai/comparison_context.py",
+        "ai/advice_selection.py", "comparison/advice_facts.py", "comparison/advice_rendering.py",
     ],
     "suggestion": [
         *ANALYST_SOURCES,
         "ai/tradeoff_analysis_eval.py", "ai/tradeoff_analysis.py",
-        "ai/comparison_advice_eval.py", "ai/comparison_advice.py",
+        "ai/comparison_advice_eval.py", "ai/comparison_advice.py", "ai/comparison_context.py",
+        "ai/advice_selection.py", "comparison/advice_facts.py", "comparison/advice_rendering.py",
     ],
 }
 LIVE_FIXTURE_SOURCES = [
@@ -414,10 +416,12 @@ def classify_live(
         terminal = None
         if analyst:
             steps = sorted(run.supplier_explanation_steps, key=lambda step: step.sequence)
-            # Usage and bounded validation diagnostics describe the terminal
+            # Usage and bounded diagnostics describe the terminal
             # event; they must not replace it when attributing the outcome.
             terminal = next((step for step in reversed(steps) if step.kind not in {
                 "run", "usage", "validation_phase", "validation_schema",
+                "provider_category", "provider_status", "provider_code",
+                "timeout_origin", "transport_phase", "transport_phase_state",
             }), None)
         if run.status == "FAILED_LIMIT_REACHED":
             model_caused = analyst and terminal is not None and (
@@ -435,6 +439,7 @@ def classify_live(
             ):
                 from pydantic import ValidationError
 
+                from sourcepilot.ai.advice_selection import ComparisonSelectionV1, SelectionRepairV1
                 from sourcepilot.ai.brief_interpreter import ExtractedBrief
                 from sourcepilot.ai.clarification import ClarificationSet
                 from sourcepilot.ai.comparison_advice import ComparisonAdvice
@@ -452,6 +457,13 @@ def classify_live(
                 }
                 response = responses[-1]
                 model = models.get(run.operation)
+                if run.operation == "comparison_advice":
+                    # Retained historical responses use the public contract;
+                    # new calls declare their private selection/repair schema.
+                    schema_name = response.get("schema_name")
+                    model = {m.__name__: m for m in (
+                        ComparisonAdvice, ComparisonSelectionV1, SelectionRepairV1,
+                    )}.get(schema_name) if isinstance(schema_name, str) else None
                 if model is not None and response.get("schema_name") == model.__name__:
                     try:
                         model.model_validate_json(response["output_text"])

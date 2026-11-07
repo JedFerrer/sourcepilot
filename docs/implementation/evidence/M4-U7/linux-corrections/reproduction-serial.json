@@ -1,9 +1,0 @@
-{
-  "command": [
-    "/home/jedferrer/.cache/sourcepilot-m4u7-linux/venv/bin/python",
-    "/mnt/c/Users/ferre/OneDrive/Documents/source-pilot/.tmp/m4-u7-corrections/reproduce.py"
-  ],
-  "exit_code": 0,
-  "seconds": 989.0786186089999,
-  "platform": "Linux-6.6.87.1-microsoft-standard-WSL2-x86_64-with-glibc2.43"
-}

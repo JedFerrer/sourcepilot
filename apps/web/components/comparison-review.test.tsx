@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ComparisonReview } from "./comparison-review";
 import { jsonResponse } from "../test/api-responses";
@@ -627,6 +628,34 @@ const adviceResponse = (selected: string | null = "a") => ({
 describe("Comparison advice", () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
+  it("identifies repeated requirements and preserves a false expected value in advice", async () => {
+    const base = snapshot();
+    const comparison = { ...base, comparison_payload: {
+      ...base.comparison_payload,
+      brief: { requirements: [
+        { id: "branding-yes", kind: "CAPABILITY", importance: "REQUIRED", expected_value: true, notes: null },
+        { id: "branding-no", kind: "CAPABILITY", importance: "INFORMATIONAL", expected_value: false, notes: null },
+      ] },
+      suppliers: base.comparison_payload.suppliers.map((item) => ({ ...item, evaluation: {
+        ...item.evaluation, results: [
+          { requirement_id: "branding-yes", kind: "CAPABILITY", status: "MEETS", selected_fact: null, evidence_ids: [], conflicting_facts: [] },
+          { requirement_id: "branding-no", kind: "CAPABILITY", status: "UNKNOWN", selected_fact: null, evidence_ids: [], conflicting_facts: [] },
+        ],
+      } })),
+    } };
+    const output = adviceResponse(null);
+    output.analysis.supplier_summaries = [
+      { ...advicePoint("Willow requirement is MEETS."), requirement_ids: ["branding-yes"] },
+      { ...advicePoint("Willow requirement is UNKNOWN."), requirement_ids: ["branding-no"] },
+    ];
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? output : comparison))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    const analysis = await screen.findByRole("region", { name: "Comparison analysis" });
+    expect(within(analysis).getByText(/Expected: Yes/)).toHaveTextContent("Required");
+    expect(within(analysis).getByText(/Expected: No/)).toHaveTextContent("Informational");
+  });
+
   it("requests one combined result and displays analysis, suggestion and cited sources", async () => {
     const output = adviceResponse();
     output.suggestion.supporting_reasons[0].quote_fields = [{ quote_id: "quote-a", field_key: "unit_price" }];
@@ -644,6 +673,46 @@ describe("Comparison advice", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/comparison/advice", expect.objectContaining({
       method: "POST", body: JSON.stringify({ snapshot_id: "comparison-1" }),
     }));
+  });
+
+  it("discloses the retained PDF correction despite unresolved price and currency", async () => {
+    const fixtureUrl = "../../docs/implementation/evidence/M4-U7/pdf-fixture-preparation/comparison.json";
+    const original = readFileSync(fixtureUrl, "utf8");
+    const comparison = JSON.parse(original);
+    const harbor = comparison.comparison_payload.suppliers.find((item: { supplier_name: string }) => item.supplier_name === "Harbor Pouch Works");
+    // Synthetic citation against the exact retained snapshot; no historical
+    // selection replay or new Analyze submission is claimed.
+    const output = { ...adviceResponse(null), snapshot_id: comparison.id, analysis: {
+      supplier_summaries: [], key_tradeoffs: [], important_unknowns: [],
+      important_conflicts: [{
+        text: "Harbor Pouch Works unit price is CONFLICT.",
+        supplier_ids: [harbor.supplier_id], requirement_ids: [],
+        quote_fields: ["unit_price", "currency"].map((field_key) => ({ quote_id: harbor.quote_id, field_key })),
+        evidence_ids: [],
+      }],
+    } };
+    output.suggestion.uncertainties = [];
+    const fetchMock = vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? output : comparison)));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    const analysis = await screen.findByRole("region", { name: "Comparison analysis" });
+    for (const summary of within(analysis).getAllByText("Source details")) fireEvent.click(summary);
+    expect(within(analysis).getByText("Current user-corrected value: 4.50")).toBeVisible();
+    expect(within(analysis).getByText("Currency conflict remains unresolved; no currency is assigned to this amount.")).toBeVisible();
+    expect(within(analysis).getByText("Original extracted value: 4.22")).toBeVisible();
+    expect(within(analysis).getByText(/does not verify the correction/)).toBeVisible();
+    for (const value of ["USD", "EUR"]) {
+      expect(within(analysis).getByText(new RegExp(`Original PDF provenance: .*extracted ${value}`))).toBeVisible();
+    }
+    expect(within(analysis).getAllByText(/Original PDF provenance: .*extracted 4.22/)).toHaveLength(2);
+    expect(analysis.textContent).not.toMatch(/(?:USD|EUR) 4\.50|4\.50 (?:USD|EUR)|Current user-corrected value: 4\.22/);
+    for (const field of harbor.quote_fields.filter((item: { field_key: string }) => ["unit_price", "currency"].includes(item.field_key))) {
+      expect(analysis.textContent).toContain(field.source_reference);
+      for (const evidence of field.evidence) expect(analysis.textContent).toContain(evidence.id);
+    }
+    expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/advice"))).toHaveLength(1);
+    expect(readFileSync(fixtureUrl, "utf8")).toBe(original);
   });
 
   it.each([false, true])("renders evidence-only PDF advice citations with corrected value = %s", async (corrected) => {

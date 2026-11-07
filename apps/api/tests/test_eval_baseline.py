@@ -80,6 +80,7 @@ def test_runner_reuses_parsed_context_for_extraction_scoring_and_measurements(
 
 @pytest.mark.parametrize("operation,schema_name", [
     ("tradeoff_analysis", "TradeoffAnalysis"), ("comparison_advice", "ComparisonAdviceV1"),
+    ("comparison_advice", "ComparisonSelectionV1"), ("comparison_advice", "SelectionRepairV1"),
 ])
 @pytest.mark.parametrize("terminal,captured,expected", [
     ("validation", True, "QUALITY_FINDING"),
@@ -95,6 +96,12 @@ def test_validation_diagnostics_preserve_failure_attribution(
         SimpleNamespace(sequence=3, kind="validation_schema", outcome="INVALID", name="schema_type_missing"),
         SimpleNamespace(sequence=4, kind="usage", outcome="COMPLETE", name="input_tokens"),
         SimpleNamespace(sequence=5, kind="run", outcome="VALIDATION_FAILED", name=None),
+        SimpleNamespace(sequence=6, kind="provider_category", outcome="DIAGNOSTIC", name="UNKNOWN"),
+        SimpleNamespace(sequence=7, kind="timeout_origin", outcome="DIAGNOSTIC", name="SDK_READ"),
+        SimpleNamespace(sequence=8, kind="transport_phase", outcome="DIAGNOSTIC", name="UNKNOWN"),
+        SimpleNamespace(sequence=9, kind="transport_phase_state", outcome="DIAGNOSTIC", name="UNKNOWN"),
+        SimpleNamespace(sequence=10, kind="provider_status", outcome="DIAGNOSTIC", name="NO_HTTP_STATUS"),
+        SimpleNamespace(sequence=11, kind="provider_code", outcome="DIAGNOSTIC", name="UNKNOWN"),
     ]
     run = SimpleNamespace(operation=operation, status="VALIDATION_FAILED",
                           validation_status="INVALID", supplier_explanation_steps=steps)
@@ -897,6 +904,13 @@ def test_narrative_nonmatch_is_not_an_exact_groundedness_pass(tmp_path: Path) ->
     assert result["human_review"]["status"] == "PENDING"
     assert result["human_review"]["case_count"] >= 10
     assert all(case["review_result"] is None for case in result["human_review"]["cases"])
+    currency_reviews = {case["id"] for case in result["human_review"]["cases"]
+                        if case["id"].startswith("currency-grounding-")}
+    assert currency_reviews == {
+        "currency-grounding-observed-v7-contradiction", "currency-grounding-known",
+        "currency-grounding-missing", "currency-grounding-conflicting",
+        "currency-grounding-known-no-pdf",
+    }
     assert "incomparable_price_ranking_signal" not in result["metrics"]["comparison"]
     assert "lead_time_context_signal" not in result["metrics"]["comparison"]
     assert "supplier_free_text_capability_signal" not in result["metrics"]["supplier_explanation"]

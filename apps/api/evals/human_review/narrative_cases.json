@@ -80,5 +80,89 @@
     "narrative_example": "Supplier A usually takes 25 days for catalog work, but its quoted production period for this order is 50 days.",
     "review_criteria": "Flag both reversed attributions; the catalog value is 50 days and the project quote is 25 days.",
     "why_automation_is_insufficient": "Keyword proximity alone can misassign the two values in a combined sentence."
+  },
+  {
+    "id": "currency-grounding-observed-v7-contradiction",
+    "category": "suggestion",
+    "narrative_example": "Harbor Pouch Works provides shipping cost USD 600 and shipping time 10 days; Sunrise Textile Lab provides shipping cost 800 and shipping time 12 days, but its shipping-cost currency is not stated. These entered shipping details do not establish equivalent landed costs.",
+    "evidence_context": "Retained manual synthetic project: Sunrise Textile Lab shipping_cost=800, shipping_time=12, currency=USD (known); factual table displays USD 800. Field-specific shipping evidence omits sibling currency and manual fields have no PDF evidence.",
+    "source_evidence": "apps/api/tests/fixtures/comparison_advice/observed-v7-currency-contradiction.json",
+    "review_criteria": "Flag the observed unstated shipping-currency claim as factually contradicted by the full snapshot. Cite the same quote currency field for a corrected USD claim. Preserve the original COMPLETED / VALID runtime result separately; it is not factual correctness.",
+    "why_automation_is_insufficient": "Existing structural acceptance and bounded narrative signals do not establish currency entailment. This retained observed failure is a factual-quality regression, not a passing model response or a new live review."
+  },
+  {
+    "id": "currency-grounding-known",
+    "category": "comparison",
+    "narrative_example": "Supplier B shipping cost is USD 800 and tooling cost is USD 150.",
+    "evidence_context": {
+      "supplier_name": "Supplier B",
+      "currency_state": "known",
+      "currency": "USD",
+      "shipping_cost": "800",
+      "tooling_cost": "150",
+      "current_origin": "USER_ENTERED",
+      "pdf_evidence": [],
+      "currency_alternatives": [],
+      "tool_response_scope": "shipping_cost only; no sibling currency field"
+    },
+    "review_criteria": "Accept the scalar amounts using the same quote currency. Consult the full snapshot despite omitted sibling currency in the field-specific tool result; cite currency and each amount field. Do not infer from another quote.",
+    "why_automation_is_insufficient": "A curated response tests contract compatibility only. It cannot prove live prompt adherence or free-text factual correctness; human review remains pending."
+  },
+  {
+    "id": "currency-grounding-missing",
+    "category": "comparison",
+    "narrative_example": "Supplier B currency is UNKNOWN.",
+    "evidence_context": {
+      "supplier_name": "Supplier B",
+      "currency_state": "missing",
+      "currency": null,
+      "shipping_cost": "800",
+      "tooling_cost": "150",
+      "current_origin": "USER_ENTERED",
+      "pdf_evidence": [],
+      "currency_alternatives": [],
+      "tool_response_scope": "shipping_cost only; no sibling currency field"
+    },
+    "review_criteria": "Preserve missing currency and cite currency alone in important_unknowns. Known shipping/tooling amounts remain known; do not label those amounts UNKNOWN or borrow USD from another quote or the brief.",
+    "why_automation_is_insufficient": "A curated response tests contract compatibility only. It cannot prove live prompt adherence or free-text factual correctness; human review remains pending."
+  },
+  {
+    "id": "currency-grounding-conflicting",
+    "category": "suggestion",
+    "narrative_example": "Supplier B currency is CONFLICT.",
+    "evidence_context": {
+      "supplier_name": "Supplier B",
+      "currency_state": "conflicting",
+      "currency": null,
+      "shipping_cost": "800",
+      "tooling_cost": "150",
+      "current_origin": "USER_ENTERED",
+      "pdf_evidence": [],
+      "currency_alternatives": [
+        "USD",
+        "AUD"
+      ],
+      "tool_response_scope": "shipping_cost only; no sibling currency field"
+    },
+    "review_criteria": "Preserve conflicting currency and cite currency alone in important_conflicts. Do not choose between USD and AUD alternatives or mark known scalar amounts conflicting.",
+    "why_automation_is_insufficient": "A curated response tests contract compatibility only. It cannot prove live prompt adherence or free-text factual correctness; human review remains pending."
+  },
+  {
+    "id": "currency-grounding-known-no-pdf",
+    "category": "suggestion",
+    "narrative_example": "Supplier B shipping cost is USD 800 and tooling cost is USD 150. These user-entered amounts have no PDF verification.",
+    "evidence_context": {
+      "supplier_name": "Supplier B",
+      "currency_state": "known",
+      "currency": "USD",
+      "shipping_cost": "800",
+      "tooling_cost": "150",
+      "current_origin": "USER_ENTERED",
+      "pdf_evidence": [],
+      "currency_alternatives": [],
+      "tool_response_scope": "shipping_cost only; no sibling currency field"
+    },
+    "review_criteria": "Accept confirmed known USD while disclosing absent PDF verification separately. Cite currency and amount fields; do not invent PDF citations or claim currency is missing/conflicting.",
+    "why_automation_is_insufficient": "A curated response tests contract compatibility only. It cannot prove live prompt adherence or free-text factual correctness; human review remains pending."
   }
 ]

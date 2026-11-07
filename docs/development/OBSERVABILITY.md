@@ -27,6 +27,49 @@ WHERE air_run_id = '<run UUID>' ORDER BY sequence;
 
 Use the run ID returned by the operation or the local record to correlate observations. Session tokens are never tracing identifiers. Local database access remains an administrative capability; no trace-reading endpoint has been added.
 
+### Comparison provider diagnostics
+
+Future comparison failures append three ordered steps after each existing model failure and before any retry: `provider_category`, `provider_status`, and `provider_code`, each with outcome `DIAGNOSTIC`. Their `name` is a finite allowlisted label. Both comparison advice and tradeoff analysis use these steps; other provider adapters default to unknown diagnostics. Local records and optional external observations use the same labels. The existing model/retry/terminal events remain authoritative for execution and eval classification.
+
+The comparison transport captures these labels before normalizing the exception. Only installed-SDK `APIStatusError` instances establish HTTP rejection; validated integer statuses map as follows:
+
+| Status / failure evidence | Category |
+| --- | --- |
+| 400, 422 | `INVALID_REQUEST` |
+| 401 | `AUTHENTICATION` |
+| 403 | `PERMISSION` |
+| 404 | `NOT_FOUND` |
+| 408 or SDK/Python timeout | `TIMEOUT` |
+| 429 | `RATE_LIMIT` |
+| 500–599 | `SERVER_ERROR` |
+| SDK connection exception | `CONNECTION` |
+| TypeError / ValueError at the comparison client boundary | `LOCAL_CLIENT_ERROR` |
+| Other or insufficient evidence, including HTTP 409 | `UNKNOWN` |
+
+Status labels are `400`, `401`, `403`, `404`, `408`, `409`, `422`, `429`, individual `500`–`599`, `OTHER_HTTP` for other valid HTTP integers (100–599), or `NO_HTTP_STATUS`. Booleans, strings, out-of-range integers and malformed values are not HTTP evidence. A non-SDK exception with a status-like attribute remains diagnostically unknown. Retryability continues to use the existing independent policy; diagnostics do not decide retries or change budgets, validation or browser behavior.
+
+The SDK's already parsed code may be retained only as `invalid_api_key`, `permission_denied`, `model_not_found`, `invalid_json_schema`, `unsupported_parameter`, `invalid_value`, `missing_required_parameter`, `rate_limit_exceeded`, `insufficient_quota`, `server_error`, or `internal_server_error`; everything else is `UNKNOWN`. Codes do not override the broad category. No exception text, body, header, request, URL, credentials, quote content or arbitrary type/name is copied into these steps. Missing diagnostics from older callers use `UNKNOWN` / `NO_HTTP_STATUS` / `UNKNOWN`.
+
+Use the existing read-only queries above and ordered sequence/run ID to inspect attempts. HTTP 404 does not prove a bad model; HTTP 429 does not prove quota exhaustion. `NO_HTTP_STATUS` is absence of safe status evidence, not proof that no remote work happened. These diagnostics cannot reconstruct historical causes. The original provider cause, v4 validation rejection and historical quality findings remain unresolved. No historical records are backfilled and no live analysis is required to verify this instrumentation.
+
+### Timeout origin and last observed transport operation
+
+Comparison failures additionally record `timeout_origin`, `transport_phase`, and `transport_phase_state` as `DIAGNOSTIC` steps. These join an existing trace commit; callbacks do no persistence, logging, network I/O or body reads. The record is the **last observed operation/state**, not a timing measurement, a complete transport history or root-cause proof.
+
+- Timeout origins: `SDK_CONNECT`, `SDK_READ`, `SDK_WRITE`, `SDK_POOL`, `SDK_UNKNOWN`, `APP_ATTEMPT`, `APP_WORK_BUDGET`, `APP_TOTAL_BUDGET`, `APP_CLEANUP_BUDGET`, `UNKNOWN`, `NOT_APPLICABLE`.
+- Transport operations: `CONNECT_TCP`, `START_TLS`, `SEND_REQUEST_HEADERS`, `SEND_REQUEST_BODY`, `RECEIVE_RESPONSE_HEADERS`, `RECEIVE_RESPONSE_BODY`, `UNKNOWN`.
+- Operation states: `STARTED`, `COMPLETE`, `FAILED`, `UNKNOWN`. A failed operation can reflect cancellation; it does not establish a network fault.
+
+SDK timeout origin uses only the direct HTTPX exception type beneath an actual SDK `APITimeoutError`; no recursive cause traversal or exception attributes/content are captured. `SDK_UNKNOWN` means an SDK timeout without a recognized direct timeout subtype. A generic Python timeout without an expired application-owned timeout context is `UNKNOWN`. HTTP 408 retains its existing status/category and does not imply a client-side timer expired.
+
+The comparison-owned HTTPX client attaches the supported async request trace extension. Exact HTTPCore event names map to the finite operation/state labels. Callback information dictionaries, request/response content, headers, credentials, URLs (including query parameters), raw messages, arbitrary event names and network stream objects are never inspected or persisted by the observer. Response-close events do not overwrite the last I/O operation; unsupported events yield unknown. Each HTTP exchange resets the observation; each application attempt creates fresh state. Failure evidence is frozen before provider cleanup. Observation failures are isolated; external cancellation still propagates.
+
+There is no separate DNS or pool-acquisition phase hook in the inspected transport. Connect can include resolution; pool origin may be known while phase remains unknown. Connection reuse can omit connect/TLS events. Response-header waiting is not model processing time, and absence of HTTP 401 is not authentication acceptance. No authentication-success claim is added.
+
+Application origins distinguish the work cutoff (which reserves cleanup time), the original total budget, the existing cleanup contexts, and the individual attempt timer. Cleanup failure alone is not cleanup-budget expiry. Expiry outside an active provider invocation uses unknown transport fields. If a frozen provider failure is followed by an independently observed application-budget expiry, the trace retains its first three-field snapshot and adds a second origin snapshot with unknown transport fields before the unchanged terminal outcome. This does not manufacture a second model attempt.
+
+The approved deadline remains **cooperative**. No new timeout, rescheduling, retry, helper termination guarantee or remote-cancellation guarantee is introduced. Observation adds no dedicated database round trip or cleanup reserve. Exhausted budgets, database failure, process termination or interrupted finalization can still prevent persistence. Existing public error contracts, SDK retries zero, application retry/backoff, repair rules and configured budgets remain unchanged. Historical causes and validation/quality findings are unresolved; a live verification requires separate authorization.
+
 Usage totals sum only reported values across model invocations. `NULL` means no usage was reported; zero means reported zero. Each token dimension has a terminal `usage` step: `COMPLETE` if all attempts reported that dimension, `PARTIAL` if some did, and `UNAVAILABLE` if none did. Provider failures with no usage make later totals partial. No missing usage or cost is invented. `estimated_cost` remains nullable; there is no pricing lookup or pricing table.
 
 `latency_ms` measures elapsed runtime with a monotonic clock, including retries and local processing/recording up to finalization. It is not provider-only latency. Ordered local events have no individual timestamps; optional live model/tool observations measure their own execution intervals. The supplier snapshot fetched before AIRun creation is recorded as a completed event, without inventing its duration.

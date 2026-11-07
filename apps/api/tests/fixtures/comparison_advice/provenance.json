@@ -1,0 +1,53 @@
+{
+  "fixtures": [
+    {
+      "source": "docs/implementation/evidence/M4-U7/pdf-fixture-preparation/current-snapshot.json",
+      "destination": "apps/api/tests/fixtures/comparison_advice/corrected-pdf-snapshot.json",
+      "source_sha256": "84a178f0072fb86da26ca49abf1596de2c8e2363a19baca1cb6d47802acdb736",
+      "derivation": "byte-identical copy",
+      "bytes": 57500,
+      "sha256": "84a178f0072fb86da26ca49abf1596de2c8e2363a19baca1cb6d47802acdb736"
+    },
+    {
+      "source": "docs/implementation/evidence/M4-U7/pdf-fixture-preparation/pdf-confirmed.json",
+      "destination": "apps/api/tests/fixtures/comparison_advice/corrected-pdf-confirmed.json",
+      "source_sha256": "747600abd0043c1ac8ec1ae46dc3d100d327079e2c737208a804469b7b415581",
+      "derivation": "byte-identical copy",
+      "bytes": 10039,
+      "sha256": "747600abd0043c1ac8ec1ae46dc3d100d327079e2c737208a804469b7b415581"
+    },
+    {
+      "source": "docs/implementation/evidence/M4-U7/pdf-fixture-preparation/extracted-before-correction.json",
+      "destination": "apps/api/tests/fixtures/comparison_advice/pdf-extracted-before-correction.json",
+      "source_sha256": "f4e8f74d886e93ad4bbf72637debd28102ec6115103ddde066604eb420d71570",
+      "derivation": "byte-identical copy",
+      "bytes": 9871,
+      "sha256": "f4e8f74d886e93ad4bbf72637debd28102ec6115103ddde066604eb420d71570"
+    },
+    {
+      "source": "docs/implementation/evidence/M4-U7/pdf-fixture-preparation/stored-original.pdf",
+      "destination": "apps/api/tests/fixtures/comparison_advice/currency-conflict.pdf",
+      "source_sha256": "89adf781463f4a9204b390fb0c66e3f818877e0742aa3238cf665936d47dd1c7",
+      "derivation": "byte-identical copy",
+      "bytes": 3062,
+      "sha256": "89adf781463f4a9204b390fb0c66e3f818877e0742aa3238cf665936d47dd1c7"
+    },
+    {
+      "source": "docs/implementation/evidence/M4-U7/deterministic-live-new-project-2026-11-06/before.json",
+      "destination": "apps/api/tests/fixtures/comparison_advice/manual-delivery-snapshot.json",
+      "source_sha256": "761a95421d2f6b0155b374f0fb9f2be8b129ae8ac71eb1cee8d717ab3d2838be",
+      "derivation": "snapshot only; remove run metadata/fingerprints",
+      "bytes": 73294,
+      "sha256": "011c2b98f4858498b3ea1ebd2f54cfa35a57e2853ea7abd0f41b9ae34bd8158b"
+    },
+    {
+      "source": "docs/implementation/evidence/M4-U7/live-v7-browser-2026-11-05.txt",
+      "destination": "apps/api/tests/fixtures/comparison_advice/observed-v7-currency-contradiction.json",
+      "source_sha256": "d36dcd580034efcbbfe81336838a909e2af7dca0dde5f31b5bca49a8712dd1c6",
+      "derivation": "exact observed paragraph plus existing human-review factual context; no whole browser capture",
+      "bytes": 647,
+      "sha256": "7f8614bd593712b423b2e47b6a9aa6c9043363328e7b0708c9f0182097d0212e"
+    }
+  ],
+  "policy": "Curated tracked synthetic regression inputs; archived originals are provenance only, never runtime dependencies."
+}

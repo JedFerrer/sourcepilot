@@ -1,0 +1,5 @@
+# M4-U7-state-syntax-wording
+
+Reviewed v6 clarifies canonical state sentences, repeated-requirement identity, quote-only references and bounded fixed repair feedback; v7 clarifies reference binding; v8 clarifies same-quote currency grounding. Public schemas and validator predicates were not relaxed. Both paths retain cumulative guidance; the final combined path uses v10 selections. Exact original rejected text is unavailable. v7 COMPLETED/VALID was not factual acceptance: its missing-currency claim contradicted known USD. That exact paragraph is a tracked regression fixture; historical failures remain failures.
+
+Review passed for the bounded correction. Retention split approved and applied on 7 November 2026; commit remains paused. See [final acceptance](M4-U7-final-done-check.md); detailed original decisions/reviews/failures remain in the local-only archive `../../.local-investigation-artifacts/M4-U7/original-tree/docs/implementation/M4-U7-state-syntax-wording.md`. They are not clone dependencies.

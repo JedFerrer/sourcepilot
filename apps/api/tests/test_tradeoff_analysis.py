@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from sourcepilot.ai.analyst_tools import ComparisonSnapshotResult, EvaluationAvailability
 from sourcepilot.ai.client import AnalystModelInvocation, ModelInvocation, ModelProviderError
+from sourcepilot.ai.comparison_context import context_json
 from sourcepilot.ai.structured import structured_input_hash
 from sourcepilot.ai.tradeoff_analysis import (
     INSTRUCTIONS,
@@ -263,7 +264,7 @@ def test_preconditions_and_success(client: TestClient, engine: Engine, monkeypat
         initial = {key: model.inputs[0][key] for key in (
             "snapshot_id", "brief_revision", "quote_revision_snapshot", "comparison_payload")}
         assert run.input_hash == structured_input_hash(
-            instructions=INSTRUCTIONS, input_text=json.dumps(initial, sort_keys=True))
+            instructions=INSTRUCTIONS, input_text=context_json(initial))
         assert session.scalars(select(SupplierExplanationRunStep).where(
             SupplierExplanationRunStep.air_run_id == run.id)).all()
 
@@ -425,7 +426,7 @@ def test_api_preconditions_do_not_call_provider(client: TestClient, engine: Engi
 
 
 def test_n4_tradeoff_prompt_guidance() -> None:
-    assert PROMPT_VERSION == "tradeoff-analysis-v5"
+    assert PROMPT_VERSION == "tradeoff-analysis-v9"
     for guidance in (
         "Use the supplied current comparison first", "do not reread",
         "specific claims", "reuse retrieved results", "four model turns",

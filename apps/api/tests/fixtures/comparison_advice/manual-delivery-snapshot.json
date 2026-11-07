@@ -1,0 +1,2056 @@
+{
+  "availability": "CURRENT",
+  "snapshot_id": "ca69011f-c1a0-405e-963d-bac256ccf5a6",
+  "brief_revision": 1,
+  "quote_revision_snapshot": {
+    "ab260b2a-cd49-58f6-8d8d-e474a7e737c6": {
+      "quote_id": "fbc0a05d-660e-4871-8c9a-a2e284bd81d8",
+      "revision": 0,
+      "facts_fingerprint": "57925ec3c8a3995184c0267f9c70052416167a0fb4700929e79afe36574ea503"
+    },
+    "b6ffa3a1-2510-5376-92cb-aaaef846ca5a": {
+      "quote_id": "839e6062-43ee-4662-a80d-160096185100",
+      "revision": 0,
+      "facts_fingerprint": "d9f99e418ace83ea8f8fe0680df208f9e3964274353a0740f84026f60911ef72"
+    },
+    "fdc24cfa-7350-5ce4-b8d2-249085cd36da": {
+      "quote_id": "a6d3b13d-24f4-4fcf-b27d-7bef7bef2c09",
+      "revision": 0,
+      "facts_fingerprint": "5cca08ee215c24ac7d99d88e42021ad3b829f4962f17ab3b7ca9ad7b350903c2"
+    }
+  },
+  "generated_at": "2026-11-06T08:28:07.421498Z",
+  "stale": false,
+  "comparison_payload": {
+    "brief": {
+      "quantity": 2000,
+      "requirements": [
+        {
+          "id": "075c03ef-4c77-4f17-94b2-8657e1c3cc84",
+          "kind": "MATERIAL",
+          "notes": null,
+          "importance": "REQUIRED",
+          "expected_value": {
+            "value": "recycled polyester"
+          }
+        },
+        {
+          "id": "3ac0d64a-139d-4603-856c-f7512f7aefdd",
+          "kind": "CAPABILITY",
+          "notes": null,
+          "importance": "REQUIRED",
+          "expected_value": {
+            "value": true,
+            "capability_key": "CUSTOM_BRANDING"
+          }
+        },
+        {
+          "id": "a3b1ff63-8df8-42bd-8cfc-e19378f98d91",
+          "kind": "CERTIFICATION",
+          "notes": null,
+          "importance": "PREFERRED",
+          "expected_value": {
+            "value": "grs"
+          }
+        }
+      ],
+      "delivery_target": {
+        "kind": "PERIOD",
+        "label": "By 15 December 2026",
+        "end_date": null,
+        "start_date": null
+      },
+      "target_unit_price": "5.0000"
+    },
+    "suppliers": [
+      {
+        "quote_id": "fbc0a05d-660e-4871-8c9a-a2e284bd81d8",
+        "evaluation": {
+          "results": [
+            {
+              "kind": "MATERIAL",
+              "status": "MEETS",
+              "evidence_ids": [
+                "2e0d1fd9-7065-5866-964a-92114c0d9126"
+              ],
+              "selected_fact": null,
+              "requirement_id": "075c03ef-4c77-4f17-94b2-8657e1c3cc84",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "CAPABILITY",
+              "status": "UNKNOWN",
+              "evidence_ids": [],
+              "selected_fact": null,
+              "requirement_id": "3ac0d64a-139d-4603-856c-f7512f7aefdd",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "CERTIFICATION",
+              "status": "UNKNOWN",
+              "evidence_ids": [],
+              "selected_fact": null,
+              "requirement_id": "a3b1ff63-8df8-42bd-8cfc-e19378f98d91",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "MOQ",
+              "status": "MEETS",
+              "evidence_ids": [],
+              "selected_fact": {
+                "value": 800,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:f47da37d-a7cb-4132-8bac-65a61e4c3be0",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "requirement_id": null,
+              "conflicting_facts": []
+            }
+          ],
+          "warnings": [],
+          "informational_requirement_ids": []
+        },
+        "supplier_id": "ab260b2a-cd49-58f6-8d8d-e474a7e737c6",
+        "completeness": [
+          {
+            "state": "missing",
+            "field_key": "certifications",
+            "source_references": [
+              "quote-value:bd210978-6732-447e-bd61-56dea752c358"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "compliance_notes",
+            "source_references": [
+              "quote-value:42934428-4df4-4c54-a138-08a4be2f2515"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "currency",
+            "source_references": [
+              "quote-value:a154e10a-3ea6-4c9a-873d-c8e0910ef876"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "delivery_date",
+            "source_references": []
+          },
+          {
+            "state": "missing",
+            "field_key": "exclusions",
+            "source_references": [
+              "quote-value:2c3da184-6e0a-4c7b-85b5-509a95e4f28c"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "incoterm",
+            "source_references": [
+              "quote-value:034063f6-7bde-4489-933c-b9940472993f"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "moq",
+            "source_references": [
+              "quote-value:f47da37d-a7cb-4132-8bac-65a61e4c3be0",
+              "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:moq"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "packaging_cost",
+            "source_references": [
+              "quote-value:888aac27-c1d0-4bca-b831-0ce60ef8f9f6"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "payment_terms",
+            "source_references": [
+              "quote-value:a9a1025e-09c2-4324-b773-2c70d15d2c30"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "production_lead_time",
+            "source_references": [
+              "quote-value:faf888b4-d83d-41cc-b35a-1a1d6ca14b81",
+              "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:production_lead_time"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "quote_validity",
+            "source_references": [
+              "quote-value:67292f52-02ef-43d0-9341-a5d88e509477"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "quoted_quantity",
+            "source_references": [
+              "quote-value:0d14320d-351c-46ca-8950-b48cfe34569d"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "sample_cost",
+            "source_references": [
+              "quote-value:9ddeb245-70ca-40a4-b7b8-4758631c8065"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "sample_lead_time",
+            "source_references": [
+              "quote-value:43ada909-2ec2-4ebb-956f-d3dd8176065c"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "shipping_cost",
+            "source_references": [
+              "quote-value:d3f19ede-2faf-476d-adee-909b5a023205"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "shipping_time",
+            "source_references": [
+              "quote-value:c3202ec7-4cad-46e8-a16e-60e02b1233bb"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "special_conditions",
+            "source_references": [
+              "quote-value:006d5ea3-f27b-4fdb-9ddd-aca2bc6b41fd"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "supplier_notes",
+            "source_references": [
+              "quote-value:274c0064-3076-4e78-9695-30b58a5b0276"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "tooling_cost",
+            "source_references": [
+              "quote-value:88f69632-7a18-47ae-8868-6318100bc934"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "total_lead_time",
+            "source_references": [
+              "quote-value:8d45c6a0-4400-4254-8dfd-9bf915acb53d"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "unit_price",
+            "source_references": [
+              "quote-value:a3820732-5cc4-43d4-b244-07778c5bfc2a"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "warranty",
+            "source_references": [
+              "quote-value:4544f852-66c2-4881-96b3-111c2c47f3b0"
+            ]
+          }
+        ],
+        "quote_fields": [
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "certifications",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:bd210978-6732-447e-bd61-56dea752c358",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "compliance_notes",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:42934428-4df4-4c54-a138-08a4be2f2515",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "currency",
+            "uncertainty": null,
+            "current_value": "USD",
+            "source_reference": "quote-value:a154e10a-3ea6-4c9a-873d-c8e0910ef876",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "exclusions",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:2c3da184-6e0a-4c7b-85b5-509a95e4f28c",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "incoterm",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:034063f6-7bde-4489-933c-b9940472993f",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "moq",
+            "uncertainty": null,
+            "current_value": 800,
+            "source_reference": "quote-value:f47da37d-a7cb-4132-8bac-65a61e4c3be0",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "packaging_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:888aac27-c1d0-4bca-b831-0ce60ef8f9f6",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "payment_terms",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:a9a1025e-09c2-4324-b773-2c70d15d2c30",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "production_lead_time",
+            "uncertainty": null,
+            "current_value": "37 days",
+            "source_reference": "quote-value:faf888b4-d83d-41cc-b35a-1a1d6ca14b81",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "quote_validity",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:67292f52-02ef-43d0-9341-a5d88e509477",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "quoted_quantity",
+            "uncertainty": null,
+            "current_value": 2000,
+            "source_reference": "quote-value:0d14320d-351c-46ca-8950-b48cfe34569d",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "sample_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:9ddeb245-70ca-40a4-b7b8-4758631c8065",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "sample_lead_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:43ada909-2ec2-4ebb-956f-d3dd8176065c",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "shipping_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:d3f19ede-2faf-476d-adee-909b5a023205",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "shipping_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:c3202ec7-4cad-46e8-a16e-60e02b1233bb",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "special_conditions",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:006d5ea3-f27b-4fdb-9ddd-aca2bc6b41fd",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "supplier_notes",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:274c0064-3076-4e78-9695-30b58a5b0276",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "tooling_cost",
+            "uncertainty": null,
+            "current_value": "0",
+            "source_reference": "quote-value:88f69632-7a18-47ae-8868-6318100bc934",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "total_lead_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:8d45c6a0-4400-4254-8dfd-9bf915acb53d",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "unit_price",
+            "uncertainty": null,
+            "current_value": "4.2",
+            "source_reference": "quote-value:a3820732-5cc4-43d4-b244-07778c5bfc2a",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "warranty",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:4544f852-66c2-4881-96b3-111c2c47f3b0",
+            "ai_extracted_value": null
+          }
+        ],
+        "supplier_name": "Moss Thread Bags",
+        "quote_revision": 0,
+        "resolved_facts": {
+          "moq": {
+            "status": "SELECTED",
+            "selected": {
+              "value": 800,
+              "context": "PROJECT_QUOTE",
+              "field_key": "moq",
+              "source_reference": "quote-value:f47da37d-a7cb-4132-8bac-65a61e4c3be0",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [
+              {
+                "value": 800,
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "moq",
+                "source_reference": "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:moq",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": 800,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:f47da37d-a7cb-4132-8bac-65a61e4c3be0",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          },
+          "unit_price": {
+            "status": "SELECTED",
+            "selected": {
+              "value": {
+                "amount": "4.2",
+                "currency": "USD"
+              },
+              "context": "PROJECT_QUOTE",
+              "field_key": "unit_price",
+              "source_reference": "quote-value:a3820732-5cc4-43d4-b244-07778c5bfc2a",
+              "component_attributions": [
+                {
+                  "field_key": "unit_price",
+                  "source_reference": "quote-value:a3820732-5cc4-43d4-b244-07778c5bfc2a",
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": []
+                },
+                {
+                  "field_key": "currency",
+                  "source_reference": "quote-value:a154e10a-3ea6-4c9a-873d-c8e0910ef876",
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": []
+                }
+              ],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": [
+                "quote-value:a154e10a-3ea6-4c9a-873d-c8e0910ef876"
+              ]
+            },
+            "general_facts": [],
+            "project_facts": [
+              {
+                "value": {
+                  "amount": "4.2",
+                  "currency": "USD"
+                },
+                "context": "PROJECT_QUOTE",
+                "field_key": "unit_price",
+                "source_reference": "quote-value:a3820732-5cc4-43d4-b244-07778c5bfc2a",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "quote-value:a3820732-5cc4-43d4-b244-07778c5bfc2a",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "quote-value:a154e10a-3ea6-4c9a-873d-c8e0910ef876",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": [
+                  "quote-value:a154e10a-3ea6-4c9a-873d-c8e0910ef876"
+                ]
+              }
+            ]
+          },
+          "delivery_date": {
+            "status": "UNAVAILABLE",
+            "selected": null,
+            "general_facts": [],
+            "project_facts": []
+          },
+          "quoted_quantity": {
+            "status": "SELECTED",
+            "selected": {
+              "value": 2000,
+              "context": "PROJECT_QUOTE",
+              "field_key": "quoted_quantity",
+              "source_reference": "quote-value:0d14320d-351c-46ca-8950-b48cfe34569d",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [],
+            "project_facts": [
+              {
+                "value": 2000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "quoted_quantity",
+                "source_reference": "quote-value:0d14320d-351c-46ca-8950-b48cfe34569d",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          },
+          "production_lead_time": {
+            "status": "SELECTED",
+            "selected": {
+              "value": "37 days",
+              "context": "PROJECT_QUOTE",
+              "field_key": "production_lead_time",
+              "source_reference": "quote-value:faf888b4-d83d-41cc-b35a-1a1d6ca14b81",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [
+              {
+                "value": 37,
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "production_lead_time",
+                "source_reference": "supplier:ab260b2a-cd49-58f6-8d8d-e474a7e737c6:production_lead_time",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": "37 days",
+                "context": "PROJECT_QUOTE",
+                "field_key": "production_lead_time",
+                "source_reference": "quote-value:faf888b4-d83d-41cc-b35a-1a1d6ca14b81",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          }
+        },
+        "supplier_facts": {
+          "country": "Philippines",
+          "evidence": [
+            {
+              "id": "2e0d1fd9-7065-5866-964a-92114c0d9126",
+              "claim_key": "material:recycled polyester",
+              "source_type": "CAPABILITY_RECORD",
+              "source_label": "Synthetic material sheet",
+              "evidence_text": "Material sheet lists recycled polyester.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            },
+            {
+              "id": "c601c88b-f35d-5092-8949-2430f2cb8e41",
+              "claim_key": "category:cosmetic travel bag",
+              "source_type": "CATALOG",
+              "source_label": "Synthetic product catalog",
+              "evidence_text": "Catalog lists cosmetic travel pouches.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            }
+          ],
+          "description": "Fictional small-run pouch producer with unverified certification status.",
+          "general_moq": 800,
+          "capabilities": [
+            [
+              "CUSTOM_BRANDING",
+              "true"
+            ],
+            [
+              "MATERIAL",
+              "recycled polyester"
+            ],
+            [
+              "PRODUCT_CATEGORY",
+              "cosmetic travel bag"
+            ]
+          ],
+          "general_lead_time_days": 37,
+          "indicative_price_amount": null,
+          "indicative_price_currency": null
+        }
+      },
+      {
+        "quote_id": "839e6062-43ee-4662-a80d-160096185100",
+        "evaluation": {
+          "results": [
+            {
+              "kind": "MATERIAL",
+              "status": "UNKNOWN",
+              "evidence_ids": [],
+              "selected_fact": null,
+              "requirement_id": "075c03ef-4c77-4f17-94b2-8657e1c3cc84",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "CAPABILITY",
+              "status": "UNKNOWN",
+              "evidence_ids": [],
+              "selected_fact": null,
+              "requirement_id": "3ac0d64a-139d-4603-856c-f7512f7aefdd",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "CERTIFICATION",
+              "status": "CONFLICT",
+              "evidence_ids": [
+                "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+                "4d2de0c9-5783-5478-ab80-eca25fe29677"
+              ],
+              "selected_fact": null,
+              "requirement_id": "a3b1ff63-8df8-42bd-8cfc-e19378f98d91",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "MOQ",
+              "status": "MEETS",
+              "evidence_ids": [],
+              "selected_fact": {
+                "value": 1500,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:bc091d12-c3b4-41a7-913b-aebb52fff903",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "requirement_id": null,
+              "conflicting_facts": []
+            }
+          ],
+          "warnings": [],
+          "informational_requirement_ids": []
+        },
+        "supplier_id": "b6ffa3a1-2510-5376-92cb-aaaef846ca5a",
+        "completeness": [
+          {
+            "state": "missing",
+            "field_key": "certifications",
+            "source_references": [
+              "quote-value:3b9249c7-896f-4b8b-aadd-9e6cac956981"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "compliance_notes",
+            "source_references": [
+              "quote-value:e6cc0fcd-a401-4fb1-b721-a8526ce8b417"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "currency",
+            "source_references": [
+              "quote-value:24c601d5-efca-4ac0-b0b3-aaf04a1c0f6c"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "delivery_date",
+            "source_references": []
+          },
+          {
+            "state": "missing",
+            "field_key": "exclusions",
+            "source_references": [
+              "quote-value:4b50668e-1ea3-46c1-9144-02d88dd2680a"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "incoterm",
+            "source_references": [
+              "quote-value:1fb00844-09f7-40bd-b0a7-a330761d3c72"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "moq",
+            "source_references": [
+              "quote-value:bc091d12-c3b4-41a7-913b-aebb52fff903",
+              "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:moq"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "packaging_cost",
+            "source_references": [
+              "quote-value:d3d51c64-f2ca-4879-950f-ebce78006435"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "payment_terms",
+            "source_references": [
+              "quote-value:3b0e8eb2-2145-40f5-af87-d9eed13f06b9"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "production_lead_time",
+            "source_references": [
+              "quote-value:6edd1517-72f3-4cb5-9ec6-18a916dcab4c",
+              "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:production_lead_time"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "quote_validity",
+            "source_references": [
+              "quote-value:b1d400c9-d408-4484-bf83-c8e6e1e7ee60"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "quoted_quantity",
+            "source_references": [
+              "quote-value:5f0d8368-f943-49c3-a5aa-d57f817d560e"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "sample_cost",
+            "source_references": [
+              "quote-value:3f819cd2-edd3-46e3-8695-b1c286684d40"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "sample_lead_time",
+            "source_references": [
+              "quote-value:cbbf71ba-6fb2-4e76-a042-54f3b9df2d25"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "shipping_cost",
+            "source_references": [
+              "quote-value:6d5e1711-6963-42a4-b5a4-0801171b3aba"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "shipping_time",
+            "source_references": [
+              "quote-value:0eee0db9-5861-458b-82f6-f76e6335726f"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "special_conditions",
+            "source_references": [
+              "quote-value:dcf832dd-03b5-403d-b913-5012cdd4a13f"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "supplier_notes",
+            "source_references": [
+              "quote-value:fe9ca0bf-02b4-4e0c-b58b-9193c7474837"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "tooling_cost",
+            "source_references": [
+              "quote-value:17c90942-b71e-4d19-aa84-62b4671c8ee9"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "total_lead_time",
+            "source_references": [
+              "quote-value:943401fe-df49-451f-91b2-62910aea6248"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "unit_price",
+            "source_references": [
+              "quote-value:a7053696-ddd1-437a-be1d-4c8b07b68e65",
+              "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "warranty",
+            "source_references": [
+              "quote-value:d4c45972-8436-466f-8c64-0e922e8302e8"
+            ]
+          }
+        ],
+        "quote_fields": [
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "certifications",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:3b9249c7-896f-4b8b-aadd-9e6cac956981",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "compliance_notes",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:e6cc0fcd-a401-4fb1-b721-a8526ce8b417",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "currency",
+            "uncertainty": null,
+            "current_value": "USD",
+            "source_reference": "quote-value:24c601d5-efca-4ac0-b0b3-aaf04a1c0f6c",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "exclusions",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:4b50668e-1ea3-46c1-9144-02d88dd2680a",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "incoterm",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:1fb00844-09f7-40bd-b0a7-a330761d3c72",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "moq",
+            "uncertainty": null,
+            "current_value": 1500,
+            "source_reference": "quote-value:bc091d12-c3b4-41a7-913b-aebb52fff903",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "packaging_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:d3d51c64-f2ca-4879-950f-ebce78006435",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "payment_terms",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:3b0e8eb2-2145-40f5-af87-d9eed13f06b9",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "production_lead_time",
+            "uncertainty": null,
+            "current_value": "45 days",
+            "source_reference": "quote-value:6edd1517-72f3-4cb5-9ec6-18a916dcab4c",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "quote_validity",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:b1d400c9-d408-4484-bf83-c8e6e1e7ee60",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "quoted_quantity",
+            "uncertainty": null,
+            "current_value": 2000,
+            "source_reference": "quote-value:5f0d8368-f943-49c3-a5aa-d57f817d560e",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "sample_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:3f819cd2-edd3-46e3-8695-b1c286684d40",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "sample_lead_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:cbbf71ba-6fb2-4e76-a042-54f3b9df2d25",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "shipping_cost",
+            "uncertainty": null,
+            "current_value": "650",
+            "source_reference": "quote-value:6d5e1711-6963-42a4-b5a4-0801171b3aba",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "shipping_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:0eee0db9-5861-458b-82f6-f76e6335726f",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "special_conditions",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:dcf832dd-03b5-403d-b913-5012cdd4a13f",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "supplier_notes",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:fe9ca0bf-02b4-4e0c-b58b-9193c7474837",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "tooling_cost",
+            "uncertainty": null,
+            "current_value": "220",
+            "source_reference": "quote-value:17c90942-b71e-4d19-aa84-62b4671c8ee9",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "total_lead_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:943401fe-df49-451f-91b2-62910aea6248",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "unit_price",
+            "uncertainty": null,
+            "current_value": "4.1",
+            "source_reference": "quote-value:a7053696-ddd1-437a-be1d-4c8b07b68e65",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "warranty",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:d4c45972-8436-466f-8c64-0e922e8302e8",
+            "ai_extracted_value": null
+          }
+        ],
+        "supplier_name": "Sunrise Textile Lab",
+        "quote_revision": 0,
+        "resolved_facts": {
+          "moq": {
+            "status": "SELECTED",
+            "selected": {
+              "value": 1500,
+              "context": "PROJECT_QUOTE",
+              "field_key": "moq",
+              "source_reference": "quote-value:bc091d12-c3b4-41a7-913b-aebb52fff903",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [
+              {
+                "value": 1500,
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "moq",
+                "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:moq",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": 1500,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:bc091d12-c3b4-41a7-913b-aebb52fff903",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          },
+          "unit_price": {
+            "status": "SELECTED",
+            "selected": {
+              "value": {
+                "amount": "4.1",
+                "currency": "USD"
+              },
+              "context": "PROJECT_QUOTE",
+              "field_key": "unit_price",
+              "source_reference": "quote-value:a7053696-ddd1-437a-be1d-4c8b07b68e65",
+              "component_attributions": [
+                {
+                  "field_key": "unit_price",
+                  "source_reference": "quote-value:a7053696-ddd1-437a-be1d-4c8b07b68e65",
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": []
+                },
+                {
+                  "field_key": "currency",
+                  "source_reference": "quote-value:24c601d5-efca-4ac0-b0b3-aaf04a1c0f6c",
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": []
+                }
+              ],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": [
+                "quote-value:24c601d5-efca-4ac0-b0b3-aaf04a1c0f6c"
+              ]
+            },
+            "general_facts": [
+              {
+                "value": {
+                  "amount": "4.1000",
+                  "currency": "USD"
+                },
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "unit_price",
+                "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:unit_price",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": {
+                  "amount": "4.1",
+                  "currency": "USD"
+                },
+                "context": "PROJECT_QUOTE",
+                "field_key": "unit_price",
+                "source_reference": "quote-value:a7053696-ddd1-437a-be1d-4c8b07b68e65",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "quote-value:a7053696-ddd1-437a-be1d-4c8b07b68e65",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "quote-value:24c601d5-efca-4ac0-b0b3-aaf04a1c0f6c",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": [
+                  "quote-value:24c601d5-efca-4ac0-b0b3-aaf04a1c0f6c"
+                ]
+              }
+            ]
+          },
+          "delivery_date": {
+            "status": "UNAVAILABLE",
+            "selected": null,
+            "general_facts": [],
+            "project_facts": []
+          },
+          "quoted_quantity": {
+            "status": "SELECTED",
+            "selected": {
+              "value": 2000,
+              "context": "PROJECT_QUOTE",
+              "field_key": "quoted_quantity",
+              "source_reference": "quote-value:5f0d8368-f943-49c3-a5aa-d57f817d560e",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [],
+            "project_facts": [
+              {
+                "value": 2000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "quoted_quantity",
+                "source_reference": "quote-value:5f0d8368-f943-49c3-a5aa-d57f817d560e",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          },
+          "production_lead_time": {
+            "status": "SELECTED",
+            "selected": {
+              "value": "45 days",
+              "context": "PROJECT_QUOTE",
+              "field_key": "production_lead_time",
+              "source_reference": "quote-value:6edd1517-72f3-4cb5-9ec6-18a916dcab4c",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [
+              {
+                "value": 45,
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "production_lead_time",
+                "source_reference": "supplier:b6ffa3a1-2510-5376-92cb-aaaef846ca5a:production_lead_time",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": "45 days",
+                "context": "PROJECT_QUOTE",
+                "field_key": "production_lead_time",
+                "source_reference": "quote-value:6edd1517-72f3-4cb5-9ec6-18a916dcab4c",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          }
+        },
+        "supplier_facts": {
+          "country": "India",
+          "evidence": [
+            {
+              "id": "1b6d1b0b-a4c9-52f8-8859-49dc7b3adf15",
+              "claim_key": "certification:grs:current",
+              "source_type": "CERTIFICATION_RECORD",
+              "source_label": "Synthetic certification register B",
+              "evidence_text": "Current register B marks the same GRS certification inactive.",
+              "evidence_state": "CONTRADICTS",
+              "source_reference": null
+            },
+            {
+              "id": "4d2de0c9-5783-5478-ab80-eca25fe29677",
+              "claim_key": "certification:grs:current",
+              "source_type": "CERTIFICATION_RECORD",
+              "source_label": "Synthetic certification register A",
+              "evidence_text": "Current register A marks GRS certification active.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            },
+            {
+              "id": "fbecae24-ea0d-521b-9a95-fce59c586be9",
+              "claim_key": "category:cosmetic travel bag",
+              "source_type": "CATALOG",
+              "source_label": "Synthetic product catalog",
+              "evidence_text": "Catalog lists cosmetic travel bags.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            }
+          ],
+          "description": "Fictional bag producer with conflicting current certification records.",
+          "general_moq": 1500,
+          "capabilities": [
+            [
+              "CERTIFICATION",
+              "grs"
+            ],
+            [
+              "CUSTOM_BRANDING",
+              "true"
+            ],
+            [
+              "MATERIAL",
+              "recycled polyester"
+            ],
+            [
+              "PRODUCT_CATEGORY",
+              "cosmetic travel bag"
+            ]
+          ],
+          "general_lead_time_days": 45,
+          "indicative_price_amount": "4.1000",
+          "indicative_price_currency": "USD"
+        }
+      },
+      {
+        "quote_id": "a6d3b13d-24f4-4fcf-b27d-7bef7bef2c09",
+        "evaluation": {
+          "results": [
+            {
+              "kind": "MATERIAL",
+              "status": "MEETS",
+              "evidence_ids": [
+                "1574c829-2b7b-500d-96ac-153811a6a8da"
+              ],
+              "selected_fact": null,
+              "requirement_id": "075c03ef-4c77-4f17-94b2-8657e1c3cc84",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "CAPABILITY",
+              "status": "MEETS",
+              "evidence_ids": [
+                "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253"
+              ],
+              "selected_fact": null,
+              "requirement_id": "3ac0d64a-139d-4603-856c-f7512f7aefdd",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "CERTIFICATION",
+              "status": "MEETS",
+              "evidence_ids": [
+                "8643eee8-edd2-5de6-8b53-f4b5435de096"
+              ],
+              "selected_fact": null,
+              "requirement_id": "a3b1ff63-8df8-42bd-8cfc-e19378f98d91",
+              "conflicting_facts": []
+            },
+            {
+              "kind": "MOQ",
+              "status": "MEETS",
+              "evidence_ids": [],
+              "selected_fact": {
+                "value": 1000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:d2e936c6-8104-40ee-9e52-128842ed40b6",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              },
+              "requirement_id": null,
+              "conflicting_facts": []
+            }
+          ],
+          "warnings": [],
+          "informational_requirement_ids": []
+        },
+        "supplier_id": "fdc24cfa-7350-5ce4-b8d2-249085cd36da",
+        "completeness": [
+          {
+            "state": "missing",
+            "field_key": "certifications",
+            "source_references": [
+              "quote-value:98141dd4-e497-46a2-bca3-b6c32a0f100e"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "compliance_notes",
+            "source_references": [
+              "quote-value:d53a48e9-dd3d-4165-84d0-17a8a7cc0ea8"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "currency",
+            "source_references": [
+              "quote-value:bbfbf466-8b67-438e-9ff2-72e79c9cf240"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "delivery_date",
+            "source_references": []
+          },
+          {
+            "state": "missing",
+            "field_key": "exclusions",
+            "source_references": [
+              "quote-value:eb65f404-d80e-4792-89f5-9d11f84ff9aa"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "incoterm",
+            "source_references": [
+              "quote-value:11c1fa45-4dd6-4c34-b852-8feb08e5a0a5"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "moq",
+            "source_references": [
+              "quote-value:d2e936c6-8104-40ee-9e52-128842ed40b6",
+              "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:moq"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "packaging_cost",
+            "source_references": [
+              "quote-value:06ceb45c-8bfc-4d6d-942c-d899c021f87c"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "payment_terms",
+            "source_references": [
+              "quote-value:866be927-ba02-4030-931e-fee8bd8b606f"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "production_lead_time",
+            "source_references": [
+              "quote-value:1ce295f6-cad4-435d-a07d-3662fd6a9722",
+              "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:production_lead_time"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "quote_validity",
+            "source_references": [
+              "quote-value:173a436c-c8af-4e8b-bdeb-5d85807758ce"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "quoted_quantity",
+            "source_references": [
+              "quote-value:020644cd-a4e5-40cf-9090-9696c5dd0ebe"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "sample_cost",
+            "source_references": [
+              "quote-value:f5125ca8-fc43-40ac-bd21-c42a96218db7"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "sample_lead_time",
+            "source_references": [
+              "quote-value:84301d17-dece-4ec6-978b-10b481b46653"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "shipping_cost",
+            "source_references": [
+              "quote-value:da060b87-407b-47ee-a029-9f96f2f80fbb"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "shipping_time",
+            "source_references": [
+              "quote-value:7750444d-8640-4fc3-929e-d7bc89e86dcd"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "special_conditions",
+            "source_references": [
+              "quote-value:a5325163-7b1b-408a-9379-ab16b575674a"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "supplier_notes",
+            "source_references": [
+              "quote-value:fd0a1f9f-9d7a-4da5-9fac-cc584d7ab602"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "tooling_cost",
+            "source_references": [
+              "quote-value:c1043c02-a0f6-4384-9c62-310a3d302085"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "total_lead_time",
+            "source_references": [
+              "quote-value:695ccc62-0cb6-44a1-b8d6-d1edb457a0f9"
+            ]
+          },
+          {
+            "state": "known",
+            "field_key": "unit_price",
+            "source_references": [
+              "quote-value:a00ceee2-a681-4b30-8906-d3d233dc4bad",
+              "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price"
+            ]
+          },
+          {
+            "state": "missing",
+            "field_key": "warranty",
+            "source_references": [
+              "quote-value:cc58eb51-bf2e-498f-abad-207c4c8ac035"
+            ]
+          }
+        ],
+        "quote_fields": [
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "certifications",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:98141dd4-e497-46a2-bca3-b6c32a0f100e",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "compliance_notes",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:d53a48e9-dd3d-4165-84d0-17a8a7cc0ea8",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "currency",
+            "uncertainty": null,
+            "current_value": "USD",
+            "source_reference": "quote-value:bbfbf466-8b67-438e-9ff2-72e79c9cf240",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "exclusions",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:eb65f404-d80e-4792-89f5-9d11f84ff9aa",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "incoterm",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:11c1fa45-4dd6-4c34-b852-8feb08e5a0a5",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "moq",
+            "uncertainty": null,
+            "current_value": 1000,
+            "source_reference": "quote-value:d2e936c6-8104-40ee-9e52-128842ed40b6",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "packaging_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:06ceb45c-8bfc-4d6d-942c-d899c021f87c",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "payment_terms",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:866be927-ba02-4030-931e-fee8bd8b606f",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "production_lead_time",
+            "uncertainty": null,
+            "current_value": "32 days",
+            "source_reference": "quote-value:1ce295f6-cad4-435d-a07d-3662fd6a9722",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "quote_validity",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:173a436c-c8af-4e8b-bdeb-5d85807758ce",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "quoted_quantity",
+            "uncertainty": null,
+            "current_value": 2000,
+            "source_reference": "quote-value:020644cd-a4e5-40cf-9090-9696c5dd0ebe",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "sample_cost",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:f5125ca8-fc43-40ac-bd21-c42a96218db7",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "sample_lead_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:84301d17-dece-4ec6-978b-10b481b46653",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "shipping_cost",
+            "uncertainty": null,
+            "current_value": "720",
+            "source_reference": "quote-value:da060b87-407b-47ee-a029-9f96f2f80fbb",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "shipping_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:7750444d-8640-4fc3-929e-d7bc89e86dcd",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "special_conditions",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:a5325163-7b1b-408a-9379-ab16b575674a",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "supplier_notes",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:fd0a1f9f-9d7a-4da5-9fac-cc584d7ab602",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "tooling_cost",
+            "uncertainty": null,
+            "current_value": "150",
+            "source_reference": "quote-value:c1043c02-a0f6-4384-9c62-310a3d302085",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "total_lead_time",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:695ccc62-0cb6-44a1-b8d6-d1edb457a0f9",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "unit_price",
+            "uncertainty": null,
+            "current_value": "4.6",
+            "source_reference": "quote-value:a00ceee2-a681-4b30-8906-d3d233dc4bad",
+            "ai_extracted_value": null
+          },
+          {
+            "origin": "USER_ENTERED",
+            "evidence": [],
+            "field_key": "warranty",
+            "uncertainty": null,
+            "current_value": null,
+            "source_reference": "quote-value:cc58eb51-bf2e-498f-abad-207c4c8ac035",
+            "ai_extracted_value": null
+          }
+        ],
+        "supplier_name": "Harbor Pouch Works",
+        "quote_revision": 0,
+        "resolved_facts": {
+          "moq": {
+            "status": "SELECTED",
+            "selected": {
+              "value": 1000,
+              "context": "PROJECT_QUOTE",
+              "field_key": "moq",
+              "source_reference": "quote-value:d2e936c6-8104-40ee-9e52-128842ed40b6",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [
+              {
+                "value": 1000,
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "moq",
+                "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:moq",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [
+                  "e070ff18-3a61-57b3-9d3c-55d3a5f97847"
+                ],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": 1000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "moq",
+                "source_reference": "quote-value:d2e936c6-8104-40ee-9e52-128842ed40b6",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          },
+          "unit_price": {
+            "status": "SELECTED",
+            "selected": {
+              "value": {
+                "amount": "4.6",
+                "currency": "USD"
+              },
+              "context": "PROJECT_QUOTE",
+              "field_key": "unit_price",
+              "source_reference": "quote-value:a00ceee2-a681-4b30-8906-d3d233dc4bad",
+              "component_attributions": [
+                {
+                  "field_key": "unit_price",
+                  "source_reference": "quote-value:a00ceee2-a681-4b30-8906-d3d233dc4bad",
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": []
+                },
+                {
+                  "field_key": "currency",
+                  "source_reference": "quote-value:bbfbf466-8b67-438e-9ff2-72e79c9cf240",
+                  "provenance_evidence_ids": [],
+                  "supporting_evidence_ids": []
+                }
+              ],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": [
+                "quote-value:bbfbf466-8b67-438e-9ff2-72e79c9cf240"
+              ]
+            },
+            "general_facts": [
+              {
+                "value": {
+                  "amount": "4.6000",
+                  "currency": "USD"
+                },
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "unit_price",
+                "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:unit_price",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": {
+                  "amount": "4.6",
+                  "currency": "USD"
+                },
+                "context": "PROJECT_QUOTE",
+                "field_key": "unit_price",
+                "source_reference": "quote-value:a00ceee2-a681-4b30-8906-d3d233dc4bad",
+                "component_attributions": [
+                  {
+                    "field_key": "unit_price",
+                    "source_reference": "quote-value:a00ceee2-a681-4b30-8906-d3d233dc4bad",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  },
+                  {
+                    "field_key": "currency",
+                    "source_reference": "quote-value:bbfbf466-8b67-438e-9ff2-72e79c9cf240",
+                    "provenance_evidence_ids": [],
+                    "supporting_evidence_ids": []
+                  }
+                ],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": [
+                  "quote-value:bbfbf466-8b67-438e-9ff2-72e79c9cf240"
+                ]
+              }
+            ]
+          },
+          "delivery_date": {
+            "status": "UNAVAILABLE",
+            "selected": null,
+            "general_facts": [],
+            "project_facts": []
+          },
+          "quoted_quantity": {
+            "status": "SELECTED",
+            "selected": {
+              "value": 2000,
+              "context": "PROJECT_QUOTE",
+              "field_key": "quoted_quantity",
+              "source_reference": "quote-value:020644cd-a4e5-40cf-9090-9696c5dd0ebe",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [],
+            "project_facts": [
+              {
+                "value": 2000,
+                "context": "PROJECT_QUOTE",
+                "field_key": "quoted_quantity",
+                "source_reference": "quote-value:020644cd-a4e5-40cf-9090-9696c5dd0ebe",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          },
+          "production_lead_time": {
+            "status": "SELECTED",
+            "selected": {
+              "value": "32 days",
+              "context": "PROJECT_QUOTE",
+              "field_key": "production_lead_time",
+              "source_reference": "quote-value:1ce295f6-cad4-435d-a07d-3662fd6a9722",
+              "component_attributions": [],
+              "provenance_evidence_ids": [],
+              "supporting_evidence_ids": [],
+              "has_same_context_conflict": false,
+              "related_source_references": []
+            },
+            "general_facts": [
+              {
+                "value": 32,
+                "context": "GENERAL_SUPPLIER",
+                "field_key": "production_lead_time",
+                "source_reference": "supplier:fdc24cfa-7350-5ce4-b8d2-249085cd36da:production_lead_time",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ],
+            "project_facts": [
+              {
+                "value": "32 days",
+                "context": "PROJECT_QUOTE",
+                "field_key": "production_lead_time",
+                "source_reference": "quote-value:1ce295f6-cad4-435d-a07d-3662fd6a9722",
+                "component_attributions": [],
+                "provenance_evidence_ids": [],
+                "supporting_evidence_ids": [],
+                "has_same_context_conflict": false,
+                "related_source_references": []
+              }
+            ]
+          }
+        },
+        "supplier_facts": {
+          "country": "Vietnam",
+          "evidence": [
+            {
+              "id": "1574c829-2b7b-500d-96ac-153811a6a8da",
+              "claim_key": "material:recycled polyester",
+              "source_type": "CAPABILITY_RECORD",
+              "source_label": "Synthetic material sheet",
+              "evidence_text": "Material sheet lists recycled polyester bag production.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            },
+            {
+              "id": "1ae6cffb-e0a6-52e7-b62b-51243f502e69",
+              "claim_key": "category:cosmetic travel bag",
+              "source_type": "CATALOG",
+              "source_label": "Synthetic product catalog",
+              "evidence_text": "Catalog lists custom cosmetic travel bags.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            },
+            {
+              "id": "8643eee8-edd2-5de6-8b53-f4b5435de096",
+              "claim_key": "certification:grs:current",
+              "source_type": "CERTIFICATION_RECORD",
+              "source_label": "Synthetic current GRS record",
+              "evidence_text": "Record states current GRS certification for this fictional supplier.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            },
+            {
+              "id": "c4db3ff0-3b8d-5e30-bfe5-59e7b502e253",
+              "claim_key": "capability:custom branding",
+              "source_type": "CAPABILITY_RECORD",
+              "source_label": "Synthetic branding sheet",
+              "evidence_text": "Branding sheet offers custom screen printed logos.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            },
+            {
+              "id": "e070ff18-3a61-57b3-9d3c-55d3a5f97847",
+              "claim_key": "moq:general",
+              "source_type": "CATALOG",
+              "source_label": "Synthetic catalog terms",
+              "evidence_text": "General minimum order is 1,000 units.",
+              "evidence_state": "SUPPORTS",
+              "source_reference": null
+            }
+          ],
+          "description": "Fictional maker of custom cosmetic travel bags and small textile accessories.",
+          "general_moq": 1000,
+          "capabilities": [
+            [
+              "BRANDING_METHOD",
+              "screen print"
+            ],
+            [
+              "CERTIFICATION",
+              "grs"
+            ],
+            [
+              "CUSTOM_BRANDING",
+              "true"
+            ],
+            [
+              "MATERIAL",
+              "recycled polyester"
+            ],
+            [
+              "PRODUCT_CATEGORY",
+              "cosmetic travel bag"
+            ]
+          ],
+          "general_lead_time_days": 32,
+          "indicative_price_amount": "4.6000",
+          "indicative_price_currency": "USD"
+        }
+      }
+    ]
+  }
+}

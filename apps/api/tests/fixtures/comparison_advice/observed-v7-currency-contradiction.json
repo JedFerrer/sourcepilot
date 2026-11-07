@@ -1,0 +1,5 @@
+{
+  "observed_narrative": "Harbor Pouch Works provides shipping cost USD 600 and shipping time 10 days; Sunrise Textile Lab provides shipping cost 800 and shipping time 12 days, but its shipping-cost currency is not stated. These entered shipping details do not establish equivalent landed costs.",
+  "evidence_context": "Retained manual synthetic project: Sunrise Textile Lab shipping_cost=800, shipping_time=12, currency=USD (known); factual table displays USD 800. Field-specific shipping evidence omits sibling currency and manual fields have no PDF evidence.",
+  "result": "Historical factual failure despite structural COMPLETED / VALID."
+}
