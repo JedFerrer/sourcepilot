@@ -27,7 +27,7 @@ from sourcepilot.ai.client import AnalystModelInvocation, ModelInvocation, Model
 from sourcepilot.ai.comparison_advice_eval import scenario_snapshot
 from sourcepilot.ai.eval_scoring import check_failed, score_output
 from sourcepilot.ai.tradeoff_analysis import TradeoffNotReadyError
-from sourcepilot.ai.tradeoff_analysis_eval import fixture_snapshot
+from sourcepilot.ai.tradeoff_analysis_eval import CERT, LEAD, QA, QB, QC, A, B, C, fixture_snapshot
 from sourcepilot.comparison.deadline import ComparisonDeadline, current_deadline
 from sourcepilot.comparison.execution import comparison_cli_lifecycle
 from sourcepilot.persistence.base import Base
@@ -131,6 +131,139 @@ def session() -> Iterator[Session]:
         engine.dispose()
 
 
+def unique_rows(rows: list[dict[str, Any]], key: str) -> dict[str, dict[str, Any]]:
+    result = {row[key]: row for row in rows}
+    assert len(result) == len(rows), f"Duplicate {key}"
+    return result
+
+
+def comparison_identities(
+    old_payload: dict[str, Any], initial: dict[str, Any], old_snapshot_id: str,
+) -> dict[str, str]:
+    """Bind by semantic identity, with exact owned field/evidence membership."""
+    payload = initial["comparison_payload"]
+    # Check both complete identity domains before dictionary insertion can hide
+    # duplicate source keys or collisions between different kinds of identity.
+    for data, snapshot_id in ((old_payload, old_snapshot_id), (payload, initial["snapshot_id"])):
+        domain = [snapshot_id, *(r["id"] for r in data["brief"]["requirements"])]
+        for supplier in data["suppliers"]:
+            domain.extend((supplier["supplier_id"], supplier["quote_id"]))
+            domain.extend(source["id"] for field in supplier["quote_fields"]
+                          for source in field.get("evidence", []))
+        assert len(domain) == len(set(domain)), "Duplicate or conflicting identity"
+
+    # Legacy scenario owners are fixed independently of the payload under test.
+    # Target owners come from persisted Quote rows via active_quote_revisions,
+    # not from the projected payload or its positional fact catalogue.
+    source_quotes = {A: QA, B: QB, C: QC}
+    revisions = initial["quote_revision_snapshot"]
+    assert isinstance(revisions, dict), "Missing authoritative quote owners"
+    assert set(revisions) == {s["supplier_id"] for s in payload["suppliers"]}
+    for supplier in old_payload["suppliers"]:
+        assert source_quotes.get(supplier["supplier_id"]) == supplier["quote_id"], (
+            "Source quote owner mismatch")
+    for supplier in payload["suppliers"]:
+        revision = revisions[supplier["supplier_id"]]
+        assert isinstance(revision, dict) and revision.get("quote_id") == supplier["quote_id"], (
+            "Projected quote owner mismatch")
+    identities = {old_snapshot_id: initial["snapshot_id"]}
+    old_requirements = unique_rows(old_payload["brief"]["requirements"], "kind")
+    requirements = unique_rows(payload["brief"]["requirements"], "kind")
+    assert old_requirements.keys() == requirements.keys()
+    for kind, old in old_requirements.items():
+        actual = requirements[kind]
+        assert old["importance"] == actual["importance"]
+        identities[old["id"]] = actual["id"]
+    old_suppliers = unique_rows(old_payload["suppliers"], "supplier_name")
+    suppliers = unique_rows(payload["suppliers"], "supplier_name")
+    assert old_suppliers.keys() == suppliers.keys()
+    seen_evidence: set[str] = set()
+    for name, old in old_suppliers.items():
+        actual = suppliers[name]
+        identities[old["supplier_id"]] = actual["supplier_id"]
+        identities[old["quote_id"]] = actual["quote_id"]
+        fields = unique_rows(old["quote_fields"], "field_key")
+        completeness = unique_rows(old["completeness"], "field_key")
+        projected = unique_rows(actual["quote_fields"], "field_key")
+        assert projected.keys() == fields.keys() | completeness.keys()
+        for key, projected_field in projected.items():
+            expected_completeness = (
+                {k: v for k, v in completeness[key].items() if k != "field_key"}
+                if key in completeness else None
+            )
+            assert projected_field.get("completeness") == expected_completeness
+            if key not in fields:
+                assert set(projected_field) <= {"field_key", "completeness", "currency_context"}
+                continue
+            expected = eval_live.canonical_quote_field(old, fields[key])
+            for attribute in ("current_value", "origin", "ai_extracted_value"):
+                assert projected_field[attribute] == expected[attribute]
+            old_sources = unique_rows(expected["evidence"], "id")
+            actual_sources = unique_rows(projected_field["evidence"], "id")
+            assert len(old_sources) == len(actual_sources)
+            for source_id, source in old_sources.items():
+                matches = [item for item in actual_sources.values()
+                           if {k: v for k, v in item.items() if k != "id"}
+                           == {k: v for k, v in source.items() if k != "id"}]
+                assert len(matches) == 1, "Ambiguous or mismatched owned evidence"
+                target = matches[0]["id"]
+                assert source_id not in identities and target not in seen_evidence
+                identities[source_id] = target
+                seen_evidence.add(target)
+    assert len(set(identities.values())) == len(identities), "Identity collision"
+    return identities
+
+
+# Independent scenario intent: never search the runtime catalogue for an acceptable reason.
+SUGGESTION_CHOICES = {
+    "clear-suggestion": A, "tie": None, "critical-unknown": None,
+    "required-failure": B, "incomplete-evidence": None, "user-correction": A,
+    "incomparable-prices": None, "general-vs-project": A,
+    "mixed-currencies": None, "unequal-quantities": None, "required-conflict": None,
+}
+
+
+def scenario_selection(case_id: str, initial: dict[str, Any], ids: dict[str, str]) -> dict[str, Any]:
+    selected = SUGGESTION_CHOICES[case_id]
+
+    def requirement(supplier: str, requirement_id: str) -> str:
+        return f"R:{ids[supplier]}:{ids[requirement_id]}"
+
+    def quote(quote_id: str, field: str) -> str:
+        return f"Q:{ids[quote_id]}:{field}"
+
+    reasons = ([quote(QA if selected == A else QB, "unit_price")] if selected else [])
+    highlights = {
+        "clear-suggestion": [requirement(A, CERT), quote(QA, "unit_price")],
+        "tie": [requirement(A, CERT), requirement(B, CERT), requirement(C, CERT)],
+        "critical-unknown": [requirement(A, CERT), requirement(B, CERT), requirement(C, CERT)],
+        "required-failure": [quote(QB, "unit_price"), requirement(B, CERT), requirement(B, LEAD)],
+        "incomplete-evidence": [requirement(C, CERT)],
+        "user-correction": [quote(QA, "unit_price")],
+        "incomparable-prices": [quote(QA, "unit_price"), quote(QB, "unit_price")],
+        "general-vs-project": [quote(QA, "unit_price"), quote(QA, "production_lead_time")],
+        "mixed-currencies": [quote(QA, "currency"), quote(QB, "currency")],
+        "unequal-quantities": [quote(QA, "quoted_quantity"), quote(QB, "quoted_quantity")],
+        "required-conflict": [requirement(B, CERT)],
+    }[case_id]
+    actions = {
+        "critical-unknown": [("CONFIRM_MISSING", requirement(s, CERT)) for s in (A, B, C)],
+        "incomplete-evidence": [("CONFIRM_MISSING", requirement(C, CERT))],
+        "required-conflict": [("RESOLVE_CONFLICT", requirement(B, CERT))],
+    }.get(case_id, [])
+    result = {
+        "version": "comparison-selection-v1", "snapshot_id": initial["snapshot_id"],
+        "highlights": highlights, "tradeoffs": [],
+        "verification_actions": [{"action": action, "fact_id": fact} for action, fact in actions],
+        "suggestion": {"supplier_id": ids[selected] if selected else None,
+                       "reason_fact_ids": reasons,
+                       "no_suggestion_reason": None if selected else (
+                           "VERIFY_BEFORE_CHOOSING" if actions else "NO_CLEAR_PREFERENCE")},
+    }
+    assert all(fact in initial["fact_catalogue"] for fact in highlights + reasons)
+    return result
+
+
 class FixtureClient:
     model = "recorded-adapter-regression"
 
@@ -230,22 +363,9 @@ class FixtureClient:
                 ).comparison_payload,
             )
             assert old_payload is not None
-            payload = initial["comparison_payload"]
-            identities = {}
-            for old, actual in zip(
-                old_payload["brief"]["requirements"], payload["brief"]["requirements"], strict=True
-            ):
-                identities[old["id"]] = actual["id"]
-            for old, actual in zip(old_payload["suppliers"], payload["suppliers"], strict=True):
-                identities[old["supplier_id"]] = actual["supplier_id"]
-                identities[old["quote_id"]] = actual["quote_id"]
-                for old_field, actual_field in zip(
-                    old["quote_fields"], actual["quote_fields"], strict=True
-                ):
-                    for old_source, actual_source in zip(
-                        old_field["evidence"], actual_field["evidence"], strict=True
-                    ):
-                        identities[old_source["id"]] = actual_source["id"]
+            identities = comparison_identities(
+                old_payload, initial, self.case.get("snapshot_id", str(fixture_snapshot().snapshot_id)),
+            )
             if self.calls == 1:
                 return AnalystModelInvocation(
                     "",
@@ -260,6 +380,11 @@ class FixtureClient:
                     1,
                     1,
                 )
+        if self.category == "suggestion":
+            assert schema_name == "ComparisonSelectionV1"
+            return AnalystModelInvocation(
+                json.dumps(scenario_selection(self.case["id"], initial, identities)), (), 1, 1,
+            )
         return AnalystModelInvocation(
             json.dumps(eval_live.remap(self.case["output"], identities)), (), 1, 1
         )

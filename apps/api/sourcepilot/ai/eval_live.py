@@ -232,12 +232,78 @@ def supplier_fixture(session: Session, project: Project, case: dict[str, Any]) -
     return identities
 
 
+def canonical_quote_field(
+    supplier: dict[str, Any], field: dict[str, Any],
+) -> dict[str, Any]:
+    """Convert legacy eval provenance without treating source evidence as extraction."""
+    result = deepcopy(field)
+    evidence = result.get("evidence", [])
+
+    def alias(primary: str, legacy: str) -> tuple[bool, Any]:
+        if (primary in result and legacy in result
+                and json.dumps(result[primary], sort_keys=True)
+                != json.dumps(result[legacy], sort_keys=True)):
+            raise ValueError(f"Conflicting provenance aliases: {primary}/{legacy}")
+        return primary in result or legacy in result, result.get(primary, result.get(legacy))
+
+    has_origin, origin = alias("origin", "current_origin")
+    has_extraction, extracted = alias("ai_extracted_value", "extracted_value")
+    if not has_origin:
+        if evidence or has_extraction:
+            raise ValueError("Ambiguous quote origin")
+        origin = "USER_ENTERED"
+    if origin not in {"AI_EXTRACTED", "USER_CORRECTED", "USER_ENTERED"}:
+        raise ValueError("Invalid quote origin")
+    if origin == "USER_ENTERED" and (evidence or extracted is not None):
+        raise ValueError("Manual value cannot acquire extraction or PDF evidence")
+    if origin == "AI_EXTRACTED":
+        if not has_extraction:
+            extracted = result["current_value"]
+        elif extracted is not None and extracted != result["current_value"]:
+            raise ValueError("Unchanged extraction differs from current value")
+    if origin == "USER_CORRECTED" and not has_extraction and evidence:
+        # The retained fixture explicitly documents this correction. Cardinality
+        # alone is never proof that a source value was the model's extraction.
+        from sourcepilot.ai.tradeoff_analysis_eval import PDF_PRICE, QA, A
+
+        if not (
+            supplier["supplier_id"] == A and supplier["quote_id"] == QA
+            and result["field_key"] == "unit_price" and result["current_value"] == "4.50"
+            and evidence == [{"id": PDF_PRICE, "evidence_value": "4.22"}]
+        ):
+            raise ValueError("Ambiguous legacy correction extraction")
+        extracted = "4.22"
+    result.pop("current_origin", None)
+    result.pop("extracted_value", None)
+    result.update(origin=origin, ai_extracted_value=extracted, evidence=evidence)
+    return result
+
+
 def comparison_fixture(
     session: Session, project: Project, case: dict[str, Any]
 ) -> tuple[ComparisonSnapshotResult, dict[str, str]]:
     snapshot = scenario_snapshot(case) if "snapshot_id" in case else fixture_snapshot()
     payload = cast(dict[str, Any], deepcopy(snapshot.comparison_payload))
     assert payload is not None
+    # Validate identities before remapping; duplicate evidence must not silently
+    # acquire a different owner when assigned fresh database IDs.
+    seen: set[str] = {str(snapshot.snapshot_id)}
+    for requirement in payload["brief"]["requirements"]:
+        if requirement["id"] in seen:
+            raise ValueError("Duplicate fixture identity or evidence ownership")
+        seen.add(requirement["id"])
+    for supplier in payload["suppliers"]:
+        fields = supplier["quote_fields"]
+        keys = [field["field_key"] for field in fields]
+        if len(keys) != len(set(keys)):
+            raise ValueError("Duplicate quote field")
+        owned = [supplier["supplier_id"], supplier["quote_id"]]
+        owned.extend(source["id"] for field in fields for source in field["evidence"])
+        for identity in owned:
+            if identity in seen:
+                raise ValueError("Duplicate fixture identity or evidence ownership")
+            seen.add(identity)
+        supplier["quote_fields"] = [canonical_quote_field(supplier, field) for field in fields]
     identities = {str(snapshot.snapshot_id): str(uuid4())}
     for requirement in payload["brief"]["requirements"]:
         identities[requirement["id"]] = str(uuid4())
@@ -313,30 +379,27 @@ def comparison_fixture(
         )
         session.add(document)
         session.flush()
-        for index, field in enumerate(supplier["quote_fields"], start=1):
+        block_number = 0
+        for field in supplier["quote_fields"]:
             value = field["current_value"]
-            if field["field_key"] == "production_lead_time" and isinstance(value, int):
-                value = f"{value} days"
-            corrected = field.get("current_origin") == "USER_CORRECTED"
             evidence = field["evidence"]
             quote_value = QuoteValue(
                 quote_id=quote.id,
                 field_key=field["field_key"],
                 current_value=value,
-                current_origin="USER_CORRECTED" if corrected else "USER_ENTERED",
-                ai_extracted_value=evidence[0]["evidence_value"]
-                if corrected and evidence
-                else None,
+                current_origin=field["origin"],
+                ai_extracted_value=field["ai_extracted_value"],
             )
             session.add(quote_value)
             session.flush()
             for source in evidence:
+                block_number += 1
                 block = DocumentBlock(
                     id=uuid4(),
                     quote_document_id=document.id,
                     page_number=1,
-                    block_number=index,
-                    text=f"Synthetic original USD {source['evidence_value']}",
+                    block_number=block_number,
+                    text=f"Synthetic original {field['field_key']}: {source['evidence_value']}",
                 )
                 session.add(block)
                 session.flush()

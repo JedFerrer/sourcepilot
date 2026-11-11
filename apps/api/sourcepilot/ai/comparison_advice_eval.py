@@ -83,7 +83,7 @@ def score_case(case: dict[str, Any], advice: ComparisonAdvice,
             section = (advice.suggestion.tradeoffs if state == "DOES_NOT_MEET"
                        else advice.suggestion.uncertainties)
             if state != "MEETS":
-                pattern = {"DOES_NOT_MEET": r"does not meet|fails|failure",
+                pattern = {"DOES_NOT_MEET": r"does not meet|\bDOES_NOT_MEET\b|fails|failure",
                            "UNKNOWN": r"unknown|unverified|missing",
                            "CONFLICT": r"conflict"}[state]
                 if not any(UUID(requirement_id) in point.requirement_ids
