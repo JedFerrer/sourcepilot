@@ -41,11 +41,13 @@ def test_optional_removal_preserves_valid_slots_and_snapshot():
     draft["tradeoffs"] = [{"relation":"SAME_REQUIREMENT","fact_ids":["foreign","foreign2"]}]
     reject(task,draft)
     assert list(task.issues) == ["tradeoffs[0]"]
+    assert task.draft is not None
     frozen = task.draft.model_dump_json()
     result = task.accept(patch(task,[{"slot_id":"tradeoffs[0]","op":"remove","value":None}]))
     validate_advice(ComparisonAdvice.model_validate(result),snapshot)
     clean = AdviceSelectionTask(snapshot)
     assert result == clean.accept(json.dumps(valid_selection(clean)))
+    assert task.draft is not None
     assert task.draft.model_dump_json() == frozen
     assert snapshot.model_dump_json() == original
 
@@ -60,6 +62,7 @@ def test_duplicate_slots_are_all_invalid_and_merge_uses_original_indexes():
     result = task.accept(patch(task,[{"slot_id":"highlights[0]","op":"remove","value":None},
                                     {"slot_id":"highlights[2]","op":"replace","value":first}]))
     assert result["analysis"]["important_unknowns"][0]["supplier_ids"]
+    assert task.draft is not None
     assert task.draft.highlights == [first,other,first]
 
 
@@ -158,10 +161,30 @@ def test_reversed_supplier_order_is_still_a_duplicate_relationship():
 def test_required_failure_is_disclosed_without_excluding_supplier():
     snapshot = retained_snapshot()
     assert snapshot.comparison_payload is not None
-    supplier = snapshot.comparison_payload["suppliers"][0]
-    requirement = next(r for r in snapshot.comparison_payload["brief"]["requirements"]
+    suppliers = snapshot.comparison_payload["suppliers"]
+    assert isinstance(suppliers, list)
+    supplier = suppliers[0]
+    assert isinstance(supplier, dict)
+    assert isinstance(supplier["supplier_id"], str)
+    brief = snapshot.comparison_payload["brief"]
+    assert isinstance(brief, dict)
+    requirements = brief["requirements"]
+    assert isinstance(requirements, list)
+    for row in requirements:
+        assert isinstance(row, dict)
+        assert isinstance(row["id"], str)
+        assert isinstance(row["importance"], str)
+    requirement = next(r for r in requirements
                        if r["importance"] == "REQUIRED")
-    finding = next(r for r in supplier["evaluation"]["results"] if r["requirement_id"] == requirement["id"])
+    evaluation = supplier["evaluation"]
+    assert isinstance(evaluation, dict)
+    results = evaluation["results"]
+    assert isinstance(results, list)
+    for row in results:
+        assert isinstance(row, dict)
+        assert row["requirement_id"] is None or isinstance(row["requirement_id"], str)
+        assert isinstance(row["status"], str)
+    finding = next(r for r in results if r["requirement_id"] == requirement["id"])
     finding["status"] = "DOES_NOT_MEET"
     task = AdviceSelectionTask(snapshot)
     price = next(f for f in task.catalogue.facts.values()

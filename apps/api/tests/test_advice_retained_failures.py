@@ -50,7 +50,33 @@ def test_latent_contradiction_and_unresolved_parser_gap_are_not_success():
     payload = snapshot.comparison_payload
     assert payload is not None
     suppliers = payload["suppliers"]
-    requirements = {UUID(r["id"]): r for r in payload["brief"]["requirements"]}
+    assert isinstance(suppliers, list)
+    brief = payload["brief"]
+    assert isinstance(brief, dict)
+    requirement_rows = brief["requirements"]
+    assert isinstance(requirement_rows, list)
+    for requirement in requirement_rows:
+        assert isinstance(requirement, dict)
+        assert isinstance(requirement["id"], str)
+    for supplier in suppliers:
+        assert isinstance(supplier, dict)
+        assert isinstance(supplier["supplier_id"], str)
+        assert isinstance(supplier["quote_id"], str)
+        evaluation = supplier["evaluation"]
+        assert isinstance(evaluation, dict)
+        results = evaluation["results"]
+        assert isinstance(results, list)
+        for result in results:
+            assert isinstance(result, dict)
+            assert result["requirement_id"] is None or isinstance(result["requirement_id"], str)
+            assert isinstance(result["status"], str)
+        fields = supplier["completeness"]
+        assert isinstance(fields, list)
+        for field in fields:
+            assert isinstance(field, dict)
+            assert isinstance(field["field_key"], str)
+            assert isinstance(field["state"], str)
+    requirements = {UUID(r["id"]): r for r in requirement_rows}
     states = {(UUID(s["supplier_id"]), UUID(r["requirement_id"])): r["status"] for s in suppliers
               for r in s["evaluation"]["results"] if r["requirement_id"] is not None}
     owners = {UUID(s["quote_id"]): UUID(s["supplier_id"]) for s in suppliers}
