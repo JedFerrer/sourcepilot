@@ -143,9 +143,8 @@ def test_repeated_nonstring_reference_contract(
 
 def test_generation_and_repair_share_nonstring_binding_guidance() -> None:
     assert analysis_module.PROMPT_VERSION == "tradeoff-analysis-v9"
-    assert advice_module.PROMPT_VERSION == "comparison-advice-v9"
     for text in (
-        analysis_module.INSTRUCTIONS, advice_module.INSTRUCTIONS,
+        analysis_module.INSTRUCTIONS,
         *(comparison_repair_feedback(ComparisonRejection(code, "untrusted sentinel"))
           for code in (RejectionCode.STATE_SYNTAX, RejectionCode.STATE_REFERENCE)),
     ):
@@ -186,54 +185,48 @@ def test_nonstring_reference_runtime_repair(
                     "kind-only": RejectionCode.STATE_REFERENCE,
                     "value-in-state": RejectionCode.STATE_SYNTAX}[initial]
 
-    class RepairModel:
-        model = "provider-free-reference-binding"
+    # This is the default prose loop with two public result envelopes. The combined
+    # envelope is NOT the production v10 entry point; that has separate selection tests.
+    base_before = deepcopy(base)
+    initial_output = mutate_output(base, initial, snapshot, label, value_label)
+    if initial == "unknown-pair":
+        initial_output["supplier_summaries"][0]["text"] = (
+            base["supplier_summaries"][0]["text"].replace("requirement", label))
+    rejected = contract(combined, initial_output, snapshot).model_dump_json()
+    rejected_before = deepcopy(initial_output)
+    final = json.loads(rejected)
+    output = final["analysis"] if combined else final
+    corrected = mutate_output(base, "kind-only" if repair == "pair-only" else repair,
+                              snapshot, label, value_label)
+    output["supplier_summaries"][0] = deepcopy(corrected["supplier_summaries"][0])
+    assert output == corrected  # Other descriptions, disclosures and citations survive.
+    responses = [rejected, json.dumps(final)]
+    requests: list[dict[str, Any]] = []
 
-        def __init__(self) -> None:
-            self.calls = 0
-            self.rejected = ""
-            self.items: list[dict[str, Any]] = []
+    class RepairModel:
+        model = "provider-free-public-envelope-prose-harness"
 
         def invoke_with_tools(self, **kwargs: Any) -> AnalystModelInvocation:
-            self.calls += 1
-            assert self.calls <= 2
-            if self.calls == 1:
-                self.items = deepcopy(kwargs["input_items"])
-                assert json.loads(self.items[0]["content"]) == comparison_context(snapshot)
-                output = mutate_output(base, initial, snapshot, label, value_label)
-                if initial == "unknown-pair":
-                    # Both defects coexist: fixing only the quote key exposes the
-                    # repeated-kind binding rejection on the next validation.
-                    output["supplier_summaries"][0]["text"] = (
-                        base["supplier_summaries"][0]["text"].replace("requirement", label))
-                self.rejected = contract(combined, output, snapshot).model_dump_json()
-                return AnalystModelInvocation(self.rejected, (), 2, 1)
-            assert kwargs["input_items"] == self.items + [{"role": "assistant", "content": self.rejected}]
-            assert REPAIR_FEEDBACK[initial_code] in kwargs["instructions"]
-            assert "Supplier A requirement is MEETS." in kwargs["instructions"]
-            assert self.rejected not in kwargs["instructions"]
-            final = json.loads(self.rejected)
-            output = final["analysis"] if combined else final
-            # Correct only the offending point in the actual rejected final.
-            corrected = mutate_output(base, "kind-only" if repair == "pair-only" else repair,
-                                      snapshot, label, value_label)
-            output["supplier_summaries"][0] = corrected["supplier_summaries"][0]
-            assert output == corrected  # All descriptions, disclosures and other citations survive.
-            return AnalystModelInvocation(json.dumps(final), (), 2, 1)
+            requests.append(deepcopy(kwargs))
+            # Record unexpected calls too; assertions run outside production recovery.
+            return AnalystModelInvocation(responses[min(len(requests) - 1, 1)], (), 2, 1)
 
     monkeypatch.setenv("SOURCEPILOT_LANGFUSE_ENABLED", "false")
     monkeypatch.setattr(analysis_module, "_current_snapshot", lambda *args, **kwargs: snapshot)
     model = RepairModel()
-    module = advice_module if combined else analysis_module
     kwargs: dict[str, Any] = {
         "demo_session_id": uuid4(), "project_id": uuid4(), "client_factory": lambda: model,
-        "operation": "comparison_advice" if combined else "tradeoff_analysis",
-        "prompt_version": module.PROMPT_VERSION, "base_instructions": module.INSTRUCTIONS,
+        "operation": "public_envelope_prose_harness" if combined else "tradeoff_analysis",
+        "prompt_version": analysis_module.PROMPT_VERSION,
+        "base_instructions": analysis_module.INSTRUCTIONS,
         "result_type": advice_module.ComparisonAdvice if combined else analysis_module.TradeoffAnalysis,
         "validate": advice_module.validate_advice if combined else analysis_module.validate_analysis,
     }
     if repair == "valid":
-        analysis_module.run_comparison_analyst(cast(Session, MemorySession()), **kwargs)
+        _, bound_id, result = analysis_module.run_comparison_analyst(
+            cast(Session, MemorySession()), **kwargs)
+        assert bound_id == snapshot.snapshot_id
+        assert result.model_dump(mode="json") == final
     else:
         with pytest.raises(analysis_module.TradeoffUnavailableError):
             analysis_module.run_comparison_analyst(cast(Session, MemorySession()), **kwargs)
@@ -246,7 +239,17 @@ def test_nonstring_reference_runtime_repair(
     assert codes == [initial_code.value] + ([] if repair == "valid" else [terminal[repair]])
     assert run.status == ("COMPLETED" if repair == "valid" else "VALIDATION_FAILED")
     assert run.validation_status == ("REPAIRED" if repair == "valid" else "INVALID")
-    assert run.model_turn_count == model.calls == 2
+    assert run.model_turn_count == len(requests) == 2
+    assert run.error_type == (None if repair == "valid" else terminal[repair])
     assert run.tool_call_count == 0
     assert sum(item.kind == "retry" and item.outcome == "REPAIR" for item in steps) == 1
     assert snapshot == original
+    items = requests[0]["input_items"]
+    assert json.loads(items[0]["content"]) == comparison_context(original)
+    assert requests[1]["input_items"] == items + [{"role": "assistant", "content": rejected}]
+    assert REPAIR_FEEDBACK[initial_code] in requests[1]["instructions"]
+    assert "Supplier A requirement is MEETS." in requests[1]["instructions"]
+    assert rejected not in requests[1]["instructions"]
+    assert base == base_before
+    assert initial_output == rejected_before
+    assert requests[0]["schema_name"] == ("ComparisonAdviceV1" if combined else "TradeoffAnalysis")
