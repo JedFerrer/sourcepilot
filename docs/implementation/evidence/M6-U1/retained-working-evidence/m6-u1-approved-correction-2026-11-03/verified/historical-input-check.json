@@ -1,8 +1,0 @@
-{
-  "historical_source": "..\\..\\docs\\implementation\\evidence\\M6-U1\\quote-v2-filtered-live-2026-11-03-10d48e60\\baseline\\results.json",
-  "checked": 58,
-  "changed": [
-    "apps/api/sourcepilot/ai/eval_scoring.py",
-    "apps/api/sourcepilot/ai/quote_extraction_eval.py"
-  ]
-}

@@ -6,6 +6,16 @@ PLANNING → IMPLEMENTATION → REVIEW → BROWSER QA when applicable → DONE C
 
 One approved implementation unit is active at a time.
 
+Approved current-unit records live privately at
+`.local-investigation-artifacts/private-development/docs/implementation/`.
+A fresh clone can build and test without these records. Before continuing an
+existing unit, obtain its approved record if it is absent; never infer approval
+from code or commits. New unit work still requires an explicitly approved plan.
+The private archive's navigation index maps original paths without changing
+historical records. The Product Specification, Technical Architecture and
+Implementation Plan remain the higher-authority tracked sources.
+
+
 ## Change Paths
 
 SourcePilot supports two development paths.

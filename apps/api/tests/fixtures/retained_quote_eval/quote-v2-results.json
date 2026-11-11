@@ -1,0 +1,5024 @@
+{
+  "human_review": {
+    "status": "PENDING",
+    "case_count": 0,
+    "cases": []
+  },
+  "cases": [
+    {
+      "id": "harbor-primary",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"harbor_currency_usd\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1000, \"expected\": 1000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40\", \"expected\": \"40\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"150\", \"expected\": \"150\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"320\", \"expected\": \"320\", \"rule\": \"exact_value\", \"uncertainty\": \"Shipping cost is stated as USD 320 to Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"12 days after production\", \"expected\": \"12 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b13\"], \"expected\": [\"p1-b13\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record: current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": \"harbor_exclusion_case\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER\", \"source_block_ids\": [\"p1-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1000,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "40",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "150",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "320",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "Shipping cost is stated as USD 320 to Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "12 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record: current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+            "source_block_ids": [
+              "p1-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "willow-primary",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.20\", \"expected\": \"4.20\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1800, \"expected\": 1800, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"35\", \"expected\": \"35\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"100\", \"expected\": \"100\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"280\", \"expected\": \"280\", \"rule\": \"exact_value\", \"uncertainty\": \"Shipping cost is stated for delivery to Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"10 days\", \"expected\": \"10 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40 days after sample approval\", \"expected\": \"40 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"14 days after production\", \"expected\": \"14 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"50% deposit, 50% before dispatch\", \"expected\": \"50% deposit, 50% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b15\"], \"expected\": [\"p1-b15\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic demo quote \\u2014 not a real supplier offer.\", \"source_block_ids\": [\"p1-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.20",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1800,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "35",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "100",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "280",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "Shipping cost is stated for delivery to Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "10 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "40 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "14 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "50% deposit, 50% before dispatch",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b15"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": "The quote states that preferred GRS certification is not stated in the quote.",
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic demo quote — not a real supplier offer.",
+            "source_block_ids": [
+              "p1-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      },
+      "model_responses": [
+        {
+          "output_text": "{\"fields\":{\"quoted_quantity\":{\"state\":\"KNOWN\",\"extracted_value\":2000,\"source_block_ids\":[\"p1-b4\"],\"uncertainty\":null,\"conflicting_values\":[]},\"unit_price\":{\"state\":\"KNOWN\",\"extracted_value\":\"4.20\",\"source_block_ids\":[\"p1-b5\"],\"uncertainty\":null,\"conflicting_values\":[]},\"currency\":{\"state\":\"KNOWN\",\"extracted_value\":\"USD\",\"source_block_ids\":[\"p1-b5\",\"p1-b7\",\"p1-b8\",\"p1-b11\"],\"uncertainty\":null,\"conflicting_values\":[]},\"moq\":{\"state\":\"KNOWN\",\"extracted_value\":1800,\"source_block_ids\":[\"p1-b6\"],\"uncertainty\":null,\"conflicting_values\":[]},\"sample_cost\":{\"state\":\"KNOWN\",\"extracted_value\":\"35\",\"source_block_ids\":[\"p1-b8\"],\"uncertainty\":null,\"conflicting_values\":[]},\"tooling_cost\":{\"state\":\"KNOWN\",\"extracted_value\":\"100\",\"source_block_ids\":[\"p1-b7\"],\"uncertainty\":null,\"conflicting_values\":[]},\"packaging_cost\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"shipping_cost\":{\"state\":\"KNOWN\",\"extracted_value\":\"280\",\"source_block_ids\":[\"p1-b11\"],\"uncertainty\":\"Shipping cost is stated for delivery to Manila.\",\"conflicting_values\":[]},\"sample_lead_time\":{\"state\":\"KNOWN\",\"extracted_value\":\"10 days\",\"source_block_ids\":[\"p1-b9\"],\"uncertainty\":null,\"conflicting_values\":[]},\"production_lead_time\":{\"state\":\"KNOWN\",\"extracted_value\":\"40 days after sample approval\",\"source_block_ids\":[\"p1-b10\"],\"uncertainty\":null,\"conflicting_values\":[]},\"shipping_time\":{\"state\":\"KNOWN\",\"extracted_value\":\"14 days after production\",\"source_block_ids\":[\"p1-b12\"],\"uncertainty\":null,\"conflicting_values\":[]},\"total_lead_time\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"payment_terms\":{\"state\":\"KNOWN\",\"extracted_value\":\"50% deposit, 50% before dispatch\",\"source_block_ids\":[\"p1-b14\"],\"uncertainty\":null,\"conflicting_values\":[]},\"incoterm\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"quote_validity\":{\"state\":\"KNOWN\",\"extracted_value\":\"30 days\",\"source_block_ids\":[\"p1-b15\"],\"uncertainty\":null,\"conflicting_values\":[]},\"warranty\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"certifications\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[\"p1-b13\"],\"uncertainty\":\"The quote states that preferred GRS certification is not stated in the quote.\",\"conflicting_values\":[]},\"compliance_notes\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"exclusions\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"special_conditions\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"supplier_notes\":{\"state\":\"KNOWN\",\"extracted_value\":\"Synthetic demo quote — not a real supplier offer.\",\"source_block_ids\":[\"p1-b1\"],\"uncertainty\":null,\"conflicting_values\":[]}}}"
+        }
+      ]
+    },
+    {
+      "id": "moss-primary",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.45\", \"expected\": \"4.45\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 800, \"expected\": 800, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"45\", \"expected\": \"45\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"600\", \"expected\": \"600\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"360\", \"expected\": \"360\", \"rule\": \"exact_value\", \"uncertainty\": \"To Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"25 days after sample approval\", \"expected\": \"25 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"10 days after production\", \"expected\": \"10 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40% deposit, 60% before dispatch\", \"expected\": \"40% deposit, 60% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"21 days\", \"expected\": \"21 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b15\"], \"expected\": [\"p1-b15\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER\", \"source_block_ids\": [\"p1-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.45",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 800,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "45",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "600",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "360",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "To Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": "Sample lead time is not stated in this quote.",
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "25 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "10 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "40% deposit, 60% before dispatch",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "21 days",
+            "source_block_ids": [
+              "p1-b15"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+            "source_block_ids": [
+              "p1-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-shipping",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1000, \"expected\": 1000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40\", \"expected\": \"40\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"150\", \"expected\": \"150\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record: current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\", \"p1-b8\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.exclusions.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Import duties are not included\", \"source_block_ids\": [\"p2-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"import duties are not included\", [\"p2-b7\"]], \"field\": \"exclusions\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER\", \"source_block_ids\": [\"p1-b1\", \"p2-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1000,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "40",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "150",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record: current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+            "source_block_ids": [
+              "p1-b1",
+              "p2-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "conflicting-lead-time",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.45\", \"expected\": \"4.45\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 800, \"expected\": 800, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"45\", \"expected\": \"45\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"600\", \"expected\": \"600\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"360\", \"expected\": \"360\", \"rule\": \"exact_value\", \"uncertainty\": \"Shipping cost is to Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.production_lead_time.conflict",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"10 days after production\", \"expected\": \"10 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40% deposit, 60% before dispatch\", \"expected\": \"40% deposit, 60% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"21 days\", \"expected\": \"21 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b15\"], \"expected\": [\"p1-b15\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic demo quote - not a real supplier offer\", \"source_block_ids\": [\"p1-b1\", \"p2-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.45",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 800,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "45",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "600",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "360",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "Shipping cost is to Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": "Sample lead time is not stated in this quote.",
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "CONFLICT",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b10",
+              "p2-b3"
+            ],
+            "uncertainty": "The quote gives conflicting production lead times, each measured after sample approval.",
+            "conflicting_values": [
+              {
+                "value": "25 days after sample approval",
+                "source_block_ids": [
+                  "p1-b10"
+                ]
+              },
+              {
+                "value": "30-35 days after sample approval",
+                "source_block_ids": [
+                  "p2-b3"
+                ]
+              }
+            ]
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "10 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "40% deposit, 60% before dispatch",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "21 days",
+            "source_block_ids": [
+              "p1-b15"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic demo quote - not a real supplier offer",
+            "source_block_ids": [
+              "p1-b1",
+              "p2-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "included-tooling",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1000, \"expected\": 1000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40\", \"expected\": \"40\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"320\", \"expected\": \"320\", \"rule\": \"exact_value\", \"uncertainty\": \"To Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"12 days after production\", \"expected\": \"12 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b13\"], \"expected\": [\"p1-b13\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record: current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": \"exact_value\", \"uncertainty\": \"The document describes this as a synthetic record for a fictional supplier.\"}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b8\", \"p1-b11\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.exclusions.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Import duties are not included\", \"source_block_ids\": [\"p2-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"import duties are not included\", [\"p2-b7\"]], \"field\": \"exclusions\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic demo quote - not a real supplier offer\", \"source_block_ids\": [\"p1-b1\", \"p2-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1000,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "40",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": "Tooling/setup is included in unit price; no separate charge. No separate numeric amount is stated.",
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "320",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "To Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "12 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record: current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": "The document describes this as a synthetic record for a fictional supplier.",
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic demo quote - not a real supplier offer",
+            "source_block_ids": [
+              "p1-b1",
+              "p2-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "missing-moq",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b6\", \"p1-b7\", \"p1-b10\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40\", \"expected\": \"40\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"150\", \"expected\": \"150\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"320\", \"expected\": \"320\", \"rule\": \"exact_value\", \"uncertainty\": \"Shipping cost is to Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"12 days after production\", \"expected\": \"12 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b13\"], \"expected\": [\"p1-b13\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record: current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b6\", \"p1-b7\", \"p1-b10\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.exclusions.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Import duties are not included\", \"source_block_ids\": [\"p2-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"import duties are not included\", [\"p2-b7\"]], \"field\": \"exclusions\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER\", \"source_block_ids\": [\"p1-b1\", \"p2-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b6",
+              "p1-b7",
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "40",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "150",
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "320",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": "Shipping cost is to Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "12 days after production",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record: current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+            "source_block_ids": [
+              "p1-b1",
+              "p2-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "quantity-mismatch",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 5000, \"expected\": 5000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1000, \"expected\": 1000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40\", \"expected\": \"40\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"150\", \"expected\": \"150\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"320\", \"expected\": \"320\", \"rule\": \"exact_value\", \"uncertainty\": \"Shipping cost is to Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"12 days after production\", \"expected\": \"12 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b13\"], \"expected\": [\"p1-b13\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record; current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.certifications.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic GRS record; current for this fictional supplier\", \"source_block_ids\": [\"p2-b4\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"Synthetic GRS record: current for this fictional supplier\", [\"p2-b4\"]], \"field\": \"certifications\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.compliance_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic GRS record; current for this fictional supplier\", \"source_block_ids\": [\"p2-b4\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"compliance_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        },
+        {
+          "name": "field.exclusions.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Import duties are not included\", \"source_block_ids\": [\"p2-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"import duties are not included\", [\"p2-b7\"]], \"field\": \"exclusions\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic demo quote\\u2014not a real supplier offer\", \"source_block_ids\": [\"p1-b1\", \"p2-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 5000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1000,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "40",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "150",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "320",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "Shipping cost is to Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "12 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record; current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record; current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic demo quote—not a real supplier offer",
+            "source_block_ids": [
+              "p1-b1",
+              "p2-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      },
+      "model_responses": [
+        {
+          "output_text": "{\"fields\":{\"quoted_quantity\":{\"state\":\"KNOWN\",\"extracted_value\":5000,\"source_block_ids\":[\"p1-b4\"],\"uncertainty\":null,\"conflicting_values\":[]},\"unit_price\":{\"state\":\"KNOWN\",\"extracted_value\":\"4.60\",\"source_block_ids\":[\"p1-b5\"],\"uncertainty\":null,\"conflicting_values\":[]},\"currency\":{\"state\":\"KNOWN\",\"extracted_value\":\"USD\",\"source_block_ids\":[\"p1-b5\",\"p1-b7\",\"p1-b8\",\"p1-b11\"],\"uncertainty\":null,\"conflicting_values\":[]},\"moq\":{\"state\":\"KNOWN\",\"extracted_value\":1000,\"source_block_ids\":[\"p1-b6\"],\"uncertainty\":null,\"conflicting_values\":[]},\"sample_cost\":{\"state\":\"KNOWN\",\"extracted_value\":\"40\",\"source_block_ids\":[\"p1-b8\"],\"uncertainty\":null,\"conflicting_values\":[]},\"tooling_cost\":{\"state\":\"KNOWN\",\"extracted_value\":\"150\",\"source_block_ids\":[\"p1-b7\"],\"uncertainty\":null,\"conflicting_values\":[]},\"packaging_cost\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"shipping_cost\":{\"state\":\"KNOWN\",\"extracted_value\":\"320\",\"source_block_ids\":[\"p1-b11\"],\"uncertainty\":\"Shipping cost is to Manila.\",\"conflicting_values\":[]},\"sample_lead_time\":{\"state\":\"KNOWN\",\"extracted_value\":\"7 days\",\"source_block_ids\":[\"p1-b9\"],\"uncertainty\":null,\"conflicting_values\":[]},\"production_lead_time\":{\"state\":\"KNOWN\",\"extracted_value\":\"32 days after sample approval\",\"source_block_ids\":[\"p1-b10\"],\"uncertainty\":null,\"conflicting_values\":[]},\"shipping_time\":{\"state\":\"KNOWN\",\"extracted_value\":\"12 days after production\",\"source_block_ids\":[\"p1-b12\"],\"uncertainty\":null,\"conflicting_values\":[]},\"total_lead_time\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"payment_terms\":{\"state\":\"KNOWN\",\"extracted_value\":\"30% deposit, 70% before dispatch\",\"source_block_ids\":[\"p1-b13\"],\"uncertainty\":null,\"conflicting_values\":[]},\"incoterm\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"quote_validity\":{\"state\":\"KNOWN\",\"extracted_value\":\"30 days\",\"source_block_ids\":[\"p1-b14\"],\"uncertainty\":null,\"conflicting_values\":[]},\"warranty\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"certifications\":{\"state\":\"KNOWN\",\"extracted_value\":\"Synthetic GRS record; current for this fictional supplier\",\"source_block_ids\":[\"p2-b4\"],\"uncertainty\":null,\"conflicting_values\":[]},\"compliance_notes\":{\"state\":\"KNOWN\",\"extracted_value\":\"Synthetic GRS record; current for this fictional supplier\",\"source_block_ids\":[\"p2-b4\"],\"uncertainty\":null,\"conflicting_values\":[]},\"exclusions\":{\"state\":\"KNOWN\",\"extracted_value\":\"Import duties are not included\",\"source_block_ids\":[\"p2-b7\"],\"uncertainty\":null,\"conflicting_values\":[]},\"special_conditions\":{\"state\":\"UNKNOWN\",\"extracted_value\":null,\"source_block_ids\":[],\"uncertainty\":null,\"conflicting_values\":[]},\"supplier_notes\":{\"state\":\"KNOWN\",\"extracted_value\":\"Synthetic demo quote—not a real supplier offer\",\"source_block_ids\":[\"p1-b1\",\"p2-b1\"],\"uncertainty\":null,\"conflicting_values\":[]}}}"
+        }
+      ]
+    },
+    {
+      "id": "non-usd",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"AUD\", \"expected\": \"AUD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1000, \"expected\": 1000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"40\", \"expected\": \"40\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b8\"], \"expected\": [\"p1-b8\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"150\", \"expected\": \"150\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"320\", \"expected\": \"320\", \"rule\": \"exact_value\", \"uncertainty\": \"Shipping cost is to Manila.\"}"
+        },
+        {
+          "name": "field.shipping_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b11\"], \"expected\": [\"p1-b11\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"12 days after production\", \"expected\": \"12 days after production\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.shipping_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b12\"], \"expected\": [\"p1-b12\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b13\"], \"expected\": [\"p1-b13\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record: current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"AUD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\", \"p1-b8\", \"p1-b11\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"AUD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.exclusions.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Import duties are not included\", \"source_block_ids\": [\"p2-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"import duties are not included\", [\"p2-b7\"]], \"field\": \"exclusions\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER\", \"source_block_ids\": [\"p1-b1\", \"p2-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "AUD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7",
+              "p1-b8",
+              "p1-b11"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1000,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "KNOWN",
+            "extracted_value": "40",
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "150",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "KNOWN",
+            "extracted_value": "320",
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "Shipping cost is to Manila.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "KNOWN",
+            "extracted_value": "12 days after production",
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record: current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "SYNTHETIC DEMO QUOTE - NOT A REAL SUPPLIER OFFER",
+            "source_block_ids": [
+              "p1-b1",
+              "p2-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "explicit-unknown",
+      "assertions": [
+        {
+          "name": "source_references",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "numeric_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "currency_accuracy",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "unknown_detection",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "conflict_detection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "source_block_accuracy",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "hallucination_rate",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quoted_quantity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 2000, \"expected\": 2000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quoted_quantity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b4\"], \"expected\": [\"p1-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.unit_price.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"4.60\", \"expected\": \"4.60\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.unit_price.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\"], \"expected\": [\"p1-b5\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.currency.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"USD\", \"expected\": \"USD\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.currency.sources",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b5\", \"p1-b7\"], \"expected\": [\"p1-b5\"], \"rule\": \"evidence_mismatch\"}"
+        },
+        {
+          "name": "field.moq.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": 1000, \"expected\": 1000, \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.moq.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b6\"], \"expected\": [\"p1-b6\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.sample_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.tooling_cost.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"150\", \"expected\": \"150\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.tooling_cost.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b7\"], \"expected\": [\"p1-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.packaging_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.shipping_cost.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.sample_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"7 days\", \"expected\": \"7 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.sample_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b9\"], \"expected\": [\"p1-b9\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.production_lead_time.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"32 days after sample approval\", \"expected\": \"32 days after sample approval\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.production_lead_time.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b10\"], \"expected\": [\"p1-b10\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.shipping_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.total_lead_time.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.payment_terms.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30% deposit, 70% before dispatch\", \"expected\": \"30% deposit, 70% before dispatch\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.payment_terms.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b13\"], \"expected\": [\"p1-b13\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.incoterm.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.quote_validity.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"30 days\", \"expected\": \"30 days\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.quote_validity.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p1-b14\"], \"expected\": [\"p1-b14\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.warranty.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.certifications.value",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": \"Synthetic GRS record: current for this fictional supplier\", \"expected\": \"Synthetic GRS record: current for this fictional supplier\", \"rule\": \"exact_value\", \"uncertainty\": null}"
+        },
+        {
+          "name": "field.certifications.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b4\"], \"expected\": [\"p2-b4\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.compliance_notes.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.exclusions.value",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": \"Import duties are not included\", \"expected\": \"import duties are not included\", \"rule\": null, \"uncertainty\": null}"
+        },
+        {
+          "name": "field.exclusions.sources",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": "{\"actual\": [\"p2-b7\"], \"expected\": [\"p2-b7\"], \"rule\": \"exact_evidence\"}"
+        },
+        {
+          "name": "field.special_conditions.unknown",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.supplier_notes.unknown",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": null
+        },
+        {
+          "name": "field.currency.misattributed_evidence",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"USD\", \"source_block_ids\": [\"p1-b5\", \"p1-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"misattributed_evidence\", \"expected\": [\"USD\", [\"p1-b5\"]], \"field\": \"currency\", \"field_match\": true, \"rule\": \"exact_value\", \"source_match\": false}"
+        },
+        {
+          "name": "field.exclusions.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Import duties are not included\", \"source_block_ids\": [\"p2-b7\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": [\"import duties are not included\", [\"p2-b7\"]], \"field\": \"exclusions\", \"field_match\": false, \"rule\": null, \"source_match\": true}"
+        },
+        {
+          "name": "field.supplier_notes.unresolved_support",
+          "kind": "exact",
+          "passed": false,
+          "critical": true,
+          "detail": "{\"actual\": {\"conflicting_values\": [], \"extracted_value\": \"Synthetic demo quote - not a real supplier offer\", \"source_block_ids\": [\"p1-b1\"], \"state\": \"KNOWN\", \"uncertainty\": null}, \"classification\": \"unresolved_support\", \"expected\": \"UNKNOWN\", \"field\": \"supplier_notes\", \"field_match\": false, \"rule\": null, \"source_match\": false}"
+        }
+      ],
+      "output": {
+        "fields": {
+          "quoted_quantity": {
+            "state": "KNOWN",
+            "extracted_value": 2000,
+            "source_block_ids": [
+              "p1-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "unit_price": {
+            "state": "KNOWN",
+            "extracted_value": "4.60",
+            "source_block_ids": [
+              "p1-b5"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "currency": {
+            "state": "KNOWN",
+            "extracted_value": "USD",
+            "source_block_ids": [
+              "p1-b5",
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "moq": {
+            "state": "KNOWN",
+            "extracted_value": 1000,
+            "source_block_ids": [
+              "p1-b6"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "sample_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b8"
+            ],
+            "uncertainty": "Sample cost is not stated.",
+            "conflicting_values": []
+          },
+          "tooling_cost": {
+            "state": "KNOWN",
+            "extracted_value": "150",
+            "source_block_ids": [
+              "p1-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "packaging_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_cost": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b11"
+            ],
+            "uncertainty": "Shipping cost is to be confirmed; no numeric amount is stated.",
+            "conflicting_values": []
+          },
+          "sample_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "7 days",
+            "source_block_ids": [
+              "p1-b9"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "production_lead_time": {
+            "state": "KNOWN",
+            "extracted_value": "32 days after sample approval",
+            "source_block_ids": [
+              "p1-b10"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "shipping_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [
+              "p1-b12"
+            ],
+            "uncertainty": "Shipping time is not stated.",
+            "conflicting_values": []
+          },
+          "total_lead_time": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "payment_terms": {
+            "state": "KNOWN",
+            "extracted_value": "30% deposit, 70% before dispatch",
+            "source_block_ids": [
+              "p1-b13"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "incoterm": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "quote_validity": {
+            "state": "KNOWN",
+            "extracted_value": "30 days",
+            "source_block_ids": [
+              "p1-b14"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "warranty": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "certifications": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic GRS record: current for this fictional supplier",
+            "source_block_ids": [
+              "p2-b4"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "compliance_notes": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "exclusions": {
+            "state": "KNOWN",
+            "extracted_value": "Import duties are not included",
+            "source_block_ids": [
+              "p2-b7"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "special_conditions": {
+            "state": "UNKNOWN",
+            "extracted_value": null,
+            "source_block_ids": [],
+            "uncertainty": null,
+            "conflicting_values": []
+          },
+          "supplier_notes": {
+            "state": "KNOWN",
+            "extracted_value": "Synthetic demo quote - not a real supplier offer",
+            "source_block_ids": [
+              "p1-b1"
+            ],
+            "uncertainty": null,
+            "conflicting_values": []
+          }
+        }
+      }
+    },
+    {
+      "id": "unsupported-image-only",
+      "assertions": [
+        {
+          "name": "parser_rejection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        }
+      ],
+      "output": null
+    },
+    {
+      "id": "malformed-pdf",
+      "assertions": [
+        {
+          "name": "parser_rejection",
+          "kind": "exact",
+          "passed": true,
+          "critical": true,
+          "detail": null
+        }
+      ],
+      "output": null
+    }
+  ]
+}

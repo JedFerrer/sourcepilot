@@ -57,9 +57,10 @@ PostgreSQL `AIRun` records retain prompt/model identity, validation, retries, ti
 ### Known quality and UX limitations
 
 - The full 90-case Analyst-v2 baseline remains **ERROR / exit 2, 20 runtime errors**. The separate 31-case Analyst-v3 follow-up remains **ERROR / exit 2, ten runtime errors**. No successful complete current-version full baseline is established.
-- Ten human reviews remain pending. Brief/quote correctness findings and Analyst quality failures remain unresolved; automated scoring does not establish narrative groundedness. See [M6-U1's preserved evidence and risks](docs/implementation/M6-U1.md#evidence-and-unresolved-product-quality-risks).
-- Deterministic E2E success is not live-model quality approval. The real live-advice preservation browser assertion remains unexercised; [M5-U1](docs/implementation/M5-U1.md) records the prerequisite failures and fixture-backed coverage.
-- **Save a manual quote draft before uploading another quote.** That upload can discard unsaved edits on another quote; [M6-U4](docs/implementation/M6-U4.md) records this existing UX limitation.
+- Ten human reviews remain pending. Brief/quote correctness findings and Analyst quality failures remain unresolved; automated scoring does not establish narrative groundedness.
+- Deterministic E2E success is not live-model quality approval. The real live-advice preservation browser assertion remains unexercised. Prerequisite failures remain unresolved; fixture-backed coverage does not close that check.
+- Drafts are preserved per record in memory when switching stages or suppliers. Save each record explicitly; replacing an unsaved manual draft with a PDF requires discard confirmation. Drafts are not durable recovery storage: reload, session expiry or process loss can lose unsaved work.
+- Actual 400% zoom, actual screen-reader interoperability and five-participant usability validation remain deferred and unverified. No accessibility-conformance, validated-usability or release-readiness claim is made.
 
 ## Run and demonstrate locally
 

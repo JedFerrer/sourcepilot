@@ -17,6 +17,8 @@ from sourcepilot.ai import eval_baseline as baseline
 from sourcepilot.ai import eval_live
 from sourcepilot.ai.eval_scoring import assertion, check_failed, heuristic_signal, score_output
 
+RETAINED_FIXTURES = Path(__file__).parent / "fixtures" / "retained_quote_eval"
+
 
 def parsed_quote_case(case: dict[str, Any]) -> dict[str, Any]:
     with TemporaryDirectory() as directory:
@@ -113,11 +115,17 @@ def test_retained_harbor_rescore_preserves_historical_evidence_and_named_counts(
     from sourcepilot.ai.eval_scoring import measurements
     from sourcepilot.ai.quote_extraction_eval import METRIC_NAMES
 
-    evidence = baseline.ROOT / "docs/implementation/evidence/M6-U1/corrected-production-single-2026-11-02-01"
-    historical_bytes = {name: (evidence / name).read_bytes()
-                        for name in ("extraction.json", "inspection.json", "outcome.json")}
-    output = json.loads(historical_bytes["extraction.json"])
-    historical = json.loads(historical_bytes["inspection.json"])
+    evidence = RETAINED_FIXTURES
+    historical_bytes = {
+        name: (evidence / name).read_bytes()
+        for name in ("harbor-extraction.json", "harbor-inspection.json", "harbor-outcome.json")
+    }
+    assert len(historical_bytes) == 3
+    output = json.loads(historical_bytes["harbor-extraction.json"])
+    historical = json.loads(historical_bytes["harbor-inspection.json"])
+    assert json.loads(historical_bytes["harbor-outcome.json"]) == {
+        "case_id": "harbor-primary", "classification": "QUALITY_FINDING",
+    }
     case = parsed_quote_case(baseline.load_scope(["quote_extraction"])["quote_extraction"][0])
     checks = score_output("quote_extraction", case, output)
     counts = measurements("quote_extraction", case, output)
@@ -1181,14 +1189,12 @@ def rescore_retained_quotes(output: Path) -> dict[str, Any]:
     """Local analysis of retained v2 responses; no live runner/provider/DB path."""
     from sourcepilot.ai.eval_scoring import measurements
 
-    evidence = next(
-        (baseline.ROOT / "docs/implementation/evidence/M6-U1").glob(
-            "quote-v2-filtered-live*/baseline/results.json"
-        )
-    )
+    evidence = RETAINED_FIXTURES / "quote-v2-results.json"
     historical = baseline.read_json(evidence)
     cases = baseline.load_scope(["quote_extraction"])["quote_extraction"]
     retained = {item["id"]: item for item in historical["cases"]}
+    assert len(historical["cases"]) == len(retained) == len(cases) == 12
+    assert set(retained) == {case["id"] for case in cases}
     result = {
         "mode": "offline",
         "analysis": "retained-output local rescore, not a live baseline",
@@ -1233,15 +1239,20 @@ def test_all_twelve_retained_outputs_reconcile_without_provider_or_evidence_writ
 ) -> None:
     from sourcepilot.ai.quote_extraction_eval import METRIC_NAMES
 
-    protected = list((baseline.ROOT / "docs/implementation/evidence/M6-U1").rglob("*"))
+    protected = [RETAINED_FIXTURES / name for name in (
+        "harbor-extraction.json", "harbor-inspection.json", "harbor-outcome.json",
+        "quote-v2-results.json", "provenance.json", "README.md",
+    )]
+    assert len(protected) == 6 and all(path.is_file() for path in protected)
+    assert baseline.load_scope(["quote_extraction"])["quote_extraction"]
     protected += list((baseline.ROOT / "apps/api/evals").rglob("*"))
     before = baseline.hash_files([p for p in protected if p.is_file()])
+    assert len(before) > 6
     forbidden = Mock(side_effect=AssertionError("Provider/database/live execution forbidden"))
     monkeypatch.setattr(baseline.OpenAIResponsesClient, "from_environment", forbidden)
     monkeypatch.setattr(baseline, "preflight_database", forbidden)
     monkeypatch.setattr(baseline, "run_case", forbidden)
-    historical_path = next((baseline.ROOT / "docs/implementation/evidence/M6-U1").glob(
-        "quote-v2-filtered-live*/baseline/results.json"))
+    historical_path = RETAINED_FIXTURES / "quote-v2-results.json"
     historical = baseline.read_json(historical_path)
     old_checks = [c for case in historical["cases"] for c in case["assertions"] if c["kind"] == "exact"]
     assert (sum(c["passed"] for c in old_checks), len(old_checks)) == (359, 443)
@@ -1253,6 +1264,7 @@ def test_all_twelve_retained_outputs_reconcile_without_provider_or_evidence_writ
             assert captured["fields"]["supplier_notes"]["extracted_value"] == value
     report = rescore_retained_quotes(tmp_path)
     assert report["complete"] and report["executed_case_count"] == 12
+    assert report["human_review"]["status"] == "PENDING"
     assert report["status_counts"] == {"QUALITY_FINDING": 10, "EXPECTED_REJECTION": 2}
     totals = report["measurements"]["quote_extraction"]
     assignments = []

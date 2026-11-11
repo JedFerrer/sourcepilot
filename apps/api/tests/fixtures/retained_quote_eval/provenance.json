@@ -1,0 +1,48 @@
+[
+  {
+    "source_identifier": "docs/implementation/evidence/M6-U1/corrected-production-single-2026-11-02-01/extraction.json",
+    "source_sha256": "60d02d5dd008d7cbd0b80e6e7129911ba9ee92a74afc52d0dbbb592db0b6a602",
+    "projection": "Keep complete fields object; preserve exact values and Unicode.",
+    "json_fields": [
+      "fields"
+    ],
+    "fixture": "harbor-extraction.json",
+    "fixture_sha256": "b28c9ed11849eb0ea46d14139538fbc829306db15ba4218d01152a57f5fa6956"
+  },
+  {
+    "source_identifier": "docs/implementation/evidence/M6-U1/corrected-production-single-2026-11-02-01/inspection.json",
+    "source_sha256": "8e59605a1f40a6965a79eb082dd16b996b6eb74dd74830f7ad5e1313c68d9c1a",
+    "projection": "Keep assertions.passed and assertions.total only (34 and 43).",
+    "json_fields": [
+      "assertions.passed",
+      "assertions.total"
+    ],
+    "fixture": "harbor-inspection.json",
+    "fixture_sha256": "8346bf9ff2d892fb7189b61166bc0e143ae38102830efee70a9efbe1cfbbb58f"
+  },
+  {
+    "source_identifier": "docs/implementation/evidence/M6-U1/corrected-production-single-2026-11-02-01/outcome.json",
+    "source_sha256": "e04de23da3f5e83cf9e50ffb599758c20971b30bec11da22bead5abdbe3236dd",
+    "projection": "Keep case_id and classification only as the third immutable synthetic input; no timing or run IDs.",
+    "json_fields": [
+      "case_id",
+      "classification"
+    ],
+    "fixture": "harbor-outcome.json",
+    "fixture_sha256": "9b9e070c7e0077eb00d24c624ffa47c3539939f1d167a8183dc187fc06d0fa7c"
+  },
+  {
+    "source_identifier": "docs/implementation/evidence/M6-U1/quote-v2-filtered-live-2026-11-03-10d48e60/baseline/results.json",
+    "source_sha256": "8982d9e4e62246ba81da9f3ba42ffa2ae9c79520af7e834ae7191b3d3dd43f2b",
+    "projection": "Keep pending human_review; all 12 cases with id, assertions and output including null. Only willow-primary and quantity-mismatch retain model_responses[0].output_text for captured Unicode equality. No operational metadata.",
+    "json_fields": [
+      "human_review",
+      "cases[].id",
+      "cases[].assertions",
+      "cases[].output",
+      "cases[willow-primary,quantity-mismatch].model_responses[0].output_text"
+    ],
+    "fixture": "quote-v2-results.json",
+    "fixture_sha256": "e4c39e9fad83192e648643083f6bb2e4dc95280892453efee23838192780d0c1"
+  }
+]

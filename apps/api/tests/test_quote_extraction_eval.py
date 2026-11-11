@@ -571,14 +571,15 @@ def test_unknown_does_not_become_invented_numeric(
 def retained_cases() -> dict[str, tuple[dict[str, Any], dict[str, Any]]]:
     from sourcepilot.ai import eval_baseline as baseline
 
-    evidence = next(
-        (baseline.ROOT / "docs/implementation/evidence/M6-U1").glob(
-            "quote-v2-filtered-live*/baseline/results.json"
-        )
-    )
+    evidence = FIXTURES.parent / "retained_quote_eval" / "quote-v2-results.json"
     report = json.loads(evidence.read_text(encoding="utf-8"))
+    expected = baseline.load_scope(["quote_extraction"])["quote_extraction"]
+    assert len(report["cases"]) == len(expected) == 12
+    assert {item["id"] for item in report["cases"]} == {case["id"] for case in expected}
     outputs = {item["id"]: item["output"] for item in report["cases"] if item.get("output")}
     cases = load_cases()
+    assert len(cases) == len(outputs) == 10
+    assert set(outputs) == {case["id"] for case in cases}
     with TemporaryDirectory() as directory:
         for case in cases:
             baseline.parser_result(case, Path(directory))

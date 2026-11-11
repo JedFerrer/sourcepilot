@@ -117,17 +117,15 @@ Database tests require the existing isolated `TEST_DATABASE_URL` safeguards. The
 
 To inspect actual Langfuse UI traces, use an explicitly configured test destination and a permitted synthetic demo execution. Locate the run using its ID; inspect model/tool children and terminal validation/status metadata. An unconfigured destination is an evidence limitation, not a successful UI smoke. Do not run a live model baseline simply to validate telemetry.
 
-## Historical latency and usage baseline
+## Quality and measurement limitations
 
-Source: the retained [M6-U1 full live report](../implementation/evidence/M6-U1/final-full-live-2026-11-03-01/baseline/results.json), started 2026-11-03 at 07:34:54 UTC. All listed model runs used `gpt-6-luna`. The table counts actual AIRuns, not every evaluation case; parser rejections and deterministic cases without runs are excluded. All runs below have reported latency/input/output values; cost is unavailable for every run. Medians include failures.
+The historical full 90-case baseline remains **ERROR / exit 2, 20 runtime
+errors**. The separate 31-case follow-up remains **ERROR / exit 2, ten runtime
+errors**. Human quality reviews remain pending; no successful complete
+current-version live baseline or live-quality approval is established.
 
-| Operation / prompt version | Runs | Terminal status | Median latency (ms) | Reported input tokens, total | Reported output tokens, total |
-| --- | ---: | --- | ---: | ---: | ---: |
-| Brief / brief-interpreter-v2 | 24 | 24 COMPLETED | 7,124 | 35,926 | 8,507 |
-| Clarification / clarification-v1 | 9 | 9 COMPLETED | 2,077 | 2,514 | 612 |
-| Supplier explanation / supplier-explanation-v2 | 6 | 6 COMPLETED | 7,695 | 21,298 | 2,033 |
-| Quote / quote-extractor-v2 | 10 | 10 COMPLETED | 14,858 | 48,278 | 12,521 |
-| Tradeoff / tradeoff-analysis-v2 | 9 | 9 VALIDATION_FAILED | 72,703 | 74,780 | 66,814 |
-| Advice / comparison-advice-v2 | 11 | 11 VALIDATION_FAILED | 74,000 | 105,297 | 89,841 |
-
-These are historical measurements, not a current-version performance or cost guarantee. Historical structured-run usage retained the last reported attempt, so its totals may undercount repaired/retried calls; M6-U2 does not rewrite those records. Analyst v2 measurements are not relabeled as v3. Deterministic tests have artificial token values and local timings and must not be mixed with this live baseline. The full report remains ERROR/exit 2, the separate v3 follow-up remains ERROR/exit 2 with ten runtime errors, and human quality reviews remain pending. See [M6-U1](../implementation/M6-U1.md) for the complete carry-forward risks.
+Historical structured-run usage retained the last reported attempt and can
+undercount repaired/retried calls. Historical measurements are not current-version
+performance or cost guarantees. Deterministic tests use artificial usage and local
+timings; do not mix them with live measurements. Hosted tracing visibility remains
+unverified. Reproduce deterministic checks above without invoking a live provider.

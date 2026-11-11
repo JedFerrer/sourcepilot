@@ -17,7 +17,7 @@ Follow this source-of-truth order:
 1. `docs/specs/SourcePilot-Product-Specification-v0.2.md`
 2. `docs/specs/SourcePilot-Technical-Architecture-v0.2.md`
 3. `docs/specs/SourcePilot-Implementation-Plan-v0.2.md`
-4. Approved current implementation-unit document in `docs/implementation/`
+4. Approved current implementation-unit document in `.local-investigation-artifacts/private-development/docs/implementation/`
 5. Existing code
 
 If a lower-level source conflicts with a higher-level source:
@@ -100,3 +100,14 @@ Work on one approved implementation unit at a time.
 Do not begin, partially scaffold, or opportunistically implement the next unit. Stop after the current unit has passed its done check and been committed.
 
 Follow `docs/development/WORKFLOW.md`.
+
+## Private implementation records
+
+Approved current-unit records live privately at
+`.local-investigation-artifacts/private-development/docs/implementation/`.
+A fresh clone can build and test without these records. Before continuing an
+existing unit, obtain its approved record if it is absent; never infer approval
+from code or commits. New unit work still requires an explicitly approved plan.
+The private archive's navigation index maps original paths without changing
+historical records. The Product Specification, Technical Architecture and
+Implementation Plan remain the higher-authority tracked sources.

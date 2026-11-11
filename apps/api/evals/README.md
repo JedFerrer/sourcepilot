@@ -240,11 +240,18 @@ are recorded. The same
 files are rehashed after execution. No self-referential final-commit SHA is required,
 and this is not a generalized repository manifest framework.
 
-Working `.eval-results/` reports are ignored. The recorded full offline evidence lives
-under `docs/implementation/evidence/M6-U1/offline/`. A live baseline is **not started**
-while EVAL_DATABASE_URL is absent; configuration blockage is recorded in the unit
-document rather than represented as a successful live run. No live model-quality
-claim can be made from offline or injected-client integration tests.
+Working `.eval-results/` reports are ignored. Reproduce offline reports with the
+commands above. Retained synthetic scorer inputs are tracked in
+[`tests/fixtures/retained_quote_eval`](../tests/fixtures/retained_quote_eval/README.md);
+tests need no private reports. A live baseline is **not started** while
+EVAL_DATABASE_URL is absent; configuration blockage is not a successful live run.
+No live model-quality claim can be made from offline or injected-client tests.
+
+The historical full 90-case baseline remains ERROR/exit 2 with 20 runtime errors;
+the separate 31-case follow-up remains ERROR/exit 2 with ten runtime errors.
+Human reviews remain pending, and no complete current-version live approval is
+established. The live-advice preservation browser check remains unexercised.
+Historical outputs and failing assertions are preserved, not relabeled as passes.
 
 Adapter integration tests use the repository's existing test database under an outer
 transaction rollback, with provider construction forbidden. These are normal tests,
