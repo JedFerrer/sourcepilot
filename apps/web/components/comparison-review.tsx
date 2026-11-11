@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { WorkflowSummary, workflowReasons } from "../lib/workflow";
 import { ApiClientError, apiRequest } from "../lib/api";
+import { useDraftRegistration } from "./workspace-drafts";
 import { analysisBackendMs, analysisBrowserMs } from "../lib/analysis-timeouts";
 
 type Evidence = {
@@ -50,45 +51,72 @@ type Advice = {
 
 function AdvicePoints({ title, points, comparison }: { title: string; points: AnalysisPoint[]; comparison: Comparison }) {
   if (!points.length) return null;
-  return <div><h4>{title}</h4><ul>{points.map((point, index) => <li key={index}>
-    <p>{point.text}</p>
-    {comparison.comparison_payload.suppliers.filter((supplier) => point.supplier_ids.includes(supplier.supplier_id)).map((supplier) => {
-      const fieldKeys = new Set(point.quote_fields.filter((ref) => ref.quote_id === supplier.quote_id).map((ref) => ref.field_key));
-      for (const field of supplier.quote_fields) {
-        if (field.evidence.some((evidence) => point.evidence_ids.includes(evidence.id))) fieldKeys.add(field.field_key);
-      }
-      const fields = [...fieldKeys];
-      const results = supplier.evaluation.results.filter((result) => result.requirement_id && point.requirement_ids.includes(result.requirement_id));
-      return <div key={supplier.supplier_id}>
+  return <section className="advice-group" aria-label={title}><h4>{title}</h4><ul className="advice-points">{points.map((point, index) => {
+    const citations = comparison.comparison_payload.suppliers
+      .filter((supplier) => point.supplier_ids.includes(supplier.supplier_id)).map((supplier) => {
+        const fieldKeys = new Set(point.quote_fields.filter((ref) => ref.quote_id === supplier.quote_id).map((ref) => ref.field_key));
+        for (const field of supplier.quote_fields) {
+          if (field.evidence.some((evidence) => point.evidence_ids.includes(evidence.id))) fieldKeys.add(field.field_key);
+        }
+        return { supplier, fields: [...fieldKeys], results: supplier.evaluation.results.filter((result) =>
+          result.requirement_id && point.requirement_ids.includes(result.requirement_id)) };
+      });
+    const hasSources = citations.some(({ fields, results, supplier }) => fields.length ||
+      results.some((result) => result.selected_fact || result.evidence_ids.length) ||
+      supplier.supplier_facts.evidence.some((item) => point.evidence_ids.includes(item.id)));
+    return <li key={index}>
+      <p className="advice-finding">{point.text}</p>
+      {citations.map(({ supplier, results }) => <div key={supplier.supplier_id}>
         {results.map((result) => {
           const requirement = comparison.comparison_payload.brief.requirements.find((item) => item.id === result.requirement_id);
-          return <div key={result.requirement_id}>
-            <p>{supplier.supplier_name}: {label(result.kind)} — {label(result.status)}</p>
+          return <div className="advice-requirement" key={result.requirement_id}>
+            <p>{supplier.supplier_name}: {label(result.kind)} — <strong>{label(result.status)}</strong></p>
             {requirement && <p><span className="comparison-importance">{label(requirement.importance ?? "informational")}</span>{" · Expected: "}{display(requirement.expected_value)}</p>}
-            <SourceDetails supplier={supplier} fact={result.selected_fact} evidenceIds={result.evidence_ids} />
           </div>;
         })}
-        {fields.map((fieldKey) => <SourceDetails key={fieldKey} supplier={supplier} fieldKey={fieldKey} evidenceIds={point.evidence_ids} />)}
-        {!fields.length ? <SourceDetails supplier={supplier} evidenceIds={point.evidence_ids} /> : null}
-      </div>;
-    })}
-  </li>)}</ul></div>;
+      </div>)}
+      {hasSources ? <details className="advice-evidence"><summary>Source details</summary>
+        {citations.map(({ supplier, fields, results }) => <div className="advice-source-group" key={supplier.supplier_id}>
+          <strong>{supplier.supplier_name}</strong>
+          {results.map((result) => <SourceDetails key={result.requirement_id} inline supplier={supplier} fact={result.selected_fact} evidenceIds={result.evidence_ids} />)}
+          {fields.map((fieldKey) => <SourceDetails key={fieldKey} inline supplier={supplier} fieldKey={fieldKey} evidenceIds={point.evidence_ids} />)}
+          {!fields.length ? <SourceDetails inline supplier={supplier} evidenceIds={point.evidence_ids} /> : null}
+        </div>)}
+      </details> : null}
+    </li>;
+  })}</ul></section>;
+}
+
+function SupplierSummaries({ points, comparison }: { points: AnalysisPoint[]; comparison: Comparison }) {
+  if (!points.length) return null;
+  const suppliers = comparison.comparison_payload.suppliers;
+  const shared = points.filter((point) => point.supplier_ids.length !== 1 || !suppliers.some((supplier) => supplier.supplier_id === point.supplier_ids[0]));
+  return <section className="advice-summaries" aria-label="Supplier summaries">
+    <h3>Supplier summaries</h3>
+    <div className="advice-supplier-grid">{suppliers.map((supplier) => <AdvicePoints key={supplier.supplier_id}
+      title={supplier.supplier_name} comparison={comparison}
+      points={points.filter((point) => point.supplier_ids.length === 1 && point.supplier_ids[0] === supplier.supplier_id)} />)}</div>
+    <AdvicePoints title="Across suppliers" points={shared} comparison={comparison} />
+  </section>;
 }
 
 function ComparisonAdviceView({ advice, comparison }: { advice: Advice; comparison: Comparison }) {
   const selected = comparison.comparison_payload.suppliers.find((supplier) => supplier.supplier_id === advice.suggestion.supplier_id);
-  return <section aria-label="Comparison analysis">
+  return <section className="comparison-advice" aria-label="Comparison analysis">
     <h3>Tradeoff analysis</h3>
-    <AdvicePoints title="Supplier summaries" points={advice.analysis.supplier_summaries} comparison={comparison} />
+    <p className="advice-intro">Review the tradeoffs and open questions, then inspect the evidence behind each finding. This analysis does not select a supplier for you.</p>
     <AdvicePoints title="Key tradeoffs" points={advice.analysis.key_tradeoffs} comparison={comparison} />
     <AdvicePoints title="Important unknowns" points={advice.analysis.important_unknowns} comparison={comparison} />
     <AdvicePoints title="Important conflicts" points={advice.analysis.important_conflicts} comparison={comparison} />
+    <SupplierSummaries points={advice.analysis.supplier_summaries} comparison={comparison} />
+    <div className="advice-suggestion">
     <h3>{selected ? "Suggested Supplier to Investigate First" : "No supplier suggested yet"}</h3>
     {selected ? <p><strong>{selected.supplier_name}</strong></p> : null}
     <p>This advice supports your review. You remain responsible for the supplier decision.</p>
     <AdvicePoints title="Supporting reasons" points={advice.suggestion.supporting_reasons} comparison={comparison} />
     <AdvicePoints title="Tradeoffs" points={advice.suggestion.tradeoffs} comparison={comparison} />
     <AdvicePoints title="Uncertainties" points={advice.suggestion.uncertainties} comparison={comparison} />
+    </div>
   </section>;
 }
 
@@ -124,7 +152,7 @@ function display(value: unknown): string {
   if (typeof value === "object") {
     const item = value as Record<string, unknown>;
     if (item.amount !== undefined) return `${display(item.currency)} ${display(item.amount)}`;
-    return Object.values(item).map(display).join(" · ");
+    return Object.entries(item).map(([key, value]) => ["capability_key", "subject", "kind"].includes(key) && typeof value === "string" ? label(value) : display(value)).join(" · ");
   }
   return "Unknown";
 }
@@ -144,8 +172,8 @@ function supplierEvidenceText(item: SupplierEvidence): string {
     .filter(Boolean).join(" · ");
 }
 
-function SourceDetails({ supplier, fact, resolution, fieldKey, evidenceIds = [], includeCurrency = false }: {
-  supplier: Supplier; fact?: Fact | null; resolution?: Resolution; fieldKey?: string; evidenceIds?: string[]; includeCurrency?: boolean;
+function SourceDetails({ supplier, fact, resolution, fieldKey, evidenceIds = [], includeCurrency = false, inline = false }: {
+  supplier: Supplier; fact?: Fact | null; resolution?: Resolution; fieldKey?: string; evidenceIds?: string[]; includeCurrency?: boolean; inline?: boolean;
 }) {
   const field = fieldKey ? quoteField(supplier, fieldKey) : undefined;
   const projectFacts = resolution?.status === "CONFLICT" && !fact ? resolution.project_facts : [];
@@ -169,8 +197,9 @@ function SourceDetails({ supplier, fact, resolution, fieldKey, evidenceIds = [],
   ]);
   const supplierEvidence = supplier.supplier_facts.evidence.filter((item) => selectedEvidenceIds.has(item.id));
   if (!fact && selectedQuoteFields.length === 0 && supplierEvidence.length === 0 && !generalContextFacts.length && !projectFacts.length) return null;
-  return <details className="comparison-source">
-    <summary>Source details</summary>
+  const Container = inline ? "div" : "details";
+  return <Container className="comparison-source">
+    {!inline ? <summary>Source details</summary> : null}
     {fact ? <>
       <p>{fact.context === "PROJECT_QUOTE" ? "Confirmed project quote" : "General supplier information"} · {fact.source_reference}</p>
       {fact.related_source_references?.length ? <p>Related sources: {fact.related_source_references.join(", ")}</p> : null}
@@ -202,7 +231,7 @@ function SourceDetails({ supplier, fact, resolution, fieldKey, evidenceIds = [],
     {fact?.supporting_evidence_ids?.length ? <p>Supporting evidence IDs: {fact.supporting_evidence_ids.join(", ")}</p> : null}
     {fact?.provenance_evidence_ids?.length ? <p>Provenance evidence IDs: {fact.provenance_evidence_ids.join(", ")}</p> : null}
     {supplierEvidence.map((item) => <p key={item.id}>Supplier evidence: {supplierEvidenceText(item)}</p>)}
-  </details>;
+  </Container>;
 }
 
 function ComparisonTable({ comparison }: { comparison: Comparison }) {
@@ -225,7 +254,7 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
               ? `${display(rawCurrency)} ${display(rawField.current_value)}`
               : `${display(rawField.current_value)} (currency: ${currencyState === "conflicting" ? "Conflict" : "Unknown"})`
             : display(rawField?.current_value);
-          return <td key={supplier.supplier_id}>
+          return <td key={supplier.supplier_id}><span className="mobile-cell-label">{supplier.supplier_name}</span>
             <strong>{state === "CONFLICT" || completeness?.state === "conflicting" ? "Conflict" : fact ? displayCommercialFact(fact, key) : rawValue}</strong>
             {key === "unit_price" && state === "SELECTED" && fact ? <small>
               {fact.context === "GENERAL_SUPPLIER" ? "General supplier indicative price" : "Confirmed project quote price"}
@@ -244,7 +273,7 @@ function ComparisonTable({ comparison }: { comparison: Comparison }) {
           const result = supplier.evaluation.results.find((item) => item.requirement_id === requirement.id);
           const informational = supplier.evaluation.informational_requirement_ids.includes(requirement.id);
           const status = informational ? "Informational" : result ? label(result.status) : "Unknown";
-          return <td key={supplier.supplier_id}>
+          return <td key={supplier.supplier_id}><span className="mobile-cell-label">{supplier.supplier_name}</span>
             <strong className={requirement.importance === "REQUIRED" && result?.status === "DOES_NOT_MEET" ? "comparison-required-failure" : undefined}>{status}</strong>
             <SourceDetails supplier={supplier} fact={result?.selected_fact} evidenceIds={result?.evidence_ids} />
             {result?.conflicting_facts.map((item) => <div key={item.source_reference}>
@@ -270,6 +299,7 @@ export function ComparisonReview({ projectId, refreshKey, onSnapshotChange, work
   const [adviceBusy, setAdviceBusy] = useState(false);
   const [adviceError, setAdviceError] = useState<string | null>(null);
   const [adviceOutdated, setAdviceOutdated] = useState(false);
+  useDraftRegistration("comparison", { label: "Comparison", stage: "COMPARISON", dirty: false, pending: busy || adviceBusy, error: error || generationError || adviceError });
   const adviceSequence = useRef(0);
   const advicePresent = useRef(false);
   // Request ownership survives read-only freshness checks, including failed reads.

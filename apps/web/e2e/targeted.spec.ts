@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { connect, type Socket } from "node:net";
 import path from "node:path";
-import { advice, approveShortlist, comparison, confirm, createAndApprove, pdfDirectory, quoteCard, readApi, upload, type Project, type Quote } from "./helpers";
+import { viewStage, selectQuote, inspectQuoteSource, closeQuoteSource, advice, approveShortlist, comparison, confirm, createAndApprove, pdfDirectory, quoteCard, readApi, upload, type Project, type Quote } from "./helpers";
 
 for (const outcome of ["success", "failure"] as const) {
   test(`pending comparison ${outcome} survives returning to the tab`, async ({ page, context }) => {
@@ -61,7 +61,9 @@ test("corrected quote retains PDF provenance", async ({ page }) => {
     const field = card.locator("dl > div").filter({ has: page.locator("dt").filter({ hasText: /^Unit price$/ }) });
     await expect(field).toContainText("Current draft value: 4.50");
     await expect(field).toContainText("Current origin: USER CORRECTED");
-    await expect(field.getByRole("blockquote")).toContainText(`USD ${original}`);
+    const source = await inspectQuoteSource(page, 0);
+    await expect(source.getByRole("blockquote")).toContainText(`USD ${original}`);
+    await closeQuoteSource(page);
     const changed = (await readApi<Quote[]>(page, `/projects/${id}/quotes`))[0].values.unit_price;
     expect(changed.current_value).toBe("4.50");
     expect(changed.ai_extracted_value).toBe(original);
@@ -82,14 +84,20 @@ test("empty discovery returns to Brief and recovers through approval", async ({ 
   const { id } = await createAndApprove(page);
   const brief = page.getByRole("region", { name: "Sourcing Brief", exact: true });
   const suppliers = page.getByRole("region", { name: "Suppliers", exact: true });
+  await viewStage(page, "Brief");
+  await brief.getByRole("button", { name: "Edit Brief", exact: true }).click();
   const original = await brief.getByLabel("Category", { exact: true }).inputValue();
   await brief.getByLabel("Category", { exact: true }).fill("");
   await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
+  await viewStage(page, "Suppliers");
   await expect(suppliers).toContainText("Approve the Brief to discover or re-evaluate suppliers.");
   await expect(suppliers).toContainText("Your sourcing requirements changed");
+  await viewStage(page, "Brief");
   await brief.getByLabel("Category", { exact: true }).fill("industrial gloves");
   await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
-  await brief.getByRole("button", { name: "Approve Brief", exact: true }).click();
+  await brief.getByRole("button", { name: "Review saved Brief", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Approve Brief", exact: true }).click();
+  await viewStage(page, "Suppliers");
   await suppliers.getByRole("button", { name: "Re-discover and re-evaluate", exact: true }).click();
   await expect(suppliers).toContainText("No supplier candidates were found in the curated dataset");
   await expect(suppliers.getByRole("article")).toHaveCount(0);
@@ -104,12 +112,14 @@ test("empty discovery returns to Brief and recovers through approval", async ({ 
   expect(await readApi(page, `/projects/${id}/brief`)).toEqual(before);
   expect(writes).toEqual([]);
   page.off("request", recordWrite);
+  await brief.getByRole("button", { name: "Edit Brief", exact: true }).click();
   await brief.getByLabel("Category", { exact: true }).fill(original);
   await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
   await expect(brief).toContainText("Readiness: Approved");
   const changed = await readApi<{ brief_revision: number }>(page, `/projects/${id}/brief`);
   expect(changed.brief_revision).toBe(Number(before.brief_revision) + 1);
   expect((await readApi<Record<string, unknown>>(page, `/projects/${id}/brief`)).approved_at).toBe(before.approved_at);
+  await viewStage(page, "Suppliers");
   await suppliers.getByRole("button", { name: "Discover Suppliers", exact: true }).click();
   await expect(suppliers.getByRole("article")).toHaveCount(5);
   await expect(suppliers).not.toContainText("No supplier candidates were found");
@@ -202,10 +212,13 @@ test("Brief edit routes stale suppliers through existing refresh", async ({ page
   const { id } = await createAndApprove(page);
   await test.step("Edit approved Brief, then rediscover and approve shortlist", async () => {
     const brief = page.getByRole("region", { name: "Sourcing Brief", exact: true });
+    await viewStage(page, "Brief");
+    await brief.getByRole("button", { name: "Edit Brief", exact: true }).click();
     await brief.getByLabel("Destination", { exact: true }).fill("Melbourne");
     await brief.getByRole("button", { name: "Save Brief", exact: true }).click();
     // Existing complete edits retain Brief approval but invalidate supplier evaluations.
     await expect(brief).toContainText("Readiness: Approved");
+    await viewStage(page, "Suppliers");
     const section = page.getByRole("region", { name: "Suppliers", exact: true });
     await expect(section.getByText("Evaluations need refreshing after the Brief changed.").first()).toBeVisible();
     expect((await readApi<Project>(page, `/projects/${id}`)).workflow.suppliers_stale).toBe(true);
@@ -223,6 +236,7 @@ test("confirmed quote edit invalidates comparison and advice", async ({ page }) 
   await advice(page, id);
   await test.step("Correct confirmed quote and enforce comparison regeneration", async () => {
     const card = quoteCard(page, 0);
+    await selectQuote(page, 0);
     await card.getByRole("button", { name: "Edit confirmed PDF quote", exact: true }).click();
     await card.getByLabel("Unit price", { exact: true }).fill("4.65");
     await card.getByRole("button", { name: "Save quote", exact: true }).click();
@@ -230,6 +244,7 @@ test("confirmed quote edit invalidates comparison and advice", async ({ page }) 
     await expect(card).toContainText("Current confirmed value: 4.65");
     await expect(card).toContainText("Status: CONFIRMED");
     const section = page.getByRole("region", { name: "Comparison", exact: true });
+    await viewStage(page, "Comparison");
     await expect(section).toContainText("Comparison outdated");
     await expect(section.getByRole("region", { name: "Comparison analysis", exact: true })).toBeHidden();
     await expect(section.getByRole("button", { name: "Retry analysis", exact: true })).toBeDisabled();
@@ -284,6 +299,8 @@ test("security request rejection preserves state and manual entry", async ({ pag
   expect(malformed.status()).toBe(422);
   expect((await malformed.json()).error.code).toBe("INVALID_PDF");
   expect(await readApi<Quote[]>(page, `/projects/${id}/quotes`)).toEqual([]);
+  await selectQuote(page, 0);
+  await quoteCard(page, 0).getByRole("button", { name: "Enter manually", exact: true }).click();
   await expect(quoteCard(page, 0).getByRole("button", { name: "Create manual quote", exact: true })).toBeEnabled();
   const valid = await page.request.patch(`/api/projects/${id}`, { data: { name: "Still usable" } });
   expect(valid.status()).toBe(200);

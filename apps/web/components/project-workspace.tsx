@@ -1,9 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ApiClientError, apiRequest } from "../lib/api";
-import { stageLabels, stageAnchors, workflowStages, workflowActions, workflowReasons, WorkflowSummary } from "../lib/workflow";
+import { WorkflowSummary } from "../lib/workflow";
+import { WorkspaceShell } from "./workspace-shell";
+import { useRecordDraft } from "./use-record-draft";
+import { DraftConflict, RecordSaveStatus } from "./record-save-status";
+import { useDraftRegistration } from "./workspace-drafts";
+import { WorkspaceDraftProvider } from "./workspace-drafts";
 import { BriefEditor } from "./brief-editor";
 import { ComparisonReview } from "./comparison-review";
 import { DecisionProject, DecisionReview } from "./decision-review";
@@ -21,11 +25,21 @@ type Project = DecisionProject & {
 type WorkspaceState = "loading" | "ready" | "unavailable" | "not-found";
 
 export function ProjectWorkspace({ projectId }: { projectId: string }) {
+  return <WorkspaceDraftProvider key={projectId}><ProjectWorkspaceContent projectId={projectId} /></WorkspaceDraftProvider>;
+}
+
+function ProjectWorkspaceContent({ projectId }: { projectId: string }) {
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const [project, setProject] = useState<Project | null>(null);
   const [workspaceState, setWorkspaceState] = useState<WorkspaceState>("loading");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [renameError, setRenameError] = useState<string | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
+  const renameRecord = useRecordDraft(project?.name ?? "");
+  const dispatchRename = renameRecord.dispatch;
+  const renameDisclosure = useRef<HTMLDetailsElement>(null);
+  const [renameCloseWarning, setRenameCloseWarning] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [supplierRefreshKey, setSupplierRefreshKey] = useState(0);
   const [decisionRefreshKey, setDecisionRefreshKey] = useState(0);
@@ -38,7 +52,7 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   const acceptedName = useRef<string | null>(null);
   const projectVisit = useRef(0);
   const currentProjectId = useRef(projectId);
-  if (currentProjectId.current !== projectId) {
+  if (!mounted.current || currentProjectId.current !== projectId) {
     projectVisit.current += 1;
     renameRequest.current += 1;
   }
@@ -70,7 +84,7 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
     });
   }, []);
   const refreshSummary = useCallback(async () => {
-    if (currentProjectId.current !== projectId || renderedProjectVisit !== projectVisit.current) return;
+    if (!mounted.current || currentProjectId.current !== projectId || renderedProjectVisit !== projectVisit.current) return;
     const request = ++summaryRequest.current;
     try {
       while (request === summaryRequest.current && renderedProjectVisit === projectVisit.current) {
@@ -120,7 +134,7 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   }, [renderedSummaryRequest, renderedWorkflow, renderedProjectVisit, refreshSummary]);
 
   async function refreshProject() {
-    if (renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
+    if (!mounted.current || renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
     refreshComparison();
     setSupplierRefreshKey((value) => value + 1);
     refreshDecision();
@@ -128,12 +142,12 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
   }
 
   const handleSuppliersChange = useCallback(() => {
-    if (renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
+    if (!mounted.current || renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
     refreshDecision();
     void refreshSummary();
   }, [projectId, renderedProjectVisit, refreshDecision, refreshSummary]);
   const handleQuoteChange = useCallback(() => {
-    if (renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
+    if (!mounted.current || renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
     refreshComparison();
     void refreshSummary();
   }, [projectId, renderedProjectVisit, refreshComparison, refreshSummary]);
@@ -161,6 +175,7 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
         appliedSummaryRequest.current = request;
         nameRevision.current += 1;
         acceptedName.current = loadedProject.name;
+        dispatchRename({ type: "reset", value: loadedProject.name });
         setProject(loadedProject);
         setWorkspaceState("ready");
       })
@@ -179,7 +194,19 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
     return () => {
       isCurrentRequest = false;
     };
-  }, [loadAttempt, projectId]);
+  }, [loadAttempt, projectId, dispatchRename]);
+
+  useDraftRegistration("project-name", { label: "Project name", stage: "BRIEF", dirty: renameRecord.dirty,
+    pending: isRenaming, uncertain: renameRecord.state.uncertain, error: renameError, check: checkName });
+
+  async function checkName() {
+    try {
+      const latest = await apiRequest<Project>(`/api/projects/${projectId}`);
+      if (!mounted.current) return;
+      renameRecord.dispatch({ type: "receive", value: latest.name });
+      await refreshSummary();
+    } catch { setRenameError("Saved name could not be checked. Your draft is retained."); }
+  }
 
   async function handleRename(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -189,6 +216,7 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
       return;
     }
 
+    if (renameRecord.begin() === null) return;
     setRenameError(null);
     setIsRenaming(true);
     const request = ++renameRequest.current;
@@ -202,10 +230,12 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
-      if (currentProjectId.current !== projectId || visit !== projectVisit.current || request !== renameRequest.current) return;
+      if (!mounted.current || currentProjectId.current !== projectId || visit !== projectVisit.current || request !== renameRequest.current) return;
       applyProjectResponse(renamedProject, startedAtDecisionRevision, startedAtNameRevision, startedAtSummaryRequest, true);
+      renameRecord.dispatch({ type: "saved", value: renamedProject.name });
     } catch (error) {
-      if (currentProjectId.current !== projectId || visit !== projectVisit.current || request !== renameRequest.current) return;
+      if (!mounted.current || currentProjectId.current !== projectId || visit !== projectVisit.current || request !== renameRequest.current) return;
+      renameRecord.dispatch({ type: "failed", message: "Name could not be saved", uncertain: error instanceof ApiClientError && ["NETWORK_ERROR", "INVALID_RESPONSE"].includes(error.code) });
       setRenameError(
         error instanceof ApiClientError ? error.message : "We could not rename this project. Please try again.",
       );
@@ -231,48 +261,30 @@ export function ProjectWorkspace({ projectId }: { projectId: string }) {
     );
   }
 
-  return (
-    <section className="project-workspace" aria-labelledby="project-title">
-      <Link href="/">Back to projects</Link>
-      <p className="workspace-stage">Current stage: {project.workflow ? stageLabels[project.workflow.current_stage] : "Unavailable"}</p>
-      {project.workflow && !loadError ? <div className="workflow-guidance" aria-label="Next action">
-        <p>{workflowReasons[project.workflow.next_action.reason_code]}</p>
-        <a href={`#${workflowActions[project.workflow.next_action.code].anchor}`}>Next: {workflowActions[project.workflow.next_action.code].label}</a>
-      </div> : null}
-      {loadError ? <p role="status">Progress guidance may be outdated until the refresh succeeds.</p> : null}
-      {loadError ? <div className="form-error" role="alert"><p>{loadError}</p><button type="button" onClick={() => void refreshSummary()}>Refresh stage</button></div> : null}
-      <h1 id="project-title">{project.name}</h1>
-      <p>Preferred supplier: {project.preferred_supplier_name ?? "No Decision Yet"}</p>
-      {project.workflow ? <nav aria-label="Sourcing workflow stages">
-        <ul className="stage-list">
-          {workflowStages.map((stage) => <li key={stage}
-            aria-current={project.workflow!.current_stage === stage ? "step" : undefined}
-            data-unavailable={project.workflow!.stage_prerequisites[stage] ? "true" : undefined}>
-            <a href={`#${stageAnchors[stage]}`}><strong>{stageLabels[stage]}</strong></a>
-            {project.workflow!.stage_prerequisites[stage] ? <span>{workflowReasons[project.workflow!.stage_prerequisites[stage]!]}</span> : null}
-          </li>)}
-        </ul>
-      </nav> : <p role="status">Workflow progress is unavailable. Refresh the project to try again.</p>}
-      <form className="rename-form" onSubmit={handleRename}>
+  return <WorkspaceShell projectId={projectId} name={project.name} preference={project.preferred_supplier_name}
+    workflow={project.workflow} outdated={Boolean(loadError)} refreshError={loadError} retry={() => void refreshSummary()}
+    rename={<details ref={renameDisclosure} onToggle={(event) => {
+      if (!event.currentTarget.open && (renameRecord.dirty || isRenaming)) { event.currentTarget.open = true; setRenameCloseWarning(true); }
+    }}><summary>Rename project</summary>
+      <RecordSaveStatus savedVersion={renameRecord.savedVersion} dirty={renameRecord.dirty} pending={isRenaming} error={renameError} conflict={renameRecord.state.conflict} />
+      {renameRecord.state.conflict ? <DraftConflict saved={<p>{renameRecord.state.remote}</p>} draft={<p>{renameRecord.state.draft}</p>} onUseSaved={() => renameRecord.dispatch({ type: "use-saved" })} onKeepDraft={() => renameRecord.dispatch({ type: "reconcile", value: renameRecord.state.draft })} /> : null}
+      {renameRecord.state.uncertain ? <p role="alert">Name save outcome is uncertain. <button type="button" onClick={() => void checkName()}>Check saved name</button></p> : null}
+      {renameCloseWarning ? <p className="notice">The name has unsaved or pending changes. Keep editing, or discard unsaved edits after saving finishes. <button type="button" onClick={() => setRenameCloseWarning(false)}>Keep editing</button><button type="button" disabled={isRenaming || renameRecord.state.uncertain} onClick={() => { renameRecord.dispatch({ type: "use-saved" }); setRenameCloseWarning(false); }}>Discard name edits</button></p> : null}      <form className="rename-form" onSubmit={handleRename}>
         <label>
           Rename project
-          <input name="name" defaultValue={project.name} maxLength={255} required />
+          <input name="name" value={renameRecord.state.draft} onChange={(event) => renameRecord.edit(event.target.value)} maxLength={255} required />
         </label>
         {renameError ? <p className="form-error" role="alert">{renameError}</p> : null}
-        <button type="submit" disabled={isRenaming}>
+        <button type="submit" disabled={isRenaming || renameRecord.state.conflict || renameRecord.state.uncertain || !renameRecord.dirty}>
           {isRenaming ? "Saving…" : "Save name"}
         </button>
       </form>
-      <section aria-labelledby="original-request-title">
-        <h2 id="original-request-title">Original sourcing request</h2>
-        <p>{project.original_request}</p>
-      </section>
-      <BriefEditor key={`BriefEditor-${projectId}`} projectId={projectId} onProjectChange={refreshProject} />
-      <SupplierReview key={`SupplierReview-${projectId}`} projectId={projectId} refreshKey={supplierRefreshKey} onStageChange={refreshProject} onSuppliersChange={handleSuppliersChange} />
-      <QuoteReview key={`QuoteReview-${projectId}`} projectId={projectId} active={project.workflow?.stage_prerequisites.QUOTES === null} refreshKey={supplierRefreshKey} onQuoteChange={handleQuoteChange} />
-      <ComparisonReview key={`ComparisonReview-${projectId}`} projectId={projectId} refreshKey={comparisonRefreshKey} workflow={project.workflow} onGenerated={refreshSummary} />
-      <DecisionReview key={`DecisionReview-${projectId}`} project={project} refreshKey={decisionRefreshKey} onSaved={handleDecisionSaved} />
-
-    </section>
-  );
+</details>}
+    stages={{
+      BRIEF: <><BriefEditor key={`BriefEditor-${projectId}`} projectId={projectId} originalRequest={project.original_request} onProjectChange={refreshProject} /></>,
+      SUPPLIERS: <SupplierReview key={`SupplierReview-${projectId}`} projectId={projectId} refreshKey={supplierRefreshKey} onStageChange={refreshProject} onSuppliersChange={handleSuppliersChange} />,
+      QUOTES: <QuoteReview key={`QuoteReview-${projectId}`} projectId={projectId} active={project.workflow?.stage_prerequisites.QUOTES === null} refreshKey={supplierRefreshKey} onQuoteChange={handleQuoteChange} />,
+      COMPARISON: <ComparisonReview key={`ComparisonReview-${projectId}`} projectId={projectId} refreshKey={comparisonRefreshKey} workflow={project.workflow} onGenerated={refreshSummary} />,
+      DECISION: <DecisionReview key={`DecisionReview-${projectId}`} project={project} refreshKey={decisionRefreshKey} onSaved={handleDecisionSaved} />,
+    }} />;
 }

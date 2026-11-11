@@ -1,3 +1,4 @@
+import { viewStage } from "../test/workspace-navigation";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
@@ -60,8 +61,11 @@ describe("Workspace decision review regressions", () => {
     render(<ProjectWorkspace projectId="p" />);
     await screen.findByText("No shortlisted suppliers are available for a new selection.");
     fireEvent.click(screen.getByRole("button", { name: "Add to shortlist" }));
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
+    await viewStage("Suppliers");
     fireEvent.click(screen.getByRole("button", { name: "Remove from shortlist" }));
+    await viewStage("Decision");
     await waitFor(() => expect(screen.queryByRole("option", { name: "Supplier A" })).not.toBeInTheDocument());
     expect(screen.getByText("No shortlisted suppliers are available for a new selection.")).toBeInTheDocument();
     expect(screen.getByText("Current stage: Suppliers")).toBeInTheDocument();
@@ -70,11 +74,14 @@ describe("Workspace decision review regressions", () => {
   it("warns after removing the saved preference and retains notes editing with an empty shortlist", async () => {
     const { fetchMock } = fixture({ shortlisted: true, preferred: true });
     render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
+    await viewStage("Suppliers");
     fireEvent.click(screen.getByRole("button", { name: "Remove from shortlist" }));
+    await viewStage("Decision");
     await screen.findByText(/saved preferred supplier is no longer shortlisted/);
     expect(screen.queryByRole("option", { name: "Supplier A" })).not.toBeInTheDocument();
-    expect(screen.getByText("Preferred supplier: Supplier A")).toBeInTheDocument();
+    expect(screen.getByText("Supplier A", { selector: ".project-context strong" })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Retained notes" } });
     fireEvent.click(screen.getByRole("button", { name: "Save decision notes" }));
     await screen.findByText("Decision notes saved.");
@@ -84,19 +91,24 @@ describe("Workspace decision review regressions", () => {
   it.each(["rename", "refresh"] as const)("preserves a newer decision and notes save after an older %s response", async (path) => {
     const { fetchMock, startOlder, finishOlder } = fixture({ shortlisted: true });
     render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
     startOlder(path);
+    if (path === "rename") { fireEvent.click(screen.getByText("Rename project", { selector: "summary" })); fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "Requested rename" } }); }
+    else await viewStage("Brief");
     fireEvent.click(screen.getByRole("button", { name: path === "rename" ? "Save name" : "Refresh project fixture" }));
     await waitFor(() => expect(fetchMock.mock.calls.filter(([url, init]) => url === "/api/projects/p" && (path === "rename" ? init?.method === "PATCH" : !init?.method))).toHaveLength(path === "rename" ? 1 : 2));
+    await viewStage("Decision");
     await waitFor(() => expect(screen.getByLabelText("Preferred supplier")).toBeEnabled());
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "New decision notes" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
-    await screen.findByText("Preferred supplier: Supplier A");
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
+    await screen.findByText("Supplier A", { selector: ".project-context strong" });
     await act(async () => finishOlder());
     expect(screen.getByRole("heading", { name: path === "refresh" ? "Project" : "Older response project" })).toBeInTheDocument();
     expect(screen.getByText("Current stage: Suppliers")).toBeInTheDocument();
-    expect(screen.getByText("Preferred supplier: Supplier A")).toBeInTheDocument();
+    expect(screen.getByText("Supplier A", { selector: ".project-context strong" })).toBeInTheDocument();
     expect(screen.getByLabelText("Decision notes")).toHaveValue("New decision notes");
     fireEvent.click(screen.getByRole("button", { name: "Save decision notes" }));
     await screen.findByText("Decision notes saved.");

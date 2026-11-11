@@ -1,4 +1,5 @@
-import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { viewStage } from "../test/workspace-navigation";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
 import { workspaceFixtureResponse as jsonResponse } from "../test/workflow-fixtures";
@@ -43,11 +44,13 @@ describe("ProjectWorkspace", () => {
       return Promise.resolve(jsonResponse(project));
     }));
     render(<ProjectWorkspace projectId="project-1" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier C" });
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "c" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Choice" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
-    expect(await screen.findByText("Preferred supplier: Supplier C")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
+    expect(await screen.findByText("Preferred supplier saved.")).toBeInTheDocument();
     expect(screen.getByText("Existing comparison advice")).toBeInTheDocument();
     expect(comparisonRender.mock.calls.every(([refreshKey]) => refreshKey === 0)).toBe(true);
     expect(reads).toBe(1);
@@ -66,14 +69,16 @@ describe("ProjectWorkspace", () => {
     render(<ProjectWorkspace projectId="project-1" />);
 
     expect(await screen.findByText("Travel Bag")).toBeInTheDocument();
-    expect(screen.getByText("Source recycled travel bags.")).toBeInTheDocument();
-    expect(screen.getByText("Brief").closest("li")).toHaveAttribute("aria-current", "step");
+    expect(await screen.findByText("Source recycled travel bags.")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Brief" })).toHaveAttribute("aria-current", "page");
     for (const stage of ["Suppliers", "Quotes"]) {
       expect(screen.getByText(stage).closest("li")).toHaveAttribute("data-unavailable", "true");
     }
     expect(screen.getByText("Comparison").closest("li")).not.toHaveAttribute("data-unavailable");
     const decision = within(screen.getByRole("navigation", { name: "Sourcing workflow stages" })).getByText("Decision");
     expect(decision.closest("li")).not.toHaveAttribute("data-unavailable");
+    expect(screen.queryByRole("heading", { name: "Decision" })).not.toBeInTheDocument();
+    await viewStage("Decision");
     expect(screen.getByRole("heading", { name: "Decision" })).toBeInTheDocument();
   });
 
@@ -100,10 +105,12 @@ describe("ProjectWorkspace", () => {
       return Promise.resolve(jsonResponse({ id: "project-1", name: "Lamp", original_request: "Source lamps.", stage }));
     }));
     render(<ProjectWorkspace projectId="project-1" />);
-    fireEvent.click(await screen.findByRole("button", { name: "Approve Brief" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Review saved Brief" }));
+    fireEvent.click(screen.getByRole("button", { name: "Approve Brief" }));
     expect(await screen.findByText("Current stage: Suppliers")).toBeInTheDocument();
     const suppliers = screen.getByText("Suppliers").closest("li");
-    expect(suppliers).toHaveAttribute("aria-current", "step");
+    expect(screen.getByRole("link", { name: "Brief" })).toHaveAttribute("aria-current", "page");
+    fireEvent.click(screen.getByRole("button", { name: "Edit Brief" }));
     expect(suppliers).not.toHaveAttribute("data-unavailable");
     expect(suppliers).toHaveTextContent("Suppliers");
     expect(suppliers).not.toHaveTextContent("Available in a later step.");
@@ -124,6 +131,7 @@ describe("ProjectWorkspace", () => {
     render(<ProjectWorkspace projectId="project-1" />);
 
     await screen.findByText("Travel Bag");
+    fireEvent.click(screen.getByText("Rename project", { selector: "summary" }));
     fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "Renamed Bag" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
 
@@ -144,7 +152,7 @@ describe("ProjectWorkspace", () => {
     )));
     render(<ProjectWorkspace projectId="project-1" />);
     expect(await screen.findByText("Current stage: Quotes")).toBeInTheDocument();
-    expect(screen.getByText("Quotes").closest("li")).toHaveAttribute("aria-current", "step");
+    await waitFor(() => expect(screen.getByRole("link", { name: "Quotes" })).toHaveAttribute("aria-current", "page"));
     expect(screen.getByText("Quotes").closest("li")).not.toHaveAttribute("data-unavailable");
     expect(screen.getByText("Quotes").closest("li")).toHaveTextContent("Quotes");
   });

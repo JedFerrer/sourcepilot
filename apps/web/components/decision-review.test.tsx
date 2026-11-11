@@ -30,6 +30,23 @@ function server(suppliers = choices) {
 describe("DecisionReview", () => {
   afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
+  it("reviews the proposed preference without saving until explicitly confirmed", async () => {
+    const fetchMock = server();
+    vi.stubGlobal("fetch", fetchMock);
+    render(<Host />);
+    await screen.findByRole("option", { name: "Supplier A" });
+    fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
+    fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Check samples first" } });
+    fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Supplier A");
+    expect(screen.getByRole("dialog")).toHaveTextContent("Check samples first");
+    expect(fetchMock.mock.calls.every(([, init]) => !init?.method)).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "Keep reviewing" }));
+    expect(screen.getByLabelText("Preferred supplier")).toHaveValue("a");
+    expect(screen.getByLabelText("Decision notes")).toHaveValue("Check samples first");
+    expect(fetchMock.mock.calls.every(([, init]) => !init?.method)).toBe(true);
+  });
+
   it("selects, changes, edits notes, and clears through explicit user actions", async () => {
     const fetchMock = server();
     vi.stubGlobal("fetch", fetchMock);
@@ -41,11 +58,13 @@ describe("DecisionReview", () => {
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "  First choice  " } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     await screen.findByText("Preferred supplier saved.");
     expect(fetchMock).toHaveBeenLastCalledWith("/api/projects/p/preferred-supplier", expect.objectContaining({ method: "PUT", body: JSON.stringify({ supplier_id: "a", decision_notes: "  First choice  " }) }));
     expect(screen.getByLabelText("Decision notes")).toHaveValue("First choice");
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "c" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     await waitFor(() => expect(screen.getByText("Supplier C", { selector: "strong" })).toBeInTheDocument());
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Changed" } });
     fireEvent.click(screen.getByRole("button", { name: "Save decision notes" }));
@@ -95,6 +114,7 @@ describe("DecisionReview", () => {
     const base = server();
     let fail = true;
     vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
+      if (path === "/api/projects/p" && !init?.method) return Promise.resolve(jsonResponse(empty));
       if (init?.method === "PUT" && fail) return Promise.reject(new Error("network"));
       return base(path, init);
     }));
@@ -103,11 +123,15 @@ describe("DecisionReview", () => {
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Draft" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
-    await screen.findByRole("alert");
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
+    await screen.findByText(/Decision save outcome is uncertain/);
     expect(screen.getByLabelText("Preferred supplier")).toHaveValue("a");
     expect(screen.getByLabelText("Decision notes")).toHaveValue("Draft");
     fail = false;
+    fireEvent.click(screen.getByRole("button", { name: "Check saved decision" }));
+    fireEvent.click(await screen.findByRole("button", { name: "I reviewed both records—keep my edits" }));
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     await screen.findByText("Preferred supplier saved.");
   });
 
@@ -122,6 +146,7 @@ describe("DecisionReview", () => {
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Keep draft" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     await screen.findByText("No shortlisted suppliers are available for a new selection.");
     expect(screen.getByRole("alert")).toHaveTextContent("Choose from the current shortlist.");
     expect(screen.getByLabelText("Decision notes")).toHaveValue("Keep draft");
@@ -194,4 +219,17 @@ describe("DecisionReview", () => {
     await act(async () => resolveOld(jsonResponse({ suppliers: choices })));
     expect(screen.queryByRole("option", { name: "Supplier A" })).not.toBeInTheDocument();
   });
+  it("clears only the saved preference while retaining unsaved replacement and notes", async () => {
+    const fetchMock = server(); vi.stubGlobal("fetch", fetchMock);
+    render(<Host initial={saved} />);
+    await screen.findByRole("option", { name: "Supplier C" });
+    fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "c" } });
+    fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Unsubmitted notes" } });
+    fireEvent.click(screen.getByRole("button", { name: "Clear preferred supplier" }));
+    await screen.findByText("Preferred supplier cleared.");
+    expect(fetchMock).toHaveBeenLastCalledWith("/api/projects/p/preferred-supplier", expect.objectContaining({ body: JSON.stringify({ supplier_id: null, decision_notes: "Original" }) }));
+    expect(screen.getByLabelText("Preferred supplier")).toHaveValue("c");
+    expect(screen.getByLabelText("Decision notes")).toHaveValue("Unsubmitted notes");
+  });
+
 });

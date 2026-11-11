@@ -1,15 +1,17 @@
 import { expect, test } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { advice, comparison, confirm, createAndApprove, quoteCard, readApi, scenario, suppliers, upload, type Project, type Quote } from "./helpers";
+import { viewStage, inspectQuoteSource, closeQuoteSource, advice, comparison, confirm, createAndApprove, quoteCard, readApi, scenario, suppliers, upload, type Project, type Quote } from "./helpers";
 
 test("complete V1 golden path", async ({ page }) => {
   const project = await createAndApprove(page, true);
   await test.step("Upload, review and explicitly confirm three PDF quotes", async () => {
     for (let index = 0; index < suppliers.length; index++) {
       await upload(page, index);
-      await expect(quoteCard(page, index)).toContainText("PDF source evidence:");
+      const source = await inspectQuoteSource(page, index);
+      await expect(source.getByRole("blockquote").first()).toContainText(/./);
+      await closeQuoteSource(page);
       await expect(quoteCard(page, index)).toContainText("Current origin: AI EXTRACTED");
-      await expect(quoteCard(page, index).getByRole("blockquote").first()).toContainText(/./);
+
       await expect(quoteCard(page, index)).toContainText("Unknown");
       await confirm(page, index);
     }
@@ -34,10 +36,12 @@ test("complete V1 golden path", async ({ page }) => {
       { cwd: "../api", stdio: "pipe", timeout: 20_000 });
   });
   await test.step("Human decision persists after reload and on dashboard", async () => {
+    await viewStage(page, "Decision");
     const section = page.getByRole("region", { name: "Decision", exact: true });
     await section.getByRole("combobox", { name: /Preferred supplier/ }).selectOption({ label: suppliers[0] });
     await section.getByLabel("Decision notes").fill("Evidence reviewed; retain uncertainties for follow-up.");
     await section.getByRole("button", { name: "Mark as Preferred Supplier", exact: true }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Save preferred supplier", exact: true }).click();
     await expect(section).toContainText("Preferred supplier saved.");
     await page.reload();
     await expect(section).toContainText(`Current preference: ${suppliers[0]}`);
@@ -45,7 +49,7 @@ test("complete V1 golden path", async ({ page }) => {
     const saved = await readApi<Project>(page, `/projects/${project.id}`);
     expect(saved.preferred_supplier_name).toBe(suppliers[0]);
     expect(saved.decision_notes).toBe("Evidence reviewed; retain uncertainties for follow-up.");
-    await page.getByRole("link", { name: "Back to projects", exact: true }).click();
+    await page.getByRole("link", { name: "All projects", exact: true }).click();
     const card = page.getByRole("link").filter({ hasText: project.name });
     await expect(card).toContainText(`Preferred supplier: ${suppliers[0]}`);
     await expect(card).toContainText("Manage your preferred supplier");

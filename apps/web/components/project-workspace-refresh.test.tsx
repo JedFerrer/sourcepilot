@@ -1,3 +1,4 @@
+import { viewStage } from "../test/workspace-navigation";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { workspaceFixtureResponse as jsonResponse } from "../test/workflow-fixtures";
@@ -35,6 +36,7 @@ const generationNotReady = () => jsonResponse({
 }, 409);
 
 async function showSettledGenerationError() {
+  await viewStage("Comparison");
   const generate = await screen.findByRole("button", { name: "Generate Comparison" });
   await waitFor(() => expect(generate).toBeEnabled());
   fireEvent.click(generate);
@@ -72,9 +74,11 @@ describe("ProjectWorkspace comparison refresh after upstream changes", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<ProjectWorkspace projectId="project-1" />);
 
-    await screen.findByRole("button", { name: "Save Brief" });
+    await viewStage("Brief");
+    fireEvent.click(await screen.findByRole("button", { name: "Edit Brief" }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/comparison", expect.anything()));
     await showSettledGenerationError();
+    await viewStage("Brief");
     fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "101" } });
     fireEvent.click(screen.getByRole("button", { name: "Save Brief" }));
 
@@ -105,6 +109,7 @@ describe("ProjectWorkspace comparison refresh after upstream changes", () => {
     render(<ProjectWorkspace projectId="project-1" />);
 
     await showSettledGenerationError();
+    await viewStage("Suppliers");
     fireEvent.click(await screen.findByRole("button", { name: "Remove from shortlist" }));
 
     expect(await screen.findByText("The project stage could not be refreshed. Try again.")).toBeInTheDocument();
@@ -131,6 +136,7 @@ describe("ProjectWorkspace comparison refresh after upstream changes", () => {
     render(<ProjectWorkspace projectId="project-1" />);
 
     await showSettledGenerationError();
+    await viewStage("Suppliers");
     fireEvent.click(await screen.findByRole("button", { name: "Review selected suppliers" }));
     fireEvent.click(screen.getByRole("button", { name: "Approve Shortlist" }));
 

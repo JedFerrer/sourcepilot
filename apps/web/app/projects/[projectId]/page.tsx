@@ -9,7 +9,7 @@ export default async function ProjectPage({
   const { projectId } = await params;
 
   return (
-    <main>
+    <main id="main-content">
       <DemoSessionInitializer>
         <ProjectWorkspace projectId={projectId} />
       </DemoSessionInitializer>

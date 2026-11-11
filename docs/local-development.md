@@ -16,7 +16,7 @@ Run root commands from the repository root; keep the API and web server in separ
 4. From the repository root, install the web dependencies with `pnpm install`.
 5. From `apps/api`, install the API environment with `uv sync --dev --locked`.
 6. From `apps/api`, apply the [existing migrations](#migrations-and-persistence-tests), then run the [supplier seed command](#synthetic-supplier-catalog). Both are required before using the workflow; startup does not seed the catalog.
-7. Start FastAPI from `apps/api` with `uv run --env-file ../../.env uvicorn sourcepilot.main:app --loop sourcepilot.comparison.lifecycle:comparison_loop --reload --port 8000`. Keep the explicit loop option without `--reload` and with workers too: Windows psycopg async requires a Selector loop.
+7. Start FastAPI from `apps/api` with `uv run --no-env-file python ../../scripts/dev-api.py`. This local launcher loads application settings from the root `.env`, replacing inherited values and clearing omitted settings listed in `.env.example` plus inherited `OPENAI_`, `SOURCEPILOT_`, and `LANGFUSE_` variables. It preserves OS settings such as PATH, fails if `.env` is missing, and keeps the required Windows Selector loop.
 8. Start the web app from the repository root with `pnpm --filter @sourcepilot/web dev`.
 
 Open `http://localhost:3000`. The browser requests `/api/health`; Next.js proxies that request to FastAPI `http://localhost:8000/health` by default.
@@ -25,7 +25,7 @@ Open `http://localhost:3000`. The browser requests `/api/health`; Next.js proxie
 
 Set `OPENAI_API_KEY` and `SOURCEPILOT_AI_MODEL` in the root `.env` before starting the API to use **Analyze request**, **Get clarification questions**, PDF quote extraction, supplier explanations or **Analyze Comparison**. Use a model available to your account that supports the application's structured-output and tool-calling requests. There is no default model. These actions invoke the live provider and can incur charges; live output is variable and retains the [documented quality limitations](../README.md#known-quality-and-ux-limitations).
 
-Configuration is read lazily: API startup, manual editing, deterministic comparison and normal automated checks do not require model credentials. The automated browser suite supplies its own test-only model; it is not an interactive demo mode. Keep model credentials server-side, outside version control and out of `apps/web/.env.local`. The startup command above loads the root `.env`; restart the API after changing it.
+Configuration is read lazily: API startup, manual editing, deterministic comparison and normal automated checks do not require model credentials. The automated browser suite supplies its own test-only model; it is not an interactive demo mode. Keep model credentials server-side, outside version control and out of `apps/web/.env.local`. The local startup command above makes the root `.env` authoritative; restart the API after changing it. Bare `uv run --env-file` gives existing environment variables precedence, so use the local launcher for the interactive API. Migration, test and deployment environment handling is unchanged.
 
 Langfuse is disabled by default and is not a startup or demo prerequisite. Its existing optional installation/configuration instructions and unverified hosted-visibility limitation are in [AI observability](development/OBSERVABILITY.md).
 
@@ -88,7 +88,7 @@ Complete setup and seeding above, then open `http://localhost:3000`. Use one bro
 
 ### 1. Brief
 
-Fill **Project name** with a descriptive demo name and **What do you want to source?** with the existing [scenario](../apps/api/tests/e2e_support/scenario.json) request:
+Choose **New project**, then fill **Project name** with a descriptive demo name and **What do you want to source?** with the existing [scenario](../apps/api/tests/e2e_support/scenario.json) request:
 
 > Source 2,000 custom cosmetic travel bags made from recycled polyester with a custom logo. Target unit cost below USD 5, delivery to Sydney, preferred GRS certification. Delivery timing is not decided yet.
 
@@ -97,6 +97,8 @@ Choose **Create project**, then **Analyze request**. Review the result rather th
 Save any corrections with **Save Brief** before requesting clarification. For the missing timing, choose **Get clarification questions** when available, set **Delivery answer** to `2026-12-15` (the fixed synthetic scenario date), and **Save answers**. If analysis/clarification fails or leaves incorrect data, use the existing Brief editor; choose **Delivery target type: Date**, fill **Delivery date**, and correct/add requirements there. This fixture date demonstrates the flow, not a current delivery promise. Choose **Save Brief**, resolve any remaining readiness messages, review the saved requirements and choose **Approve Brief**.
 
 ### 2. Suppliers
+
+Choose **Suppliers** in the stage navigation. Viewing a stage does not approve it or advance the workflow.
 
 Choose **Discover Suppliers**. The seeded cosmetic-bag scenario produces five candidates; a differently interpreted category can change the results. Review requirement findings and **Available evidence**; **Explain this supplier** requests optional AI explanation. Unknown or conflicting evidence must remain visible.
 
@@ -112,7 +114,7 @@ Use **Upload PDF quote** on each matching supplier card. The files are in `apps/
 | Willow Stitch Studio | [willow_primary.pdf](../apps/api/tests/fixtures/quote_pdfs/willow_primary.pdf) |
 | Moss Thread Bags | [moss_primary.pdf](../apps/api/tests/fixtures/quote_pdfs/moss_primary.pdf) |
 
-Process, review and save one quote before moving to the next. **Save a manual draft before uploading another quote:** an explicit upload can discard unsaved edits on another card, as recorded in [M6-U4](implementation/M6-U4.md).
+Choose **Quotes** in the stage navigation, select a supplier, then choose **Upload PDF** or **Enter manually**. Drafts remain mounted when switching suppliers or stages. Save each record explicitly; **Saved** refers to that record. Replacing an unsaved manual draft with a PDF requires explicit discard confirmation. The earlier cross-card draft-loss limitation in M6-U4 is historical; UX-U1 introduces record-scoped preservation and guarded project departure.
 
 After **NEEDS REVIEW**, inspect current values, origins, extracted values and **PDF source evidence**. All three primary PDFs quote 2,000 units in USD, but their shipping text names **Manila**, while the Brief requests **Sydney**. Preserve this mismatch; the quotes do not establish delivery to Sydney. Willow leaves preferred GRS certification unstated and Moss leaves sample lead time unstated. Keep unknowns and conflicts visible; see the [fixture guide](../apps/api/tests/fixtures/quote_pdfs/README.md) for the full corpus.
 
@@ -120,11 +122,15 @@ Use **Edit PDF draft** and **Save draft** for corrections. An optional provenanc
 
 ### 4. Comparison
 
+Choose **Comparison** in the stage navigation.
+
 With the approved shortlist and at least two confirmed quotes, choose **Generate Comparison**. Review the factual table, requirement states, warnings and **Source details**. Three confirmed quotes show the intended primary scenario; fewer confirmed quotes leave the remaining supplier data incomplete.
 
 Choose **Analyze Comparison** to request optional tradeoff analysis. A valid result may say **No supplier suggested yet**. A failed analysis offers **Retry analysis** and does not erase the factual comparison. Neither outcome chooses a preferred supplier. If upstream inputs change, follow supplier re-evaluation guidance and use **Regenerate Comparison** before requesting current advice.
 
 ### 5. Decision
+
+Choose **Decision** in the stage navigation; it remains accessible independently of upstream prerequisites.
 
 Review the evidence and uncertainties, choose **Preferred supplier**, optionally enter **Decision notes**, then choose **Mark as Preferred Supplier**. Reload to inspect the saved preference; **Back to projects** returns to the dashboard. This records the user's choice only: it sends no message, order or payment.
 
@@ -132,7 +138,7 @@ Review the evidence and uncertainties, choose **Preferred supplier**, optionally
 
 In a separate demo project with an approved shortlist, upload [image_only.pdf](../apps/api/tests/fixtures/quote_pdfs/image_only.pdf) for Harbor. It has no extractable text and should reach **FAILED**. Choose **Enter quote manually**; for the synthetic fallback example enter **Quoted quantity** `2000`, **Unit price** `4.50` and **Original currency (three-letter code)** `USD`, leaving unstated fields blank. These are user-entered demonstration values, not facts extracted from the failed file.
 
-Choose **Save manual draft**, **Review for confirmation**, then **Confirm Quote**. Add and confirm Willow's quote (by its primary PDF or manual entry) to enable **Generate Comparison**. Save each draft before another upload. For other failures, **Retry processing** retries extraction; **Retry status check**, when shown, only rereads status and does not restart processing.
+Choose **Save manual draft**, **Review for confirmation**, then **Confirm Quote**. Add and confirm Willow's quote (by its primary PDF or manual entry) to enable **Generate Comparison**. Switching suppliers preserves unsaved drafts; save each record explicitly before leaving the project. For other failures, **Retry processing** retries extraction; **Retry status check**, when shown, only rereads status and does not restart processing.
 
 ## AI foundation smoke check
 

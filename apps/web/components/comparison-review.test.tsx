@@ -619,13 +619,40 @@ const adviceResponse = (selected: string | null = "a") => ({
   run_id: "run-1", snapshot_id: "comparison-1",
   analysis: { supplier_summaries: [advicePoint("Willow has confirmed quote information.")],
     key_tradeoffs: [advicePoint("Compare the quote terms before proceeding.")],
-    important_unknowns: [], important_conflicts: [] },
+    important_unknowns: [] as AdvicePoint[], important_conflicts: [] as AdvicePoint[] },
   suggestion: { supplier_id: selected, supporting_reasons: selected ? [advicePoint("Investigate its confirmed terms.")] : [],
     tradeoffs: [advicePoint("Willow fails the required material requirement.")],
     uncertainties: [advicePoint("No single supplier has enough confirmed information.")], evidence_ids: [] as string[] },
 });
 
 describe("Comparison advice", () => {
+
+  it("groups supplier summaries without losing shared findings and combines source controls", async () => {
+    const comparison = snapshot();
+    const output = adviceResponse();
+    output.analysis.supplier_summaries = [
+      { ...advicePoint("Willow material needs review."), requirement_ids: ["required"], evidence_ids: ["evidence-1"] },
+      { ...advicePoint("Moss offers a different lead time."), supplier_ids: ["b"] },
+      { ...advicePoint("Check both suppliers before deciding."), supplier_ids: ["a", "b"] },
+      { ...advicePoint("Delivery timing needs clarification."), supplier_ids: [] },
+    ];
+    output.analysis.important_unknowns = [advicePoint("Delivery date is unknown.")];
+    vi.stubGlobal("fetch", vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/advice") ? output : comparison))));
+    render(<ComparisonReview projectId="project-1" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Analyze Comparison" }));
+    const analysis = await screen.findByRole("region", { name: "Comparison analysis" });
+    const summaries = within(analysis).getByRole("region", { name: "Supplier summaries" });
+    expect(within(summaries).getByRole("region", { name: "Willow" })).toHaveTextContent("Willow material needs review.");
+    expect(within(summaries).getByRole("region", { name: "Moss" })).toHaveTextContent("Moss offers a different lead time.");
+    expect(within(summaries).getByRole("region", { name: "Across suppliers" })).toHaveTextContent("Delivery timing needs clarification.");
+    expect(within(analysis).getAllByText("Check both suppliers before deciding.")).toHaveLength(1);
+    expect(within(analysis).getByText("Delivery date is unknown.")).toBeVisible();
+    const point = within(analysis).getByText("Willow material needs review.").closest("li")!;
+    expect(within(point).getAllByText("Source details")).toHaveLength(1);
+    expect(point).toHaveTextContent("Does Not Meet");
+    fireEvent.click(within(point).getByText("Source details"));
+    expect(within(point).getByText(/Supporting PDF evidence/)).toBeVisible();
+  });
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
   it("identifies repeated requirements and preserves a false expected value in advice", async () => {
@@ -676,7 +703,7 @@ describe("Comparison advice", () => {
   });
 
   it("discloses the retained PDF correction despite unresolved price and currency", async () => {
-    const fixtureUrl = "../../docs/implementation/evidence/M4-U7/pdf-fixture-preparation/comparison.json";
+    const fixtureUrl = "../api/tests/fixtures/comparison_advice/corrected-pdf-snapshot.json";
     const original = readFileSync(fixtureUrl, "utf8");
     const comparison = JSON.parse(original);
     const harbor = comparison.comparison_payload.suppliers.find((item: { supplier_name: string }) => item.supplier_name === "Harbor Pouch Works");

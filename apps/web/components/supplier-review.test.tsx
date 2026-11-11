@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { WorkspaceDraftProvider } from "./workspace-drafts";
 import { SupplierReview } from "./supplier-review";
 import { jsonResponse } from "../test/api-responses";
 
@@ -20,6 +21,31 @@ const supplier = {
 
 describe("SupplierReview", () => {
   afterEach(() => { cleanup(); vi.restoreAllMocks(); });
+
+  it("keeps failures and required omissions visible while disclosing optional context and evidence", async () => {
+    const candidate = { ...supplier, general_moq: 5000, indicative_price_amount: "3.7000", indicative_price_currency: "USD",
+      evaluations: [{ ...supplier.evaluations[0], status: "UNKNOWN" }],
+      derived_context: [{ kind: "MOQ", status: "DOES_NOT_MEET", evidence_ids: [] }],
+      informational_requirements: [
+        { requirement_id: "optional", kind: "INFORMATIONAL", importance: "INFORMATIONAL", expected_value: { subject: "BRANDING_NOTES", text: "Custom logo" } },
+        { requirement_id: "required", kind: "DELIVERY", importance: "REQUIRED", expected_value: { kind: "DATE", date: "2027-01-01" } },
+        { requirement_id: "unset", kind: "UNIT_PRICE", importance: null, expected_value: { amount: 5, currency: "USD" } },
+      ],
+    };
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse({ brief_revision: 1, brief_approved: true, shortlist_approved: false, suppliers: [candidate] }))));
+    render(<SupplierReview projectId="project-1" refreshKey={0} />);
+    expect(await screen.findByText("Minimum order exceeds your requested quantity.")).toBeVisible();
+    expect(screen.getByText("Unknown", { selector: "strong" })).toBeVisible();
+    expect(screen.getByText(/Unknown means there is not enough reliable evidence/)).toBeVisible();
+    expect(screen.getByText(/Delivery .*Required.*January 1, 2027/)).toBeVisible();
+    expect(screen.getByText(/Unit price .*Importance not set.*5 USD/)).toBeVisible();
+    expect(screen.getByText("USD 3.70")).toBeVisible();
+    const context = screen.getByText("Additional Brief context · 1 item").closest("details");
+    expect(context).not.toHaveAttribute("open");
+    fireEvent.click(screen.getByRole("button", { name: "View evidence" }));
+    expect(screen.getByText("Available evidence").closest("details")).toHaveAttribute("open");
+    expect(screen.getByText(/Uses recycled polyester/)).toBeVisible();
+  });
 
   it("explains successful empty discovery, links to Brief without writing, and recovers candidates", async () => {
     let candidates = false;
@@ -87,7 +113,7 @@ describe("SupplierReview", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<SupplierReview projectId="project-1" refreshKey={0} />);
     expect(await screen.findByText("Harbor Pouch Works")).toBeInTheDocument();
-    expect(screen.getByText("MEETS", { selector: "strong" })).toBeInTheDocument();
+    expect(screen.getByText("Meets", { selector: "strong" })).toBeInTheDocument();
     fireEvent.click(screen.getByText("Available evidence"));
     expect(screen.getByText(/Uses recycled polyester/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Add to shortlist" }));
@@ -110,10 +136,10 @@ describe("SupplierReview", () => {
     }));
     render(<SupplierReview projectId="project-1" refreshKey={0} />);
     expect(await screen.findByText(/Your sourcing requirements changed/)).toBeInTheDocument();
-    expect(screen.queryByText("MEETS", { selector: "strong" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Meets", { selector: "strong" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Explain this supplier" })).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Re-discover and re-evaluate" }));
-    expect(await screen.findByText("MEETS", { selector: "strong" })).toBeInTheDocument();
+    expect(await screen.findByText("Meets", { selector: "strong" })).toBeInTheDocument();
   });
 
   it("never presents old findings as current when a Brief-triggered reload fails", async () => {
@@ -125,16 +151,17 @@ describe("SupplierReview", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const view = render(<SupplierReview projectId="project-1" refreshKey={0} />);
-    expect(await screen.findByText("MEETS", { selector: "strong" })).toBeInTheDocument();
+    expect(await screen.findByText("Meets", { selector: "strong" })).toBeInTheDocument();
 
     view.rerender(<SupplierReview projectId="project-1" refreshKey={1} />);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(screen.queryByText("MEETS", { selector: "strong" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Meets", { selector: "strong" })).not.toBeInTheDocument();
 
     await act(async () => { rejectReload!(new Error("Network unavailable")); });
     expect(await screen.findByRole("alert")).toHaveTextContent("We could not reach SourcePilot. Please try again.");
-    expect(screen.queryByText("MEETS", { selector: "strong" })).not.toBeInTheDocument();
-    expect(screen.queryByText("Harbor Pouch Works")).not.toBeInTheDocument();
+    expect(screen.queryByText("Meets", { selector: "strong" })).not.toBeInTheDocument();
+    expect(screen.getByText("Harbor Pouch Works")).toBeInTheDocument();
+    expect(screen.getByText("Evaluations need refreshing after the Brief changed.")).toBeInTheDocument();
   });
 
   it("keeps the newest supplier response when reloads resolve out of order", async () => {
@@ -280,7 +307,7 @@ describe("SupplierReview", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add to shortlist" }));
     expect(await screen.findByText(/1 selected/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
-    expect(screen.getByLabelText("Harbor Pouch Works approval details")).toHaveTextContent("REQUIRED: MATERIAL recycled polyester — MEETS");
+    expect(screen.getByLabelText("Harbor Pouch Works approval details")).toHaveTextContent("Material · Requiredrecycled polyesterMeets");
     fireEvent.click(screen.getByRole("button", { name: "Continue Reviewing" }));
     expect(screen.queryByText("Review before approval")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
@@ -318,12 +345,14 @@ describe("SupplierReview", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<SupplierReview projectId="project-1" refreshKey={0} />);
     fireEvent.click(await screen.findByRole("button", { name: "Review selected suppliers" }));
+    fireEvent.click(screen.getByRole("button", { name: "Continue Reviewing" }));
     fireEvent.click(screen.getByRole("button", { name: "Re-discover and re-evaluate" }));
-    expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Review selected suppliers" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Approving…" })).not.toBeInTheDocument();
     expect(fetchMock.mock.calls.filter(([path]) => path.endsWith("/shortlist/approve"))).toHaveLength(0);
 
     await act(async () => { resolveDiscovery(jsonResponse({})); });
+    fireEvent.click(screen.getByRole("button", { name: "Review selected suppliers" }));
     expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "Approve Shortlist" }));
     expect(screen.getByRole("button", { name: "Approving…" })).toBeDisabled();
@@ -367,4 +396,18 @@ describe("SupplierReview", () => {
     expect(screen.getByRole("button", { name: "Approve Shortlist" })).toBeDisabled();
     expect(screen.queryByText(/Shortlist approved/)).not.toBeInTheDocument();
   });
+  it("keeps unavailable private-note drafts copyable after external candidate removal", async () => {
+    let removed = false;
+    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(jsonResponse({ brief_revision: 1, brief_approved: true, shortlist_approved: false, suppliers: removed ? [] : [supplier] }))));
+    const view = render(<WorkspaceDraftProvider><SupplierReview projectId="project-1" refreshKey={0} /></WorkspaceDraftProvider>);
+    await screen.findByRole("heading", { name: supplier.name });
+    fireEvent.click(screen.getByText("Private notes", { selector: "summary" }));
+    fireEvent.change(screen.getByLabelText(`Private notes for ${supplier.name}`), { target: { value: "Keep this sourcing note" } });
+    removed = true;
+    view.rerender(<WorkspaceDraftProvider><SupplierReview projectId="project-1" refreshKey={1} /></WorkspaceDraftProvider>);
+    await screen.findByText(/This supplier is no longer available/);
+    expect(screen.getByLabelText(`Private notes for ${supplier.name}`)).toHaveValue("Keep this sourcing note");
+    expect(screen.getByRole("button", { name: "Save notes" })).toBeDisabled();
+  });
+
 });

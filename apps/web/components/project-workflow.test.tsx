@@ -1,3 +1,4 @@
+import { viewStage } from "../test/workspace-navigation";
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ProjectWorkspace } from "./project-workspace";
@@ -146,9 +147,12 @@ describe("M5-U2 workflow integration", () => {
     for (const label of ["Brief", "Suppliers", "Quotes", "Comparison", "Decision"]) {
       const link = stages.getByRole("link", { name: label });
       const anchor = link.getAttribute("href")!;
-      expect(document.querySelector(anchor)).toBeInTheDocument();
+      expect(anchor).toBe(`?stage=${label.toLowerCase()}`);
       fireEvent.click(link);
+      expect(link).toHaveAttribute("aria-current", "page");
+      expect(new URL(window.location.href).searchParams.get("stage")).toBe(label.toLowerCase());
     }
+    await viewStage("Brief");
     fireEvent.change(screen.getByLabelText("Product name"), { target: { value: "Unsaved lamp" } });
     fireEvent.click(next);
     expect(screen.getByLabelText("Product name")).toHaveValue("Unsaved lamp");
@@ -180,10 +184,13 @@ describe("M5-U2 workflow integration", () => {
         COMPARISON: "INSUFFICIENT_CONFIRMED_QUOTES" as const } };
     fixture(summary);
     render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
+    await viewStage("Comparison");
     await waitFor(() => expect(screen.getByRole("button", { name: "Regenerate Comparison" })).toBeDisabled());
     expect(within(screen.getByRole("navigation")).getByRole("link", { name: "Comparison" }).closest("li"))
       .toHaveAttribute("data-unavailable", "true");
+    await viewStage("Decision");
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     expect(screen.getByRole("button", { name: "Mark as Preferred Supplier" })).toBeEnabled();
   });
@@ -227,7 +234,7 @@ describe("M5-U2 workflow integration", () => {
     expect(screen.getByText("Current stage: Decision")).toBeInTheDocument();
     fireEvent(window, new Event("focus"));
     await screen.findByText(/Progress guidance may be outdated/);
-    expect(screen.queryByLabelText("Next action")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Next action")).toBeInTheDocument(); // Last-known guidance is retained with an outdated warning.
     expect(screen.getByLabelText("Product name")).toHaveValue("Keep draft");
     fireEvent.click(screen.getByRole("button", { name: "Refresh stage" }));
     await screen.findByLabelText("Next action");
@@ -287,6 +294,7 @@ describe("M5-U2 workflow integration", () => {
     });
     const { rerender } = render(<ProjectWorkspace projectId="p" />);
     await screen.findByText("Current stage: Quotes");
+    fireEvent.click(screen.getByText("Rename project", { selector: "summary" }));
     fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "Renamed A" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     rerender(<ProjectWorkspace projectId="b" />);
@@ -297,7 +305,7 @@ describe("M5-U2 workflow integration", () => {
     await act(async () => bReads[1](jsonResponse(b)));
     await screen.findByRole("heading", { name: "Project B" });
     expect(screen.getByText("Current stage: Brief")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save name" })).toBeEnabled();
+    expect(screen.getByLabelText("Rename project")).toBeEnabled();
     await act(async () => bReads[0](jsonResponse({ ...b, name: "Older B" })));
     expect(screen.getByRole("heading", { name: "Project B" })).toBeInTheDocument();
     expect(screen.queryByText("Renamed A")).not.toBeInTheDocument();
@@ -319,17 +327,20 @@ describe("M5-U2 workflow integration", () => {
       return ordinary(path, init);
     });
     render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
+    await viewStage("Decision");
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Saved choice" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     fireEvent(window, new Event("focus"));
     await screen.findByText("Current stage: Brief");
     await act(async () => resolveDecision(jsonResponse({ ...project(workflowFixture("DECISION")),
       preferred_supplier_id: "a", preferred_supplier_name: "Supplier A", decision_notes: "Saved choice" })));
     expect(screen.getByText("Current stage: Brief")).toBeInTheDocument();
     expect(within(screen.getByLabelText("Next action")).getByRole("link")).toHaveAttribute("href", "#brief-analyze");
-    expect(screen.getByText("Preferred supplier: Supplier A")).toBeInTheDocument();
+    expect(screen.getByText("Supplier A", { selector: ".project-context strong" })).toBeInTheDocument();
     expect(screen.getByLabelText("Decision notes")).toHaveValue("Saved choice");
     expect(screen.getByText("Preferred supplier saved.")).toBeInTheDocument();
   });
@@ -347,10 +358,13 @@ describe("M5-U2 workflow integration", () => {
       return ordinary(path, init);
     });
     render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
+    await viewStage("Decision");
     fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Saved choice" } });
     fireEvent.click(screen.getByRole("button", { name: "Mark as Preferred Supplier" }));
+    fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     fireEvent(window, new Event("focus"));
     const workflow = stage === "BRIEF" ? workflowFixture("BRIEF") : {
       ...workflowFixture("DECISION"), next_action: { code: "MANAGE_PREFERENCE" as const,
@@ -359,17 +373,17 @@ describe("M5-U2 workflow integration", () => {
     const saved = { ...project(workflow), preferred_supplier_id: "a", preferred_supplier_name: "Supplier A", decision_notes: "Saved choice" };
     await act(async () => resolveDecision(jsonResponse(saved)));
     expect(screen.getByText(/Progress guidance may be outdated/)).toBeInTheDocument();
-    expect(screen.queryByLabelText("Next action")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Next action")).toBeInTheDocument(); // Last-known guidance is retained with an outdated warning.
     // The overlapping GET can still contain a pre-save snapshot.
     await act(async () => reads[0](jsonResponse(project(workflowFixture(stage)))));
     expect(screen.getByText(/Progress guidance may be outdated/)).toBeInTheDocument();
-    expect(screen.queryByLabelText("Next action")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Next action")).toBeInTheDocument(); // Last-known guidance is retained with an outdated warning.
     expect(reads).toHaveLength(2);
     await act(async () => reads[1](jsonResponse(saved)));
     expect(screen.getByText(`Current stage: ${stage === "BRIEF" ? "Brief" : "Decision"}`)).toBeInTheDocument();
     expect(within(screen.getByLabelText("Next action")).getByRole("link")).toHaveAttribute("href", stage === "BRIEF" ? "#brief-analyze" : "#decision-choice");
     expect(screen.queryByText(/Progress guidance may be outdated/)).not.toBeInTheDocument();
-    expect(screen.getByText("Preferred supplier: Supplier A")).toBeInTheDocument();
+    expect(screen.getByText("Supplier A", { selector: ".project-context strong" })).toBeInTheDocument();
     expect(screen.getByLabelText("Decision notes")).toHaveValue("Saved choice");
   });
 
@@ -398,17 +412,19 @@ describe("M5-U2 workflow integration", () => {
       return ordinary(path, init);
     });
     render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Decision");
     await screen.findByRole("option", { name: "Supplier A" });
     if (operation !== "clear") fireEvent.change(screen.getByLabelText("Preferred supplier"), { target: { value: "a" } });
     fireEvent.change(screen.getByLabelText("Decision notes"), { target: { value: "Saved choice" } });
     fireEvent.click(screen.getByRole("button", { name: operation === "clear" ? "Clear preferred supplier" : "Mark as Preferred Supplier" }));
+    if (operation !== "clear") fireEvent.click(screen.getByRole("button", { name: "Save preferred supplier" }));
     fireEvent(window, new Event("focus"));
     await act(async () => reads[0](jsonResponse(initial)));
     expect(screen.getByLabelText("Next action")).toBeInTheDocument();
     await act(async () => resolveDecision(jsonResponse(saved)));
     expect(screen.getByText(/Progress guidance may be outdated/)).toBeInTheDocument();
-    expect(screen.queryByLabelText("Next action")).not.toBeInTheDocument();
-    expect(screen.getByText(`Preferred supplier: ${saved.preferred_supplier_name ?? "No Decision Yet"}`)).toBeInTheDocument();
+    expect(screen.getByLabelText("Next action")).toBeInTheDocument(); // Last-known guidance is retained with an outdated warning.
+    expect(screen.getByText(saved.preferred_supplier_name ?? "No Decision Yet", { selector: ".project-context strong" })).toBeInTheDocument();
     expect(screen.getByLabelText("Decision notes")).toHaveValue("Saved choice");
     expect(reads).toHaveLength(2);
     await act(async () => reads[1](jsonResponse(saved)));
@@ -434,6 +450,7 @@ describe("M5-U2 workflow integration", () => {
     render(<ProjectWorkspace projectId="p" />);
     await screen.findByRole("heading", { name: "Lamps" });
     if (order === "read-first") fireEvent(window, new Event("focus"));
+    fireEvent.click(screen.getByText("Rename project", { selector: "summary" }));
     fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "Renamed lamps" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     if (order === "rename-first") fireEvent(window, new Event("focus"));
@@ -442,7 +459,7 @@ describe("M5-U2 workflow integration", () => {
     expect(screen.getByRole("button", { name: /^Saving/ })).toBeDisabled();
     await act(async () => resolveRename(jsonResponse({ ...project(summary), name: "Renamed lamps" })));
     expect(screen.getByRole("heading", { name: "Renamed lamps" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save name" })).toBeEnabled();
+    expect(screen.getByLabelText("Rename project")).toBeEnabled();
   });
 
   it.each(["rename-first", "refresh-first"] as const)("protects accepted same-visit names with %s completion", async (order) => {
@@ -460,6 +477,7 @@ describe("M5-U2 workflow integration", () => {
     render(<ProjectWorkspace projectId="p" />);
     await screen.findByRole("heading", { name: "Lamps" });
     if (order === "rename-first") fireEvent(window, new Event("focus"));
+    fireEvent.click(screen.getByText("Rename project", { selector: "summary" }));
     fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "Renamed lamps" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     if (order === "refresh-first") fireEvent(window, new Event("focus"));
@@ -475,7 +493,7 @@ describe("M5-U2 workflow integration", () => {
       await act(async () => resolveRename(rename));
     }
     expect(screen.getByRole("heading", { name: order === "rename-first" ? "Renamed lamps" : "Newer external name" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save name" })).toBeEnabled();
+    expect(screen.getByLabelText("Rename project")).toBeEnabled();
     // A read started after the accepted name data is legitimate and must still apply.
     fireEvent(window, new Event("focus"));
     await act(async () => reads[1](jsonResponse({ ...project(summary), name: "Latest refreshed name" })));
@@ -499,6 +517,9 @@ describe("M5-U2 workflow integration", () => {
       return ordinary(path, init);
     });
     const { rerender } = render(<ProjectWorkspace projectId="p" />);
+    await viewStage("Brief");
+    fireEvent.click(await screen.findByRole("button", { name: "Edit Brief" }));
+    fireEvent.change(await screen.findByLabelText("Product name"), { target: { value: "Pending Brief" } });
     fireEvent.click(await screen.findByRole("button", { name: "Save Brief" }));
     rerender(<ProjectWorkspace projectId="b" />);
     if (read === "focus") {
@@ -526,12 +547,14 @@ describe("M5-U2 workflow integration", () => {
     });
     const { rerender } = render(<ProjectWorkspace projectId="p" />);
     await screen.findByRole("heading", { name: "Lamps" });
+    fireEvent.click(screen.getByText("Rename project", { selector: "summary" }));
     fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "Old A" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     rerender(<ProjectWorkspace projectId="b" />);
     await screen.findByRole("heading", { name: "Project B" });
     rerender(<ProjectWorkspace projectId="p" />);
     await screen.findByRole("heading", { name: "Reloaded A" });
+    fireEvent.click(screen.getByText("Rename project", { selector: "summary" }));
     fireEvent.change(screen.getByLabelText("Rename project"), { target: { value: "New A" } });
     fireEvent.click(screen.getByRole("button", { name: "Save name" }));
     await act(async () => renames[0](outcome === "success"
@@ -543,7 +566,7 @@ describe("M5-U2 workflow integration", () => {
     expect(renames).toHaveLength(2);
     await act(async () => renames[1](jsonResponse({ ...project(workflowFixture("QUOTES")), name: "New A" })));
     expect(screen.getByRole("heading", { name: "New A" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Save name" })).toBeEnabled();
+    expect(screen.getByLabelText("Rename project")).toBeEnabled();
   });
 
 });

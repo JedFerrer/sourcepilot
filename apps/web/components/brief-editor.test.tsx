@@ -1,7 +1,8 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BriefEditor } from "./brief-editor";
 import { jsonResponse } from "../test/api-responses";
+import userEvent from "@testing-library/user-event";
 
 const emptyBrief = {
   product_name: null, category: null, quantity: null, destination: null,
@@ -19,10 +20,119 @@ const readyBrief = {
 };
 
 describe("BriefEditor", () => {
+  it("focuses server errors and links to retained fields, including a collapsed attribute", async () => {
+    const user = userEvent.setup();
+    const saved = { ...readyBrief, requirements: [{ id: "attribute-1", kind: "INFORMATIONAL", importance: "INFORMATIONAL", expected_value: { subject: "OTHER_CONTEXT", text: "Original context" }, notes: null }] };
+    vi.stubGlobal("fetch", vi.fn((_: string, init?: RequestInit) => Promise.resolve(init?.method === "PATCH" ? jsonResponse({ error: { code: "VALIDATION_ERROR", message: "Invalid", fields: [
+      { field: "body.quantity", message: "Quantity is too large" },
+      { field: "body.requirements.0.expected_value.text", message: "Context is too long" },
+    ] } }, 422) : jsonResponse(saved))));
+    render(<BriefEditor projectId="p" />);
+    const quantity = await screen.findByLabelText("Requested quantity");
+    fireEvent.change(quantity, { target: { value: "2147483648" } });
+    await user.click(screen.getByRole("button", { name: "Save Brief" }));
+    const summary = await screen.findByRole("alert");
+    expect(summary).toHaveFocus();
+    expect(quantity).toHaveAttribute("aria-invalid", "true");
+    expect(quantity).toHaveAccessibleDescription("Requested quantity: Quantity is too large");
+    const link = within(summary).getByRole("link", { name: /Context is too long/ });
+    link.focus(); await user.keyboard("{Enter}");
+    const context = screen.getByLabelText("Context");
+    expect(context.closest("details")).toHaveAttribute("open");
+    expect(context).toHaveFocus();
+    expect(context).toHaveAttribute("aria-invalid", "true");
+    expect(context).toHaveAccessibleDescription(/Context is too long/);
+    expect(context).toHaveValue("Original context");
+    expect(quantity).toHaveValue(2147483648);
+  });
+
+  it("links a requirement-level server error to its value and does not steal focus after leaving the stage", async () => {
+    let finish!: (value: Response) => void;
+    vi.stubGlobal("fetch", vi.fn((_: string, init?: RequestInit) => init?.method === "PATCH" ? new Promise<Response>(resolve => { finish = resolve; }) : Promise.resolve(jsonResponse(emptyBrief))));
+    const view = render(<div><button>Other stage</button><div data-testid="stage"><BriefEditor projectId="p" /></div></div>);
+    fireEvent.click(await screen.findByRole("button", { name: "Add requirement" }));
+    fireEvent.change(screen.getByLabelText("Value"), { target: { value: "   " } });
+    fireEvent.click(screen.getByRole("button", { name: "Save Brief" }));
+    screen.getByTestId("stage").hidden = true;
+    screen.getByRole("button", { name: "Other stage" }).focus();
+    await act(async () => { finish(jsonResponse({ error: { code: "VALIDATION_ERROR", message: "Invalid", fields: [{ field: "body.requirements.0", message: "Value error, value must not be blank" }] } }, 422)); });
+    expect(screen.getByRole("button", { name: "Other stage" })).toHaveFocus();
+    screen.getByTestId("stage").hidden = false;
+    fireEvent.click(screen.getByRole("link", { name: "Requirement 1: value must not be blank" }));
+    expect(screen.getByLabelText("Value")).toHaveFocus();
+    expect(screen.getByLabelText("Value")).toHaveValue("   ");
+    view.unmount();
+  });
+  it.each(["2000", ""])("retains post-submission answer %s after its question disappears without replay", async (later) => {
+    let finish!: (value: Response) => void;
+    const saved = { ...readyBrief, quantity: null, status: "IN_PROGRESS", missing_fields: [{ field_key: "quantity", reason: "Quantity needed" }] };
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "PATCH") return new Promise<Response>((resolve) => { finish = resolve; });
+      return Promise.resolve(jsonResponse(path.endsWith("/clarifications") ? { brief_revision: 1, questions: [{ field_key: "quantity", question: "How many?", reason: "Needed" }] } : saved));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<BriefEditor projectId="project-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Get clarification questions" }));
+    fireEvent.change(await screen.findByLabelText("How many?"), { target: { value: "1000" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save answers" }));
+    fireEvent.change(screen.getByLabelText("How many?"), { target: { value: later } });
+    await act(async () => { finish(jsonResponse({ ...readyBrief, quantity: 1000, brief_revision: 2 })); });
+    expect(screen.queryByLabelText("How many?")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Requested quantity")).toHaveValue(1000);
+    const recovery = screen.getByRole("region", { name: "Unsaved clarification answers" });
+    expect(within(recovery).getByText(later || "Empty answer (cleared)")).toBeInTheDocument();
+    expect(screen.getAllByText("Unsaved changes").length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: "Review saved Brief" })).toBeDisabled();
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
+    fireEvent.click(within(recovery).getByRole("button", { name: /Discard retained answer/ }));
+    expect(screen.getByRole("button", { name: "Review saved Brief" })).toBeEnabled();
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
+  });
+
+  it("retains delivery type with later answer edits and preserves edits on failed saves", async () => {
+    let finish!: (value: Response) => void;
+    const saved = { ...readyBrief, delivery_target: null, status: "IN_PROGRESS", missing_fields: [{ field_key: "delivery_target", reason: "Delivery needed" }] };
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "PATCH") return new Promise<Response>((resolve) => { finish = resolve; });
+      return Promise.resolve(jsonResponse(path.endsWith("/clarifications") ? { brief_revision: 1, questions: [{ field_key: "delivery_target", question: "When?", reason: "Needed" }] } : saved));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<BriefEditor projectId="project-1" />);
+    fireEvent.click(await screen.findByRole("button", { name: "Get clarification questions" }));
+    fireEvent.change(await screen.findByLabelText("Delivery answer"), { target: { value: "2027-01-01" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save answers" }));
+    fireEvent.change(screen.getByLabelText("Delivery answer type"), { target: { value: "PERIOD" } });
+    fireEvent.change(screen.getByLabelText("Delivery answer"), { target: { value: "Spring 2027" } });
+    await act(async () => { finish(jsonResponse({ error: { code: "UNAVAILABLE", message: "Try later" } }, 503)); });
+    expect(screen.getByLabelText("Delivery answer")).toHaveValue("Spring 2027");
+    expect(screen.getByLabelText("Delivery answer type")).toHaveValue("PERIOD");
+    fireEvent.click(screen.getByRole("button", { name: "Save answers" }));
+    fireEvent.change(screen.getByLabelText("Delivery answer"), { target: { value: "Summer 2027" } });
+    await act(async () => { finish(jsonResponse({ ...readyBrief, delivery_target: { kind: "PERIOD", label: "Spring 2027" }, brief_revision: 2 })); });
+    const recovery = screen.getByRole("region", { name: "Unsaved clarification answers" });
+    expect(recovery).toHaveTextContent("Period");
+    expect(recovery).toHaveTextContent("Summer 2027");
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(2);
+  });
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+  });
+
+  it("opens a saved-value review without approving and returns to the retained editor", async () => {
+    const fetchMock = vi.fn(() => Promise.resolve(jsonResponse({ ...readyBrief, uncertainties: ["Check delivery timing."] })));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<BriefEditor projectId="project-1" originalRequest="Source lamps for Manila." />);
+    fireEvent.click(await screen.findByRole("button", { name: "Review saved Brief" }));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog).toHaveTextContent("January 1, 2027");
+    expect(dialog).toHaveTextContent("Check delivery timing.");
+    expect(dialog).not.toHaveTextContent("kind: DATE");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Continue editing" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Product name")).toHaveValue("Desk lamp");
   });
 
   it("requires saved edits before approval and refreshes the project after success", async () => {
@@ -34,12 +144,13 @@ describe("BriefEditor", () => {
     ));
     vi.stubGlobal("fetch", fetchMock);
     render(<BriefEditor projectId="project-1" onProjectChange={onProjectChange} />);
-    const approve = await screen.findByRole("button", { name: "Approve Brief" });
+    const review = await screen.findByRole("button", { name: "Review saved Brief" });
     fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "200" } });
-    expect(approve).toBeDisabled();
+    expect(review).toBeDisabled();
     expect(screen.getByText("Save your Brief edits before approving.")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Requested quantity"), { target: { value: "100" } });
-    fireEvent.click(approve);
+    fireEvent.click(review);
+    fireEvent.click(screen.getByRole("button", { name: "Approve Brief" }));
     await waitFor(() => expect(screen.getByText("Readiness: Approved")).toBeInTheDocument());
     expect(fetchMock).toHaveBeenCalledWith("/api/projects/project-1/brief/approve", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -56,7 +167,8 @@ describe("BriefEditor", () => {
         : jsonResponse(readyBrief),
     )));
     render(<BriefEditor projectId="project-1" />);
-    fireEvent.click(await screen.findByRole("button", { name: "Approve Brief" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Review saved Brief" }));
+    fireEvent.click(screen.getByRole("button", { name: "Approve Brief" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("This Brief changed.");
     expect(screen.getByLabelText("Product name")).toHaveValue("Desk lamp");
     expect(screen.getByRole("button", { name: "Reload Brief" })).toBeInTheDocument();
@@ -80,24 +192,29 @@ describe("BriefEditor", () => {
     vi.stubGlobal("fetch", fetchMock);
     render(<BriefEditor projectId="project-1" />);
 
-    const approve = await screen.findByRole("button", { name: "Approve Brief" });
+    fireEvent.click(await screen.findByRole("button", { name: "Review saved Brief" }));
+    const approve = screen.getByRole("button", { name: "Approve Brief" });
+    fireEvent.click(approve);
+    expect(await screen.findByRole("alert")).toHaveTextContent("Saved Brief changed. Review the latest saved values before approving again.");
+    expect(approvals).toBe(0);
+    await waitFor(() => expect(screen.getByLabelText("Requested quantity")).toHaveValue(220));
     fireEvent.click(approve);
     expect(await screen.findByRole("alert")).toHaveTextContent("This Brief changed. Reload it before approving.");
     expect(approve).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "Reload Brief" }));
     await waitFor(() => expect(screen.getByLabelText("Requested quantity")).toHaveValue(220));
-    expect(screen.getByRole("region", { name: "Brief approval review" })).toHaveTextContent("220");
+    expect(screen.getByRole("dialog", { name: "Review saved Brief before approval" })).toHaveTextContent("220");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Reload Brief" })).not.toBeInTheDocument();
     expect(approve).toBeEnabled();
-    expect(reads).toBe(2);
+    expect(reads).toBe(4);
 
     fireEvent.click(approve);
     await waitFor(() => expect(screen.getByText("Readiness: Approved")).toBeInTheDocument());
     expect(approvals).toBe(2);
     const approvalCalls = fetchMock.mock.calls.filter(([path, init]) => path.endsWith("/approve") && init?.method === "POST");
-    expect(JSON.parse(String(approvalCalls[0][1]?.body))).toEqual({ expected_brief_revision: 1 });
+    expect(JSON.parse(String(approvalCalls[0][1]?.body))).toEqual({ expected_brief_revision: 2 });
     expect(JSON.parse(String(approvalCalls[1][1]?.body))).toEqual({ expected_brief_revision: 2 });
   });
 
@@ -162,7 +279,7 @@ describe("BriefEditor", () => {
     const fetchMock = vi.fn().mockResolvedValue(jsonResponse(saved));
     vi.stubGlobal("fetch", fetchMock);
     const first = render(<BriefEditor projectId="project-1" />);
-    expect(await screen.findByText("Informational attributes")).toBeInTheDocument();
+    expect(await screen.findByText(/Additional context/, { selector: "summary" })).toBeInTheDocument();
     expect(screen.getByDisplayValue("cotton")).toBeInTheDocument();
     expect(screen.getByDisplayValue("blue")).toBeInTheDocument();
     first.unmount();
@@ -231,7 +348,7 @@ describe("BriefEditor", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Get clarification questions" }));
     fireEvent.change(await screen.findByLabelText("How many totes do you need?"), { target: { value: "1000" } });
     fireEvent.click(screen.getByRole("button", { name: "Save answers" }));
-    await waitFor(() => expect(screen.getByText("No required information is missing.")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText("Readiness: Ready for review")).toBeInTheDocument());
     const saveCall = fetchMock.mock.calls.find(([, init]) => init?.method === "PATCH");
     const body = JSON.parse(String(saveCall?.[1]?.body));
     expect(body).toMatchObject({ quantity: 1000, expected_brief_revision: 1, product_name: "Tote", destination: "Sydney" });
@@ -273,7 +390,7 @@ describe("BriefEditor", () => {
     expect(JSON.parse(String(patches[1][1]?.body))).toMatchObject({
       expected_brief_revision: 2, product_name: "Updated tote", quantity: 500, destination: "Sydney",
     });
-    expect(await screen.findByText("No required information is missing.")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Missing information" })).not.toBeInTheDocument());
   });
 
   it("drops an answer for a field resolved by another edit before retrying remaining answers", async () => {
@@ -326,7 +443,7 @@ describe("BriefEditor", () => {
     expect(JSON.parse(String(patches[1][1]?.body))).toMatchObject({
       expected_brief_revision: 2, destination: "Melbourne", quantity: 1000,
     });
-    expect(await screen.findByText("No required information is missing.")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("region", { name: "Missing information" })).not.toBeInTheDocument());
   });
 
   it("removes the retry when another edit resolves the only pending answer", async () => {
@@ -352,7 +469,7 @@ describe("BriefEditor", () => {
     await waitFor(() => expect(screen.getByLabelText("Destination")).toHaveValue("Melbourne"));
     expect(screen.queryByRole("form", { name: "Clarification questions" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Save answers" })).not.toBeInTheDocument();
-    expect(screen.getByText("No required information is missing.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Missing information" })).not.toBeInTheDocument();
     expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
   });
 

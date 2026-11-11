@@ -1,9 +1,10 @@
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QuoteReview } from "./quote-review";
 import { ComparisonReview } from "./comparison-review";
 import { jsonResponse } from "../test/api-responses";
+import userEvent from "@testing-library/user-event";
 
 const supplier = { id: "supplier-1", name: "Fictional Bags", shortlisted: true, dismissed: false };
 
@@ -16,7 +17,269 @@ function QuoteComparisonHarness() {
 }
 
 describe("QuoteReview", () => {
+  it("uses the quote editor fallback when its heading is unavailable and leaves later focus alone", async () => {
+    const { quote, reads, view, setListedQuote } = await uncertainRecovery();
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    await act(async () => { reads[0].resolve(jsonResponse(quote)); });
+    const heading = screen.getByRole("heading", { name: supplier.name });
+    heading.hidden = true;
+    fireEvent.click(screen.getByRole("button", { name: "Use saved record" }));
+    expect(screen.getByRole("article", { name: `${supplier.name} quote editor` })).toHaveFocus();
+    const notes = screen.getByLabelText("Quote notes"); notes.focus();
+    setListedQuote({ ...quote, notes: "Background saved record" });
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={1} />);
+    await waitFor(() => expect(notes).toHaveValue("Background saved record"));
+    expect(notes).toHaveFocus();
+  });
+  it.each(["saved", "keep"])("returns keyboard focus and announces the %s recovery choice without another write", async (choice) => {
+    const user = userEvent.setup();
+    const { quote, reads, fetchMock } = await uncertainRecovery();
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    await act(async () => { reads[0].resolve(jsonResponse(quote)); });
+    const button = screen.getByRole("button", { name: choice === "saved" ? "Use saved record" : /I reviewed both records/ });
+    button.focus(); await user.keyboard("{Enter}");
+    const heading = screen.getByRole("heading", { name: supplier.name });
+    expect(heading).toHaveFocus();
+    expect(screen.getByRole("status", { name: "Quote recovery" })).toHaveTextContent(choice === "saved" ? "Saved record loaded" : "Your edits are retained");
+    expect(screen.getByLabelText("Quote notes")).toHaveValue(choice === "saved" ? quote.notes : "Retained edits");
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
+  });
+  async function uncertainRecovery() {
+    const quote = { id: "q", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW", revision: 1, notes: "Original", values: {} };
+    let listedQuote = quote;
+    const reads: { resolve: (value: Response) => void; reject: (error: Error) => void }[] = [];
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "PATCH") return Promise.reject(new TypeError("Disconnected"));
+      if (path === "/api/quotes/q") return new Promise<Response>((resolve, reject) => reads.push({ resolve, reject }));
+      return Promise.resolve(jsonResponse(path.endsWith("/suppliers") ? { suppliers: [supplier] } : [listedQuote]));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const onQuoteChange = vi.fn();
+    const view = render(<QuoteReview projectId="project-1" active refreshKey={0} onQuoteChange={onQuoteChange} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Edit draft" }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Retained edits" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Save draft" }).closest("form")!);
+    await screen.findByRole("button", { name: "Check saved quote" });
+    return { quote, reads, fetchMock, onQuoteChange, view, setListedQuote: (value: typeof quote) => { listedQuote = value; } };
+  }
+
+  it.each(["saved", "keep"])("ignores an older recovery success after accepting the newer record with %s", async (choice) => {
+    const { quote, reads, fetchMock } = await uncertainRecovery();
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    await act(async () => { reads[1].resolve(jsonResponse({ ...quote, revision: 2, notes: "New saved notes" })); });
+    fireEvent.click(screen.getByRole("button", { name: choice === "saved" ? "Use saved record" : /I reviewed both records/ }));
+    await act(async () => { reads[0].resolve(jsonResponse(quote)); });
+    expect(screen.getByLabelText("Quote notes")).toHaveValue(choice === "saved" ? "New saved notes" : "Retained edits");
+    expect(screen.queryByRole("region", { name: "Review changes saved elsewhere" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Check saved quote" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+    // Discarding after keeping edits must still use the newer saved baseline.
+    if (choice === "keep") {
+      fireEvent.click(screen.getByRole("button", { name: "Discard unsaved quote edits" }));
+      fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
+      expect(screen.getByLabelText("Quote notes")).toHaveValue("New saved notes");
+    }
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
+  });
+
+  it.each([
+    ["saved", "success"], ["saved", "failure"], ["keep", "success"], ["keep", "failure"],
+  ])("invalidates an outstanding recovery on %s choice before late %s", async (choice, outcome) => {
+    const { quote, reads, fetchMock } = await uncertainRecovery();
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    await act(async () => { reads[0].resolve(jsonResponse(quote)); });
+    // Start a read after a review exists: sequence ordering alone cannot protect this choice.
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    fireEvent.click(screen.getByRole("button", { name: choice === "saved" ? "Use saved record" : /I reviewed both records/ }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Edits after recovery" } });
+    await act(async () => {
+      if (outcome === "failure") reads[1].reject(new TypeError("Late failure"));
+      else reads[1].resolve(jsonResponse({ ...quote, revision: 2, notes: "Late saved notes" }));
+    });
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Edits after recovery");
+    expect(screen.queryByRole("region", { name: "Review changes saved elsewhere" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/Saved quote could not be checked/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Check saved quote" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
+  });
+
+  it("keeps newer recovery failure feedback when an older read succeeds", async () => {
+    const { quote, reads } = await uncertainRecovery();
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    await act(async () => { reads[1].reject(new TypeError("Newer read failed")); });
+    await act(async () => { reads[0].resolve(jsonResponse(quote)); });
+    expect(screen.getByText(/Saved quote could not be checked/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Use saved record" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Retained edits");
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+  });
+
+  it.each(["success", "failure"])("ignores late recovery %s after a quote change, project change or unmount", async (outcome) => {
+    for (const change of ["quote", "project", "unmount"] as const) {
+      const { quote, reads, onQuoteChange, view, setListedQuote } = await uncertainRecovery();
+      fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+      if (change === "unmount") {
+        view.unmount();
+      } else {
+        setListedQuote({ ...quote, id: "replacement", notes: "Replacement quote" });
+        view.rerender(<QuoteReview projectId={change === "project" ? "project-2" : "project-1"} active refreshKey={1} onQuoteChange={onQuoteChange} />);
+        await screen.findByText("Replacement quote");
+      }
+      const calls = onQuoteChange.mock.calls.length;
+      await act(async () => {
+        if (outcome === "success") reads[0].resolve(jsonResponse({ ...quote, notes: "Obsolete quote" }));
+        else reads[0].reject(new TypeError("Late failure"));
+      });
+      expect(onQuoteChange).toHaveBeenCalledTimes(calls);
+      expect(screen.queryByText("Obsolete quote")).not.toBeInTheDocument();
+      expect(screen.queryByText(/Saved quote could not be checked/)).not.toBeInTheDocument();
+      if (change !== "unmount") expect(screen.getByText("Replacement quote")).toBeInTheDocument();
+      view.unmount();
+    }
+  });
+
+  it.each(["keep", "saved"])("reconciles unchanged reads after uncertain saves using explicit %s choice", async (choice) => {
+    const quote = { id: "q", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW", revision: 1, notes: "Original", values: {} };
+    let failRead = true;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "PATCH") return Promise.reject(new TypeError("Disconnected"));
+      if (path.endsWith("/quotes/q")) return failRead ? Promise.reject(new TypeError("Disconnected")) : Promise.resolve(jsonResponse(quote));
+      return Promise.resolve(jsonResponse(path.endsWith("/suppliers") ? { suppliers: [supplier] } : [quote]));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Edit draft" }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Retained edits" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Save draft" }).closest("form")!);
+    fireEvent.click(await screen.findByRole("button", { name: "Check saved quote" }));
+    await screen.findByText("Saved quote could not be checked. Your draft is retained; retry the read.");
+    expect(screen.queryByRole("button", { name: "Use saved record" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    failRead = false;
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    await screen.findByRole("button", { name: "Use saved record" });
+    expect(screen.getByText(/Unchanged saved values do not prove the write failed/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Retained edits");
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: choice === "keep" ? "I reviewed both records—keep my edits" : "Use saved record" }));
+    expect(screen.getByLabelText("Quote notes")).toHaveValue(choice === "keep" ? "Retained edits" : "Original");
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeEnabled();
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "PATCH")).toHaveLength(1);
+  });
+
+  it("recovers an uncertain manual creation with no saved quote without replaying creation", async () => {
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => init?.method === "POST" ? Promise.reject(new TypeError("Disconnected"))
+      : Promise.resolve(jsonResponse(path.endsWith("/suppliers") ? { suppliers: [supplier] } : [])));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Enter manually" }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "New quote draft" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Create manual quote" }).closest("form")!);
+    fireEvent.click(await screen.findByRole("button", { name: "Check saved quote" }));
+    fireEvent.click(await screen.findByRole("button", { name: "I reviewed both records—keep my edits" }));
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("New quote draft");
+    expect(screen.getByRole("button", { name: "Create manual quote" })).toBeEnabled();
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
+  });
+
+  it("adopts a quote found by creation recovery so a later deliberate save updates it", async () => {
+    const quote = { id: "recovered", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW", revision: 1, notes: "Submitted", values: {} };
+    let created = false;
+    const fetchMock = vi.fn((path: string, init?: RequestInit) => {
+      if (init?.method === "POST") { created = true; return Promise.reject(new TypeError("Disconnected")); }
+      if (init?.method === "PATCH") return Promise.resolve(jsonResponse({ ...quote, notes: "Later edit" }));
+      return Promise.resolve(jsonResponse(path.endsWith("/suppliers") ? { suppliers: [supplier] } : created ? [quote] : []));
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Enter manually" }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Submitted" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Create manual quote" }).closest("form")!);
+    await screen.findByRole("button", { name: "Check saved quote" });
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Later edit" } });
+    fireEvent.click(screen.getByRole("button", { name: "Check saved quote" }));
+    fireEvent.click(await screen.findByRole("button", { name: "I reviewed both records—keep my edits" }));
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Later edit");
+    fireEvent.submit(screen.getByRole("button", { name: "Save draft" }).closest("form")!);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/quotes/recovered", expect.objectContaining({ method: "PATCH" })));
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === "POST")).toHaveLength(1);
+  });
+
+  it("names material issues in collapsed saved and editing groups without treating omissions as blockers", async () => {
+    const quote = { id: "q", supplier_id: supplier.id, entry_type: "PDF", status: "NEEDS_REVIEW", revision: 1, notes: null, values: {
+      certifications: { current_value: null, ai_extracted_value: null, current_origin: "AI_EXTRACTED", review_state: "CONFLICT" },
+      payment_terms: { current_value: "Deposit", ai_extracted_value: "Deposit", current_origin: "AI_EXTRACTED", uncertainty: "Deposit percentage unclear" },
+      warranty: { current_value: null, ai_extracted_value: null, current_origin: "AI_EXTRACTED", review_state: "UNKNOWN" },
+    } };
+    const fetchMock = vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/suppliers") ? { suppliers: [supplier] } : [quote])));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    await screen.findByRole("button", { name: "Edit PDF draft" });
+    for (const edit of [false, true]) {
+      if (edit) fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
+      const summaries = [...document.querySelectorAll("summary")].filter((item) => !item.closest("[hidden]"));
+      const compliance = summaries.find((item) => item.textContent === "Compliance · Certifications: Conflict")!;
+      const terms = summaries.find((item) => item.textContent === "Terms · Payment terms: Uncertainty")!;
+      expect(compliance).toBeVisible();
+      expect(compliance.closest("details")).not.toHaveAttribute("open");
+      expect(terms).toBeVisible();
+      expect(terms.closest("details")).not.toHaveAttribute("open");
+      expect(terms).not.toHaveTextContent("Warranty");
+    }
+    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    fireEvent.click(screen.getByRole("button", { name: "Review for confirmation" }));
+    expect(screen.getByRole("button", { name: "Confirm Quote" })).toBeEnabled();
+    expect(fetchMock.mock.calls.every(([path]) => path.endsWith("/suppliers") || path.endsWith("/quotes"))).toBe(true);
+  });
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
+
+  it("hides removed suppliers while preserving drafts and saved quotes for restoration", async () => {
+    const harbor = { ...supplier, name: "Harbor" };
+    const moss = { ...supplier, id: "moss", name: "Moss" };
+    const willow = { ...supplier, id: "willow", name: "Willow" };
+    const cedar = { ...supplier, id: "cedar", name: "Cedar" };
+    let removed = false;
+    const quote = { id: "quote-harbor", supplier_id: harbor.id, entry_type: "MANUAL", status: "NEEDS_REVIEW", revision: 1, confirmed_at: null, notes: "Saved notes", values: {} };
+    const fetchMock = vi.fn((path: string) => Promise.resolve(jsonResponse(path.endsWith("/suppliers")
+      ? { suppliers: removed ? [cedar, moss, willow, { ...harbor, shortlisted: false }] : [harbor, moss, willow] }
+      : [quote])));
+    vi.stubGlobal("fetch", fetchMock);
+    const view = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Edit draft" }));
+    fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Keep this unsaved note" } });
+    removed = true;
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={1} />);
+    const activeChoices = screen.getByRole("group", { name: "Choose a quote supplier" });
+    await waitFor(() => expect(within(activeChoices).getAllByRole("button")).toHaveLength(3));
+    expect(within(activeChoices).queryByRole("button", { name: /Harbor/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Harbor/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Harbor" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cedar/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Keep this unsaved note");
+    expect(screen.getByLabelText("Quote notes")).not.toBeVisible();
+    removed = false;
+    view.rerender(<QuoteReview projectId="project-1" active refreshKey={2} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Harbor/ }));
+    expect(screen.getByLabelText("Quote notes")).toBeVisible();
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Keep this unsaved note");
+    view.unmount();
+    removed = true;
+    const reopened = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    await screen.findByRole("button", { name: /Cedar/ });
+    expect(screen.queryByRole("button", { name: /Harbor/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Harbor" })).not.toBeInTheDocument();
+    removed = false;
+    reopened.rerender(<QuoteReview projectId="project-1" active refreshKey={1} />);
+    fireEvent.click(await screen.findByRole("button", { name: /Harbor/ }));
+    expect(screen.getByText("Notes: Saved notes")).toBeVisible();
+    expect(within(screen.getByRole("group", { name: "Choose a quote supplier" })).getAllByRole("button")).toHaveLength(3);
+    expect(fetchMock.mock.calls.every(([path]) => path.endsWith("/suppliers") || path.endsWith("/quotes"))).toBe(true);
+  });
 
   it.each(["FAILED", "STALE_PROCESSING", "NEEDS_REVIEW"])("recovers failed status reads with GET only into %s, preserving another draft", async (status) => {
     vi.useFakeTimers();
@@ -34,7 +297,10 @@ describe("QuoteReview", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
     await act(async () => { render(<QuoteReview projectId="project-1" active refreshKey={0} />); });
+    fireEvent.change(screen.getByLabelText("Quote supplier"), { target: { value: "supplier-2" } });
+    fireEvent.click(screen.getByRole("button", { name: "Enter manually" }));
     fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Unsaved other quote" } });
+    fireEvent.change(screen.getByLabelText("Quote supplier"), { target: { value: supplier.id } });
     await act(async () => { await vi.advanceTimersByTimeAsync(2000); });
     expect(screen.getByRole("alert")).toHaveTextContent("We couldn't check this quote's processing status");
     expect(screen.queryByRole("button", { name: "Retry processing" })).not.toBeInTheDocument();
@@ -155,6 +421,7 @@ describe("QuoteReview", () => {
     const view = render(<QuoteReview projectId="project-1" active refreshKey={0} />);
     await waitFor(() => expect(screen.queryByText("Loading quotes…")).not.toBeInTheDocument());
     if (existing) fireEvent.click(await screen.findByRole("button", { name: "Edit draft" }));
+    else fireEvent.click(await screen.findByRole("button", { name: "Enter manually" }));
     const notes = await screen.findByLabelText("Quote notes");
     fireEvent.change(notes, { target: { value: "UNSAVED FOCUS QUOTE" } });
     fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.75" } });
@@ -175,7 +442,7 @@ describe("QuoteReview", () => {
     expect(notes).toHaveValue("UNSAVED FOCUS QUOTE");
   });
 
-  it("reconciles changed server quotes, explicit cancellation, and successful saves", async () => {
+  it("preserves dirty server conflicts, requires explicit discard, and reconciles successful saves", async () => {
     let quote = { id: "quote-1", supplier_id: supplier.id, entry_type: "MANUAL", status: "NEEDS_REVIEW",
       revision: 1, confirmed_at: null, notes: "Saved notes", values: {} };
     vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
@@ -192,9 +459,13 @@ describe("QuoteReview", () => {
     // Notes-only server updates need not advance the quote value revision.
     quote = { ...quote, notes: "External saved notes" };
     view.rerender(<QuoteReview projectId="project-1" active refreshKey={1} />);
-    await waitFor(() => expect(screen.getByLabelText("Quote notes")).toHaveValue("External saved notes"));
+    await screen.findByRole("region", { name: "Review changes saved elsewhere" });
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("Unsaved notes");
+    expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Use saved record" }));
+    expect(screen.getByLabelText("Quote notes")).toHaveValue("External saved notes");
     fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Discard me" } });
-    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel editing|Discard unsaved quote edits/ }));
     fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
     expect(screen.getByLabelText("Quote notes")).toHaveValue("External saved notes");
     fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "  External saved notes  " } });
@@ -223,6 +494,7 @@ describe("QuoteReview", () => {
       }
       if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
       if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/quote-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/quote-1") && init?.method === "PATCH") return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/quote-1/confirm") && init?.method === "POST") return Promise.resolve(jsonResponse(quote));
       throw new Error(`Unexpected request: ${path}`);
@@ -280,6 +552,7 @@ describe("QuoteReview", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Upload PDF" }));
     const upload = await screen.findByLabelText("Upload PDF quote");
     fireEvent.change(upload, { target: { files: [new File(["%PDF-"], "quote.pdf", { type: "application/pdf" })] } });
     expect(await screen.findByText("Processing PDF quote…")).toBeInTheDocument();
@@ -320,6 +593,7 @@ describe("QuoteReview", () => {
     vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
       if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
       if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/pdf-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/pdf-1") && init?.method === "PATCH") {
         patches.push(JSON.parse(String(init.body)) as Record<string, unknown>);
         quote = { ...quote, values: {
@@ -332,9 +606,11 @@ describe("QuoteReview", () => {
       throw new Error(`Unexpected request: ${path}`);
     }));
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "View source evidence for Unit price" }));
     expect(await screen.findByText("Unit price: USD 4.22")).toBeInTheDocument();
     expect(screen.getByText("AI extracted value: 4.22")).toBeInTheDocument();
     expect(screen.getByText("Associated extracted value: 4.22")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.getByText("Extraction: Unknown")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
     fireEvent.change(screen.getByLabelText("Unit price"), { target: { value: "4.50" } });
@@ -344,6 +620,7 @@ describe("QuoteReview", () => {
       values: { unit_price: "4.50", shipping_cost: "12.00" },
     }]));
     expect(await screen.findByText("Current draft value: 4.50")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "View source evidence for Unit price" }));
     expect(screen.getByText("AI extracted value: 4.22")).toBeInTheDocument();
     expect(screen.getByText("Unit price: USD 4.22")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Confirm Quote" })).not.toBeInTheDocument();
@@ -368,6 +645,7 @@ describe("QuoteReview", () => {
     vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
       if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
       if (path.endsWith("/quotes")) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/pdf-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/pdf-1") && init?.method === "PATCH") {
         patches.push(JSON.parse(String(init.body)) as Record<string, unknown>);
         return Promise.resolve(jsonResponse({ error: { code: "QUOTE_NOT_EDITABLE", message: "Save failed." } }, 409));
@@ -375,12 +653,14 @@ describe("QuoteReview", () => {
       throw new Error(`Unexpected request: ${path}`);
     }));
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "View source evidence for Production lead time" }));
     expect(await screen.findByText("Production: 25 days")).toBeInTheDocument();
     expect(screen.getByText("Production: 30-35 days")).toBeInTheDocument();
-    expect(screen.getByText("Uncertainty: Contradictory production times")).toBeInTheDocument();
+    expect(screen.getAllByText("Uncertainty: Contradictory production times").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
     fireEvent.change(screen.getByLabelText("Production lead time"), { target: { value: "25 days" } });
-    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel editing|Discard unsaved quote edits/ }));
     expect(patches).toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "Edit PDF draft" }));
     expect((screen.getByLabelText("Production lead time") as HTMLInputElement).value).toBe("");
@@ -406,10 +686,14 @@ describe("QuoteReview", () => {
       path.endsWith("/suppliers") ? jsonResponse({ suppliers: [supplier] }) : jsonResponse([quote]),
     )));
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "View source evidence for Unit price" }));
     expect(await screen.findByText("AI extracted value: 4.22")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.getByText("Extraction: Known")).toBeInTheDocument();
     expect(screen.getAllByText("Extraction: Indeterminate (source evidence unavailable)").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("AI extracted value: Indeterminate").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "View source evidence for Production lead time" }));
+    expect(screen.getByText("AI extracted value: Indeterminate")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(screen.getAllByText("Current draft value: Not set").length).toBeGreaterThan(0);
   });
 
@@ -517,6 +801,7 @@ describe("QuoteReview", () => {
         };
         return Promise.resolve(jsonResponse(quote, 201));
       }
+      if (path.endsWith("/quotes/quote-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/quote-1") && init?.method === "PATCH") {
         requests.push({ path, body });
         quote = { ...quote, values: { unit_price: {
@@ -531,6 +816,7 @@ describe("QuoteReview", () => {
       return Promise.resolve(jsonResponse({ error: { code: "NOT_FOUND", message: "Missing" } }, 404));
     }));
     render(<QuoteReview projectId="project-1" active refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Enter manually" }));
     fireEvent.click(await screen.findByRole("button", { name: "Create manual quote" }));
     expect(await screen.findByText("Status: NEEDS REVIEW")).toBeInTheDocument();
     expect(requests[0].body).toMatchObject({ supplier_id: supplier.id, values: {} });
@@ -575,6 +861,7 @@ describe("QuoteReview", () => {
     vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
       if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
       if (path.endsWith("/quotes") && !init?.method) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/quote-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/quote-1") && init?.method === "PATCH") {
         patches.push(JSON.parse(String(init.body)) as Record<string, unknown>);
         return Promise.resolve(jsonResponse(quote));
@@ -588,7 +875,7 @@ describe("QuoteReview", () => {
       fireEvent.change(screen.getByLabelText(label), { target: { value } });
     }
     fireEvent.change(screen.getByLabelText("Quote notes"), { target: { value: "Cancelled note" } });
-    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel editing|Discard unsaved quote edits/ }));
     expect(patches).toHaveLength(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
@@ -613,6 +900,7 @@ describe("QuoteReview", () => {
     vi.stubGlobal("fetch", vi.fn((path: string, init?: RequestInit) => {
       if (path.endsWith("/suppliers")) return Promise.resolve(jsonResponse({ suppliers: [supplier] }));
       if (path.endsWith("/quotes") && !init?.method) return Promise.resolve(jsonResponse([quote]));
+      if (path.endsWith("/quotes/quote-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/quote-1") && init?.method === "PATCH") {
         patches += 1;
         return Promise.resolve(jsonResponse({ error: { code: "UNAVAILABLE", message: "Save failed" } }, 503));
@@ -628,7 +916,7 @@ describe("QuoteReview", () => {
     expect(await screen.findByText("Save failed")).toBeInTheDocument();
     expect((screen.getByLabelText("Unit price") as HTMLInputElement).value).toBe("5");
     expect((screen.getByLabelText("Quote notes") as HTMLTextAreaElement).value).toBe("Unsaved");
-    fireEvent.click(screen.getByRole("button", { name: "Cancel editing" }));
+    fireEvent.click(screen.getByRole("button", { name: /Cancel editing|Discard unsaved quote edits/ }));
     fireEvent.click(screen.getByRole("button", { name: "Edit draft" }));
     expect((screen.getByLabelText("Unit price") as HTMLInputElement).value).toBe("");
     expect((screen.getByLabelText("Quote notes") as HTMLTextAreaElement).value).toBe("");
@@ -646,6 +934,7 @@ describe("QuoteReview", () => {
     expect(await screen.findByText("Quotes unavailable")).toBeInTheDocument();
     fails = false;
     fireEvent.click(screen.getByRole("button", { name: "Retry quotes" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Enter manually" }));
     expect(await screen.findByRole("button", { name: "Create manual quote" })).toBeInTheDocument();
   });
 
@@ -667,6 +956,7 @@ describe("QuoteReview", () => {
         quote = { ...quote, status: "CONFIRMED", confirmed_at: "2026-09-28T00:00:00Z" };
         return Promise.resolve(jsonResponse(quote));
       }
+      if (path.endsWith("/quotes/pdf-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (path.endsWith("/quotes/pdf-1") && init?.method === "PATCH") {
         writes.push({ path, body: JSON.parse(String(init.body)) as unknown });
         quote = { ...quote, revision: 1, values: { unit_price: {
@@ -690,6 +980,7 @@ describe("QuoteReview", () => {
       { path: "/api/quotes/pdf-1", body: { values: { unit_price: "4.50" } } },
     ]));
     expect(await screen.findByText("Current confirmed value: 4.50")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "View source evidence for Unit price" }));
     expect(screen.getByText("Unit price: USD 4.22")).toBeInTheDocument();
     await waitFor(() => expect(onQuoteChange).toHaveBeenCalledTimes(2));
   });
@@ -711,6 +1002,7 @@ describe("QuoteReview", () => {
         return quoteReads === 1 ? Promise.resolve(jsonResponse([quote]))
           : new Promise<Response>((resolve) => { finishReload = resolve; });
       }
+      if (path.endsWith("/quotes/quote-1") && !init?.method) return Promise.resolve(jsonResponse(quote));
       if (init?.method === "PATCH" || path.endsWith("/confirm")) return Promise.resolve(jsonResponse(quote));
       throw new Error(`Unexpected request: ${path}`);
     });
@@ -729,7 +1021,7 @@ describe("QuoteReview", () => {
     expect(finishReload).toBeDefined();
     await act(async () => { finishReload?.(jsonResponse({ error: { code: "SERVER_ERROR", message: "Quote list unavailable." } }, 500)); });
     expect(onQuoteChange).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("alert")).toHaveTextContent("Quote list unavailable.");
+    expect(screen.getByRole("alert")).toHaveTextContent("Saved; quotes could not refresh.");
   });
 
   it("offers only retry for stale PDF processing", async () => {
