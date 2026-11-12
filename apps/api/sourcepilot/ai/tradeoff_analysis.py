@@ -1047,7 +1047,12 @@ def run_comparison_analyst(
         except ComparisonDeadlineError:
             mark_timeout()
             raise
-        except Exception:  # noqa: BLE001 - never expose database recovery details
+        except Exception as recovery_error:
+            if getattr(getattr(recovery_error, "orig", None), "sqlstate", None) in {"57014", "55P03"}:
+                mark_timeout()
+                raise ComparisonDeadlineError(
+                    "Comparison database wait exceeded its budget.",
+                ) from recovery_error
             # Database recovery itself failed. Never query a broken transaction
             # again or expose database/exception content to the API.
             logging.getLogger(__name__).warning("Comparison transaction recovery incomplete.")
