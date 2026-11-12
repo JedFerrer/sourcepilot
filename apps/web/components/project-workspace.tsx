@@ -42,6 +42,7 @@ function ProjectWorkspaceContent({ projectId }: { projectId: string }) {
   const [renameCloseWarning, setRenameCloseWarning] = useState(false);
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [supplierRefreshKey, setSupplierRefreshKey] = useState(0);
+  const [timingRefreshKey, setTimingRefreshKey] = useState(0);
   const [decisionRefreshKey, setDecisionRefreshKey] = useState(0);
   const decisionRevision = useRef(0);
   const [comparisonRefreshKey, setComparisonRefreshKey] = useState(0);
@@ -148,6 +149,7 @@ function ProjectWorkspaceContent({ projectId }: { projectId: string }) {
   }, [projectId, renderedProjectVisit, refreshDecision, refreshSummary]);
   const handleQuoteChange = useCallback(() => {
     if (!mounted.current || renderedProjectVisit !== projectVisit.current || currentProjectId.current !== projectId) return;
+    setTimingRefreshKey((value) => value + 1);
     refreshComparison();
     void refreshSummary();
   }, [projectId, renderedProjectVisit, refreshComparison, refreshSummary]);
@@ -282,7 +284,7 @@ function ProjectWorkspaceContent({ projectId }: { projectId: string }) {
 </details>}
     stages={{
       BRIEF: <><BriefEditor key={`BriefEditor-${projectId}`} projectId={projectId} originalRequest={project.original_request} onProjectChange={refreshProject} /></>,
-      SUPPLIERS: <SupplierReview key={`SupplierReview-${projectId}`} projectId={projectId} refreshKey={supplierRefreshKey} onStageChange={refreshProject} onSuppliersChange={handleSuppliersChange} />,
+      SUPPLIERS: <SupplierReview key={`SupplierReview-${projectId}`} projectId={projectId} refreshKey={supplierRefreshKey + timingRefreshKey} onStageChange={refreshProject} onSuppliersChange={handleSuppliersChange} />,
       QUOTES: <QuoteReview key={`QuoteReview-${projectId}`} projectId={projectId} active={project.workflow?.stage_prerequisites.QUOTES === null} refreshKey={supplierRefreshKey} onQuoteChange={handleQuoteChange} />,
       COMPARISON: <ComparisonReview key={`ComparisonReview-${projectId}`} projectId={projectId} refreshKey={comparisonRefreshKey} workflow={project.workflow} onGenerated={refreshSummary} />,
       DECISION: <DecisionReview key={`DecisionReview-${projectId}`} project={project} refreshKey={decisionRefreshKey} onSaved={handleDecisionSaved} />,

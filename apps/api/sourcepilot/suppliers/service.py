@@ -42,6 +42,7 @@ from sourcepilot.suppliers.schemas import (
     SupplierListResponse,
     UpdateSupplierReviewRequest,
 )
+from sourcepilot.suppliers.timing import read_supplier_timing
 
 
 class DiscoveryNotReadyError(ValueError):
@@ -255,6 +256,10 @@ def list_project_suppliers(database_session: Session, project: Project) -> Suppl
                     evidence_ids=list(derived.evidence_ids),
                 ))
         reviewed.append(ReviewedSupplierResponse(
+            timing_disclosure=None if stale else read_supplier_timing(
+                database_session, demo_session_id=project.demo_session_id,
+                project_id=project.id, supplier_id=supplier.id,
+            ),
             **_candidate_response(supplier).model_dump(),
             shortlisted=item.shortlisted,
             dismissed=item.dismissed,

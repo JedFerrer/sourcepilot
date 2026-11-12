@@ -571,7 +571,7 @@ def test_evidence_selection_and_repair_preserve_citation_guards(
     assert "The previous result failed semantic validation." in errors[0]
     with Session(engine) as session:
         run = session.scalar(select(AIRun).order_by(AIRun.started_at.desc(), AIRun.id.desc()))
-        assert run is not None and run.prompt_version == PROMPT_VERSION == "supplier-explanation-v3"
+        assert run is not None and run.prompt_version == PROMPT_VERSION == "supplier-explanation-v4"
         assert run.status == ("COMPLETED" if repair == "fetch" else "VALIDATION_FAILED")
         assert run.validation_status == ("REPAIRED" if repair == "fetch" else "INVALID")
         assert run.model_turn_count == (4 if repair == "fetch" else

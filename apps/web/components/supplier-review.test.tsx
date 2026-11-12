@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WorkspaceDraftProvider } from "./workspace-drafts";
-import { SupplierReview } from "./supplier-review";
+import { SupplierReview, SupplierTiming, type TimingDisclosure } from "./supplier-review";
 import { jsonResponse } from "../test/api-responses";
 
 const supplier = {
@@ -410,4 +410,75 @@ describe("SupplierReview", () => {
     expect(screen.getByRole("button", { name: "Save notes" })).toBeDisabled();
   });
 
+});
+
+
+const timing: TimingDisclosure = {
+  owner: "APPLICATION", destination: "Sydney", delivery_target: {kind: "DATE", date: "2027-03-01"},
+  production: {status: "UNKNOWN", facts: []}, delivery: {status: "UNKNOWN", facts: []}, freshness_key: "timing-1",
+};
+
+describe("Application-owned supplier timing", () => {
+  afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+  it("shows uncertainty once beside the captured-style explanation without changing claims", async () => {
+    const candidate = {...supplier, general_lead_time_days: 32, timing_disclosure: timing};
+    vi.stubGlobal("fetch", vi.fn(async (path: string) => jsonResponse(path.endsWith("/explanation") ? {
+      run_id: "synthetic", timing_disclosure: timing, explanation: {
+        supplier_id: supplier.id, strengths: [{text: "Material (recycled polyester): Meets.", requirement_id: "req-1", evidence_ids: ["evidence-1"]}],
+        required_failures: [], preferred_findings: [], unknowns: [], conflicts: [], concerns: [], evidence_ids: ["evidence-1"],
+      },
+    } : {brief_revision:1, brief_approved:true, shortlist_approved:false, suppliers:[candidate]})));
+    render(<SupplierReview projectId="synthetic" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button", {name: "Explain this supplier"}));
+    expect(await screen.findByText("Material (recycled polyester): Meets.")).toBeVisible();
+    expect(screen.getByText("32 days")).toBeVisible();
+    expect(screen.getAllByRole("region", {name: "Application timing disclosure"})).toHaveLength(1);
+    expect(screen.getByText(/Requested delivery to Sydney: March 1, 2027/)).toBeVisible();
+    expect(screen.getByText(/Missing delivery evidence does not mean/)).toBeVisible();
+    expect(screen.getByText(/Evidence: Catalog record/, {selector: "span"})).toBeVisible();
+    expect(screen.queryByText("Shortlist approved. The project is ready for Quotes.")).not.toBeInTheDocument();
+  });
+  it("keeps confirmed production separate from unknown delivery", () => {
+    render(<SupplierTiming timing={{...timing,production:{status:"CONFIRMED",facts:[{value:"25 days",source_reference:"quote-value:test",supporting_evidence_ids:[],provenance_evidence_ids:[]}]}}} />);
+    expect(screen.getByText(/25 days/)).toBeVisible();
+    expect(screen.getByText("Unconfirmed for this order.")).toBeVisible();
+    expect(screen.getByText(/confirmed production time does not confirm delivery/)).toBeVisible();
+  });
+  it("renders confirmed delivery contract data without an unknown disclaimer", () => {
+    render(<SupplierTiming timing={{...timing,delivery:{status:"CONFIRMED",facts:[{value:"2027-02-20",source_reference:"synthetic-contract",supporting_evidence_ids:[],provenance_evidence_ids:[]}]}}} />);
+    expect(screen.getByText(/2027-02-20/)).toBeVisible();
+    expect(screen.queryByText(/Missing delivery evidence/)).not.toBeInTheDocument();
+  });
+  it("retains conflicting alternatives and does not choose a date", () => {
+    render(<SupplierTiming timing={{...timing,delivery:{status:"CONFLICT",facts:["2027-02-20","2027-03-20"].map(value=>({value,source_reference:"synthetic-contract",supporting_evidence_ids:[],provenance_evidence_ids:["evidence"]}))}}} />);
+    expect(screen.getByText(/Conflicting order-specific evidence/)).toBeVisible();
+    expect(screen.getByText(/2027-02-20/)).toBeVisible();
+    expect(screen.getByText(/2027-03-20/)).toBeVisible();
+    expect(screen.queryByText(/Missing delivery evidence/)).not.toBeInTheDocument();
+  });
+  it("does not invent a target date", () => {
+    render(<SupplierTiming timing={{...timing,delivery_target:null}} />);
+    expect(screen.getByText(/No delivery target recorded/)).toBeVisible();
+    expect(screen.queryByText(/March 1/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/your target/)).not.toBeInTheDocument();
+  });
+});
+
+
+it("discards explanation whose timing changed and refreshes facts without another model action", async () => {
+  const newer = {...timing, freshness_key: "timing-2"};
+  let reads = 0;
+  const mock = vi.fn(async (path: string) => {
+    if(path.endsWith("/explanation")) return jsonResponse({run_id:"synthetic",timing_disclosure:newer,explanation:{supplier_id:supplier.id,strengths:[{text:"Stale claim",requirement_id:null,evidence_ids:[]}],required_failures:[],preferred_findings:[],unknowns:[],conflicts:[],concerns:[],evidence_ids:[]}});
+    reads += 1;
+    return jsonResponse({brief_revision:1,brief_approved:true,shortlist_approved:false,suppliers:[{...supplier,timing_disclosure:reads===1?timing:newer}]});
+  });
+  vi.stubGlobal("fetch",mock);
+  try {
+    render(<SupplierReview projectId="synthetic" refreshKey={0} />);
+    fireEvent.click(await screen.findByRole("button",{name:"Explain this supplier"}));
+    await waitFor(()=>expect(reads).toBe(2));
+    expect(screen.queryByText("Stale claim")).not.toBeInTheDocument();
+    expect(mock.mock.calls.filter(([path])=>path.endsWith("/explanation"))).toHaveLength(1);
+  } finally { cleanup(); vi.unstubAllGlobals(); }
 });

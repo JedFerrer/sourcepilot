@@ -18,7 +18,36 @@ type Finding = {
   requirement_id: string; kind: string; importance: string | null;
   expected_value: Record<string, unknown>; status: string; evidence_ids: string[];
 };
+type OrderTiming = {
+  status: "UNKNOWN" | "CONFIRMED" | "CONFLICT";
+  facts: { value: string | null; source_reference: string; supporting_evidence_ids: string[]; provenance_evidence_ids: string[] }[];
+};
+export type TimingDisclosure = {
+  owner: "APPLICATION"; destination: string | null; delivery_target: Record<string, unknown> | null;
+  production: OrderTiming; delivery: OrderTiming; freshness_key: string;
+};
+
+export function SupplierTiming({ timing }: { timing: TimingDisclosure }) {
+  const target = timing.delivery_target ? displayRequirement(timing.delivery_target) : null;
+  function fact(label: string, value: OrderTiming) {
+    return <div><dt>{label}</dt><dd>
+      {value.status === "UNKNOWN" ? "Unconfirmed for this order." : value.status === "CONFLICT" ? "Conflicting order-specific evidence; review the quote." : "Confirmed for this order."}
+      {value.facts.length > 0 ? <ul>{value.facts.map((item, index) => <li key={index}>
+        {item.value ?? "Value unresolved"} <span>{item.provenance_evidence_ids.length ? "(quote provenance)" : "(confirmed quote record)"}</span>
+      </li>)}</ul> : null}
+    </dd></div>;
+  }
+  return <section className="supplier-context" aria-label="Application timing disclosure">
+    <h4>Order timing</h4>
+    <p>Application facts, separate from the AI explanation.</p>
+    <p>{target ? <>Requested delivery{timing.destination ? ` to ${timing.destination}` : ""}: {target}.</> : "No delivery target recorded; delivery compatibility is not assessed."}</p>
+    <dl>{fact("Order-specific production timing", timing.production)}{fact("Order-specific delivery timing", timing.delivery)}</dl>
+    {timing.delivery.status === "UNKNOWN" ? <p>Typical or confirmed production time does not confirm delivery.{target ? " Missing delivery evidence does not mean the supplier cannot meet your target." : null}</p> : null}
+  </section>;
+}
+
 type Supplier = {
+  timing_disclosure?: TimingDisclosure | null;
   unavailable?: boolean;
   id: string; name: string; country: string; description: string;
   capabilities: { kind: string; value: string }[];
@@ -38,7 +67,7 @@ type SupplierExplanation = {
   preferred_findings: ExplanationPoint[]; unknowns: ExplanationPoint[];
   conflicts: ExplanationPoint[]; concerns: ExplanationPoint[]; evidence_ids: string[];
 };
-type ExplanationResponse = { run_id: string; explanation: SupplierExplanation };
+type ExplanationResponse = { timing_disclosure?: TimingDisclosure | null; run_id: string; explanation: SupplierExplanation };
 
 function expectedLabel(value: Record<string, unknown>): string {
   return displayRequirement(value);
@@ -62,23 +91,29 @@ function SupplierCard({ projectId, supplier, dataVersion, onUpdate, onRefresh, b
   const [explanation, setExplanation] = useState<ExplanationResponse | null>(null);
   const [explanationError, setExplanationError] = useState<string | null>(null);
   const [explaining, setExplaining] = useState(false);
-  const latestVersion = useRef(dataVersion);
-  latestVersion.current = dataVersion;
+  const timingVersion = `${dataVersion}:${supplier.stale}:${supplier.timing_disclosure?.freshness_key ?? ""}`;
+  const latestVersion = useRef(timingVersion);
+  latestVersion.current = timingVersion;
   useDraftRegistration(`notes-${supplier.id}`, { label: `Private notes · ${supplier.name}`, stage: "SUPPLIERS", supplierId: supplier.id,
     dirty: record.dirty, pending: record.pending, uncertain: record.state.uncertain, error: noteError,
     check: checkNotes, discard: () => record.dispatch({ type: "use-saved" }),
   });
-  useEffect(() => { setExplanation(null); setExplanationError(null); }, [dataVersion]);
+  useEffect(() => { setExplanation(null); setExplanationError(null); }, [timingVersion]);
 
   async function explain() {
-    const requestedVersion = dataVersion;
+    const requestedVersion = timingVersion;
     setExplaining(true);
     setExplanationError(null);
     try {
       const result = await apiRequest<ExplanationResponse>(
         `/api/projects/${projectId}/suppliers/${supplier.id}/explanation`, { method: "POST" },
       );
-      if (requestedVersion === latestVersion.current) setExplanation(result);
+      if (requestedVersion === latestVersion.current) {
+        if (result.timing_disclosure && result.timing_disclosure.freshness_key !== supplier.timing_disclosure?.freshness_key) {
+          setExplanation(null);
+          await onRefresh();
+        } else setExplanation(result);
+      }
     } catch (failure) {
       if (requestedVersion === latestVersion.current) {
         setExplanation(null);
@@ -158,6 +193,7 @@ function SupplierCard({ projectId, supplier, dataVersion, onUpdate, onRefresh, b
         {supplier.evidence.length ? <ul>{supplier.evidence.map((item) => <li key={item.id}><strong>{item.source_label}</strong> ({item.evidence_state}): {item.evidence_text}{item.source_reference ? <> · {item.source_reference}</> : null}</li>)}</ul> : <p>No supporting evidence is available.</p>}
       </details>
       <details><summary>Supporting capabilities</summary><p>{supplier.capabilities.length ? supplier.capabilities.map((item) => `${humanLabel(item.kind)}: ${item.value}`).join("; ") : "Unknown"}</p></details>
+      {!supplier.stale && supplier.timing_disclosure ? <SupplierTiming timing={explanation?.timing_disclosure ?? supplier.timing_disclosure} /> : null}
       {!supplier.stale ? <div className="supplier-explanation">
         <button className="quiet-action" type="button" disabled={busy || explaining} onClick={() => void explain()}>
           {explaining ? "Explaining…" : explanation ? "Generate explanation again" : "Explain this supplier"}
@@ -369,6 +405,7 @@ export function SupplierReview({ projectId, refreshKey, onStageChange, onSupplie
               <div><dt>Typical lead time</dt><dd>{item.general_lead_time_days === null ? "Unknown" : `${item.general_lead_time_days} days`}</dd></div>
               <div><dt>Indicative unit price</dt><dd>{item.indicative_price_amount === null ? "Unknown" : `${item.indicative_price_currency ?? "Currency unknown"} ${Number(item.indicative_price_amount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`}</dd></div>
             </dl>
+            {!item.stale && item.timing_disclosure ? <SupplierTiming timing={item.timing_disclosure} /> : null}
             {item.stale ? <p className="supplier-concern">Evaluations are stale. Re-discover and re-evaluate before approval.</p> : <>
               <ul className="shortlist-findings">{item.evaluations.map((finding) => <li key={finding.requirement_id}>
                 <div><span className="finding-name">{requirementLabel(finding.kind, finding.expected_value)} <span className="shortlist-importance">· {humanLabel(finding.importance ?? "Importance not set")}</span></span><span className="finding-expected">{expectedLabel(finding.expected_value)}</span></div>

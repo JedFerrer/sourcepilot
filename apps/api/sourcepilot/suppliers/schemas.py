@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
+from sourcepilot.suppliers.timing import TimingDisclosure
+
 
 class CandidateCapabilityResponse(BaseModel):
     kind: str
@@ -60,6 +62,7 @@ class InformationalRequirementResponse(BaseModel):
 
 
 class ReviewedSupplierResponse(SupplierCandidateResponse):
+    timing_disclosure: TimingDisclosure | None = None
     shortlisted: bool
     dismissed: bool
     notes: str | None

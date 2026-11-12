@@ -29,6 +29,7 @@ from sourcepilot.persistence.models import (
     SupplierEvidence,
 )
 from sourcepilot.quotes.domain import QuoteEntryType, QuoteStatus, QuoteValueOrigin
+from sourcepilot.suppliers.timing import TimingDisclosure, TimingScopeError, read_supplier_timing
 
 DEFAULT_MAX_TOOL_CALLS = 6
 
@@ -123,6 +124,7 @@ class SupplierRequirementFinding(BaseModel):
 
 
 class SupplierSnapshot(BaseModel):
+    timing_disclosure: TimingDisclosure | None = None
     supplier_id: UUID
     name: str
     country: str
@@ -396,6 +398,10 @@ def get_supplier_snapshot(
                     for record in evaluations if record.requirement_id in requirements
                 ]
             result = SupplierSnapshot(
+                timing_disclosure=read_supplier_timing(
+                    session, demo_session_id=runtime.context.demo_session_id,
+                    project_id=runtime.context.project_id, supplier_id=supplier_id,
+                ),
                 supplier_id=supplier_id,
                 name=supplier.name,
                 country=supplier.country,
@@ -421,6 +427,9 @@ def get_supplier_snapshot(
                 current_brief_revision=brief_revision,
                 evaluations=findings,
             )
+    except TimingScopeError as error:
+        runtime.record(tool_name, supplier_id, None, ToolErrorCode.NOT_ALLOWED.value)
+        raise ToolError(ToolErrorCode.NOT_ALLOWED) from error
     except ToolError as error:
         runtime.record(tool_name, supplier_id, None, error.code.value)
         raise
