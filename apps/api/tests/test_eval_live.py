@@ -496,9 +496,9 @@ def test_structured_post_validate_value_error_exits_two(
         def broken_post_validate(_output: Any) -> None:
             raise ValueError("injected internal callback failure")
 
-        return run_structured_operation(
-            *args, **kwargs, post_validate=broken_post_validate
-        )
+        # Brief extraction now supplies its own callback; replace it for this fault probe.
+        kwargs["post_validate"] = broken_post_validate
+        return run_structured_operation(*args, **kwargs)
 
     monkeypatch.setattr(brief_interpreter, "run_structured_operation", with_fault)
     actual, run = eval_live.run_case(

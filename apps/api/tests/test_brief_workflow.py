@@ -102,14 +102,126 @@ def client(engine: Engine) -> Iterator[TestClient]:
     app.dependency_overrides.clear()
 
 
-def create_project(client: TestClient) -> str:
+def create_project(
+    client: TestClient, original_request: str = "Source recycled cosmetic bags.",
+) -> str:
     assert client.post("/demo-session").status_code == 204
     response = client.post(
         "/projects",
-        json={"name": "Bags", "original_request": "Source recycled cosmetic bags."},
+        json={"name": "Bags", "original_request": original_request},
     )
     assert response.status_code == 201
     return response.json()["id"]
+
+
+CAPTURED_CATEGORY_REQUEST = "Source recycled cosmetic bags for Sydney by 2026-11-01."
+
+
+def captured_category_extraction(category: str) -> dict[str, object]:
+    """Public captured fields reconstructed in the existing model-test contract."""
+    return extraction(
+        product_name="cosmetic bags", category=category, quantity=None,
+        delivery_target={"kind": "DATE", "date": "2026-11-01"}, attributes=[], ambiguities=[],
+        requirements=[{"kind": "MATERIAL", "importance": None,
+                       "expected_value": {"value": "recycled"}}],
+    )
+
+
+def test_category_repair_persists_only_valid_draft_then_clarifies_actual_gaps(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id = create_project(client, CAPTURED_CATEGORY_REQUEST)
+    path = f"/projects/{project_id}/brief"
+    FakeClient.outputs = [
+        ModelInvocation(json.dumps(captured_category_extraction(category)), 10, 20)
+        for category in ("bags", "cosmetic bags")
+    ]
+    analyzed = client.post(f"{path}/analyze")
+    assert analyzed.status_code == 200
+    body = analyzed.json()
+    assert body["category"] == "cosmetic bags"
+    assert body["product_name"] == "cosmetic bags" and body["quantity"] is None
+    assert body["target_unit_price"] is None and body["approved_at"] is None
+    assert body["status"] == "IN_PROGRESS" and body["brief_revision"] == 1
+    assert [r["expected_value"] for r in body["requirements"]] == [{"value": "recycled"}]
+    keys = [field["field_key"] for field in body["missing_fields"]]
+    assert keys == ["quantity", "requirement.custom_branding"]
+    assert FakeClient.calls == 2
+    assert client.post(f"{path}/approve", json={"expected_brief_revision": 1}).status_code == 409
+    with Session(engine) as session:
+        run = session.scalars(select(AIRun).where(AIRun.project_id == project_id)).one()
+        assert (run.status, run.validation_status, run.attempts) == ("COMPLETED", "REPAIRED", 2)
+        assert run.prompt_version == "brief-interpreter-v4"
+        assert sum(step.kind == "retry" and step.outcome == "REPAIR"
+                   for step in run.supplier_explanation_steps) == 1
+
+    before = client.get(path).json()
+    FakeClient.outputs = [ModelInvocation(json.dumps({"questions": [
+        {"field_key": key, "question": question, "reason": "Required detail is missing."}
+        for key, question in zip(keys, ["How many bags?", "Is custom branding needed?"], strict=True)
+    ]}), 10, 20)]
+    clarification = client.post(f"{path}/clarifications")
+    assert clarification.status_code == 200
+    assert [q["field_key"] for q in clarification.json()["questions"]] == keys
+    assert clarification.json()["brief_revision"] == 1
+    assert client.get(path).json() == before
+    assert FakeClient.calls == 3
+
+
+def test_category_repair_exhaustion_saves_no_bad_brief_and_keeps_manual_fallback(
+    client: TestClient, engine: Engine,
+) -> None:
+    project_id = create_project(client, CAPTURED_CATEGORY_REQUEST)
+    path = f"/projects/{project_id}/brief"
+    before = client.get(path).json()
+    FakeClient.outputs = [
+        ModelInvocation(json.dumps(captured_category_extraction("bags")), 10, 20) for _ in range(2)
+    ]
+    response = client.post(f"{path}/analyze")
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "BRIEF_ANALYSIS_UNAVAILABLE"
+    assert FakeClient.calls == 2 and client.get(path).json() == before
+    with Session(engine) as session:
+        assert session.get(Brief, project_id) is None
+        assert not session.scalars(select(Requirement).where(Requirement.project_id == project_id)).all()
+        run = session.scalars(select(AIRun).where(AIRun.project_id == project_id)).one()
+        assert (run.status, run.validation_status, run.attempts) == ("VALIDATION_FAILED", "INVALID", 2)
+        assert run.completed_at is not None
+        assert sum(step.kind == "retry" and step.outcome == "REPAIR"
+                   for step in run.supplier_explanation_steps) == 1
+    manual = client.patch(path, json={**empty_edit(), "product_name": "cosmetic bags",
+                                     "category": "cosmetic bags", "expected_brief_revision": 0})
+    assert manual.status_code == 200
+    assert manual.json()["status"] == "IN_PROGRESS" and manual.json()["approved_at"] is None
+    assert FakeClient.calls == 2
+
+
+@pytest.mark.parametrize("branding,wording", [
+    (None, ""), (True, " Custom logo required."), (False, " No custom branding required."),
+])
+def test_source_branding_presence_survives_category_consistency_check(
+    client: TestClient, branding: bool | None, wording: str,
+) -> None:
+    project_id = create_project(client, CAPTURED_CATEGORY_REQUEST + wording)
+    draft = captured_category_extraction("cosmetic bags")
+    requirements: list[dict[str, object]] = [
+        {"kind": "MATERIAL", "importance": None, "expected_value": {"value": "recycled"}},
+    ]
+    if branding is not None:
+        requirements.append({"kind": "CAPABILITY", "importance": "REQUIRED",
+                             "expected_value": {"capability_key": "CUSTOM_BRANDING", "value": branding}})
+    draft["requirements"] = requirements
+    FakeClient.outputs = [ModelInvocation(json.dumps(draft), 10, 20)]
+    response = client.post(f"/projects/{project_id}/brief/analyze")
+    assert response.status_code == 200
+    body = response.json()
+    assert {r["kind"]: r["expected_value"] for r in body["requirements"]} == {
+        r["kind"]: r["expected_value"] for r in requirements
+    }
+    assert [f["field_key"] for f in body["missing_fields"]] == (
+        ["quantity", "requirement.custom_branding"] if branding is None else ["quantity"]
+    )
+    assert body["approved_at"] is None and FakeClient.calls == 1
 
 
 def test_empty_get_and_noop_patch_do_not_create_brief_domain_state(

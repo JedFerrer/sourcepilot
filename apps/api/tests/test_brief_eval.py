@@ -3,7 +3,7 @@ import json
 import pytest
 
 from sourcepilot.ai.brief_eval import CASES_PATH, load_cases, score_case
-from sourcepilot.ai.brief_interpreter import ExtractedBrief
+from sourcepilot.ai.brief_interpreter import ExtractedBrief, validate_category_consistency
 
 
 def test_release_brief_cases_validate_and_match_expected_fields() -> None:
@@ -35,12 +35,108 @@ def test_eval_scoring_catches_unexpected_requirements_and_attributes() -> None:
     baseline = outputs["missing-quantity"]
 
     for unexpected in (
-        {"requirements": [{"kind": "MATERIAL", "importance": None, "expected_value": {"value": "recycled"}}]},
+        {"requirements": [{"kind": "MATERIAL", "importance": None, "expected_value": {"value": "recycled polyester"}}]},
         {"attributes": [{"subject": "COLOR", "text": "blue"}]},
         {"target_unit_price": "5"},
     ):
         result = ExtractedBrief.model_validate({**baseline, **unexpected})
         assert score_case(result, expected) == (8, 9)
+
+
+def test_captured_request_preserves_recycled_material_but_not_broadened_category() -> None:
+    case = next(case for case in load_cases() if case["id"] == "missing-quantity")
+    assert case["request"] == "Source recycled cosmetic bags for Sydney by 2026-11-01."
+    outputs = json.loads((CASES_PATH.parent / "model_outputs.json").read_text(encoding="utf-8"))
+    valid = ExtractedBrief.model_validate(outputs[case["id"]])
+    assert valid.requirements[0].model_dump() == {
+        "kind": "MATERIAL", "importance": None, "expected_value": {"value": "recycled"},
+    }
+    assert valid.quantity is None and valid.target_unit_price is None
+    validate_category_consistency(valid, case["request"])
+    assert score_case(valid, case["expected"], aliases=case["aliases"]) == (9, 9)
+    captured = valid.model_copy(update={"category": "bags"})
+    assert score_case(captured, case["expected"], aliases=case["aliases"]) == (8, 9)
+    with pytest.raises(ValueError, match="consistent"):
+        validate_category_consistency(captured, case["request"])
+    # The fixture correction does not remove absence/hallucination sensitivity.
+    assert score_case(valid.model_copy(update={"requirements": []}), case["expected"]) == (8, 9)
+
+
+def category_draft(product: str | None, category: str | None) -> ExtractedBrief:
+    return ExtractedBrief(
+        product_name=product, category=category, quantity=None, destination=None,
+        delivery_target=None, target_unit_price=None, attributes=[], requirements=[], ambiguities=[],
+    )
+
+
+@pytest.mark.parametrize("product", [
+    "cosmetic bag", "cosmetic bags", "cosmetic travel bag", "cosmetic travel bags", "travel bags",
+])
+@pytest.mark.parametrize("category", ["bags", "pouches", "bottles"])
+@pytest.mark.parametrize("separator", [" ", "-", "\u2010", "\u2011"])
+def test_source_backed_supported_family_cannot_be_broadened(
+    product: str, category: str, separator: str,
+) -> None:
+    draft = category_draft(f"  {product.upper()}  ", category)
+    before = draft.model_dump()
+    with pytest.raises(ValueError, match="consistent"):
+        source_family = product.replace(" ", separator)
+        validate_category_consistency(draft, f"Please source recycled {source_family} for Perth.")
+    assert draft.model_dump() == before
+
+
+@pytest.mark.parametrize("category", [
+    None, "cosmetic bag", "cosmetic bags", "cosmetic travel bag", "cosmetic travel bags", "travel bags",
+])
+def test_equivalent_category_or_unknown_remains_unchanged(category: str | None) -> None:
+    draft = category_draft("cosmetic bags", category)
+    before = draft.model_dump()
+    validate_category_consistency(draft, "Source COSMETIC\nBAGS.")
+    assert draft.model_dump() == before
+
+
+@pytest.mark.parametrize("source_request,product,category", [
+    ("Source bags.", "bags", "bags"),
+    ("Source bags; exact type undecided.", "bags", None),
+    ("Source cosmetic bags or tote bags; not decided.", "bags", None),
+    ("Source cosmetic bags or tote bags; not decided.", "bags", "bags"),
+    ("No cosmetic bags; source pouches instead.", "pouches", "pouches"),
+    ("Maybe cosmetic bags; no product category decided.", None, None),
+    ("Source glass bottles.", "glass bottles", "bottles"),
+    ("Source handbags.", "handbags", "handbags"),
+    ("Source cosmetic bag accessories.", "cosmetic bag accessories", "accessories"),
+    ("Source a travel bag.", "travel bag", "travel bag"),
+    ("Source cosmetic-bags or tote bags; not decided.", "bags", None),
+    ("No cosmetic-bags; source pouches instead.", "pouches", "pouches"),
+    ("Source cosmetic-bags. Actually, source bottles instead.", "bottles", "bottles"),
+])
+def test_generic_ambiguous_and_neighboring_requests_do_not_gain_specificity(
+    source_request: str, product: str | None, category: str | None,
+) -> None:
+    draft = category_draft(product, category)
+    draft.ambiguities = ["Product category is undecided."] if "decided" in source_request else []
+    before = draft.model_dump()
+    validate_category_consistency(draft, source_request)
+    assert draft.model_dump() == before
+
+
+@pytest.mark.parametrize("source_request", [
+    "Source bags.", "Source bags, type undecided.", "Source pouches.",
+    "Source noncosmetic bags.", "Source cosmetic bagsomething.",
+    "Source noncosmetic-bags.", "Source cosmetic-bagsomething.",
+    "Source cosmetic/not bags.", "Source cosmetic-or-bags; undecided.",
+    "Source cosmetic, not bags.", "Source cosmetic/bags.",
+    "Source cosmetic--bags.", "Source cosmetic - bags.",
+    "Source cosmetic\u2013bags.", "Source cosmetic\u2014bags.",
+])
+@pytest.mark.parametrize("product,category", [
+    ("cosmetic bags", "cosmetic bags"), ("cosmetic bags", None), ("bags", "cosmetic bags"),
+])
+def test_family_assertions_require_original_request_evidence(
+    source_request: str, product: str | None, category: str | None,
+) -> None:
+    with pytest.raises(ValueError, match="absent from the source"):
+        validate_category_consistency(category_draft(product, category), source_request)
 
 
 def test_eval_partial_assertions_require_explicit_opt_in() -> None:

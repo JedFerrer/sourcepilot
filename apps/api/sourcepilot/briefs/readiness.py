@@ -23,7 +23,7 @@ ReadinessFieldKey = Literal[
     "requirement.custom_branding",
 ]
 
-_DEMO_CATEGORIES = frozenset(
+COSMETIC_BAG_CATEGORIES = frozenset(
     {
         "cosmetic bag",
         "cosmetic bags",
@@ -32,6 +32,11 @@ _DEMO_CATEGORIES = frozenset(
         "travel bags",  # Explicit alias for the current demo category only.
     }
 )
+
+
+def is_cosmetic_bag_category(category: str | None) -> bool:
+    """Recognize only the established exact labels, without taxonomy inference."""
+    return category is not None and category.strip().casefold() in COSMETIC_BAG_CATEGORIES
 
 
 @dataclass(frozen=True)
@@ -75,7 +80,7 @@ def evaluate_brief_readiness(
     if not _has_delivery_target(delivery_target):
         missing.append(MissingReadinessField("delivery_target", "Enter a valid delivery target."))
 
-    if category is not None and category.strip().casefold() in _DEMO_CATEGORIES:
+    if is_cosmetic_bag_category(category):
         if not any(_has_material(requirement) for requirement in requirements):
             missing.append(
                 MissingReadinessField(

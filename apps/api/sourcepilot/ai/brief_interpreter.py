@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from decimal import Decimal, InvalidOperation
 from typing import Literal
 from uuid import UUID
@@ -30,16 +31,27 @@ from sourcepilot.briefs.domain import (
     validate_requirement_expected_value,
     validate_target_unit_price,
 )
+from sourcepilot.briefs.readiness import COSMETIC_BAG_CATEGORIES, is_cosmetic_bag_category
 from sourcepilot.persistence.models import AIRun, DemoSession, Project
 from sourcepilot.projects.service import project_for_demo_session
 
-PROMPT_VERSION = "brief-interpreter-v3"
+PROMPT_VERSION = "brief-interpreter-v4"
 OPERATION = "brief_interpreter"
 INSTRUCTIONS = """Extract only facts explicitly stated in the sourcing request.
 Return the exact structured schema. Use null for any unstated core field or
 requirement importance. Do not infer a date, price, certification, or importance.
 Retain the stated product name and category, including generic bags, pouches or
 bottles; do not invent a more specific product/category when none is stated.
+Do not erase an explicitly stated supported product family: cosmetic bag(s),
+cosmetic travel bag(s), and travel bags share the supported cosmetic-bag category.
+If that is the stated product, retain this family in category, not generic bags.
+These labels are equivalent only within that family. Generic bags, pouches and
+bottles remain generic when no specific family is stated. A family mentioned as
+an alternative, excluded product, or unresolved choice is not a settled category;
+keep the category unknown or generic as appropriate and preserve the ambiguity.
+Never choose a specific family just to satisfy validation. Missing branding stays
+missing; a product category does not imply custom branding. Preserve 'recycled'
+when stated as material, without inferring polyester or another specific material.
 
 Explicit mandatory wording such as 'must', 'required', 'mandatory' and 'must not
 exceed' means REQUIRED for that requirement. Explicit 'preferred', 'ideally' or
@@ -206,6 +218,29 @@ class ExtractedBrief(StrictModel):
         return self
 
 
+def validate_category_consistency(result: ExtractedBrief, original_request: str) -> None:
+    """Reject unsupported family assertions and inconsistent known-family labels.
+
+    Source mentions are necessary evidence, not a general entailment classifier.
+    This check never chooses a category or resolves ambiguous alternatives.
+    """
+    product_in_family = is_cosmetic_bag_category(result.product_name)
+    category_in_family = is_cosmetic_bag_category(result.category)
+    if not product_in_family and not category_in_family:
+        return
+    request = " ".join(original_request.split()).casefold()
+    # Only separators within an established family phrase are equivalent.
+    # Keep other punctuation (including clause dashes) and intervening words intact.
+    source_mentions_family = any(
+        re.search(r"(?<!\w)" + r"[ \-\u2010\u2011]".join(label.split()) + r"(?!\w)", request)
+        for label in COSMETIC_BAG_CATEGORIES
+    )
+    if not source_mentions_family:
+        raise ValueError("Supported product family is absent from the source request.")
+    if product_in_family and result.category is not None and not category_in_family:
+        raise ValueError("Known product family and category must be consistent or category unknown.")
+
+
 def interpret_project_request(
     database_session: Session,
     *,
@@ -227,4 +262,5 @@ def interpret_project_request(
         input_text=project.original_request,
         result_model=ExtractedBrief,
         client=client,
+        post_validate=lambda result: validate_category_consistency(result, project.original_request),
     )

@@ -71,7 +71,16 @@
       "delivery_target": {
         "kind": "DATE",
         "date": "2026-11-01"
-      }
+      },
+      "requirements": [
+        {
+          "kind": "MATERIAL",
+          "importance": null,
+          "expected_value": {
+            "value": "recycled"
+          }
+        }
+      ]
     },
     "aliases": {
       "category": [

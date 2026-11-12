@@ -173,7 +173,9 @@ def test_exact_demo_aliases_require_material_and_branding(category: str) -> None
     ]
 
 
-@pytest.mark.parametrize("category", ["Travel bag", "Cosmetic bag accessories", "Handbags"])
+@pytest.mark.parametrize("category", [
+    "Travel bag", "Cosmetic bag accessories", "Handbags", "bags", "pouches", "bottles",
+])
 def test_other_categories_have_no_demo_specific_gate(category: str) -> None:
     assert evaluate(category=category, requirements=()).status is BriefStatus.READY_FOR_REVIEW
 

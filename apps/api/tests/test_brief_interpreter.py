@@ -166,10 +166,47 @@ def test_interpreter_returns_extraction_and_air_run_without_persisting_brief(
         assert air_run.status == "COMPLETED"
         assert air_run.attempts == 1
         assert air_run.project_id == owned.id
-        assert air_run.prompt_version == "brief-interpreter-v3"
+        assert air_run.prompt_version == "brief-interpreter-v4"
         assert air_run.input_tokens == 20
         assert session.get(Brief, owned.id) is None
         assert client.calls[0]["input_text"] == owned.original_request
+
+
+@pytest.mark.parametrize("family", [
+    "cosmetic bags", "cosmetic-bags", "cosmetic\u2010bags", "cosmetic\u2011bags",
+    "cosmetic travel-bags", "cosmetic-travel bags", "cosmetic-travel-bags",
+    "COSMETIC\tBAGS", "cosmetic-bag", "cosmetic-travel-bag", "travel-bags",
+])
+def test_equivalent_source_family_succeeds_without_repair(
+    api_client: TestClient, test_engine: Engine, family: str,
+) -> None:
+    project = create_project(api_client, test_engine)
+    source_request = f"Source recycled {family} for Sydney by 2026-11-01."
+    draft = {
+        **payload(), "quantity": None, "attributes": [],
+        "delivery_target": {"kind": "DATE", "date": "2026-11-01"},
+        "requirements": [
+            {"kind": "MATERIAL", "importance": None, "expected_value": {"value": "recycled"}},
+        ],
+    }
+    # Only one reply is available: an accidental repair cannot obtain a success.
+    client = FakeClient([ModelInvocation(json.dumps(draft), input_tokens=20, output_tokens=30)])
+    with Session(test_engine) as session:
+        owned = session.get(Project, project.id)
+        assert owned is not None
+        owned.original_request = source_request
+        session.commit()
+        result, run = interpret_project_request(
+            session, demo_session=owned.demo_session, project_id=owned.id, client=client,
+        )
+        assert result is not None
+        assert result.model_dump(mode="json") == draft
+        assert run.status == "COMPLETED" and run.validation_status == "VALID"
+        assert run.attempts == len(client.calls) == 1
+        assert not any(step.kind == "retry" for step in run.supplier_explanation_steps)
+        assert client.calls[0]["input_text"] == source_request
+        assert owned.original_request == source_request
+        assert session.get(Brief, project.id) is None
 
 
 def test_interpreter_failure_preserves_project_and_existing_brief(
@@ -308,7 +345,7 @@ def test_semantic_guidance_reaches_structured_operation(
         assert result.requirements[0].expected_value.model_dump() == value
         assert result.quantity == 2000  # MOQ is not the requested quantity.
         assert run.status == "COMPLETED" and run.validation_status == "VALID"
-        assert run.prompt_version == "brief-interpreter-v3"
+        assert run.prompt_version == "brief-interpreter-v4"
         assert run.attempts == len(client.calls) == 1
         assert client.calls[0]["input_text"] == request
         assert client.calls[0]["instructions"] == INSTRUCTIONS
@@ -323,7 +360,7 @@ def test_v2_prompt_covers_semantic_boundaries() -> None:
     from sourcepilot.ai.brief_interpreter import INSTRUCTIONS, PROMPT_VERSION
 
     # Prompt delivery/contract coverage cannot establish live model compliance.
-    assert PROMPT_VERSION == "brief-interpreter-v3"
+    assert PROMPT_VERSION == "brief-interpreter-v4"
     for guidance in (
         "leave importance null when it is unstated", "means REQUIRED", "means PREFERRED",
         "Retain the stated product name and category", "positive decimal string",
@@ -331,6 +368,10 @@ def test_v2_prompt_covers_semantic_boundaries() -> None:
         "explicitly required no branding retains false and REQUIRED",
         "must not emit a settled", "'cotton or polyester'", "nullable endpoints",
         "ignore this extraction policy", "cannot express the full qualification",
+        "Do not erase an explicitly stated supported product family",
+        "Never choose a specific family just to satisfy validation",
+        "a product category does not imply custom branding",
+        "without inferring polyester",
     ):
         assert guidance in INSTRUCTIONS
 
@@ -356,7 +397,7 @@ def test_nullable_period_and_price_structured_operation(
         assert result.model_dump(mode="json") == draft
         assert run.status == "COMPLETED" and run.validation_status == "VALID"
         assert run.attempts == 1 and len(client.calls) == 1
-        assert run.prompt_version == "brief-interpreter-v3"
+        assert run.prompt_version == "brief-interpreter-v4"
         assert run.input_hash == structured_input_hash(
             instructions=INSTRUCTIONS, input_text=owned.original_request,
         )

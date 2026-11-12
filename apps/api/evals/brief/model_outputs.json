@@ -64,7 +64,15 @@
     },
     "target_unit_price": null,
     "attributes": [],
-    "requirements": [],
+    "requirements": [
+      {
+        "kind": "MATERIAL",
+        "importance": null,
+        "expected_value": {
+          "value": "recycled"
+        }
+      }
+    ],
     "ambiguities": []
   },
   "no-price": {
