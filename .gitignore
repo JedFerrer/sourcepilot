@@ -15,10 +15,14 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .pyright/
+.mypy_cache/
+.hypothesis/
 
 # Local configuration and data
 .env
 .env.local
+.env.*
+!.env.example
 apps/web/.env.local
 *.local
 apps/api/.local-quote-documents/
@@ -27,3 +31,9 @@ apps/api/.eval-results/
 
 # Local investigation and generated acceptance artifacts
 /.local-investigation-artifacts/
+
+# Local logs and operating-system metadata
+*.log
+.DS_Store
+Thumbs.db
+Desktop.ini

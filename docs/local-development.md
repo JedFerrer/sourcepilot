@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 22 and pnpm 10
+- Node.js 22 and pnpm 10.30.1 (the root `packageManager` version)
 - Python 3.11 and uv
 - Docker Desktop with Docker Compose
 
@@ -13,7 +13,7 @@ Run root commands from the repository root; keep the API and web server in separ
 1. Copy `.env.example` to `.env` to configure the local PostgreSQL databases and API database URL. For interactive AI actions, also complete [model configuration](#model-configuration).
 2. Copy `apps/web/.env.example` to `apps/web/.env.local` only when FastAPI is not running at `http://localhost:8000`.
 3. Start PostgreSQL with `docker compose up -d postgres` and verify [database readiness](#postgresql-reachability).
-4. From the repository root, install the web dependencies with `pnpm install`.
+4. From the repository root, install the web dependencies with `pnpm install --frozen-lockfile`.
 5. From `apps/api`, install the API environment with `uv sync --dev --locked`.
 6. From `apps/api`, apply the [existing migrations](#migrations-and-persistence-tests), then run the [supplier seed command](#synthetic-supplier-catalog). Both are required before using the workflow; startup does not seed the catalog.
 7. Start FastAPI from `apps/api` with `uv run --no-env-file python ../../scripts/dev-api.py`. This local launcher loads application settings from the root `.env`, replacing inherited values and clearing omitted settings listed in `.env.example` plus inherited `OPENAI_`, `SOURCEPILOT_`, and `LANGFUSE_` variables. It preserves OS settings such as PATH, fails if `.env` is missing, and keeps the required Windows Selector loop.
@@ -38,6 +38,10 @@ The default `DOCUMENT_STORAGE_BACKEND=local` stores original PDFs privately unde
 ## PostgreSQL reachability
 
 After starting Compose, run `docker compose ps`. The `postgres` service must report `healthy`. For the explicit database readiness check, run `docker compose exec postgres pg_isready -U sourcepilot -d sourcepilot`; it should report that the server is accepting connections.
+
+Compose publishes PostgreSQL on host port 5432 without a loopback-only binding.
+The example credentials are local development defaults. Use a trusted local
+machine and do not expose this configuration as a public database service.
 
 The API and Alembic migration commands use `DATABASE_URL`; migration commands fail clearly when it is missing. The existing health endpoint does not open a database connection. `TEST_DATABASE_URL` is required only for persistence/integration tests; it must name a different PostgreSQL database from `DATABASE_URL`.
 
@@ -240,6 +244,34 @@ uv run pyright
 uv run --env-file ../../.env pytest
 ```
 
+
+## Specialized comparison browser checks
+
+The retained [corrected-amount](../apps/web/qa/comparison/corrected-amount/) and
+[verification-actions](../apps/web/qa/comparison/verification-actions/) suites cover
+correction provenance, source disclosures and supplier-specific follow-up actions.
+They use the existing test-only model and tracked synthetic fixtures; private
+investigation records are not inputs. Their logs, screenshots and selections are
+written to the ignored local investigation directory.
+
+These are developer diagnostics outside the normal CI commands. Their launchers
+currently require Windows (`.venv\Scripts\python.exe`), installed Google Chrome,
+the installed API/web dependencies, a root `.env` with the three database URLs
+described above, and an already built web app. They reset the guarded disposable
+`sourcepilot_e2e` database. Confirm that reset is acceptable before running, and
+never run them concurrently with another E2E invocation. Stop the development
+server before building or using the production build; both share `.next` output.
+
+Once those prerequisites and database isolation are verified, run one suite from
+the repository root:
+
+```text
+node apps/web/qa/comparison/corrected-amount/run.mjs
+node apps/web/qa/comparison/verification-actions/run.mjs
+```
+
+These commands are separate runs. They do not establish live-model quality or
+cross-platform support. Do not publish their raw diagnostic artifacts.
 
 ## Public-demo security prerequisites
 

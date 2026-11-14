@@ -1,80 +1,197 @@
 # SourcePilot
 
-SourcePilot is an AI-assisted, evidence-backed supplier sourcing workspace. It turns an informal product request into structured requirements, reviewed quotes and a supplier comparison, while keeping the final decision with the user.
+An AI-assisted supplier sourcing workspace for turning an incomplete product request and inconsistent supplier quotes into a reviewable decision. Define requirements, inspect supplier evidence, verify extracted quote data and compare tradeoffs before choosing a preferred supplier.
 
 **Brief → Suppliers → Quotes → Comparison → Decision**
 
-| Stage | What happens |
+This portfolio project is intended for local evaluation. Supplier names, capabilities, prices, evidence and quote fixtures are fictional; they make no claims about real manufacturers.
+
+![Factual comparison of two synthetic suppliers, with source details and unknown delivery commitments](docs/assets/screenshots/comparison.png)
+
+*Compare confirmed quote facts while keeping evidence and unknowns visible. Screenshots are real browser captures from the provider-free synthetic test flow on 10 November 2026; model responses use test doubles. They show selected working surfaces, not live-model quality or a full verification report. The example compares two confirmed quotes from a three-supplier shortlist.*
+
+## How it works
+
+### 1. Define and approve the Brief
+
+Start with a request such as “2,000 custom cosmetic travel bags made from recycled material, with our logo, for under USD 5 each.” Analyze the request, review the structured fields and clarify missing details. Set requirement importance and explicitly approve the saved Brief before discovering suppliers.
+
+<details>
+<summary>Screenshot: review the structured Brief</summary>
+
+![Synthetic cosmetic-bag Brief with product, commercial details and editable requirement importance](docs/assets/screenshots/brief.png)
+
+*The editor keeps requirements editable before approval. This automated scenario changes certification to Required; it is an example user choice, not a recommendation.*
+
+</details>
+
+### 2. Review suppliers and approve a shortlist
+
+Discover candidates from the curated synthetic catalog. Inspect capabilities, requirement findings and available evidence; optionally request an AI explanation. Missing evidence stays **Unknown**, and contradictory information remains visible. You choose and approve a shortlist of up to three suppliers.
+
+### 3. Add quotes and verify the data
+
+Upload a text-extractable PDF or enter a quote manually. Review extracted values, source evidence, uncertainty and any corrections before explicitly confirming the quote. If a PDF cannot be processed, manual entry remains available.
+
+<details>
+<summary>Screenshot: compare an edit with the original PDF evidence</summary>
+
+![Quote editor showing an unsaved USD 4.75 edit alongside the original USD 4.60 PDF evidence](docs/assets/screenshots/evidence.png)
+
+*The unsaved edit is 4.75; the saved and extracted price is still 4.60. Editing a project value never rewrites what the original document says.*
+
+</details>
+
+### 4. Compare facts and explore tradeoffs
+
+With an approved shortlist and at least two confirmed quotes, generate the factual comparison. Review prices, quantities, requirement fit, source details and uncertainties. Optional AI analysis explains tradeoffs and may suggest a supplier or decline to suggest one. Failed analysis leaves the factual comparison available for review and retry.
+
+### 5. Record your decision
+
+Review the evidence, choose a supplier and explicitly **Mark as Preferred Supplier**. The saved preference records your decision. SourcePilot does not contact suppliers, negotiate, place orders or make payments.
+
+For a complete synthetic example, follow the [manual demo walkthrough](docs/local-development.md#manual-demo-walkthrough), including failed-PDF recovery. The supplied PDFs name Manila in their shipping text while the example Brief requests Sydney; that mismatch is intentionally left visible for review.
+
+## AI engineering
+
+**Application code owns the workflow. AI interprets and explains. Humans approve.**
+
+| Capability | How it works |
 | --- | --- |
-| Brief | Interpret the request, clarify missing details, then explicitly approve the requirements. |
-| Suppliers | Review candidates and evidence from the curated catalog; approve a shortlist of up to three. |
-| Quotes | Upload PDFs or enter values manually; correct and explicitly confirm each quote. |
-| Comparison | Compare facts, requirement fit and uncertainties; request AI tradeoff analysis and an optional suggestion. |
-| Decision | The user selects **Mark as Preferred Supplier**. No procurement or supplier communication follows. |
+| Structured extraction | Brief and quote interpretation use schema-constrained model responses, Pydantic validation and application checks. Clarification wording follows deterministic readiness findings. |
+| Evidence grounding | Supplier explanations use scoped evidence tools; PDF fields reference validated page/block IDs. Original evidence, extracted values, current values and user corrections remain distinct. |
+| Uncertainty disclosure | Unknowns and conflicts remain explicit. Project-specific confirmed facts take precedence over general catalog data without treating different contexts as contradictions. |
+| Deterministic rules | Application/domain code handles readiness, retrieval, supported requirement evaluation, arithmetic, currency/quantity checks, source resolution and workflow transitions. No numeric supplier match score is invented. |
+| Human approvals | The user approves the Brief and shortlist, verifies quotes and chooses the preferred supplier. Model output cannot approve these transitions. |
+| Bounded repair | Structured operations allow one validation repair and one retry for retryable provider failures. The Analyst also has turn/tool budgets; failures do not trigger an unlimited loop. |
+| Recovery and freshness | PDF processing status is persisted, abandoned attempts can be retried, and upstream changes invalidate affected evaluations/comparisons. Stale advice is not treated as current. |
+| Evaluation and tracing | Versioned synthetic cases, contract tests and negative controls distinguish exact assertions from heuristic signals and human judgment. PostgreSQL AI-run records retain model/prompt identity, validation, retries, timing and available usage. |
 
-## Synthetic demo data
+The **Sourcing Analyst** is the only agent. It chooses read-only tools within the current project and session, with defaults of **four model turns and six successful tool calls**. It cannot change records, approve anything or communicate externally. Brief interpretation, clarification and quote extraction are separate structured tasks.
 
-Supplier names, capabilities, prices, and evidence fixtures are entirely
-synthetic. The quote PDF fixtures are also synthetic. SourcePilot makes no
-claims about real manufacturers. The curated supplier catalog exists to make
-the demo and tests reproducible; it is not live supplier research.
+Schema validity and valid citations do not prove narrative correctness. The [eval guide](apps/api/evals/README.md) explains what automated scoring can and cannot establish. [Optional Langfuse](docs/development/OBSERVABILITY.md) exports sanitized execution metadata on a best-effort basis; raw prompts, PDF text, model outputs and credentials are excluded from that export.
 
-## Architecture and responsibility boundaries
+## Architecture
 
-V1 is a modular monolith. **Application code owns the workflow. AI interprets and explains. Humans approve.**
+V1 is a modular monolith with application-owned workflow and PostgreSQL persistence.
 
-```text
-Next.js / React / TypeScript
-    └── FastAPI / Python
-          ├── Application services + deterministic domain rules
-          │     ├── PostgreSQL: projects, revisions, evidence, AI runs
-          │     └── Private PDF storage: local or S3-compatible adapter
-          └── AI capabilities → model provider
-                └── Optional sanitized metadata → Langfuse
+```mermaid
+flowchart LR
+    Browser[Browser] --> Web[Next.js UI and same-origin API proxy]
+    Web --> API[FastAPI application services]
+    API --> Rules[Deterministic domain rules]
+    API --> DB[(PostgreSQL)]
+    API --> Storage[Private PDF storage]
+    API --> AI[Structured calls and bounded Analyst]
+    AI --> Provider[OpenAI SDK / model provider]
+    AI -. sanitized metadata .-> Tracing[Optional Langfuse]
 ```
 
-| Responsibility | Owner |
+| Area | Technology and role |
 | --- | --- |
-| Readiness, candidate retrieval, requirement evaluation, source precedence, arithmetic, validation and workflow transitions | Deterministic application/domain code |
-| Brief interpretation, clarification wording and quote-text interpretation | Bounded structured LLM calls |
-| Evidence lookup, supplier explanations, comparison tradeoffs and optional suggestion | One bounded Sourcing Analyst |
-| Brief approval, shortlist approval, quote verification and preferred supplier | Human |
+| Frontend | Next.js 15, React 19, TypeScript, Tailwind CSS 4; workflow UI and same-origin API proxy |
+| Backend | Python 3.11, FastAPI, Pydantic, SQLAlchemy and Alembic; APIs, application services, domain rules and migrations |
+| Persistence | PostgreSQL 16; project state, revisions, evidence and AI-run records |
+| AI and documents | OpenAI SDK; structured outputs and read-only evidence tools. PyMuPDF for text/block extraction; private local storage with an S3-compatible adapter available |
+| Quality | pytest, Vitest/Testing Library, Playwright, Ruff, Pyright, ESLint, TypeScript checks and GitHub Actions |
+| Local tooling | Node.js 22, pnpm 10.30.1, uv and Docker Compose |
 
-The Sourcing Analyst is the only agent: it chooses read-only evidence tools within the current project. Defaults cap execution at **four model turns and six tool calls**; exhausted limits produce a recoverable failure. It cannot modify records, approve a step or contact suppliers. Extraction calls are separate structured tasks, not agents. Model-directed lookup is useful for explanation; the known five-stage workflow needs no AI orchestrator.
+Manifests and lockfiles define dependency versions. Langfuse is optional, and local evaluation uses private local PDF storage by default.
 
-## Evidence and freshness
+The architecture deliberately stays small: the known workflow needs no top-level AI orchestrator or LangGraph; 15 structured synthetic supplier records need no vector database. PDF work runs in-process with persisted status and explicit recovery, without Redis/Celery or a durable worker queue. See the [architecture](docs/specs/SourcePilot-Technical-Architecture-v0.2.md) for provenance, staleness and these tradeoffs.
 
-Supplier claims link to curated evidence. PDF fields reference validated page/block IDs. Source evidence, AI extraction, current values and their origins remain distinct: correcting a price changes the project value without making the PDF evidence support that correction. Only confirmed quotes enter the factual comparison; project-specific values take precedence over general catalog information. Different contexts are not automatically conflicts, and missing information remains **Unknown**, not a negative finding.
+## Repository structure
 
-Internal Brief and quote revisions identify stale supplier evaluations and comparison inputs. Changed inputs require re-evaluation or regeneration; stale analysis is not presented as current advice. The UI provides guidance without a visible version-history system. See the [provenance design](docs/specs/SourcePilot-Technical-Architecture-v0.2.md#13-evidence-and-provenance-model) and [recovery/staleness design](docs/specs/SourcePilot-Technical-Architecture-v0.2.md#19-reliability-retries-and-idempotency).
+```text
+.
+├── apps/web/                     # Next.js UI, component tests and browser scenarios
+├── apps/api/
+│   ├── sourcepilot/              # API, application/domain modules, AI and persistence
+│   ├── alembic/                  # Database migrations
+│   ├── tests/                    # Automated tests, synthetic PDFs and regression fixtures
+│   └── evals/                    # Versioned cases, offline outputs and evaluation guide
+├── docs/
+│   ├── specs/                    # Product specification, architecture and roadmap
+│   ├── development/              # Workflow, coding standards and observability
+│   └── local-development.md      # Setup, manual demo and detailed check prerequisites
+├── scripts/                      # Local API launcher and browser-test support
+└── .github/workflows/ci.yml      # Provider-free CI checks
+```
 
-## Evaluation and tracing
+Tests consume tracked fixtures and datasets; private development records are not build or test prerequisites. Generated reports, local configuration and uploaded documents stay outside the tracked tree.
 
-The [eval guide](apps/api/evals/README.md) covers Brief, clarification, supplier explanation, quote extraction, comparison and suggestion cases. Normal CI uses deterministic tests, model doubles and curated offline cases; live-model evaluation is explicit. Exact assertions, heuristic signals and human judgments remain separate. [Browser E2E](docs/local-development.md#deterministic-browser-workflow-m5-u3) exercises the integrated workflow with a test-only model.
+## Run locally
 
-PostgreSQL `AIRun` records retain prompt/model identity, validation, retries, timing, available usage and Analyst counts. [Optional Langfuse](docs/development/OBSERVABILITY.md) exports sanitized execution metadata on a best-effort basis; the application works without it. Raw prompts, PDF text, model outputs and credentials are not exported. **Hosted Langfuse visibility remains unverified.**
+Install Git, Node.js 22, **pnpm 10.30.1**, Python **3.11**, uv, and Docker with Compose and a running engine. Follow [local development](docs/local-development.md#configure-and-start) for the full setup and platform details.
+
+From the repository root, copy `.env.example` to `.env`, then run:
+
+```text
+docker compose up -d postgres
+docker compose exec postgres pg_isready -U sourcepilot -d sourcepilot
+pnpm install --frozen-lockfile
+```
+
+Wait for PostgreSQL readiness. In an API terminal, from `apps/api`:
+
+```text
+uv sync --dev --locked
+uv run --env-file ../../.env alembic upgrade head
+uv run --env-file ../../.env python -m sourcepilot.suppliers.seed
+uv run --no-env-file python ../../scripts/dev-api.py
+```
+
+The launcher makes the root `.env` authoritative for application settings. In a separate terminal, from the repository root:
+
+```text
+pnpm --filter @sourcepilot/web dev
+```
+
+| Service | Default local address |
+| --- | --- |
+| Workspace | `http://localhost:3000` |
+| API / interactive API docs | `http://localhost:8000` / `http://localhost:8000/docs` |
+| Health | `http://localhost:8000/health` (does not check database connectivity) |
+| PostgreSQL | Host port `5432` |
+
+Compose's database port is not bound only to loopback. Its example credentials and topology are for a trusted local machine; do not expose them as a public service. If the API origin changes, copy `apps/web/.env.example` to `apps/web/.env.local` and configure `API_ORIGIN`.
+
+### Provider configuration and cost
+
+Interactive AI actions require **`OPENAI_API_KEY`** and **`SOURCEPILOT_AI_MODEL`** in the server-side root `.env`. Choose a model available to your account that supports the application's structured-output and tool-calling requests; there is no default model. Restart the API after changes. Never put provider credentials in frontend configuration or Git.
+
+Startup, manual editing and deterministic comparison do not require a model key. **Analyze request**, clarification, PDF extraction, supplier explanation and comparison analysis call the live provider and can incur charges. Retries, repairs and multiple Analyst turns can add usage; no fixed per-demo cost is guaranteed. Automated checks use doubles; the browser test model is not a general interactive demo mode. Optional tracing setup is separate.
+
+## Tests and evaluations
+
+Install the locked dependencies above first. Commands below are reproducible entry points, not a report of tests run for this documentation update.
+
+| Working directory | Command | Purpose / prerequisites |
+| --- | --- | --- |
+| Repository root | `pnpm lint` / `pnpm typecheck` | Web lint and TypeScript checks |
+| Repository root | `pnpm test` | Component/unit tests with Vitest |
+| Repository root | `pnpm build` | Next.js production build; stop the dev server first because both use `.next` |
+| `apps/api` | `uv run --no-sync ruff check .` / `uv run --no-sync pyright` | Backend lint and type checking |
+| `apps/api` | `uv run --env-file ../../.env pytest` | Backend tests; integration coverage resets the guarded, separate `TEST_DATABASE_URL` database |
+| `apps/api` | `uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode offline --output .eval-results/offline` | Full offline eval baseline using tracked synthetic cases; no model-provider call |
+| Repository root | `pnpm test:e2e` | Real web/API/PostgreSQL/PDF workflow with a test-only model; resets the separate `sourcepilot_e2e` database |
+
+Read the [test/database safeguards](docs/local-development.md#migrations-and-persistence-tests) and [browser prerequisites](docs/local-development.md#deterministic-browser-workflow-m5-u3) before running database-backed commands. Use disposable databases, confirm resets are acceptable, and never run E2E invocations concurrently. Stop the development server before E2E builds share `.next` output. Keep raw traces and session data private.
+
+[CI](.github/workflows/ci.yml) defines the automated commands. The [eval guide](apps/api/evals/README.md) covers categories, negative controls, scoring limits and separately opt-in live evaluation, which needs provider credentials and an already configured dedicated eval database. Offline regression success does not establish live-model quality; heuristic signals are not human review outcomes.
 
 ### Known quality and UX limitations
 
-- The full 90-case Analyst-v2 baseline remains **ERROR / exit 2, 20 runtime errors**. The separate 31-case Analyst-v3 follow-up remains **ERROR / exit 2, ten runtime errors**. No successful complete current-version full baseline is established.
-- Ten human reviews remain pending. Brief/quote correctness findings and Analyst quality failures remain unresolved; automated scoring does not establish narrative groundedness.
-- Deterministic E2E success is not live-model quality approval. The real live-advice preservation browser assertion remains unexercised. Prerequisite failures remain unresolved; fixture-backed coverage does not close that check.
-- Drafts are preserved per record in memory when switching stages or suppliers. Save each record explicitly; replacing an unsaved manual draft with a PDF requires discard confirmation. Drafts are not durable recovery storage: reload, session expiry or process loss can lose unsaved work.
-- Actual 400% zoom, actual screen-reader interoperability and five-participant usability validation remain deferred and unverified. No accessibility-conformance, validated-usability or release-readiness claim is made.
+- **Demo scope:** curated synthetic suppliers only; no live research, supplier outreach, procurement execution, accounts or teams. No hosted demo or production-readiness claim is made; deployment and final release approval remain pending.
+- **Quotes and delivery:** text-extractable PDFs only, with default limits of 10,000,000 bytes and 15 pages. No OCR, spreadsheet upload or automatic FX conversion. Current quote fields cannot record a structured dated delivery commitment; production lead time does not prove arrival by a target date.
+- **AI quality:** extraction/correctness and Analyst factual-quality findings remain unresolved. A complete successful current-version live baseline and live-advice preservation browser verification are not established; human quality reviews remain pending. Validate outputs against their sources. Hosted Langfuse visibility is also unverified.
+- **Sessions and drafts:** anonymous sessions default to a fixed 24-hour lifetime. Unsaved drafts survive stage/supplier switching in memory, but reload, expiry or process loss can discard them. Save each record explicitly.
+- **UX validation:** screen-reader interoperability, actual 400% zoom and participant usability validation remain unverified; no accessibility-conformance claim is made.
 
-## Run and demonstrate locally
+## Engineering documentation
 
-Start with [local setup](docs/local-development.md#configure-and-start), then follow the [manual demo walkthrough](docs/local-development.md#manual-demo-walkthrough). It uses the existing synthetic PDFs and actual approval actions, with manual recovery when extraction fails. Interactive AI actions require server-side model credentials; automated checks use doubles.
+- [Product specification](docs/specs/SourcePilot-Product-Specification-v0.2.md), [technical architecture](docs/specs/SourcePilot-Technical-Architecture-v0.2.md) and [implementation roadmap](docs/specs/SourcePilot-Implementation-Plan-v0.2.md)
+- [Local setup and synthetic walkthrough](docs/local-development.md), [evaluation guide](apps/api/evals/README.md) and [AI observability](docs/development/OBSERVABILITY.md)
+- [Development workflow](docs/development/WORKFLOW.md), [coding standards](docs/development/CODING_STANDARDS.md) and [repository instructions](AGENTS.md)
 
-The workflow and storage adapters are implemented locally. **Production deployment (M6-U6) and final release approval remain pending**; this repository does not claim a verified hosted demo.
-
-## Tradeoffs and deferred evolution
-
-- **No LangGraph:** application transitions and PostgreSQL persistence handle pauses/resumption; V1 has no long-running model-controlled workflow.
-- **No vector database:** 15 structured synthetic supplier records support deterministic retrieval without embeddings or generalized RAG.
-- **No Redis/Celery:** lightweight in-process PDF work uses persisted status, stale-processing detection and explicit retries. This is not a durable worker queue.
-- **Deliberate demo limits:** anonymous sessions default to a fixed 24-hour lifetime; PDF inputs must be text-extractable and within the default 10,000,000-byte/15-page limits. No OCR or spreadsheet upload. Original currencies and quantities remain visible; there is no automatic FX conversion or numeric supplier score.
-
-Live supplier research, outreach, procurement execution, accounts/teams, OCR and heavier orchestration/worker infrastructure are outside V1. [Future architecture possibilities](docs/specs/SourcePilot-Technical-Architecture-v0.2.md#31-future-architecture-evolution) depend on new product or operational needs, not a committed migration path.
-
-For the authoritative detail, read the [Product Specification](docs/specs/SourcePilot-Product-Specification-v0.2.md), [Technical Architecture](docs/specs/SourcePilot-Technical-Architecture-v0.2.md) and [Implementation Plan](docs/specs/SourcePilot-Implementation-Plan-v0.2.md). Contributor work follows [AGENTS.md](AGENTS.md), the [workflow](docs/development/WORKFLOW.md) and [coding standards](docs/development/CODING_STANDARDS.md).
+Licensing is deferred. This repository currently includes no project license; no open-source license grant is claimed.
