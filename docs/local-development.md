@@ -1,17 +1,45 @@
 # Local development
 
+This is the shared setup guide for the workspace, tests and fixture READMEs. Commands are checked against repository source, manifests, environment examples and CI; they were not executed as a fresh-clone verification for this documentation update. Normal development startup does not reset a database or require model credentials.
+
 ## Prerequisites
 
+- Git and access to the repository
 - Node.js 22 and pnpm 10.30.1 (the root `packageManager` version)
 - Python 3.11 and uv
-- Docker Desktop with Docker Compose
+- Docker with Compose v2 and a running engine (Docker Desktop on Windows)
+
+## Clone and local configuration
+
+From a parent directory, using PowerShell or a POSIX shell:
+
+```text
+git clone https://github.com/JedFerrer/sourcepilot.git
+cd sourcepilot
+```
+
+Copy the root environment example once for a fresh clone. PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+POSIX shell (macOS/Linux):
+
+```sh
+cp .env.example .env
+```
+
+Keep `.env` private. Its example database values match Compose defaults. If you change `POSTGRES_DB`, `POSTGRES_USER` or `POSTGRES_PASSWORD`, update `DATABASE_URL` and any test URLs consistently. PostgreSQL initialization settings apply when the volume is first created; changing `.env` does not rename databases or update an existing database password.
+
+Only if the API origin differs from `http://localhost:8000`, copy `apps/web/.env.example` to `apps/web/.env.local` (`Copy-Item` in PowerShell or `cp` in POSIX shells) and edit `API_ORIGIN`. Provider credentials belong only in the root server-side `.env`. No frontend environment file is needed for the default setup.
 
 ## Configure and start
 
 Run root commands from the repository root; keep the API and web server in separate terminals.
 
-1. Copy `.env.example` to `.env` to configure the local PostgreSQL databases and API database URL. For interactive AI actions, also complete [model configuration](#model-configuration).
-2. Copy `apps/web/.env.example` to `apps/web/.env.local` only when FastAPI is not running at `http://localhost:8000`.
+1. Complete [clone and local configuration](#clone-and-local-configuration). For interactive AI actions, also complete [model configuration](#model-configuration).
+2. Leave optional Langfuse and cloud storage disabled for ordinary local setup; the defaults use private local PDF storage.
 3. Start PostgreSQL with `docker compose up -d postgres` and verify [database readiness](#postgresql-reachability).
 4. From the repository root, install the web dependencies with `pnpm install --frozen-lockfile`.
 5. From `apps/api`, install the API environment with `uv sync --dev --locked`.
@@ -20,6 +48,20 @@ Run root commands from the repository root; keep the API and web server in separ
 8. Start the web app from the repository root with `pnpm --filter @sourcepilot/web dev`.
 
 Open `http://localhost:3000`. The browser requests `/api/health`; Next.js proxies that request to FastAPI `http://localhost:8000/health` by default.
+
+The API is at `http://localhost:8000`, interactive API documentation at `http://localhost:8000/docs`, and PostgreSQL on host port `5432`. The health endpoint does not verify database connectivity. Readiness commands below assume the unchanged example database/user; substitute your configured names if you changed them.
+
+## Shutdown and restart
+
+Press **Ctrl+C** in the web terminal and the API terminal. When PostgreSQL is no longer needed, run from the repository root:
+
+```text
+docker compose stop postgres
+```
+
+This preserves the named database volume and local uploaded PDFs. Do not use `docker compose down -v` for ordinary shutdown: **it deletes the Compose database volume**, including development data. Local PDF storage is separate and is not removed by stopping Compose.
+
+To resume, start PostgreSQL using the command in [configure and start](#configure-and-start), wait for readiness, then launch the API and web servers again. Dependency installation, migrations and seeding are initial setup steps; apply new migrations when the checkout introduces them. Shutdown is cooperative and may wait for unfinished helpers; interrupting a paid request does not guarantee provider cancellation or avoid charges.
 
 ## Model configuration
 
@@ -58,9 +100,9 @@ uv run --env-file ../../.env alembic upgrade head
 uv run --env-file ../../.env alembic current
 ```
 
-Persistence tests are a separate check, not a setup requirement: `uv run --env-file ../../.env pytest` from `apps/api` uses the isolated test database described below.
+**Destructive test reset — optional, not startup:** `uv run --env-file ../../.env pytest` from `apps/api` uses the isolated test database described below. Persistence tests reset its schema through Alembic; use a disposable `TEST_DATABASE_URL` and expect its data to be lost.
 
-Generate future migrations only after changing persistence models, then review the generated revision before committing it:
+Optional schema maintenance: generate future migrations only for an approved model change, then review the generated revision before committing it. This is not a fresh-clone setup step:
 
 ```text
 uv run --env-file ../../.env alembic revision --autogenerate -m "describe the schema change"
@@ -148,7 +190,7 @@ Choose **Save manual draft**, **Review for confirmation**, then **Confirm Quote*
 
 AI configuration is lazy: `OPENAI_API_KEY` and `SOURCEPILOT_AI_MODEL` are required only when an AI operation runs, never during API startup or automated tests. CI and pytest use model-client fakes and must not call OpenAI.
 
-The following command is a manual, opt-in live check. It requires a valid API key, a configured model name, a migrated database, and an existing `DemoSession` UUID. It creates exactly one `AIRun` and prints its ID and terminal status:
+The following command is a manual, opt-in **paid provider check**, run from `apps/api`. It requires a valid API key, a configured model name, a migrated database, and an existing `DemoSession` UUID. It creates exactly one `AIRun` and prints its ID and terminal status:
 
 ```text
 uv run --env-file ../../.env python -m sourcepilot.ai.smoke --demo-session-id <demo-session-uuid>
@@ -158,7 +200,11 @@ The smoke request uses `foundation-smoke-v2` and sends `store=false` to the Resp
 
 ## Checks
 
+These optional developer checks are separate from normal startup. Provider-free does not mean read-only: database-backed tests can reset their dedicated databases. Stop the web development server before `pnpm build` or E2E commands because they share `.next` output.
+
 ### Deterministic browser workflow (M5-U3)
+
+**Destructive E2E reset — optional:** each invocation resets the guarded `sourcepilot_e2e` database, applies migrations and seeds synthetic data. Never use a database containing data you need to keep. This is automated test setup, not the interactive development startup above.
 
 The browser suite runs the real web/API/PostgreSQL/PDF path with a test-only
 model client. It never calls a live provider. Suppliers, PDFs, extraction outputs,

@@ -3,6 +3,12 @@
 Every supplier, quotation, price, and supporting claim in these PDFs is fictional
 demo data. None describes a real supplier or an actual offer.
 
+Use the tracked PDFs directly; generating them is not a prerequisite for startup,
+tests or the [manual demo](../../../../../docs/local-development.md#manual-demo-walkthrough).
+Shared [local setup](../../../../../docs/local-development.md#configure-and-start)
+covers dependencies. Uploading a supported PDF through the app invokes paid AI
+extraction; reading these files or running parser-only tests does not.
+
 | File | Parser scenario |
 | --- | --- |
 | `harbor_primary.pdf` | Slightly higher unit price, acceptable lead time, strongest stated supporting details. |
@@ -24,7 +30,23 @@ quotation values. `expected_blocks.json` stores only exact parser text, page
 numbers, and `p<page>-b<block>` references. It contains no extracted quote
 fields or AI-eval expectations.
 
-Regenerate PDFs from `apps/api` with the existing PyMuPDF dependency:
+## Usage and optional fixture maintenance
+
+[Parser fixture tests](../../test_quote_pdf_fixtures.py) check the PDFs against
+`expected_blocks.json`; [quote extraction eval tests](../../test_quote_extraction_eval.py)
+use them with tracked responses and scoring cases. After installing dependencies,
+run the parser-only check from `apps/api`:
+
+```text
+uv run --no-sync pytest tests/test_quote_pdf_fixtures.py
+```
+
+This command needs no model credentials or database. Commands here are source-checked
+instructions, not checks executed for this documentation update.
+
+**Optional overwrite operation:** `generate.py` rewrites the original six tracked
+PDFs (the first six table rows). Run only when deliberately maintaining fixtures,
+from `apps/api` with the existing PyMuPDF dependency:
 
 ```text
 uv run --no-sync python tests/fixtures/quote_pdfs/generate.py
@@ -34,7 +56,17 @@ Review parser output and update `expected_blocks.json` deliberately if any
 fixture content or the approved parser behavior changes. The unsupported image
 case must continue to raise `NoExtractableTextError`.
 
-Regenerate only the six M6 additions with `uv run --no-sync python
-tests/fixtures/quote_pdfs/generate_m6.py`. This leaves the original six PDFs unchanged.
+`generate_m6.py` rewrites only the six additions (the final six table rows), leaving
+the original six PDFs unchanged. From `apps/api`:
+
+```text
+uv run --no-sync python tests/fixtures/quote_pdfs/generate_m6.py
+```
+
+Neither generator updates `expected_blocks.json` automatically. Review generated
+changes and parser expectations together; do not regenerate historical outputs
+merely to make a test pass. See the [eval guide](../../../evals/README.md) for AI
+evaluation inputs and quality limits.
+
 The corpus contains ten text-extractable PDFs and two expected rejections; the
 malformed input intentionally cannot contain a valid rendered page.

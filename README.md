@@ -2,6 +2,8 @@
 
 An AI-assisted supplier sourcing workspace for turning an incomplete product request and inconsistent supplier quotes into a reviewable decision. Define requirements, inspect supplier evidence, verify extracted quote data and compare tradeoffs before choosing a preferred supplier.
 
+Small-business owners, founders, product managers and sourcing or operations specialists often start with an incomplete request, then receive quotes with different quantities, exclusions and delivery terms. A low unit price alone cannot show which offer fits. SourcePilot brings the requirements, supplier claims and reviewed quote facts into one workflow so the user can see the tradeoffs and make an informed choice.
+
 **Brief → Suppliers → Quotes → Comparison → Decision**
 
 This portfolio project is intended for local evaluation. Supplier names, capabilities, prices, evidence and quote fixtures are fictional; they make no claims about real manufacturers.
@@ -9,6 +11,8 @@ This portfolio project is intended for local evaluation. Supplier names, capabil
 ![Factual comparison of two synthetic suppliers, with source details and unknown delivery commitments](docs/assets/screenshots/comparison.png)
 
 *Compare confirmed quote facts while keeping evidence and unknowns visible. Screenshots are real browser captures from the provider-free synthetic test flow on 10 November 2026; model responses use test doubles. They show selected working surfaces, not live-model quality or a full verification report. The example compares two confirmed quotes from a three-supplier shortlist.*
+
+[Workflow](#how-it-works) · [AI engineering](#ai-engineering) · [Architecture](#architecture) · [Run locally](#run-locally) · [Tests and evals](#tests-and-evaluations) · [Limitations](#known-quality-and-ux-limitations)
 
 ## How it works
 
@@ -104,7 +108,11 @@ The architecture deliberately stays small: the known workflow needs no top-level
 
 ```text
 .
-├── apps/web/                     # Next.js UI, component tests and browser scenarios
+├── apps/web/
+│   ├── app/                      # Next.js pages and same-origin API proxy
+│   ├── components/               # Workflow UI and component tests
+│   ├── lib/                      # Shared API access and frontend helpers
+│   └── e2e/                      # Playwright workflow scenarios
 ├── apps/api/
 │   ├── sourcepilot/              # API, application/domain modules, AI and persistence
 │   ├── alembic/                  # Database migrations
@@ -120,32 +128,23 @@ The architecture deliberately stays small: the known workflow needs no top-level
 
 Tests consume tracked fixtures and datasets; private development records are not build or test prerequisites. Generated reports, local configuration and uploaded documents stay outside the tracked tree.
 
+Useful entry points are [the API routes](apps/api/sourcepilot/main.py), the backend's `briefs/`, `suppliers/`, `quotes/`, `comparison/` and `projects/` modules for workflow behavior, and `ai/` for structured tasks, Analyst tools and validation. [package.json](package.json) defines web/check entry points; [pyproject.toml](apps/api/pyproject.toml) defines API dependencies. [docker-compose.yml](docker-compose.yml) provisions local PostgreSQL; [scripts/dev-api.py](scripts/dev-api.py) launches the API with root environment settings. The [fixture guide](apps/api/tests/fixtures/quote_pdfs/README.md) explains the synthetic demo inputs.
+
 ## Run locally
 
-Install Git, Node.js 22, **pnpm 10.30.1**, Python **3.11**, uv, and Docker with Compose and a running engine. Follow [local development](docs/local-development.md#configure-and-start) for the full setup and platform details.
+Install Git, Node.js 22, **pnpm 10.30.1**, Python **3.11**, uv, and Docker with Compose and a running engine. Start with [clone and configuration](docs/local-development.md#clone-and-local-configuration), then follow [configure and start](docs/local-development.md#configure-and-start) for the complete sequence. Repository access is required to clone.
 
-From the repository root, copy `.env.example` to `.env`, then run:
+The normal development path is: copy the environment example, start PostgreSQL and wait for readiness, install locked dependencies, apply Alembic migrations, seed the synthetic supplier catalog, then start the API and web app in separate terminals. The guide supplies commands and working directories; database resets and browser-test provisioning are separate optional checks.
 
-```text
-docker compose up -d postgres
-docker compose exec postgres pg_isready -U sourcepilot -d sourcepilot
-pnpm install --frozen-lockfile
-```
+| Configuration | Local use |
+| --- | --- |
+| Root [`.env.example`](.env.example) → `.env` | Compose database settings and server-side application settings. `DATABASE_URL` must match the development database. The API launcher makes this file authoritative. |
+| `OPENAI_API_KEY`, `SOURCEPILOT_AI_MODEL` | Leave blank for manual/deterministic features; set both for paid AI actions described below. |
+| `DOCUMENT_STORAGE_BACKEND=local` | Default private PDF storage; no cloud credentials needed. See [storage settings](docs/local-development.md#local-pdf-storage). |
+| Web [`.env.example`](apps/web/.env.example) → `.env.local` | Optional `API_ORIGIN` override when FastAPI is elsewhere; never store provider secrets here. |
+| `TEST_DATABASE_URL` / `E2E_DATABASE_URL` | Separate disposable databases for optional tests; E2E setup is not ordinary startup. |
 
-Wait for PostgreSQL readiness. In an API terminal, from `apps/api`:
-
-```text
-uv sync --dev --locked
-uv run --env-file ../../.env alembic upgrade head
-uv run --env-file ../../.env python -m sourcepilot.suppliers.seed
-uv run --no-env-file python ../../scripts/dev-api.py
-```
-
-The launcher makes the root `.env` authoritative for application settings. In a separate terminal, from the repository root:
-
-```text
-pnpm --filter @sourcepilot/web dev
-```
+The examples also document session, upload and analysis limits. Optional [Langfuse](docs/development/OBSERVABILITY.md) and S3-compatible storage require their own configuration; external services may incur costs.
 
 | Service | Default local address |
 | --- | --- |
@@ -154,13 +153,17 @@ pnpm --filter @sourcepilot/web dev
 | Health | `http://localhost:8000/health` (does not check database connectivity) |
 | PostgreSQL | Host port `5432` |
 
-Compose's database port is not bound only to loopback. Its example credentials and topology are for a trusted local machine; do not expose them as a public service. If the API origin changes, copy `apps/web/.env.example` to `apps/web/.env.local` and configure `API_ORIGIN`.
+Compose's database port is not bound only to loopback. Its example credentials and topology are for a trusted local machine; do not expose them as a public service.
+
+To shut down, press **Ctrl+C** in each API/web terminal, then run `docker compose stop postgres` from the root when the database is no longer needed. This preserves its volume and uploaded PDFs. See [shutdown and restart](docs/local-development.md#shutdown-and-restart) for details.
 
 ### Provider configuration and cost
 
 Interactive AI actions require **`OPENAI_API_KEY`** and **`SOURCEPILOT_AI_MODEL`** in the server-side root `.env`. Choose a model available to your account that supports the application's structured-output and tool-calling requests; there is no default model. Restart the API after changes. Never put provider credentials in frontend configuration or Git.
 
 Startup, manual editing and deterministic comparison do not require a model key. **Analyze request**, clarification, PDF extraction, supplier explanation and comparison analysis call the live provider and can incur charges. Retries, repairs and multiple Analyst turns can add usage; no fixed per-demo cost is guaranteed. Automated checks use doubles; the browser test model is not a general interactive demo mode. Optional tracing setup is separate.
+
+For a provider-free manual walkthrough, create a project, fill and approve the Brief yourself, discover/approve the shortlist, enter and confirm quotes manually, generate the factual comparison and record a preference. Skip the AI actions and PDF extraction. Discovery uses the seeded catalog and deterministic rules.
 
 ## Tests and evaluations
 

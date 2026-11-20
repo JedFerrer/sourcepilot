@@ -2,22 +2,57 @@
 
 All suppliers, requests, quotes and recorded responses are synthetic. Recorded
 responses are curated contract/scorer regression fixtures, not proof of live model
-quality. This unit adds no production behavior, schema, agent or tracing system.
+quality. This directory holds evaluation inputs and recorded outputs; executable
+runners and scorers live in [`sourcepilot/ai`](../sourcepilot/ai/).
 
-From `apps/api`, with existing dependencies installed:
+## Directory map
+
+| Path | Responsibility |
+| --- | --- |
+| `brief/` | Brief interpretation cases and recorded model outputs. |
+| `clarification/` | Clarification cases, including complete Briefs that skip AI. |
+| `supplier_explanation/` | Supplier explanation cases and negative controls. |
+| `quote_extraction/` | Quote field cases, recorded outputs and parser rejection cases. Uses the tracked [PDF corpus](../tests/fixtures/quote_pdfs/README.md). |
+| `tradeoff_analysis/` | Comparison narrative cases and recorded outputs. |
+| `comparison_advice/` | Combined advice/suggestion cases, guard cases, recorded outputs and retained failures. |
+| `human_review/narrative_cases.json` | Separate examples awaiting human judgment; not automated quality approvals. |
+
+`cases.json` files define inputs and expectations. Where present,
+`model_outputs.json` supplies curated offline responses. Do not regenerate these
+as part of startup or remove negative controls to improve a result.
+
+## Offline usage — no provider calls
+
+Follow the shared [dependency setup](../../../docs/local-development.md#configure-and-start)
+first. From `apps/api`, with locked API dependencies installed:
 
 ```text
 uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode offline --output .eval-results/offline
 uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode offline --categories brief clarification --output .eval-results/intake
-uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode live --output .eval-results/live
 ```
 
-The first command is the full offline baseline and runs in normal CI. Live is
-explicit only. Set the existing `OPENAI_API_KEY`, `SOURCEPILOT_AI_MODEL` and a dedicated
+The first command is the full offline baseline and runs in normal
+[CI](../../../.github/workflows/ci.yml). The second selects only intake categories.
+Offline mode needs neither a running database nor model credentials. Reports are
+written beneath the specified ignored `.eval-results/` directory; their contents
+are explained below. These commands are source-checked instructions, not execution
+results from this documentation update.
+
+## Optional live usage — paid calls and retained database writes
+
+Live evaluation is explicit only and can incur provider charges, including retries,
+repairs and multiple Analyst turns. It is not local startup or a database reset.
+Set the existing `OPENAI_API_KEY`, `SOURCEPILOT_AI_MODEL` and a dedicated
 already-configured `EVAL_DATABASE_URL` in the command environment. Local `.env`
 values must be loaded by the caller; the runner never searches for credentials or
 falls back to `DATABASE_URL`/`TEST_DATABASE_URL`. Do not create, migrate, reset or
 repurpose a database to make this run succeed.
+
+After these prerequisites are satisfied, run from `apps/api`:
+
+```text
+uv run --no-sync python -m sourcepilot.ai.eval_baseline --mode live --output .eval-results/live
+```
 
 Preflight validates selected fixture/scorer controls, provider configuration,
 PostgreSQL URL/connectivity, connected database identity, repository Alembic heads

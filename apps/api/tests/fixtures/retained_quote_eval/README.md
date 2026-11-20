@@ -21,3 +21,25 @@ synthetic PDFs. No private archive, provider call or regenerated output is neede
 Missing or malformed inputs must fail. Do not remove failing cases or reinterpret
 pending reviews as approvals. Operational timestamps, run IDs, provider diagnostics,
 usage and approval history are excluded from these projections.
+
+## Usage
+
+Follow shared [API dependency setup](../../../../../docs/local-development.md#configure-and-start).
+The existing [quote extraction eval tests](../../test_quote_extraction_eval.py)
+load these files to compare historical assertions with current deterministic
+rescoring. For the retained-assignment regression alone, run from `apps/api`:
+
+```text
+uv run --no-sync pytest tests/test_quote_extraction_eval.py::test_approved_retained_assignments_stay_critical
+```
+
+This provider-free selection uses tracked inputs and does not need a database or
+regenerated reports. The command is source-checked, not an executed result for
+this documentation update. See the [eval guide](../../../evals/README.md) for
+metric definitions, offline baseline usage and separately opt-in paid live runs.
+Retained results must remain unchanged when producing a new local rescore.
+
+**Destructive reset for the full module:** other tests in that file use an
+`engine` fixture that resets the separate test database. Before running the entire
+module, follow the shared [test database safeguards](../../../../../docs/local-development.md#migrations-and-persistence-tests)
+and load `TEST_DATABASE_URL` as described there.
