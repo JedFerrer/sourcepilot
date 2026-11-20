@@ -1,11 +1,11 @@
-"""Provider-free timing tests; all persistence is disposable SQLite in memory."""
+"""Provider-free timing tests with SQLite projections and PostgreSQL transactions."""
 
 from collections.abc import Iterator
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import create_engine, event, select
+from sqlalchemy import create_engine, delete, event, select, text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.compiler import compiles, deregister
 from sqlalchemy.orm import Session
@@ -26,7 +26,11 @@ from sourcepilot.persistence.models import (
     Supplier,
 )
 from sourcepilot.suppliers.service import list_project_suppliers
-from sourcepilot.suppliers.timing import read_supplier_timing, timing_disclosure
+from sourcepilot.suppliers.timing import TimingScopeError, read_supplier_timing, timing_disclosure
+from tests.database_test_support import (
+    create_test_engine,
+    persistence_test_database_url_from_environment,
+)
 from tests.test_supplier_explanation import FakeClient
 
 
@@ -95,6 +99,136 @@ def test_no_quote_and_typical_only_are_unknown_without_writes(saved):
     assert result.production.status == result.delivery.status == "UNKNOWN"
     assert result.production.facts == []
     assert all(s.lstrip().upper().startswith("SELECT") for s in statements)
+
+
+@pytest.mark.parametrize("joined_savepoint", [False, True], ids=["session", "savepoint"])
+@pytest.mark.parametrize("finish", ["commit", "rollback"])
+def test_postgres_timing_preserves_edits_and_caller_transaction(
+    joined_savepoint: bool, finish: str,
+) -> None:
+    engine = create_test_engine(persistence_test_database_url_from_environment())
+    actor_id = uuid4()
+    supplier_id = uuid4()
+    try:
+        with engine.connect() as connection:
+            outer = connection.begin() if joined_savepoint else None
+            with Session(
+                bind=connection, expire_on_commit=False,
+                join_transaction_mode="create_savepoint" if joined_savepoint else "conditional_savepoint",
+            ) as session:
+                actor = DemoSession(id=actor_id, opaque_token=uuid4().hex,
+                                    expires_at=datetime.now(UTC) + timedelta(days=1))
+                supplier = Supplier(id=supplier_id, name=f"Timing {uuid4()}", country="Demo",
+                                    description="Synthetic transaction regression")
+                session.add_all([actor, supplier])
+                session.flush()
+                project = Project(demo_session_id=actor.id, name="Timing transaction",
+                                  original_request="Synthetic", brief_revision=1)
+                session.add(project)
+                session.flush()
+                brief = Brief(project_id=project.id, destination="Sydney", status="APPROVED")
+                membership = ProjectSupplier(project_id=project.id, supplier_id=supplier.id,
+                                             shortlisted=True, evaluated_against_brief_revision=1)
+                value = QuoteValue(field_key="production_lead_time", current_value="25 days",
+                                   current_origin="USER_ENTERED")
+                quote_record = Quote(project_id=project.id, supplier_id=supplier.id,
+                                     entry_type="MANUAL", status="CONFIRMED", revision=1,
+                                     values=[value])
+                session.add_all([brief, membership, quote_record])
+                session.flush()
+                project_id, supplier_id = project.id, supplier.id
+                transaction = session.get_transaction()
+                db_transaction = connection.get_transaction()
+                savepoint = connection.get_nested_transaction()
+                backend = connection.scalar(text("SELECT pg_backend_pid()"))
+                transaction_id = connection.scalar(text("SELECT txid_current()"))
+                baseline = read_supplier_timing(session, demo_session_id=actor_id,
+                                                project_id=project_id, supplier_id=supplier_id)
+                assert baseline.production.status == "CONFIRMED"
+                assert baseline.production.facts[0].value == "25 days"
+                with Session(engine) as observer:
+                    assert observer.get(Project, project_id) is None
+
+                pending_owner = uuid4()
+                pending_project = uuid4()
+                project.demo_session_id = pending_owner
+                supplier.name = "Pending supplier"
+                membership.project_id = pending_project
+                membership.shortlisted = False
+                brief.destination = "Pending destination"
+                quote_record.status = "NEEDS_REVIEW"
+                value.current_value = "99 days"
+                pending = {project, supplier, membership, brief, quote_record, value}
+                new_supplier = Supplier(id=uuid4(), name=f"Unflushed {uuid4()}",
+                                        country="Demo", description="Synthetic")
+                session.add(new_supplier)
+                statements: list[str] = []
+                boundaries: list[str] = []
+
+                def capture(conn, cursor, statement, parameters, context, executemany):
+                    statements.append(statement)
+
+                def committed(conn):
+                    boundaries.append("commit")
+
+                def rolled_back(conn):
+                    boundaries.append("rollback")
+
+                event.listen(connection, "before_cursor_execute", capture)
+                event.listen(connection, "commit", committed)
+                event.listen(connection, "rollback", rolled_back)
+                try:
+                    assert read_supplier_timing(
+                        session, demo_session_id=actor_id,
+                        project_id=project_id, supplier_id=supplier_id,
+                    ) == baseline
+                    with pytest.raises(TimingScopeError):
+                        read_supplier_timing(session, demo_session_id=uuid4(),
+                                             project_id=project_id, supplier_id=supplier_id)
+                    assert all(sql.lstrip().upper().startswith("SELECT") for sql in statements)
+                    assert statements and boundaries == []
+                    assert session.get_transaction() is transaction
+                    assert connection.get_transaction() is db_transaction
+                    assert connection.get_nested_transaction() is savepoint
+                    assert transaction is not None and transaction.is_active
+                    assert connection.scalar(text("SELECT pg_backend_pid()")) == backend
+                    assert connection.scalar(text("SELECT txid_current()")) == transaction_id
+                    assert set(session.dirty) == pending
+                    assert set(session.new) == {new_supplier} and not session.deleted
+                    assert project.demo_session_id == pending_owner
+                    assert supplier.name == "Pending supplier"
+                    assert membership.project_id == pending_project and not membership.shortlisted
+                    assert brief.destination == "Pending destination"
+                    assert quote_record.status == "NEEDS_REVIEW" and value.current_value == "99 days"
+                finally:
+                    event.remove(connection, "before_cursor_execute", capture)
+                    event.remove(connection, "commit", committed)
+                    event.remove(connection, "rollback", rolled_back)
+
+                # Discard deliberately invalid pending FK edits; finish only by caller action.
+                session.expunge(new_supplier)
+                for entity in pending:
+                    session.expire(entity)
+                if finish == "commit":
+                    session.commit()
+                    if outer is not None:
+                        assert outer.is_active
+                        with Session(engine) as observer:
+                            assert observer.get(Project, project_id) is None
+                        outer.commit()
+                else:
+                    session.rollback()
+                    if outer is not None:
+                        assert outer.is_active
+                        outer.rollback()
+                with Session(engine) as observer:
+                    assert (observer.get(Project, project_id) is not None) == (finish == "commit")
+    finally:
+        # The committed branch deliberately proves caller ownership, then cleans only its rows.
+        with engine.begin() as cleanup:
+            cleanup.execute(delete(DemoSession).where(DemoSession.id == actor_id))
+            cleanup.execute(delete(Supplier).where(Supplier.id == supplier_id))
+        engine.dispose()
 
 
 def test_confirmed_production_is_not_delivery_and_revision_invalidates(saved):

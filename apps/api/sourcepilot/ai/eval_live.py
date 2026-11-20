@@ -165,6 +165,7 @@ def fresh_project(session: Session, case: dict[str, Any]) -> tuple[DemoSession, 
 
 
 def supplier_fixture(session: Session, project: Project, case: dict[str, Any]) -> dict[str, str]:
+    session.add(Brief(project_id=project.id, status="APPROVED", approved_at=datetime.now(UTC)))
     identities = {"11111111-1111-1111-1111-111111111111": str(uuid4())}
     for finding in case["findings"]:
         identities[finding["requirement_id"]] = str(uuid4())

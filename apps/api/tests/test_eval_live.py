@@ -31,7 +31,7 @@ from sourcepilot.ai.tradeoff_analysis_eval import CERT, LEAD, QA, QB, QC, A, B, 
 from sourcepilot.comparison.deadline import ComparisonDeadline, current_deadline
 from sourcepilot.comparison.execution import comparison_cli_lifecycle
 from sourcepilot.persistence.base import Base
-from sourcepilot.persistence.models import AIRun, DemoSession, Project
+from sourcepilot.persistence.models import AIRun, Brief, DemoSession, Project
 from tests.database_test_support import (
     create_test_engine,
     persistence_test_database_url_from_environment,
@@ -427,6 +427,17 @@ def test_all_valid_adapters_use_real_runtime_and_scoped_tools(
         if category in {"comparison", "suggestion", "supplier_explanation"}:
             assert run.tool_call_count and run.tool_call_count >= 1
     provider.assert_not_called()
+
+
+def test_supplier_fixture_supplies_scoped_brief(session: Session) -> None:
+    case = baseline.load_scope(["supplier_explanation"])["supplier_explanation"][0]
+    _, project = eval_live.fresh_project(session, case)
+    eval_live.supplier_fixture(session, project, case)
+    brief = session.get(Brief, project.id)
+    assert brief is not None and brief.status == "APPROVED"
+    assert brief.approved_at is not None
+    assert brief.destination is None and brief.delivery_target is None
+    assert project.brief_revision == 1
 
 
 @pytest.mark.parametrize(

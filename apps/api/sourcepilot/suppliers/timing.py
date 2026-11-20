@@ -79,7 +79,21 @@ def timing_disclosure(
 def read_supplier_timing(
     session: Session, *, demo_session_id: UUID, project_id: UUID, supplier_id: UUID,
 ) -> TimingDisclosure:
-    """Read fresh scoped facts without autoflush, writes, or model-tool budget use."""
+    """Read scoped facts without refreshing pending edits in the caller's identity map."""
+    # Share transaction visibility, not ORM state. Closing this joined Session
+    # neither commits nor rolls back the caller's connection-owned transaction.
+    with session.no_autoflush, Session(
+        bind=session.connection(), autoflush=False, join_transaction_mode="rollback_only",
+    ) as read_session:
+        return _read_supplier_timing(
+            read_session, demo_session_id=demo_session_id,
+            project_id=project_id, supplier_id=supplier_id,
+        )
+
+
+def _read_supplier_timing(
+    session: Session, *, demo_session_id: UUID, project_id: UUID, supplier_id: UUID,
+) -> TimingDisclosure:
     with session.no_autoflush:
         row = session.execute(select(ProjectSupplier, Brief, Supplier).join(
             Project, Project.id == ProjectSupplier.project_id,
