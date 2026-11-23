@@ -197,4 +197,12 @@ Read the [test/database safeguards](docs/local-development.md#migrations-and-per
 - [Local setup and synthetic walkthrough](docs/local-development.md), [evaluation guide](apps/api/evals/README.md) and [AI observability](docs/development/OBSERVABILITY.md)
 - [Development workflow](docs/development/WORKFLOW.md), [coding standards](docs/development/CODING_STANDARDS.md) and [repository instructions](AGENTS.md)
 
-Licensing is deferred. This repository currently includes no project license; no open-source license grant is claimed.
+## License
+
+Copyright (c) 2026 Jedidiah Ferrer.
+
+SourcePilot's original code is licensed under the GNU Affero General Public License, version 3 only (SPDX: AGPL-3.0-only). The same grant covers original documentation, synthetic fixtures and screenshots to the extent the author holds the rights to license them. Third-party material retains its applicable upstream licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). See [LICENSE](LICENSE) for the complete terms. This software is provided without warranty.
+
+PyMuPDF is retained under its AGPL option; its commercial alternative is a separate Artifex grant not provided by SourcePilot. Other dependencies retain their own terms. Corresponding-source and remote-interaction duties apply as specified by the relevant licenses. Future binary or hosted distribution requires assessment of the actual version and included packages.
+
+The application provides legal notices at `/legal.html`, accessible through Legal / Licenses; this notice feature does not establish compliance with source-delivery obligations for a hosted service or executable distribution.
